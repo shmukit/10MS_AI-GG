@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ArrowLeft, Moon, Sun, Users, BookOpen, MessageSquare, Bell, Plus, Edit2, Trash2, ExternalLink, LogOut, User, Phone, Mail, Calendar, Clock, X } from 'lucide-react';
 
 interface MentorDashboardProps {
-  onBack: () => void;
   onLogout?: () => void;
   onProfile?: () => void;
   isDarkMode?: boolean;
@@ -168,7 +167,6 @@ const mockNotices: Notice[] = [
 ];
 
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({ 
-  onBack, 
   onLogout, 
   onProfile, 
   isDarkMode = false, 
