@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Moon, Sun, User } from 'lucide-react';
 import { LoginPage } from './components/Auth/LoginPage';
 import { ProfilePage } from './components/Profile/ProfilePage';
@@ -7,8 +7,10 @@ import { RoadmapInterface } from './components/Roadmap/RoadmapInterface';
 import { CommunityPage } from './components/Community/CommunityPage';
 import { NoticeBoard } from './components/NoticeBoard/NoticeBoard';
 import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationModal';
+import { AuthProvider, useAuthContext } from './lib';
+import { supabase } from './lib/supabase';
 
-function App() {
+function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'student' | 'mentor'>('student');
   const [showRoadmap, setShowRoadmap] = useState(false);
@@ -17,6 +19,25 @@ function App() {
   const [showMentorDashboard, setShowMentorDashboard] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Test database connection
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        console.log('Testing Supabase connection...');
+        const { data, error } = await supabase.from('users').select('count').limit(1);
+        if (error) {
+          console.error('Database connection failed:', error);
+        } else {
+          console.log('✅ Database connection successful!');
+        }
+      } catch (err) {
+        console.error('Connection test error:', err);
+      }
+    };
+    
+    testConnection();
+  }, []);
 
   const handleLogin = (role: 'student' | 'mentor') => {
     setUserRole(role);
@@ -458,6 +479,14 @@ function App() {
         />
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
