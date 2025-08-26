@@ -7,8 +7,9 @@ import { RoadmapInterface } from './components/Roadmap/RoadmapInterface';
 import { CommunityPage } from './components/Community/CommunityPage';
 import { NoticeBoard } from './components/NoticeBoard/NoticeBoard';
 import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationModal';
+// import { AuthProvider, useAuthContext } from './lib';
 
-function App() {
+function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'student' | 'mentor'>('student');
   const [showRoadmap, setShowRoadmap] = useState(false);
@@ -459,6 +460,10 @@ function App() {
       </div>
     </div>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;
