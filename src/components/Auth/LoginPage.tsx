@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-// import { useAuthContext } from '../../lib';
+import { useAuthContext } from '../../lib';
 
 interface LoginPageProps {
   onLogin: (role: 'student' | 'mentor') => void;
@@ -109,6 +109,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
 
 
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error.message}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
@@ -212,9 +219,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2 px-4 rounded-lg font-medium transition-colors"
           >
-            {isLogin ? 'Sign In' : 'Sign Up'}
+            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
         </form>
 
