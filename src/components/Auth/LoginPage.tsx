@@ -30,35 +30,33 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🚀 Form submitted with:', { email: formData.email, role, isLogin });
     
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
+    console.log('Form submitted with:', { email: formData.email, isLogin, role });
+    
     try {
       if (isLogin) {
-        console.log('🔐 Attempting sign in...');
+        console.log('Attempting sign in...');
         const result = await signIn(formData.email, formData.password);
-        console.log('📝 Sign in result:', result);
-        if (result.error) {
-          console.error('❌ Sign in error:', result.error);
-        } else {
-          console.log('✅ Sign in successful, navigation will be handled by useEffect');
+        console.log('Sign in result:', result);
+        
+        if (result.success) {
+          // Store the selected role temporarily for this session
+          localStorage.setItem('selectedRole', role);
+          console.log('✔ Sign in successful, navigation will be handled by useEffect');
         }
       } else {
-        console.log('📝 Attempting sign up...');
+        console.log('Attempting sign up...');
         const result = await signUp(formData.email, formData.password);
-        console.log('📝 Sign up result:', result);
-        if (result.error) {
-          console.error('❌ Sign up error:', result.error);
-        } else {
-          alert('Please check your email for verification link');
+        console.log('Sign up result:', result);
+        
+        if (result.success) {
+          // Store the selected role temporarily for this session
+          localStorage.setItem('selectedRole', role);
+          console.log('✔ Sign up successful, navigation will be handled by useEffect');
         }
       }
-    } catch (err) {
-      console.error('💥 Authentication error:', err);
+    } catch (error) {
+      console.error('Auth error:', error);
     }
   };
 
@@ -112,8 +110,6 @@ export const LoginPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-
 
         {/* Error Display */}
         {error && (

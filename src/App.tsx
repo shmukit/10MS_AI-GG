@@ -2,11 +2,12 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from './lib';
 import { supabase } from './lib/supabase';
+import { ThemeProvider } from './lib/ThemeContext';
 
 // Import components
 import { LoginPage } from './components/Auth/LoginPage';
 import { StudentDashboard } from './components/Student/StudentDashboard';
-import { StudentRoadmap } from './components/Student/StudentRoadmap';
+
 import { StudentProfile } from './components/Student/StudentProfile';
 import { StudentCommunity } from './components/Student/StudentCommunity';
 import { MentorDashboard } from './components/Mentor/MentorDashboard';
@@ -14,6 +15,7 @@ import { MentorRoadmaps } from './components/Mentor/MentorRoadmaps';
 import { MentorStudents } from './components/Mentor/MentorStudents';
 import { MentorNotices } from './components/Mentor/MentorNotices';
 import { MentorSettings } from './components/Mentor/MentorSettings';
+import { RoadmapInterface } from './components/Roadmap/RoadmapInterface';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) => {
@@ -30,9 +32,10 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
     return <Navigate to="/login" replace />;
   }
   
-  // Check if user has required role from database
-  const role = userRole || 'student'; // Default to student if no role
-  console.log('🔒 User role from database:', role, 'Allowed roles:', allowedRoles);
+  // Check if user has required role - prioritize form selection over database role
+  const selectedRole = localStorage.getItem('selectedRole');
+  const role = selectedRole || userRole || 'student'; // Form selection > Database role > Default
+  console.log('🔒 User role (form selection):', selectedRole, 'Database role:', userRole, 'Final role:', role, 'Allowed roles:', allowedRoles);
   
   if (!allowedRoles.includes(role)) {
     console.log('🔒 Access denied, redirecting to unauthorized');
@@ -72,10 +75,12 @@ const StudentRoutes = () => {
   return (
     <Routes>
       <Route path="/dashboard" element={<StudentDashboard />} />
-      <Route path="/roadmap" element={<StudentRoadmap />} />
-      <Route path="/roadmap/:roadmapSlug" element={<StudentRoadmap />} />
+      <Route path="/roadmap" element={<RoadmapInterface onBack={() => window.history.back()} />} />
+      <Route path="/roadmap/:roadmapSlug" element={<RoadmapInterface onBack={() => window.history.back()} />} />
       <Route path="/profile" element={<StudentProfile />} />
+      <Route path="/profile/:profileSlug" element={<StudentProfile />} />
       <Route path="/community" element={<StudentCommunity />} />
+      <Route path="/community/:batchSlug" element={<StudentCommunity />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
@@ -97,7 +102,7 @@ const MentorRoutes = () => {
 
 // Main App Routes
 const AppRoutes = () => {
-  const { user, loading, userRole } = useAuthContext();
+  const { user, loading } = useAuthContext();
   
   // Test database connection
   useEffect(() => {
@@ -118,7 +123,7 @@ const AppRoutes = () => {
     testConnection();
   }, []);
 
-  console.log('🔍 AppRoutes - User:', user, 'Loading:', loading, 'User Role from DB:', userRole);
+  console.log('🔍 AppRoutes - User:', user, 'Loading:', loading);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -129,63 +134,49 @@ const AppRoutes = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // For admin users, let them choose their route
-  // For other users, redirect based on their role from database
-  const role = userRole || 'student'; // Default to student if no role
-  console.log('🔍 User role from database:', role);
-  
-  if (role === 'student') {
-    console.log('🔍 Redirecting student to dashboard');
-    return <Navigate to="/student/dashboard" replace />;
-  } else if (role === 'mentor') {
-    console.log('🔍 Redirecting mentor to dashboard');
-    return <Navigate to="/mentor/dashboard" replace />;
-  } else if (role === 'admin') {
-    // Admin users can access both, so redirect to student dashboard as default
-    console.log('🔍 Redirecting admin to student dashboard');
-    return <Navigate to="/student/dashboard" replace />;
-  }
-
-  // Fallback for unknown roles
-  console.log('🔍 Unknown role, redirecting to login');
-  return <Navigate to="/login" replace />;
+  // Don't redirect automatically - let the login page handle navigation
+  // Just show a welcome message or redirect to a default page
+  console.log('🔍 User logged in, showing welcome or default page');
+  return <Navigate to="/student/dashboard" replace />;
 };
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<LoginPage />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          
-          {/* Student Routes */}
-          <Route 
-            path="/student/*" 
-            element={
-              <ProtectedRoute allowedRoles={['student', 'admin']}>
-                <StudentRoutes />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Mentor Routes */}
-          <Route 
-            path="/mentor/*" 
-            element={
-              <ProtectedRoute allowedRoles={['mentor', 'admin']}>
-                <MentorRoutes />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Default Route */}
-          <Route path="/" element={<AppRoutes />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<LoginPage />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            
+            {/* Student Routes */}
+            <Route 
+              path="/student/*" 
+              element={
+                <ProtectedRoute allowedRoles={['student', 'mentor', 'admin']}>
+                  <StudentRoutes />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Mentor Routes */}
+            <Route 
+              path="/mentor/*" 
+              element={
+                <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+                  <MentorRoutes />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Default Route */}
+            <Route path="/" element={<AppRoutes />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

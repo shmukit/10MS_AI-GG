@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prod": "vite build --mode production",
+    "build:staging": "vite build --mode staging",
+    "deploy:check": "node -e \"console.log('Environment check:', require('./deployment.config.js').getConfig())\"",
+    "start": "vite preview --port 3000 --host 0.0.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",

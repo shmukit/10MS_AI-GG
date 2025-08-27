@@ -1,10 +1,67 @@
 import { RoadmapNodeData } from '../components/Roadmap/RoadmapNode';
+import { Roadmap, RoadmapWeek, RoadmapTask } from '../services/database';
 
 export interface RoadmapConnection {
   from: string;
   to: string;
 }
 
+// Function to generate roadmap data from real database data
+export const generateRoadmapData = (roadmap: Roadmap, weeks: RoadmapWeek[], tasks: RoadmapTask[], studentProgress?: any[]): { nodes: RoadmapNodeData[] } => {
+  const nodes = weeks.map((week, index) => {
+    // Determine status based on actual student progress, not hardcoded
+    let status: 'completed' | 'active' | 'locked' = 'locked';
+    
+    if (studentProgress && studentProgress.length > 0) {
+      // Check if this week has any completed tasks
+      const weekTasks = tasks.filter(task => task.week_id === week.id);
+      const completedTasks = weekTasks.filter(task => 
+        studentProgress.some(progress => progress.task_id === task.id && progress.is_completed)
+      );
+      
+      if (completedTasks.length === weekTasks.length) {
+        status = 'completed';
+      } else if (completedTasks.length > 0) {
+        status = 'active';
+      } else if (index === 0) {
+        // First week is active if no progress yet
+        status = 'active';
+      }
+    } else {
+      // No progress data, only first week is active
+      if (index === 0) status = 'active';
+    }
+    
+    // Get tasks for this week
+    const weekTasks = tasks.filter(task => task.week_id === week.id);
+    
+    return {
+      id: week.id,
+      title: week.title,
+      description: week.description || 'No description available',
+      status,
+      tasks: weekTasks.map(task => {
+        const isCompleted = studentProgress ? 
+          studentProgress.some(progress => progress.task_id === task.id && progress.is_completed) : 
+          false;
+        
+        return {
+          id: task.id,
+          title: task.task_name,
+          type: 'exercise' as const, // Default to exercise, could be enhanced based on task_type
+          url: task.relevant_links?.[0] || '#',
+          completed: isCompleted
+        };
+      }),
+      relatedSkills: [week.domain],
+      estimatedTime: '1 week'
+    };
+  });
+
+  return { nodes };
+};
+
+// Keep the original hardcoded data as fallback
 export const roadmapData = {
   nodes: [
     {

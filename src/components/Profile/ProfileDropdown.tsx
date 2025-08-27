@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
+import { useTheme } from '../../lib/ThemeContext';
 
 interface ProfileDropdownProps {
-  isDarkMode: boolean;
   userName?: string;
   userRole?: string;
 }
 
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ 
-  isDarkMode, 
   userName = 'User', 
   userRole = 'student' 
 }) => {
+  const { isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuth();
@@ -44,16 +44,18 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   };
 
   const handleProfileClick = () => {
-    const route = userRole === 'mentor' ? '/mentor/profile' : '/student/profile';
-    navigate(route);
+    if (userRole === 'mentor') {
+      navigate('/mentor/profile');
+    } else {
+      // For students, use slug based on first name
+      const firstName = userName || 'student';
+      const slug = firstName.toLowerCase().replace(/\s+/g, '-');
+      navigate(`/student/profile/${slug}`);
+    }
     setIsOpen(false);
   };
 
-  const handleSettingsClick = () => {
-    const route = userRole === 'mentor' ? '/mentor/settings' : '/student/settings';
-    navigate(route);
-    setIsOpen(false);
-  };
+
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -73,7 +75,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border transition-colors duration-200 ${
+        <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border transition-colors duration-200 z-50 ${
           isDarkMode 
             ? 'bg-gray-800 border-gray-700' 
             : 'bg-white border-gray-200'
@@ -105,17 +107,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                 Profile
               </button>
 
-              <button
-                onClick={handleSettingsClick}
-                className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 flex items-center gap-3 ${
-                  isDarkMode 
-                    ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Settings
-              </button>
+
 
               {/* Divider */}
               <div className={`my-1 border-t transition-colors duration-200 ${

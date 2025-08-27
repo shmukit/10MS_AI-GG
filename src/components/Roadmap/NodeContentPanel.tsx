@@ -189,26 +189,24 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             </div>
           </div>
         )}
-      </div>
 
-      {/* Footer */}
-      {node.status === 'active' && (
-        <div className={`p-6 border-t transition-colors duration-200 ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
-        }`}>
-          <button
-            onClick={() => {/* Handle completion */}}
-            className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
-              isCompleted
-                ? `${isDarkMode ? 'bg-green-500 hover:bg-green-600' : 'bg-green-500 hover:bg-green-600'} text-white`
-                : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
-            }`}
-            disabled={!isCompleted}
-          >
-            {isCompleted ? 'Mark as Complete' : `Complete ${completedTasks.filter(Boolean).length}/${completedTasks.length} tasks first`}
-          </button>
-        </div>
-      )}
+        {/* Complete Button - Moved near Related Skills */}
+        {node.status === 'active' && (
+          <div className="mb-6">
+            <button
+              onClick={() => {/* Handle completion */}}
+              className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
+                isCompleted
+                  ? `${isDarkMode ? 'bg-green-500 hover:bg-green-600' : 'bg-green-500 hover:bg-green-600'} text-white`
+                  : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
+              }`}
+              disabled={!isCompleted}
+            >
+              {isCompleted ? 'Mark as Complete' : `Complete ${completedTasks.filter(Boolean).length}/${completedTasks.length} tasks first`}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

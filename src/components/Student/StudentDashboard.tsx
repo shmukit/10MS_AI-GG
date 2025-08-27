@@ -6,20 +6,18 @@ import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
 import { ProfileDropdown } from '../Profile/ProfileDropdown';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
+import { useTheme } from '../../lib/ThemeContext';
+import { StudentHeader } from './StudentHeader';
+import { generateBatchSlug, generateRoadmapSlug } from '../../services/database';
 
 export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
-  };
 
   const handleMarkAsDone = () => {
     setShowConfirmation(true);
@@ -53,40 +51,11 @@ export const StudentDashboard: React.FC = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Header */}
-      <div className={`border-b h-16 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xs">10MS</span>
-              </div>
-              <h1 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>10MS SheSTEM</h1>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleDarkMode}
-                className={`p-2 rounded-lg transition-colors duration-200 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              <div className="flex items-center gap-2">
-                <span className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Student</span>
-                <ProfileDropdown 
-                  isDarkMode={isDarkMode}
-                  userName={dashboardData?.profile?.first_name || 'Student'}
-                  userRole="student"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudentHeader 
+        userName={dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || 'Student'}
+        userRole="student"
+        pageTitle="Dashboard"
+      />
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -126,7 +95,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
               <div>
-                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Good afternoon, Student</h2>
+                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Good afternoon, {dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || 'Student'}</h2>
                 <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI-Enabled Group Guidance Program</p>
               </div>
             </div>
@@ -134,7 +103,14 @@ export const StudentDashboard: React.FC = () => {
             {/* Navigation Cards */}
             <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => navigate('/student/roadmap')}
+                onClick={() => {
+                  if (dashboardData?.roadmap) {
+                    const roadmapSlug = generateRoadmapSlug(dashboardData.roadmap.title);
+                    navigate(`/student/roadmap/${roadmapSlug}`);
+                  } else {
+                    navigate('/student/roadmap');
+                  }
+                }}
                 className={`border rounded-xl p-4 text-center transition-colors group ${
                   isDarkMode 
                     ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30' 
@@ -152,7 +128,14 @@ export const StudentDashboard: React.FC = () => {
               </button>
 
               <button
-                onClick={() => navigate('/student/community')}
+                onClick={() => {
+                  if (dashboardData?.batch) {
+                    const batchSlug = generateBatchSlug(dashboardData.batch.name);
+                    navigate(`/student/community/${batchSlug}`);
+                  } else {
+                    navigate('/student/community');
+                  }
+                }}
                 className={`border rounded-xl p-4 text-center transition-colors group ${
                   isDarkMode 
                     ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30' 
@@ -319,9 +302,9 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Days Streaks */}
+                      {/* Right Column */}
+            <div className="space-y-6">
+              {/* Days Streaks */}
             <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
               isDarkMode 
                 ? 'bg-gray-800 border-gray-700' 
@@ -339,41 +322,65 @@ export const StudentDashboard: React.FC = () => {
                     <span>Done</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                      <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span>Incomplete</span>
-                  </div>
-                  <div className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300"></div>
                     <span>Current</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span>Incomplete</span>
                   </div>
                 </div>
               </div>
               
+              {/* Debug: Assign to existing batch */}
+              <div className="mt-4">
+                <button
+                  onClick={async () => {
+                    if (user?.id) {
+                      try {
+                        const success = await DatabaseService.assignUserToExistingBatch(
+                          user.id, 
+                          'da36d58c-9850-4f78-948f-5ce4866d50a3'
+                        );
+                        if (success) {
+                          alert('Successfully assigned to existing batch! Refreshing...');
+                          window.location.reload();
+                        } else {
+                          alert('Failed to assign to existing batch. Check console for details.');
+                        }
+                      } catch (error) {
+                        console.error('Error assigning to existing batch:', error);
+                        alert('Error assigning to existing batch. Check console for details.');
+                      }
+                    }
+                  }}
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  🔗 Assign to Existing Batch (Debug)
+                </button>
+              </div>
+              
               <div className="flex justify-between items-center">
-                {['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'].map((week, index) => (
-                  <div key={week} className="text-center">
-                    <div className={`text-xs mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{week}</div>
+                {dashboardData?.weekStreaks?.map((streak: any, index: number) => (
+                  <div key={streak.week} className="text-center">
+                    <div className={`text-xs mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Week {streak.week}
+                    </div>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
-                      index < 2 ? 'bg-green-100' :
-                      index === 2 ? 'bg-blue-100 border-2 border-blue-500' :
-                      index === 5 ? 'bg-red-100' :
                       isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
                     }`}>
-                      {index < 2 && (
-                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                      {index === 2 && <div className="w-3 h-3 bg-blue-500 rounded-full" />}
-                      {index === 5 && (
-                        <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      )}
+                      <div className="w-3 h-3 bg-red-500 rounded-full" />
+                    </div>
+                  </div>
+                )) || Array.from({ length: 6 }, (_, index) => (
+                  <div key={index} className="text-center">
+                    <div className={`text-xs mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Week {index + 1}
+                    </div>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
+                      isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
+                      <div className="w-3 h-3 bg-red-500 rounded-full" />
                     </div>
                   </div>
                 ))}

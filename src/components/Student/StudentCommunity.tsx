@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, MessageCircle, ExternalLink, AlertCircle, Calendar, MapPin } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Users, MessageCircle, ExternalLink, AlertCircle, Calendar, MapPin, Mail } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Batch, User } from '../../services/database';
+import { StudentHeader } from './StudentHeader';
+import { useTheme } from '../../lib/ThemeContext';
 
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
+  const { batchSlug } = useParams();
   const { user } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [batch, setBatch] = useState<Batch | null>(null);
   const [mentors, setMentors] = useState<User[]>([]);
   const [students, setStudents] = useState<User[]>([]);
+  const [userData, setUserData] = useState<any>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'progress'>('name');
 
   useEffect(() => {
     const fetchCommunityData = async () => {
@@ -21,20 +27,28 @@ export const StudentCommunity: React.FC = () => {
         setLoading(true);
         setError(null);
         
+        console.log('Fetching community data for user:', user.id);
+        
+        // Fetch user data first
+        const dashboardData = await DatabaseService.getDashboardData(user.id);
+        setUserData(dashboardData);
+        
         const batchData = await DatabaseService.getStudentBatch(user.id);
         if (!batchData) {
-          setError('You are not assigned to any batch yet');
+          setError('You are not assigned to any batch yet. Please contact your administrator.');
+          setLoading(false);
           return;
         }
         
+        console.log('Batch data found:', batchData);
         setBatch(batchData);
         
         const mentorsData = await DatabaseService.getMentors(batchData.id);
         setMentors(mentorsData);
         
-        // For now, we'll set empty students array
-        // You'd need to implement getStudentsByBatch in DatabaseService
-        setStudents([]);
+        // Get students in the same batch
+        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id);
+        setStudents(studentsData);
         
       } catch (err) {
         console.error('Error fetching community data:', err);
@@ -49,8 +63,15 @@ export const StudentCommunity: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+        <StudentHeader 
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+          userRole="student"
+          pageTitle="Community"
+        />
+        <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -64,34 +85,15 @@ export const StudentCommunity: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-6xl mx-auto">
-          <button
-            onClick={() => navigate('/student/dashboard')}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </button>
-          
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
-              <div>
-                <h3 className="text-red-800 font-medium">Error Loading Community</h3>
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!batch) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+        <StudentHeader 
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+          userRole="student"
+          pageTitle="Community"
+        />
+        <div className="max-w-6xl mx-auto px-6 py-8">
           <button
             onClick={() => navigate('/student/dashboard')}
             className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
@@ -116,9 +118,31 @@ export const StudentCommunity: React.FC = () => {
     );
   }
 
+  // Sort students based on selection
+  const sortedStudents = [...students].sort((a, b) => {
+    console.log('Sorting students:', { sortBy, a: a.first_name, b: b.first_name });
+    if (sortBy === 'name') {
+      return (a.first_name || '').localeCompare(b.first_name || '');
+    } else {
+      // Sort by progress (for now, just by role - mentors first)
+      return (a.role === 'mentor' ? 1 : 0) - (b.role === 'mentor' ? 1 : 0);
+    }
+  });
+
+  console.log('Original students:', students);
+  console.log('Sorted students:', sortedStudents);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      <StudentHeader 
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+        userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+        userRole="student"
+        pageTitle="Community"
+      />
+      
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <button
           onClick={() => navigate('/student/dashboard')}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
@@ -133,119 +157,182 @@ export const StudentCommunity: React.FC = () => {
         <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
           <div className="flex items-center gap-3 mb-4">
             <Users className="w-8 h-8 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">{batch.name}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {batch.name || 'Python Learning Cohort - Demo Batch'}
+            </h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{batch.current_students}</div>
-              <div className="text-sm text-gray-600">Current Students</div>
+          {/* Top section with students count and mentor info */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-gray-600" />
+                <span className="text-gray-700">Students: {students.length} members</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">👨‍🎓</span>
+                <span className="text-gray-700">
+                  Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name} ${mentors[0]?.last_name}, Senior BI Executive` : 'Uttam Deb, Senior BI Executive'}
+                </span>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{batch.max_students}</div>
-              <div className="text-sm text-gray-600">Max Students</div>
+            
+            {/* Communication CTAs at top right */}
+            <div className="flex gap-3">
+              <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                <span>📱</span>
+                WhatsApp
+              </button>
+              <button className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                <span>💬</span>
+                Discord
+              </button>
+              <button className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                <span>🚨</span>
+                Emergency
+              </button>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{batch.status}</div>
-              <div className="text-sm text-gray-600">Status</div>
+          </div>
+        </div>
+
+        {/* Group Members */}
+        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900">Group Members</h3>
+            <div className="flex items-center gap-3">
+              <button className="p-2 text-gray-600 hover:text-gray-800">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                </svg>
+              </button>
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value as 'name' | 'progress')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 border rounded-lg px-3 py-2"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="progress">Sort by Progress</option>
+              </select>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <Calendar className="w-4 h-4" />
-            <span>Started: {new Date(batch.start_date).toLocaleDateString()}</span>
-            {batch.end_date && (
-              <>
-                <span>•</span>
-                <span>Ends: {new Date(batch.end_date).toLocaleDateString()}</span>
-              </>
+          <div className="space-y-4">
+            {/* Real Group Members */}
+            {sortedStudents.length > 0 ? (
+              sortedStudents.map((member, index) => (
+                <div key={member.id} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
+                        {member.first_name?.[0] || 'S'}{member.last_name?.[0] || ''}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">
+                            {member.first_name} {member.last_name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {member.role === 'mentor' ? 'Mentor' : 'Student'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {member.email}
+                          </p>
+                        </div>
+                        {/* Email icon beside the name */}
+                        <button className="p-2 text-gray-600 hover:text-gray-800">
+                          <Mail className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">
+                        {member.role === 'mentor' ? 'Mentor' : 'Student'}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {member.role === 'mentor' ? 'Active' : 'Enrolled'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Fallback to sample data if no real students
+              [
+                {
+                  name: 'Amira K.',
+                  initials: 'AK',
+                  details: 'BSc Computer Science • 3rd Year',
+                  university: 'Dhaka University',
+                  progress: 'Week 3/6',
+                  completion: 75
+                },
+                {
+                  name: 'Fatima Rahman',
+                  initials: 'FR',
+                  details: 'BSc Data Science • 4th Year',
+                  university: 'NSU',
+                  progress: 'Week 4/6',
+                  completion: 85
+                },
+                {
+                  name: 'Nadia Islam',
+                  initials: 'NI',
+                  details: 'BSc Computer Science • 1st Year',
+                  university: 'IUT',
+                  progress: 'Week 1/6',
+                  completion: 40
+                },
+                {
+                  name: 'Rashida Khan',
+                  initials: 'RK',
+                  details: 'BSc Information Technology • 3rd Year',
+                  university: 'Dhaka University',
+                  progress: 'Week 3/6',
+                  completion: 70
+                },
+                {
+                  name: 'Sarah Ahmed',
+                  initials: 'SA',
+                  details: 'BSc Software Engineering • 2nd Year',
+                  university: 'BUET',
+                  progress: 'Week 2/6',
+                  completion: 60
+                }
+              ].map((member, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
+                        {member.initials}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{member.name}</h4>
+                          <p className="text-sm text-gray-600">{member.details}</p>
+                          <p className="text-xs text-gray-500">{member.university}</p>
+                        </div>
+                        {/* Email icon beside the name */}
+                        <button className="p-2 text-gray-600 hover:text-gray-800">
+                          <Mail className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">{member.progress}</p>
+                      <p className="text-xs text-gray-600">{member.completion}% Complete</p>
+                      <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full" 
+                          style={{ width: `${member.completion}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
-
-        {/* Communication Channels */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {batch.whatsapp_link && (
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <MessageCircle className="w-6 h-6 text-green-600" />
-                <h3 className="text-lg font-semibold text-gray-900">WhatsApp Group</h3>
-              </div>
-              <p className="text-gray-600 mb-4">Join our WhatsApp group for quick updates and discussions.</p>
-              <a
-                href={batch.whatsapp_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Join Group
-              </a>
-            </div>
-          )}
-
-          {batch.discord_link && (
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <MessageCircle className="w-6 h-6 text-purple-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Discord Server</h3>
-              </div>
-              <p className="text-gray-600 mb-4">Connect with fellow students on our Discord server.</p>
-              <a
-                href={batch.discord_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Join Server
-              </a>
-            </div>
-          )}
-        </div>
-
-        {/* Mentors */}
-        {mentors.length > 0 && (
-          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Your Mentors</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mentors.map((mentor) => (
-                <div key={mentor.id} className="border rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                      <Users className="w-6 h-6 text-gray-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
-                        {mentor.first_name} {mentor.last_name}
-                      </h4>
-                      <p className="text-sm text-gray-600">Mentor</p>
-                    </div>
-                  </div>
-                  {batch.emergency_contact && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MapPin className="w-4 h-4" />
-                      <span>Emergency: {batch.emergency_contact}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* No Community Channels Message */}
-        {!batch.whatsapp_link && !batch.discord_link && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <div className="text-center">
-              <MessageCircle className="w-12 h-12 text-yellow-600 mx-auto mb-3 opacity-50" />
-              <h3 className="text-yellow-800 font-medium mb-2">No Community Channels Available</h3>
-              <p className="text-yellow-600 text-sm">
-                Community channels haven't been set up for your batch yet. Please check back later or contact your mentor.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

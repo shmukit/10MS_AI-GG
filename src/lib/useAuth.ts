@@ -115,6 +115,7 @@ export function useAuth() {
   // Fetch user role from custom database
   const fetchUserRole = async (email: string) => {
     try {
+      console.log('🔍 Fetching user role for email:', email);
       const { data, error } = await supabase
         .from('users')
         .select('role')
@@ -122,13 +123,14 @@ export function useAuth() {
         .single()
       
       if (error) {
-        console.error('Error fetching user role:', error)
+        console.error('❌ Error fetching user role:', error);
         return null
       }
       
+      console.log('✅ User role fetched successfully:', data?.role);
       return data?.role || null
     } catch (err) {
-      console.error('Error fetching user role:', err)
+      console.error('❌ Error fetching user role:', err);
       return null
     }
   }
@@ -136,10 +138,13 @@ export function useAuth() {
   // Update user role when session changes
   useEffect(() => {
     if (session?.user?.email) {
+      console.log('🔄 Session changed, fetching role for:', session.user.email);
       fetchUserRole(session.user.email).then(role => {
+        console.log('🎭 Setting user role to:', role);
         setUserRole(role)
       })
     } else {
+      console.log('🔄 No session, clearing user role');
       setUserRole(null)
     }
   }, [session])
