@@ -19,14 +19,10 @@ export const LoginPage: React.FC = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      // Use the selected role from the form, not the database role
-      if (role === 'student') {
-        navigate('/student/dashboard');
-      } else if (role === 'mentor') {
-        navigate('/mentor/dashboard');
-      }
+      // Role-based navigation will be handled by App.tsx after role is fetched
+      // This prevents premature navigation before the role is available
     }
-  }, [user, navigate, role]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +36,7 @@ export const LoginPage: React.FC = () => {
         console.log('Sign in result:', result);
         
         if (result.success) {
-          // Store the selected role temporarily for this session
-          localStorage.setItem('selectedRole', role);
-          console.log('✔ Sign in successful, navigation will be handled by useEffect');
+          console.log('✔ Sign in successful, role will be fetched from database');
         }
       } else {
         console.log('Attempting sign up...');
@@ -50,8 +44,6 @@ export const LoginPage: React.FC = () => {
         console.log('Sign up result:', result);
         
         if (result.success) {
-          // Store the selected role temporarily for this session
-          localStorage.setItem('selectedRole', role);
           console.log('✔ Sign up successful, navigation will be handled by useEffect');
         }
       }

@@ -7,9 +7,11 @@ import { RoadmapNodeData } from './RoadmapNode';
 interface RoadmapCanvasProps {
   isDarkMode?: boolean;
   roadmapNodes: RoadmapNodeData[];
+  onRefresh?: () => void; // Add refresh callback
+  batchId?: string | null; // Add batchId prop for completion data
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false, roadmapNodes }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false, roadmapNodes, onRefresh, batchId }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -71,6 +73,8 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
           node={selectedNode}
           onClose={handleClosePanel}
           isDarkMode={isDarkMode}
+          onRefresh={onRefresh}
+          batchId={batchId}
         />
       )}
     </div>

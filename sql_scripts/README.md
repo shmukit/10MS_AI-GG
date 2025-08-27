@@ -1,120 +1,152 @@
-# SQL Scripts for 10MS SheSTEM Project
+# SQL Scripts for Student-Batch Relationship Fix
 
-This folder contains all SQL scripts needed to set up the Revenue Cycle Management Specialist roadmap and related database structures.
+## Overview
+This directory contains SQL scripts to fix the student-batch relationship issue and enable students to be enrolled in multiple batches simultaneously.
 
-## 📋 Execution Order
+## Problem Description
+The original database schema had a limitation where students could only be enrolled in one batch at a time through the `student_profiles.batch_id` field. This prevented students from participating in multiple roadmaps or programs concurrently.
 
-### 1. Database Setup (if not already done)
+## Solution
+We've implemented a many-to-many relationship between students and batches using a new junction table called `student_batch_assignments`.
+
+## Scripts Execution Order
+
+### 1. First, run the main fix script:
 ```bash
-# Run these first to set up the database structure
-create_tables.sql          # Creates all database tables
-add_test_users.sql         # Adds test users (including Uttam Deb)
-hash_password.sql          # Hash passwords for test users
-create_mentor_profile.sql  # Creates mentor profile for Uttam Deb
+psql -h your_host -U your_user -d your_database -f fix_student_batch_relationship.sql
 ```
 
-### 2. Roadmap Creation
+This script will:
+- Create the new `student_batch_assignments` table
+- Migrate existing data from `student_profiles.batch_id`
+- Add Mukit to the Augmedix RCM Specialist Batch 1
+- Update batch student counts
+
+### 2. Verify the migration was successful:
 ```bash
-# Create the main roadmap
-create_roadmap.sql         # Creates the Revenue Cycle Management Specialist roadmap
+psql -h your_host -U your_user -d your_database -f add_mukit_to_augmedix_batch.sql
 ```
 
-### 3. Week Structure
+This script will:
+- Verify Mukit's enrollment in the specified batch
+- Show all batches Mukit is enrolled in
+- Display updated batch information
+
+### 3. (Optional) Remove the old column after verification:
 ```bash
-# Create weeks and tasks in order
-create_week1.sql           # Creates Week 1 structure
-create_week1_tasks.sql     # Creates all Week 1 tasks (7 tasks)
-create_week2.sql           # Creates Week 2 and tasks (5 tasks)
-create_week3.sql           # Creates Week 3 and tasks (7 tasks)
-create_week4.sql           # Creates Week 4 and tasks (6 tasks)
-create_week5.sql           # Creates Week 5 and tasks (4 tasks)
-create_week6.sql           # Creates Week 6 and tasks (5 tasks)
+psql -h your_host -U your_user -d your_database -f remove_old_batch_id_column.sql
 ```
 
-### 4. Batch and Student Assignment
-```bash
-# Set up the learning batch
-create_batch.sql           # Creates batch and assigns Uttam Deb as mentor
-assign_student.sql         # Assigns Mukit to the batch
+**⚠️ WARNING**: Only run this after confirming all data has been successfully migrated!
+
+## What Each Script Does
+
+### `fix_student_batch_relationship.sql`
+- Creates the new `student_batch_assignments` table
+- Migrates existing student-batch relationships
+- Adds Mukit to the Augmedix RCM Specialist Batch 1
+- Updates batch student counts
+
+### `add_mukit_to_augmedix_batch.sql`
+- Specifically handles adding Mukit to the specified batch
+- Includes comprehensive verification queries
+- Shows enrollment status and progress
+
+### `remove_old_batch_id_column.sql`
+- Safely removes the old `batch_id` column from `student_profiles`
+- Includes safety checks to prevent data loss
+- Should only be run after successful migration verification
+
+## New Database Structure
+
+### Before (Old Structure)
+```
+student_profiles
+├── user_id
+├── batch_id (single batch only)
+├── progress_percentage
+├── completed_weeks
+└── ...
 ```
 
-### 5. Content and Notices
-```bash
-# Add sample content
-create_notices.sql         # Creates sample notices for the batch
+### After (New Structure)
+```
+student_profiles (no batch_id field)
+└── user_id, institute, year, subject, degree, ...
+
+student_batch_assignments (NEW TABLE)
+├── student_id
+├── batch_id
+├── enrollment_date
+├── status
+├── progress_percentage
+├── completed_weeks
+└── ...
 ```
 
-### 6. Verification
-```bash
-# Verify everything is set up correctly
-verify_setup.sql           # Comprehensive verification of all components
-verify_mentor_assignment.sql # Specific verification of mentor assignment
+## Benefits of New Structure
+
+1. **Multiple Enrollments**: Students can join multiple batches simultaneously
+2. **Independent Progress**: Each enrollment maintains its own progress metrics
+3. **Flexible Status**: Each enrollment can have different statuses (active, completed, dropped, suspended)
+4. **Scalability**: Easy to add new enrollments without affecting existing ones
+5. **Better Analytics**: Track student participation across multiple programs
+
+## Verification Queries
+
+After running the scripts, you can verify the setup with these queries:
+
+### Check Mukit's enrollments:
+```sql
+SELECT 
+  u.first_name || ' ' || u.last_name as student_name,
+  b.name as batch_name,
+  r.title as roadmap_title,
+  sba.status as enrollment_status
+FROM student_batch_assignments sba
+JOIN users u ON sba.student_id = u.id
+JOIN batches b ON sba.batch_id = b.id
+JOIN roadmaps r ON b.roadmap_id = r.id
+WHERE u.email = 'mukit@10minuteschool.com';
 ```
 
-## 🎯 Quick Setup Command
-
-To run all scripts in the correct order:
-
-```bash
-# Navigate to sql_scripts folder
-cd sql_scripts
-
-# Run the complete setup (adjust paths as needed)
-psql -h your_host -U your_user -d your_database -f create_tables.sql
-psql -h your_host -U your_user -d your_database -f add_test_users.sql
-psql -h your_host -U your_user -d your_database -f hash_password.sql
-psql -h your_host -U your_user -d your_database -f create_mentor_profile.sql
-psql -h your_host -U your_user -d your_database -f create_roadmap.sql
-psql -h your_host -U your_user -d your_database -f create_week1.sql
-psql -h your_host -U your_user -d your_database -f create_week1_tasks.sql
-psql -h your_host -U your_user -d your_database -f create_week2.sql
-psql -h your_host -U your_user -d your_database -f create_week3.sql
-psql -h your_host -U your_user -d your_database -f create_week4.sql
-psql -h your_host -U your_user -d your_database -f create_week5.sql
-psql -h your_host -U your_user -d your_database -f create_week6.sql
-psql -h your_host -U your_user -d your_database -f create_batch.sql
-psql -h your_host -U your_user -d your_database -f assign_student.sql
-psql -h your_host -U your_user -d your_database -f create_notices.sql
-psql -h your_host -U your_user -d your_database -f verify_setup.sql
+### Check batch student counts:
+```sql
+SELECT 
+  b.name as batch_name,
+  b.current_students,
+  b.max_students
+FROM batches b
+WHERE b.name = 'Augmedix RCM Specialist Batch 1';
 ```
 
-## 📊 Expected Results
+## Rollback Plan
 
-After running all scripts, you should have:
-- ✅ 1 roadmap with 6 weeks
-- ✅ 34 tasks across all weeks
-- ✅ 1 active batch with Uttam Deb as mentor
-- ✅ 1 student (Mukit) enrolled in the batch
-- ✅ Sample notices and content
-- ✅ Total of 585 points and 75 estimated hours
+If you need to rollback the changes:
 
-## 🔧 Troubleshooting
+1. **Restore the old structure**:
+   ```sql
+   ALTER TABLE student_profiles ADD COLUMN batch_id UUID REFERENCES batches(id);
+   ```
 
-- **Type errors:** Ensure all empty arrays use `ARRAY[]::text[]`
-- **Constraint errors:** Check that task types are valid (`watch`, `read`, `project`, `attend`, `mcq`, `written`)
-- **Reference errors:** Ensure scripts are run in the correct order
-- **Permission errors:** Verify database user has appropriate privileges
+2. **Migrate data back**:
+   ```sql
+   UPDATE student_profiles sp
+   SET batch_id = sba.batch_id
+   FROM student_batch_assignments sba
+   WHERE sp.user_id = sba.student_id
+     AND sba.status = 'active';
+   ```
 
-## 📁 File Structure
+3. **Drop the new table**:
+   ```sql
+   DROP TABLE IF EXISTS student_batch_assignments;
+   ```
 
-```
-sql_scripts/
-├── README.md                    # This file
-├── create_tables.sql            # Database schema
-├── add_test_users.sql           # Test user creation
-├── hash_password.sql            # Password hashing
-├── create_mentor_profile.sql    # Mentor profile setup
-├── create_roadmap.sql           # Main roadmap creation
-├── create_week1.sql             # Week 1 structure
-├── create_week1_tasks.sql       # Week 1 tasks
-├── create_week2.sql             # Week 2 and tasks
-├── create_week3.sql             # Week 3 and tasks
-├── create_week4.sql             # Week 4 and tasks
-├── create_week5.sql             # Week 5 and tasks
-├── create_week6.sql             # Week 6 and tasks
-├── create_batch.sql             # Batch creation
-├── assign_student.sql           # Student assignment
-├── create_notices.sql           # Sample notices
-├── verify_setup.sql             # Complete verification
-└── verify_mentor_assignment.sql # Mentor verification
-```
+## Support
+
+If you encounter any issues during the migration:
+1. Check the PostgreSQL logs for error messages
+2. Verify that all required tables exist
+3. Ensure you have the necessary permissions
+4. Test the scripts on a development database first

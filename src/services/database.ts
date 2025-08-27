@@ -190,6 +190,9 @@ export class DatabaseService {
         return null;
       }
 
+      // Clean up any duplicate profiles before returning
+      await this.cleanupDuplicateProfiles(userId);
+
       console.log('Student profile found:', data);
       return data;
     } catch (error) {
@@ -203,10 +206,10 @@ export class DatabaseService {
     try {
       console.log('Creating default student profile for user:', userId);
       
-      // Try to create a real profile first
+      // Use upsert with ON CONFLICT to prevent race conditions
       const { data, error } = await supabase
         .from('student_profiles')
-        .insert({
+        .upsert({
           user_id: userId,
           institute: '10 Minute School',
           year: new Date().getFullYear().toString(),
@@ -215,12 +218,29 @@ export class DatabaseService {
           completed_weeks: 0,
           progress_percentage: 0,
           enrollment_date: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id', // This should prevent duplicates
+          ignoreDuplicates: true
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating real student profile:', error);
+        console.error('Error creating/updating student profile:', error);
+        
+        // If upsert fails, try to fetch existing profile
+        const { data: existingProfile } = await supabase
+          .from('student_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingProfile) {
+          console.log('Found existing profile after upsert failure:', existingProfile);
+          return existingProfile;
+        }
+
         // If RLS prevents insertion, return a mock profile
         const mockProfile: StudentProfile = {
           id: 'mock-profile-' + userId,
@@ -240,7 +260,7 @@ export class DatabaseService {
         return mockProfile;
       }
 
-      console.log('Real student profile created:', data);
+      console.log('Student profile created/updated:', data);
       return data;
     } catch (error) {
       console.error('Error in createDefaultStudentProfile:', error);
@@ -253,56 +273,78 @@ export class DatabaseService {
     try {
       console.log('Fetching batch for user:', userId);
       
-      // First, check if user already has a batch assigned
-      const { data: profile, error: profileError } = await supabase
-        .from('student_profiles')
-        .select('batch_id')
-        .eq('user_id', userId)
+      // Use the new student_batch_assignments table
+      const { data: batchAssignment, error: assignmentError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          batch_id,
+          batches!inner(*)
+        `)
+        .eq('student_id', userId)
+        .eq('status', 'active')
         .single();
 
-      if (profileError) {
-        console.error('Error fetching student profile:', profileError);
-        // Profile doesn't exist, try to create one
-        const newProfile = await this.createDefaultStudentProfile(userId);
-        if (newProfile?.batch_id) {
-          // Profile was created with a batch, fetch it
-          const { data: batchData, error: batchError } = await supabase
+      if (assignmentError) {
+        console.error('Error fetching batch assignment:', assignmentError);
+        // Try the old method as fallback
+        const { data: profile, error: profileError } = await supabase
+          .from('student_profiles')
+          .select('batch_id')
+          .eq('user_id', userId)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching student profile:', profileError);
+          // Profile doesn't exist, try to create one
+          const newProfile = await this.createDefaultStudentProfile(userId);
+          if (newProfile?.batch_id) {
+            // Profile was created with a batch, fetch it
+            const { data: batchData, error: batchError } = await supabase
+              .from('batches')
+              .select('*')
+              .eq('id', newProfile.batch_id)
+              .single();
+
+            if (batchError) {
+              console.error('Error fetching batch from new profile:', batchError);
+              return null;
+            }
+
+            console.log('Batch found from new profile:', batchData);
+            return batchData;
+          }
+        }
+
+        if (profile?.batch_id) {
+          console.log('User has batch_id:', profile.batch_id);
+          
+          const { data, error } = await supabase
             .from('batches')
             .select('*')
-            .eq('id', newProfile.batch_id)
+            .eq('id', profile.batch_id)
             .single();
 
-          if (batchError) {
-            console.error('Error fetching batch from new profile:', batchError);
+          if (error) {
+            console.error('Error fetching batch:', error);
             return null;
           }
 
-          console.log('Batch found from new profile:', batchData);
-          return batchData;
-        }
-      }
-
-      if (profile?.batch_id) {
-        console.log('User has batch_id:', profile.batch_id);
-        
-        const { data, error } = await supabase
-          .from('batches')
-          .select('*')
-          .eq('id', profile.batch_id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching batch:', error);
-          return null;
+          console.log('Batch found:', data);
+          return data;
         }
 
-        console.log('Batch found:', data);
-        return data;
+        console.log('No batch assigned to user:', userId);
+        // Try to assign user to an available batch
+        return await this.assignUserToAvailableBatch(userId);
       }
 
-      console.log('No batch assigned to user:', userId);
-      // Try to assign user to an available batch
-      return await this.assignUserToAvailableBatch(userId);
+      if (batchAssignment?.batches) {
+        console.log('Batch found from new assignment table:', batchAssignment.batches);
+        return batchAssignment.batches as any; // Type assertion to fix the array issue
+      }
+
+      console.log('No batch assignment found for user:', userId);
+      return null;
     } catch (error) {
       console.error('Error in getStudentBatch:', error);
       return null;
@@ -393,20 +435,8 @@ export class DatabaseService {
     try {
       const batch = await this.getStudentBatch(userId);
       if (!batch?.roadmap_id) {
-        // Return a mock roadmap for demonstration
-        const mockRoadmap: Roadmap = {
-          id: 'mock-roadmap-' + userId,
-          title: 'Python Learning Path',
-          description: 'A comprehensive Python learning journey for beginners',
-          total_weeks: 6,
-          difficulty_level: 'beginner',
-          category: 'Programming',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        console.log('Mock roadmap created for user:', mockRoadmap);
-        return mockRoadmap;
+        console.log('No roadmap found for user:', userId);
+        return null;
       }
 
       const { data, error } = await supabase
@@ -424,6 +454,53 @@ export class DatabaseService {
     } catch (error) {
       console.error('Error in getStudentRoadmap:', error);
       return null;
+    }
+  }
+
+  static async getEnrolledRoadmaps(userId: string): Promise<Roadmap[]> {
+    try {
+      console.log('🔍 getEnrolledRoadmaps called for user:', userId);
+      
+      // Get all batches the user is enrolled in
+      const { data: batchEnrollments, error: batchError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          batch_id,
+          batches!inner(
+            id,
+            name,
+            roadmap_id,
+            roadmaps!inner(*)
+          )
+        `)
+        .eq('student_id', userId)
+        .eq('status', 'active');
+
+      if (batchError) {
+        console.error('❌ Error fetching batch enrollments:', batchError);
+        return [];
+      }
+
+      console.log('📊 Batch enrollments found:', batchEnrollments);
+
+      // Extract roadmaps from batch enrollments
+      const roadmaps = batchEnrollments
+        ?.map(enrollment => (enrollment.batches as any)?.roadmaps)
+        .filter(Boolean) || [];
+
+      console.log('🗺️  Roadmaps extracted from batches:', roadmaps);
+
+      // If no roadmaps found, return empty array
+      if (roadmaps.length === 0) {
+        console.log('📝 No roadmaps found for user:', userId);
+        return [];
+      }
+
+      console.log('✅ Returning real roadmaps:', roadmaps);
+      return roadmaps;
+    } catch (error) {
+      console.error('❌ Error in getEnrolledRoadmaps:', error);
+      return [];
     }
   }
 
@@ -519,6 +596,272 @@ export class DatabaseService {
     }
   }
 
+  static async markWeekAsComplete(
+    userId: string,
+    weekId: string
+  ): Promise<boolean> {
+    try {
+      console.log('🔄 Starting markWeekAsComplete for user:', userId, 'week:', weekId);
+      
+      // First, get all tasks for this week
+      const weekTasks = await this.getRoadmapTasks(weekId);
+      console.log('📋 Found tasks for week:', weekTasks.length, weekTasks);
+      
+      // Mark all tasks as completed for this user
+      for (const task of weekTasks) {
+        console.log('✅ Marking task as completed:', task.id, task.task_name);
+        
+        const { error } = await supabase
+          .from('student_progress')
+          .upsert({
+            student_id: userId,
+            task_id: task.id,
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('❌ Error updating task progress:', error);
+          return false;
+        }
+        
+        console.log('✅ Successfully marked task as completed:', task.id);
+      }
+
+      console.log('🎉 All tasks for week marked as completed successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Error in markWeekAsComplete:', error);
+      return false;
+    }
+  }
+
+  // Get week completion statistics for all students in a batch
+  static async getWeekCompletionStats(weekId: string, batchId: string): Promise<{
+    totalStudents: number;
+    completedStudents: number;
+    completionPercentage: number;
+    completedStudentNames: string[];
+  }> {
+    try {
+      // Get all students in the batch
+      const { data: batchStudents, error: batchError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          student_id,
+          users!inner(first_name, last_name)
+        `)
+        .eq('batch_id', batchId)
+        .eq('status', 'active');
+
+      if (batchError) {
+        console.error('Error fetching batch students:', batchError);
+        return {
+          totalStudents: 0,
+          completedStudents: 0,
+          completionPercentage: 0,
+          completedStudentNames: []
+        };
+      }
+
+      if (!batchStudents || batchStudents.length === 0) {
+        return {
+          totalStudents: 0,
+          completedStudents: 0,
+          completionPercentage: 0,
+          completedStudentNames: []
+        };
+      }
+
+      const totalStudents = batchStudents.length;
+      const studentIds = batchStudents.map(s => s.student_id);
+
+      // Get all tasks for this week
+      const weekTasks = await this.getRoadmapTasks(weekId);
+      if (weekTasks.length === 0) {
+        return {
+          totalStudents,
+          completedStudents: 0,
+          completionPercentage: 0,
+          completedStudentNames: []
+        };
+      }
+
+      // Get progress for all students in this batch for this week's tasks
+      const { data: progressData, error: progressError } = await supabase
+        .from('student_progress')
+        .select(`
+          student_id,
+          task_id,
+          status
+        `)
+        .in('student_id', studentIds)
+        .in('task_id', weekTasks.map(t => t.id));
+
+      if (progressError) {
+        console.error('Error fetching progress data:', progressError);
+        return {
+          totalStudents,
+          completedStudents: 0,
+          completionPercentage: 0,
+          completedStudentNames: []
+        };
+      }
+
+      // Calculate completion for each student
+      const studentCompletion = new Map<string, { completed: number; total: number; name: string }>();
+      
+      // Initialize all students
+      batchStudents.forEach(student => {
+        studentCompletion.set(student.student_id, {
+          completed: 0,
+          total: weekTasks.length,
+          name: `${(student.users as any).first_name} ${(student.users as any).last_name}`.trim()
+        });
+      });
+
+      // Count completed tasks for each student
+      progressData?.forEach(progress => {
+        if (progress.status === 'completed') {
+          const student = studentCompletion.get(progress.student_id);
+          if (student) {
+            student.completed++;
+          }
+        }
+      });
+
+      // Find students who completed all tasks
+      const completedStudents = Array.from(studentCompletion.values())
+        .filter(student => student.completed === student.total);
+      
+      
+      const completedStudentNames = completedStudents
+        .map(student => student.name)
+        .sort(); // Sort alphabetically
+
+      const completionPercentage = totalStudents > 0 ? (completedStudents.length / totalStudents) * 100 : 0;
+
+      return {
+        totalStudents,
+        completedStudents: completedStudents.length,
+        completionPercentage,
+        completedStudentNames
+      };
+    } catch (error) {
+      console.error('Error in getWeekCompletionStats:', error);
+      return {
+        totalStudents: 0,
+        completedStudents: 0,
+        completionPercentage: 0,
+        completedStudentNames: []
+      };
+    }
+  }
+
+  // Get detailed student completion for a specific week
+  static async getWeekStudentCompletionDetails(weekId: string, batchId: string): Promise<{
+    studentId: string;
+    studentName: string;
+    completedTasks: number;
+    totalTasks: number;
+    completionPercentage: number;
+    completedTaskNames: string[];
+    lastCompletedAt?: string;
+  }[]> {
+    try {
+      // Get all students in the batch
+      const { data: batchStudents, error: batchError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          student_id,
+          users!inner(first_name, last_name)
+        `)
+        .eq('batch_id', batchId)
+        .eq('status', 'active');
+
+      if (batchError || !batchStudents) {
+        console.error('Error fetching batch students:', batchError);
+        return [];
+      }
+
+      // Get all tasks for this week
+      const weekTasks = await this.getRoadmapTasks(weekId);
+      if (weekTasks.length === 0) {
+        return [];
+      }
+
+      const studentIds = batchStudents.map(s => s.student_id);
+      const taskIds = weekTasks.map(t => t.id);
+
+      // Get progress for all students in this batch for this week's tasks
+      const { data: progressData, error: progressError } = await supabase
+        .from('student_progress')
+        .select(`
+          student_id,
+          task_id,
+          status,
+          completed_at
+        `)
+        .in('student_id', studentIds)
+        .in('task_id', taskIds);
+
+      if (progressError) {
+        console.error('Error fetching progress data:', progressError);
+        return [];
+      }
+
+      // Calculate completion for each student
+      const studentDetails = batchStudents.map(batchStudent => {
+        const studentId = batchStudent.student_id;
+        const studentName = `${(batchStudent.users as any).first_name} ${(batchStudent.users as any).last_name}`.trim();
+        
+        // Get completed tasks for this student
+        const studentProgress = progressData?.filter(p => 
+          p.student_id === studentId && p.status === 'completed'
+        ) || [];
+
+        const completedTasks = studentProgress.length;
+        const totalTasks = weekTasks.length;
+        const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+        
+        // Get completed task names
+        const completedTaskNames = studentProgress
+          .map(p => 'Task Completed') // Simplified for now, can be enhanced later
+          .sort();
+
+        // Get last completion time
+        const lastCompletedAt = studentProgress.length > 0 
+          ? Math.max(...studentProgress.map(p => new Date(p.completed_at || 0).getTime()))
+          : undefined;
+
+        return {
+          studentId,
+          studentName,
+          completedTasks,
+          totalTasks,
+          completionPercentage,
+          completedTaskNames,
+          lastCompletedAt: lastCompletedAt ? new Date(lastCompletedAt).toISOString() : undefined
+        };
+      });
+
+      // Sort by completion percentage (highest first), then by last completed time
+      return studentDetails.sort((a, b) => {
+        if (a.completionPercentage !== b.completionPercentage) {
+          return b.completionPercentage - a.completionPercentage;
+        }
+        if (a.lastCompletedAt && b.lastCompletedAt) {
+          return new Date(b.lastCompletedAt).getTime() - new Date(a.lastCompletedAt).getTime();
+        }
+        return 0;
+      });
+    } catch (error) {
+      console.error('Error in getWeekStudentCompletionDetails:', error);
+      return [];
+    }
+  }
+
   // Notices management
   static async getNotices(batchId?: string): Promise<Notice[]> {
     try {
@@ -546,7 +889,7 @@ export class DatabaseService {
     }
   }
 
-  static async markNoticeAsRead(noticeId: string, userId: string): Promise<boolean> {
+  static async markNoticeAsRead(_noticeId: string, _userId: string): Promise<boolean> {
     try {
       // This would typically update a separate read_status table
       // For now, we'll just return success
@@ -613,41 +956,84 @@ export class DatabaseService {
     }
   }
 
-  // Get students by batch
-  static async getStudentsByBatch(batchId: string): Promise<User[]> {
+  // Get students by batch ID using the new student_batch_assignments table
+  static async getStudentsByBatch(batchId: string, currentUserId?: string, roadmapId?: string): Promise<(User & { profile?: any })[]> {
     try {
-      console.log('Fetching students for batch:', batchId);
+      console.log('🔍 getStudentsByBatch called for batch:', batchId);
       
-      const { data: profiles, error: profileError } = await supabase
+      // Use the new student_batch_assignments table
+      const { data: batchAssignments, error: assignmentError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          student_id,
+          status,
+          users!inner(
+            id,
+            first_name,
+            last_name,
+            email,
+            role,
+            is_active
+          )
+        `)
+        .eq('batch_id', batchId)
+        .eq('status', 'active')
+        .eq('users.is_active', true);
+
+      if (assignmentError) {
+        console.error('Error fetching batch assignments:', assignmentError);
+        return [];
+      }
+
+      if (!batchAssignments || batchAssignments.length === 0) {
+        console.log('No active students found in batch:', batchId);
+        return [];
+      }
+
+      // Get student profiles for additional information
+      const studentIds = batchAssignments.map(assignment => assignment.student_id);
+      const { data: studentProfiles, error: profileError } = await supabase
         .from('student_profiles')
-        .select('user_id')
-        .eq('batch_id', batchId);
+        .select('*')
+        .in('user_id', studentIds);
 
-      if (profileError || !profiles) {
+      if (profileError) {
         console.error('Error fetching student profiles:', profileError);
-        return [];
       }
 
-      if (profiles.length === 0) {
-        console.log('No students found in batch:', batchId);
-        return [];
-      }
+      // Transform the data to match the expected format
+      const studentsWithProfiles = batchAssignments.map(assignment => {
+        const userData = assignment.users as any;
+        const profile = studentProfiles?.find(p => p.user_id === userData.id);
+        
+        // If this is the current user and they're in the student dashboard context,
+        // override their role to show as 'student' instead of their database role
+        let displayRole = userData.role;
+        if (currentUserId && userData.id === currentUserId) {
+          displayRole = 'student';
+          console.log(`Overriding role for current user ${userData.first_name} from ${userData.role} to student`);
+        }
+        
+        return {
+          ...userData,
+          role: displayRole,
+          profile: profile ? {
+            institute: profile.institute,
+            year: profile.year,
+            subject: profile.subject,
+            degree: profile.degree,
+            enrollment_date: profile.enrollment_date
+          } : null,
+          progress: {
+            completed_weeks: profile?.completed_weeks || 0,
+            progress_percentage: profile?.progress_percentage || 0,
+            current_week: Math.ceil((profile?.completed_weeks || 0) + 1)
+          }
+        };
+      });
 
-      const userIds = profiles.map(p => p.user_id);
-      
-      const { data: users, error: userError } = await supabase
-        .from('users')
-        .select('id, first_name, last_name, email, role')
-        .in('id', userIds)
-        .eq('is_active', true);
-
-      if (userError) {
-        console.error('Error fetching users:', userError);
-        return [];
-      }
-
-      console.log('Students found in batch:', users?.length || 0);
-      return users || [];
+      console.log('Students with profiles found in batch:', studentsWithProfiles.length);
+      return studentsWithProfiles;
     } catch (error) {
       console.error('Error in getStudentsByBatch:', error);
       return [];
@@ -655,57 +1041,127 @@ export class DatabaseService {
   }
 
   // Dashboard data aggregation
-  static async getDashboardData(userId: string): Promise<{
+  static async getDashboardData(userId: string, selectedRoadmapId?: string): Promise<{
     profile: StudentProfile | null;
     batch: Batch | null;
     roadmap: Roadmap | null;
+    enrolledRoadmaps: Roadmap[];
     progress: StudentProgress[];
     notices: Notice[];
     mentors: User[];
-    weekStreaks: { week: number; status: 'completed' | 'current' | 'incomplete' }[];
+    weekStreaks: { week: number; status: 'done' | 'current' | 'incomplete' }[];
     upcomingTasks: RoadmapTask[];
+    currentWeekTasks: RoadmapTask[];
+    userData: User | null;
   }> {
     try {
-      const [profile, batch, roadmap, progress, userData] = await Promise.all([
+      console.log('🔄 getDashboardData called with selectedRoadmapId:', selectedRoadmapId);
+      // IMMEDIATE cleanup of duplicate profiles before doing anything else
+      console.log('🔄 Starting immediate cleanup of duplicate profiles...');
+      await this.cleanupDuplicateProfiles(userId);
+      
+      console.log('🔄 Fetching dashboard data components...');
+      const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
         this.getStudentProfile(userId),
         this.getStudentBatch(userId),
         this.getStudentRoadmap(userId),
+        this.getEnrolledRoadmaps(userId),
         this.getStudentProgress(userId),
         this.getUserById(userId)
       ]);
+      
+      console.log('📊 Dashboard data components fetched:');
+      console.log('  - Profile:', profile ? '✅' : '❌');
+      console.log('  - Batch:', batch ? '✅' : '❌');
+      console.log('  - Roadmap:', roadmap ? '✅' : '❌');
+      console.log('  - Enrolled Roadmaps:', enrolledRoadmaps?.length || 0, 'items');
+      console.log('  - Progress:', progress?.length || 0, 'items');
+      console.log('  - User Data:', userData ? '✅' : '❌');
 
-      const [notices, mentors] = await Promise.all([
-        this.getNotices(batch?.id),
-        this.getMentors(batch?.id)
-      ]);
+      // Get notices and mentors based on the selected roadmap
+      let notices: Notice[] = [];
+      let mentors: User[] = [];
+      
+      if (selectedRoadmapId) {
+        // If a specific roadmap is selected, get data for that roadmap
+        console.log('🔄 Getting roadmap-specific data for:', selectedRoadmapId);
+        
+        // Get the roadmap to find its associated batch
+        const { data: roadmapData, error: roadmapError } = await supabase
+          .from('roadmaps')
+          .select('*')
+          .eq('id', selectedRoadmapId)
+          .single();
+          
+        if (roadmapData) {
+          console.log('📊 Found roadmap:', roadmapData.title);
+          
+          // Find batches associated with this roadmap
+          const { data: roadmapBatches, error: batchError } = await supabase
+            .from('batches')
+            .select('*')
+            .eq('roadmap_id', selectedRoadmapId);
+            
+          if (roadmapBatches && roadmapBatches.length > 0) {
+            console.log('📊 Found batches for roadmap:', roadmapBatches.length);
+            
+            // Get notices for all batches of this roadmap
+            const roadmapNotices: Notice[] = [];
+            const roadmapMentors: User[] = [];
+            
+            for (const batch of roadmapBatches) {
+              const batchNotices = await this.getNotices(batch.id);
+              const batchMentors = await this.getMentors(batch.id);
+              roadmapNotices.push(...batchNotices);
+              roadmapMentors.push(...batchMentors);
+            }
+            
+            notices = roadmapNotices;
+            mentors = roadmapMentors;
+            console.log('📝 Roadmap-specific notices:', notices.length);
+            console.log('👥 Roadmap-specific mentors:', mentors.length);
+          }
+        }
+      }
+      
+      // Fallback to batch-specific data if no roadmap-specific data found
+      if (notices.length === 0) {
+        notices = await this.getNotices(batch?.id);
+      }
+      if (mentors.length === 0) {
+        mentors = await this.getMentors(batch?.id);
+      }
 
-      // Add sample notices if none exist
+      // Add sample notices if none exist, based on the selected roadmap
       let finalNotices = notices;
       if (!notices || notices.length === 0) {
+        let roadmapTitle = 'Learning Cohort';
+        if (selectedRoadmapId && roadmap) {
+          roadmapTitle = roadmap.title;
+        }
+        
         finalNotices = [
           {
             id: 'sample-1',
-            title: 'Welcome to Python Learning Cohort!',
-            content: 'Welcome to Week 1 of your Python journey. Complete your first assignment by Friday.',
-            type: 'announcement',
+            title: `Welcome to ${roadmapTitle}!`,
+            content: `Welcome to Week 1 of your ${roadmapTitle} journey. Complete your first assignment by Friday.`,
             priority: 'high',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          },
+          } as Notice,
           {
             id: 'sample-2',
             title: 'Office Hours This Week',
             content: 'Join us for office hours every Wednesday at 3 PM to get help with your assignments.',
-            type: 'reminder',
             priority: 'medium',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          }
+          } as Notice
         ];
       }
 
       // Calculate week streaks based on actual progress
-      let weekStreaks: { week: number; status: 'completed' | 'current' | 'incomplete'; completion: number }[] = [];
+      let weekStreaks: { week: number; status: 'done' | 'current' | 'incomplete'; completion: number }[] = [];
       
       if (roadmap) {
         // Use roadmap data if available
@@ -723,10 +1179,10 @@ export class DatabaseService {
           const weekCompletion = weekProgress.length > 0 ? 
             (weekProgress.filter(p => p.status === 'completed').length / weekProgress.length) * 100 : 0;
           
-          let status: 'completed' | 'current' | 'incomplete';
+          let status: 'done' | 'current' | 'incomplete';
           
           if (weekCompletion >= 80) {
-            status = 'completed';
+            status = 'done';
           } else if (weekNumber === Math.ceil((profile?.completed_weeks || 0) + 1)) {
             status = 'current';
           } else {
@@ -743,18 +1199,26 @@ export class DatabaseService {
         });
       }
 
-      // Get upcoming tasks (simplified)
-      const upcomingTasks: RoadmapTask[] = [];
+      // Get current week tasks and upcoming tasks
+      console.log('🔄 Fetching tasks for roadmapId:', selectedRoadmapId);
+      const [currentWeekTasks, upcomingTasks] = await Promise.all([
+        this.getCurrentWeekTasks(userId, selectedRoadmapId),
+        this.getUpcomingTasks(userId, selectedRoadmapId)
+      ]);
+      console.log('📝 Current week tasks:', currentWeekTasks.length);
+      console.log('📝 Upcoming tasks:', upcomingTasks.length);
 
       return {
         profile,
         batch,
         roadmap,
+        enrolledRoadmaps,
         progress,
         notices: finalNotices,
         mentors,
         weekStreaks,
         upcomingTasks,
+        currentWeekTasks,
         userData
       };
     } catch (error) {
@@ -763,11 +1227,14 @@ export class DatabaseService {
         profile: null,
         batch: null,
         roadmap: null,
+        enrolledRoadmaps: [],
         progress: [],
         notices: [],
         mentors: [],
         weekStreaks: [],
-        upcomingTasks: []
+        upcomingTasks: [],
+        currentWeekTasks: [],
+        userData: null
       };
     }
   }
@@ -789,25 +1256,50 @@ export class DatabaseService {
         return false;
       }
 
-      // Update or create student profile with this batch
-      const { error: profileError } = await supabase
+      // First check if profile already exists
+      const { data: existingProfile } = await supabase
         .from('student_profiles')
-        .upsert({
-          user_id: userId,
-          batch_id: batchId,
-          institute: '10 Minute School',
-          year: new Date().getFullYear().toString(),
-          subject: 'Computer Science',
-          degree: 'Bachelor',
-          completed_weeks: 0,
-          progress_percentage: 0,
-          enrollment_date: new Date().toISOString(),
-        });
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (profileError) {
-        console.error('Error updating student profile:', profileError);
-        return false;
+      if (existingProfile) {
+        // Update existing profile with new batch
+        const { error: profileError } = await supabase
+          .from('student_profiles')
+          .update({
+            batch_id: batchId,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
+        
+        if (profileError) {
+          console.error('Error updating existing student profile:', profileError);
+          return false;
+        }
+      } else {
+        // Create new profile only if none exists
+        const { error: profileError } = await supabase
+          .from('student_profiles')
+          .insert({
+            user_id: userId,
+            batch_id: batchId,
+            institute: '10 Minute School',
+            year: new Date().getFullYear().toString(),
+            subject: 'Computer Science',
+            degree: 'Bachelor',
+            completed_weeks: 0,
+            progress_percentage: 0,
+            enrollment_date: new Date().toISOString(),
+          });
+        
+        if (profileError) {
+          console.error('Error creating new student profile:', profileError);
+          return false;
+        }
       }
+
+      // Profile updated/created successfully
 
       console.log('User successfully assigned to existing batch:', batchId);
       return true;
@@ -836,6 +1328,137 @@ export class DatabaseService {
       return true;
     } catch (error) {
       console.error('Error in updateStudentProfile:', error);
+      return false;
+    }
+  }
+
+  // Update user data
+  static async updateUser(userId: string, updates: Partial<User>): Promise<boolean> {
+    try {
+      console.log('Updating user data for user:', userId, 'Updates:', updates);
+      
+      const { error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error updating user data:', error);
+        return false;
+      }
+
+      console.log('User data updated successfully');
+      return true;
+    } catch (error) {
+      console.error('Error in updateUser:', error);
+      return false;
+    }
+  }
+
+  // Clean up duplicate student profiles for a user
+  static async cleanupDuplicateProfiles(userId: string): Promise<boolean> {
+    try {
+      console.log('🧹 Starting cleanup of duplicate profiles for user:', userId);
+      
+      // Get all profiles for this user
+      const { data: profiles, error: fetchError } = await supabase
+        .from('student_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+
+      if (fetchError) {
+        console.error('❌ Error fetching profiles:', fetchError);
+        return false;
+      }
+
+      if (profiles && profiles.length > 1) {
+        console.log(`🚨 Found ${profiles.length} profiles for user ${userId}! This is a critical issue.`);
+        console.log(`📊 Profile IDs: ${profiles.map(p => p.id).join(', ')}`);
+        
+        // Keep the first profile (oldest), delete the rest
+        const profilesToDelete = profiles.slice(1);
+        console.log(`🗑️  Deleting ${profilesToDelete.length} duplicate profiles...`);
+        
+        let deletedCount = 0;
+        for (const profile of profilesToDelete) {
+          try {
+            const { error: deleteError } = await supabase
+              .from('student_profiles')
+              .delete()
+              .eq('id', profile.id);
+            
+            if (deleteError) {
+              console.error(`❌ Error deleting profile ${profile.id}:`, deleteError);
+            } else {
+              console.log(`✅ Deleted duplicate profile: ${profile.id}`);
+              deletedCount++;
+            }
+          } catch (deleteErr) {
+            console.error(`❌ Exception deleting profile ${profile.id}:`, deleteErr);
+          }
+        }
+        
+        console.log(`🎉 Cleanup completed! Deleted ${deletedCount}/${profilesToDelete.length} duplicate profiles`);
+        console.log(`📈 User ${userId} now has 1 profile instead of ${profiles.length}`);
+        return true;
+      }
+      
+      console.log('✅ No duplicate profiles found for user:', userId);
+      return true;
+    } catch (error) {
+      console.error('❌ Critical error in cleanupDuplicateProfiles:', error);
+      return false;
+    }
+  }
+
+  // Clean up ALL duplicate profiles across the entire system
+  static async cleanupAllDuplicateProfiles(): Promise<boolean> {
+    try {
+      console.log('🧹 Starting system-wide cleanup of duplicate profiles...');
+      
+      // Get all users with duplicate profiles
+      // Note: Supabase doesn't support GROUP BY with HAVING in the same way
+      // We'll fetch all profiles and handle the grouping in JavaScript
+      const { data: allProfiles, error: fetchError } = await supabase
+        .from('student_profiles')
+        .select('user_id');
+
+      if (fetchError) {
+        console.error('❌ Error fetching duplicate users:', fetchError);
+        return false;
+      }
+
+      if (allProfiles && allProfiles.length > 0) {
+        // Group profiles by user_id and find duplicates
+        const userProfileCounts = new Map<string, number>();
+        allProfiles.forEach(profile => {
+          const count = userProfileCounts.get(profile.user_id) || 0;
+          userProfileCounts.set(profile.user_id, count + 1);
+        });
+        
+        const duplicateUserIds = Array.from(userProfileCounts.entries())
+          .filter(([, count]) => count > 1)
+          .map(([userId]) => userId);
+        
+        if (duplicateUserIds.length > 0) {
+          console.log(`🚨 Found ${duplicateUserIds.length} users with duplicate profiles!`);
+          
+          let totalCleaned = 0;
+          for (const userId of duplicateUserIds) {
+            const cleaned = await this.cleanupDuplicateProfiles(userId);
+            if (cleaned) totalCleaned++;
+          }
+          
+          console.log(`🎉 System cleanup completed! Cleaned ${totalCleaned}/${duplicateUserIds.length} users`);
+          return true;
+        }
+      }
+      
+      console.log('✅ No duplicate profiles found in the system');
+      return true;
+    } catch (error) {
+      console.error('❌ Critical error in system-wide cleanup:', error);
       return false;
     }
   }
@@ -904,6 +1527,107 @@ export class DatabaseService {
       return null;
     }
   }
+
+  // Get current week tasks for a student
+  static async getCurrentWeekTasks(userId: string, roadmapId?: string): Promise<RoadmapTask[]> {
+    try {
+      console.log('🔄 Getting current week tasks for user:', userId, 'roadmapId:', roadmapId);
+      
+      let targetRoadmapId = roadmapId;
+      
+      // If no roadmapId provided, get from student's batch
+      if (!targetRoadmapId) {
+        const batch = await this.getStudentBatch(userId);
+        console.log('📊 Batch data:', batch);
+        
+        if (!batch?.roadmap_id) {
+          console.log('❌ No batch or roadmap found for user');
+          return [];
+        }
+        targetRoadmapId = batch.roadmap_id;
+      }
+
+      // Get current week (you might want to calculate this based on enrollment date)
+      const currentWeek = 1; // For now, hardcoded to week 1
+      console.log('📅 Current week:', currentWeek);
+
+      // Get roadmap weeks
+      const weeks = await this.getRoadmapWeeks(targetRoadmapId);
+      console.log('📋 Roadmap weeks:', weeks);
+      
+      const currentWeekData = weeks.find(w => w.week_number === currentWeek);
+      console.log('🎯 Current week data:', currentWeekData);
+      
+      if (!currentWeekData) {
+        console.log('❌ No current week data found');
+        return [];
+      }
+
+      // Get tasks for current week
+      const tasks = await this.getRoadmapTasks(currentWeekData.id);
+      console.log('📝 Tasks for current week:', tasks);
+      
+      // Filter to only required tasks
+      const requiredTasks = tasks.filter(task => task.is_required);
+      console.log('✅ Required tasks:', requiredTasks);
+      
+      return requiredTasks;
+    } catch (error) {
+      console.error('❌ Error in getCurrentWeekTasks:', error);
+      return [];
+    }
+  }
+
+  // Get upcoming tasks for a student
+  static async getUpcomingTasks(userId: string, roadmapId?: string): Promise<RoadmapTask[]> {
+    try {
+      console.log('🔄 Getting upcoming tasks for user:', userId, 'roadmapId:', roadmapId);
+      
+      let targetRoadmapId = roadmapId;
+      
+      // If no roadmapId provided, get from student's batch
+      if (!targetRoadmapId) {
+        const batch = await this.getStudentBatch(userId);
+        console.log('📊 Batch data:', batch);
+        
+        if (!batch?.roadmap_id) {
+          console.log('❌ No batch or roadmap found for user');
+          return [];
+        }
+        targetRoadmapId = batch.roadmap_id;
+      }
+
+      // Get roadmap weeks
+      const weeks = await this.getRoadmapWeeks(targetRoadmapId);
+      console.log('📋 Roadmap weeks:', weeks);
+      
+      // Get tasks for next few weeks (weeks 2-4)
+      const upcomingTasks: RoadmapTask[] = [];
+      
+      for (let weekNum = 2; weekNum <= 4; weekNum++) {
+        const weekData = weeks.find(w => w.week_number === weekNum);
+        if (weekData) {
+          const weekTasks = await this.getRoadmapTasks(weekData.id);
+          console.log(`📝 Tasks for week ${weekNum}:`, weekTasks);
+          
+          // Add week number to each task for display
+          const tasksWithWeek = weekTasks
+            .filter(task => task.is_required)
+            .map(task => ({
+              ...task,
+              week_number: weekNum
+            }));
+          upcomingTasks.push(...tasksWithWeek);
+        }
+      }
+      
+      console.log('✅ Total upcoming tasks:', upcomingTasks);
+      return upcomingTasks;
+    } catch (error) {
+      console.error('❌ Error in getUpcomingTasks:', error);
+      return [];
+    }
+  }
 }
 
 // Generate human-readable slugs
@@ -951,20 +1675,82 @@ export const getBatchBySlug = async (slug: string): Promise<Batch | null> => {
 // Get roadmap by slug
 export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> => {
   try {
-    // First try to find by slug (if we had a slug column)
-    // For now, we'll need to search by title pattern
-    const { data, error } = await supabase
+    console.log('🔍 Searching for roadmap with slug:', slug);
+    
+    // Convert slug back to a more precise search pattern
+    const searchPattern = slug.replace(/_/g, ' ').toLowerCase();
+    console.log('🔍 Search pattern:', searchPattern);
+    
+    // First try exact title match (case insensitive)
+    let { data, error } = await supabase
       .from('roadmaps')
       .select('*')
-      .ilike('title', `%${slug.replace(/_/g, ' ')}%`)
+      .ilike('title', searchPattern)
       .single();
     
-    if (error) {
-      console.error('Error fetching roadmap by slug:', error);
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('Error in exact title match:', error);
+    }
+    
+    if (data) {
+      console.log('✅ Found roadmap with exact title match:', data.title);
+      return data;
+    }
+    
+    // If no exact match, try to find the best match by generating slugs for all roadmaps
+    // and comparing them directly
+    const { data: allRoadmaps, error: allRoadmapsError } = await supabase
+      .from('roadmaps')
+      .select('*')
+      .eq('is_active', true);
+    
+    if (allRoadmapsError) {
+      console.error('Error fetching all roadmaps:', allRoadmapsError);
       return null;
     }
     
-    return data;
+    if (allRoadmaps && allRoadmaps.length > 0) {
+      // Generate slugs for all roadmaps and find the best match
+      let bestMatch: Roadmap | null = null;
+      let bestScore = 0;
+      
+      for (const roadmap of allRoadmaps) {
+        const roadmapSlug = generateRoadmapSlug(roadmap.title);
+        console.log(`🔍 Comparing "${slug}" with "${roadmapSlug}" for roadmap "${roadmap.title}"`);
+        
+        if (roadmapSlug === slug) {
+          console.log('✅ Found exact slug match:', roadmap.title);
+          return roadmap;
+        }
+        
+        // Calculate similarity score for partial matches
+        const slugWords = slug.split('_').filter(word => word.length > 2);
+        const roadmapSlugWords = roadmapSlug.split('_').filter(word => word.length > 2);
+        
+        let score = 0;
+        for (const word of slugWords) {
+          if (roadmapSlugWords.includes(word)) {
+            score += 1;
+          }
+        }
+        
+        // Normalize score by total words
+        const normalizedScore = score / Math.max(slugWords.length, roadmapSlugWords.length);
+        
+        if (normalizedScore > bestScore && normalizedScore > 0.5) { // Require at least 50% match
+          bestScore = normalizedScore;
+          bestMatch = roadmap;
+        }
+      }
+      
+      if (bestMatch) {
+        console.log('✅ Found best partial match:', bestMatch.title, 'Score:', bestScore);
+        return bestMatch;
+      }
+    }
+    
+    console.log('❌ No roadmap found for slug:', slug);
+    return null;
   } catch (err) {
     console.error('Error in getRoadmapBySlug:', err);
     return null;

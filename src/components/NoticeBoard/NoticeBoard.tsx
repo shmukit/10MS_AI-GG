@@ -44,7 +44,7 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({
           hour: 'numeric', 
           minute: '2-digit' 
         }),
-        isRead: false, // You might want to track this separately
+        isRead: false, // Initialize as unread
         tag: notice.tag || 'General'
       }));
       setAnnouncements(convertedAnnouncements);
@@ -56,12 +56,28 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({
   const currentAnnouncement = announcements[currentIndex] || null;
   const unreadCount = announcements.filter(a => !a.isRead).length;
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    // Update local state immediately for better UX
     setAnnouncements(prev => 
       prev.map(announcement => 
         announcement.id === id ? { ...announcement, isRead: true } : announcement
       )
     );
+
+    // Call the parent callback to persist the read status
+    if (onMarkAsRead) {
+      try {
+        await onMarkAsRead(id);
+      } catch (error) {
+        console.error('Error marking notice as read:', error);
+        // Revert local state if the API call fails
+        setAnnouncements(prev => 
+          prev.map(announcement => 
+            announcement.id === id ? { ...announcement, isRead: false } : announcement
+          )
+        );
+      }
+    }
   };
 
   const nextAnnouncement = () => {

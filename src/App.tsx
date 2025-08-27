@@ -32,13 +32,13 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
     return <Navigate to="/login" replace />;
   }
   
-  // Check if user has required role - prioritize form selection over database role
-  const selectedRole = localStorage.getItem('selectedRole');
-  const role = selectedRole || userRole || 'student'; // Form selection > Database role > Default
-  console.log('🔒 User role (form selection):', selectedRole, 'Database role:', userRole, 'Final role:', role, 'Allowed roles:', allowedRoles);
+  // Check if user has required role - use database role, not form selection
+  const role = userRole || 'student'; // Use database role, fallback to student
+  console.log('🔒 User role (database):', userRole, 'Final role:', role, 'Allowed roles:', allowedRoles);
   
   if (!allowedRoles.includes(role)) {
     console.log('🔒 Access denied, redirecting to unauthorized');
+    console.log('🔒 Role check failed: role =', role, 'allowedRoles =', allowedRoles, 'includes =', allowedRoles.includes(role));
     return <Navigate to="/unauthorized" replace />;
   }
   
@@ -78,9 +78,8 @@ const StudentRoutes = () => {
       <Route path="/roadmap" element={<RoadmapInterface onBack={() => window.history.back()} />} />
       <Route path="/roadmap/:roadmapSlug" element={<RoadmapInterface onBack={() => window.history.back()} />} />
       <Route path="/profile" element={<StudentProfile />} />
-      <Route path="/profile/:profileSlug" element={<StudentProfile />} />
       <Route path="/community" element={<StudentCommunity />} />
-      <Route path="/community/:batchSlug" element={<StudentCommunity />} />
+      <Route path="/community/:roadmapSlug" element={<StudentCommunity />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
@@ -102,26 +101,40 @@ const MentorRoutes = () => {
 
 // Main App Routes
 const AppRoutes = () => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, userRole } = useAuthContext();
   
-  // Test database connection
+  // Test database connection and cleanup duplicate profiles
   useEffect(() => {
-    const testConnection = async () => {
+    const initializeApp = async () => {
       try {
+        console.log('🔧 Initializing app...');
+        
+        // Test database connection
         console.log('Testing Supabase connection...');
         const { data, error } = await supabase.from('users').select('count').limit(1);
         if (error) {
           console.error('Database connection failed:', error);
         } else {
           console.log('✅ Database connection successful!');
+          
+          // If user is logged in, run system-wide cleanup
+          if (user?.id) {
+            console.log('🧹 Running system-wide cleanup of duplicate profiles...');
+            try {
+              const { DatabaseService } = await import('./services/database');
+              await DatabaseService.cleanupAllDuplicateProfiles();
+            } catch (cleanupErr) {
+              console.error('Cleanup error:', cleanupErr);
+            }
+          }
         }
       } catch (err) {
-        console.error('Connection test error:', err);
+        console.error('App initialization error:', err);
       }
     };
     
-    testConnection();
-  }, []);
+    initializeApp();
+  }, [user?.id]);
 
   console.log('🔍 AppRoutes - User:', user, 'Loading:', loading);
 
@@ -134,10 +147,16 @@ const AppRoutes = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Don't redirect automatically - let the login page handle navigation
-  // Just show a welcome message or redirect to a default page
-  console.log('🔍 User logged in, showing welcome or default page');
-  return <Navigate to="/student/dashboard" replace />;
+  // Check user role and redirect accordingly
+  const role = userRole || 'student'; // Use database role, fallback to student
+  
+  console.log('🔍 User logged in with database role:', role);
+  
+  if (role === 'mentor' || role === 'admin') {
+    return <Navigate to="/mentor/dashboard" replace />;
+  } else {
+    return <Navigate to="/student/dashboard" replace />;
+  }
 };
 
 function App() {

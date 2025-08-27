@@ -50,12 +50,20 @@ export function useAuth() {
       })
       if (error) {
         setError(error)
-        return { error }
+        return { success: false, error }
       }
-      return { data }
+      
+      // Fetch user role immediately after successful sign in
+      if (data.user?.email) {
+        const role = await fetchUserRole(data.user.email)
+        setUserRole(role)
+        console.log('✅ Sign in successful, user role set to:', role)
+      }
+      
+      return { success: true, data }
     } catch (err) {
       console.error('Sign in error:', err)
-      return { error: err as AuthError }
+      return { success: false, error: err as AuthError }
     }
   }
 
@@ -71,12 +79,12 @@ export function useAuth() {
       })
       if (error) {
         setError(error)
-        return { error }
+        return { success: false, error }
       }
-      return { data }
+      return { success: true, data }
     } catch (err) {
       console.error('Sign up error:', err)
-      return { error: err as AuthError }
+      return { success: false, error: err as AuthError }
     }
   }
 

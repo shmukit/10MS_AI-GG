@@ -13,6 +13,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   userName = 'User', 
   userRole = 'student' 
 }) => {
+  console.log('ProfileDropdown rendered with:', { userName, userRole });
   const { isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     }
   };
 
-  const handleProfileClick = () => {
+    const handleProfileClick = () => {
     if (userRole === 'mentor') {
       navigate('/mentor/profile');
     } else {
@@ -70,7 +71,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
           <User className="w-4 h-4" />
         </div>
-        <span className="text-sm font-medium">{userName}</span>
+        <span className="text-sm font-medium">{userName?.charAt(0).toUpperCase() + userName?.slice(1) || 'User'}</span>
         <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

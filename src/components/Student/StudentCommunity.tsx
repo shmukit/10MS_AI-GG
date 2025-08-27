@@ -1,23 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Users, MessageCircle, ExternalLink, AlertCircle, Calendar, MapPin, Mail } from 'lucide-react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Users, MessageCircle, ExternalLink, AlertCircle, Calendar, MapPin, Mail, Check } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Batch, User } from '../../services/database';
 import { StudentHeader } from './StudentHeader';
 import { useTheme } from '../../lib/ThemeContext';
+import { supabase } from '../../lib/supabase';
 
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
-  const { batchSlug } = useParams();
+  const { roadmapSlug } = useParams();
   const { user } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [batch, setBatch] = useState<Batch | null>(null);
   const [mentors, setMentors] = useState<User[]>([]);
-  const [students, setStudents] = useState<User[]>([]);
+  const [students, setStudents] = useState<(User & { profile?: any; progress?: any })[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [sortBy, setSortBy] = useState<'name' | 'progress'>('name');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Log the roadmap slug for debugging
+  console.log('🔍 Community page - Roadmap slug from URL:', roadmapSlug);
+
+
+
+  // Email copy functionality
+  const copyEmailToClipboard = async (email: string) => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setToast({ message: 'Email copied to clipboard!', type: 'success' });
+      setTimeout(() => setToast(null), 3000);
+    } catch (err) {
+      console.error('Failed to copy email:', err);
+      setToast({ message: 'Failed to copy email', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
 
   useEffect(() => {
     const fetchCommunityData = async () => {
@@ -29,13 +49,45 @@ export const StudentCommunity: React.FC = () => {
         
         console.log('Fetching community data for user:', user.id);
         
-        // Fetch user data first
-        const dashboardData = await DatabaseService.getDashboardData(user.id);
-        setUserData(dashboardData);
+        // First, get the roadmap by slug if provided
+        let roadmapData = null;
+        if (roadmapSlug) {
+          console.log('🔍 Looking for roadmap with slug:', roadmapSlug);
+          const { getRoadmapBySlug } = await import('../../services/database');
+          roadmapData = await getRoadmapBySlug(roadmapSlug);
+          console.log('📊 Roadmap data from slug:', roadmapData);
+          
+          if (!roadmapData) {
+            setError(`Roadmap "${roadmapSlug}" not found. Please check the URL or contact support.`);
+            setLoading(false);
+            return;
+          }
+        }
         
-        const batchData = await DatabaseService.getStudentBatch(user.id);
+        // Get the batch associated with this roadmap
+        let batchData = null;
+        if (roadmapData) {
+          console.log('🔍 Looking for batch associated with roadmap:', roadmapData.id);
+          const { data: roadmapBatch, error: batchError } = await supabase
+            .from('batches')
+            .select('*')
+            .eq('roadmap_id', roadmapData.id)
+            .eq('status', 'active')
+            .single();
+            
+          if (roadmapBatch) {
+            console.log('✅ Found roadmap-specific batch:', roadmapBatch.name);
+            batchData = roadmapBatch;
+          } else {
+            console.log('❌ No batch found for roadmap:', roadmapData.title);
+            setError(`No active batch found for the "${roadmapData.title}" roadmap. Please contact your administrator.`);
+            setLoading(false);
+            return;
+          }
+        }
+        
         if (!batchData) {
-          setError('You are not assigned to any batch yet. Please contact your administrator.');
+          setError(`No batch found for the "${roadmapSlug}" roadmap. Please contact your administrator.`);
           setLoading(false);
           return;
         }
@@ -43,12 +95,37 @@ export const StudentCommunity: React.FC = () => {
         console.log('Batch data found:', batchData);
         setBatch(batchData);
         
+        // Get students in this batch
+        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id, user.id);
+        console.log('📊 Students data fetched:', studentsData);
+        console.log('🔍 Batch ID used for student fetch:', batchData.id);
+        console.log('🔍 Roadmap ID from batch:', batchData.roadmap_id);
+        console.log('🔍 Roadmap title:', roadmapData?.title);
+        
+        // Debug: Check what's in the students data
+        if (studentsData && studentsData.length > 0) {
+          console.log('🔍 First student details:', {
+            id: studentsData[0].id,
+            name: `${studentsData[0].first_name} ${studentsData[0].last_name}`,
+            email: studentsData[0].email,
+            role: studentsData[0].role
+          });
+        }
+        
+        setStudents(studentsData);
+        
+        // Get mentors for this batch
         const mentorsData = await DatabaseService.getMentors(batchData.id);
+        console.log('👥 Mentors data fetched:', mentorsData);
+        console.log('🔍 Batch ID used for mentor fetch:', batchData.id);
+        
         setMentors(mentorsData);
         
-        // Get students in the same batch
-        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id);
-        setStudents(studentsData);
+        // Set user data (just basic info, no dashboard fallbacks)
+        setUserData({
+          userData: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' },
+          profile: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' }
+        });
         
       } catch (err) {
         console.error('Error fetching community data:', err);
@@ -59,14 +136,12 @@ export const StudentCommunity: React.FC = () => {
     };
 
     fetchCommunityData();
-  }, [user?.id]);
+  }, [user?.id, roadmapSlug]);
 
   if (loading) {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
         <StudentHeader 
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
           userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
           userRole="student"
           pageTitle="Community"
@@ -87,8 +162,6 @@ export const StudentCommunity: React.FC = () => {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
         <StudentHeader 
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
           userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
           userRole="student"
           pageTitle="Community"
@@ -134,13 +207,11 @@ export const StudentCommunity: React.FC = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      <StudentHeader 
-        isDarkMode={isDarkMode}
-        toggleDarkMode={toggleDarkMode}
-        userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
-        userRole="student"
-        pageTitle="Community"
-      />
+              <StudentHeader 
+          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+          userRole="student"
+          pageTitle="Community"
+        />
       
       <div className="max-w-6xl mx-auto px-6 py-8">
         <button
@@ -158,7 +229,7 @@ export const StudentCommunity: React.FC = () => {
           <div className="flex items-center gap-3 mb-4">
             <Users className="w-8 h-8 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">
-              {batch.name || 'Python Learning Cohort - Demo Batch'}
+              {batch?.name || 'Loading...'}
             </h2>
           </div>
           
@@ -231,26 +302,45 @@ export const StudentCommunity: React.FC = () => {
                           <h4 className="font-semibold text-gray-900">
                             {member.first_name} {member.last_name}
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            {member.role === 'mentor' ? 'Mentor' : 'Student'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {member.email}
-                          </p>
+                          {/* Display profile information if available */}
+                          {member.profile && (
+                            <div className="text-xs text-gray-500 space-y-1">
+                              <p>{member.profile.degree} {member.profile.subject} • {member.profile.year} Year</p>
+                              <p>{member.profile.institute}</p>
+                            </div>
+                          )}
                         </div>
-                        {/* Email icon beside the name */}
-                        <button className="p-2 text-gray-600 hover:text-gray-800">
+                        {/* Email copy button */}
+                        <button 
+                          onClick={() => copyEmailToClipboard(member.email)}
+                          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Copy email to clipboard"
+                        >
                           <Mail className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
-                        {member.role === 'mentor' ? 'Mentor' : 'Student'}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        {member.role === 'mentor' ? 'Active' : 'Enrolled'}
-                      </p>
+                      {member.progress ? (
+                        <>
+                          <p className="text-xs text-gray-600">
+                            Week {member.progress.current_week}/6
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {Math.round(member.progress.progress_percentage || 0)}% Complete
+                          </p>
+                          <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${Math.round(member.progress.progress_percentage || 0)}%` }}
+                            ></div>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-xs text-gray-600">
+                          Enrolled
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -334,6 +424,24 @@ export const StudentCommunity: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          toast.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center gap-2">
+            {toast.type === 'success' ? (
+              <Check className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

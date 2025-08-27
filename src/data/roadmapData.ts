@@ -7,7 +7,13 @@ export interface RoadmapConnection {
 }
 
 // Function to generate roadmap data from real database data
-export const generateRoadmapData = (roadmap: Roadmap, weeks: RoadmapWeek[], tasks: RoadmapTask[], studentProgress?: any[]): { nodes: RoadmapNodeData[] } => {
+export const generateRoadmapData = (
+  roadmap: Roadmap, 
+  weeks: RoadmapWeek[], 
+  tasks: RoadmapTask[], 
+  studentProgress?: any[],
+  batchId?: string
+): { nodes: RoadmapNodeData[] } => {
   const nodes = weeks.map((week, index) => {
     // Determine status based on actual student progress, not hardcoded
     let status: 'completed' | 'active' | 'locked' = 'locked';
@@ -16,16 +22,30 @@ export const generateRoadmapData = (roadmap: Roadmap, weeks: RoadmapWeek[], task
       // Check if this week has any completed tasks
       const weekTasks = tasks.filter(task => task.week_id === week.id);
       const completedTasks = weekTasks.filter(task => 
-        studentProgress.some(progress => progress.task_id === task.id && progress.is_completed)
+        studentProgress.some(progress => progress.task_id === task.id && progress.status === 'completed')
       );
       
-      if (completedTasks.length === weekTasks.length) {
+      if (completedTasks.length === weekTasks.length && weekTasks.length > 0) {
         status = 'completed';
       } else if (completedTasks.length > 0) {
         status = 'active';
       } else if (index === 0) {
         // First week is active if no progress yet
         status = 'active';
+      } else {
+        // Check if previous week is completed to unlock this week
+        const previousWeek = weeks[index - 1];
+        if (previousWeek) {
+          const previousWeekTasks = tasks.filter(task => task.week_id === previousWeek.id);
+          const previousWeekCompletedTasks = previousWeekTasks.filter(task => 
+            studentProgress.some(progress => progress.task_id === task.id && progress.status === 'completed')
+          );
+          
+          // Unlock if previous week is 100% completed
+          if (previousWeekCompletedTasks.length === previousWeekTasks.length && previousWeekTasks.length > 0) {
+            status = 'active';
+          }
+        }
       }
     } else {
       // No progress data, only first week is active
@@ -42,7 +62,7 @@ export const generateRoadmapData = (roadmap: Roadmap, weeks: RoadmapWeek[], task
       status,
       tasks: weekTasks.map(task => {
         const isCompleted = studentProgress ? 
-          studentProgress.some(progress => progress.task_id === task.id && progress.is_completed) : 
+          studentProgress.some(progress => progress.task_id === task.id && progress.status === 'completed') : 
           false;
         
         return {
@@ -54,14 +74,21 @@ export const generateRoadmapData = (roadmap: Roadmap, weeks: RoadmapWeek[], task
         };
       }),
       relatedSkills: [week.domain],
-      estimatedTime: '1 week'
+      estimatedTime: '1 week',
+      // Add completion statistics placeholder - will be populated by the component
+      completionStats: batchId ? {
+        totalStudents: 0, // Will be fetched dynamically
+        completedStudents: 0,
+        completionPercentage: 0
+      } : undefined
     };
   });
 
   return { nodes };
 };
 
-// Keep the original hardcoded data as fallback
+// Keep the original hardcoded data as fallback (commented out since we're using database)
+/*
 export const roadmapData = {
   nodes: [
     {
@@ -380,3 +407,4 @@ export const roadmapData = {
     { from: 'libraries', to: 'web-development' }
   ] as RoadmapConnection[]
 };
+*/

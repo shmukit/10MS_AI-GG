@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Roadmap, RoadmapWeek, RoadmapTask, getRoadmapBySlug } from '../../services/database';
 import { supabase } from '../../lib/supabase';
-import { NodeStatus } from './RoadmapNode';
 import { RoadmapCanvas } from './RoadmapCanvas';
 import { ProgressBar } from './ProgressBar';
 import { useTheme } from '../../lib/ThemeContext';
 import { generateRoadmapData } from '../../data/roadmapData';
+import { StudentHeader } from '../Student/StudentHeader';
 
 interface RoadmapInterfaceProps {
   onBack: () => void;
@@ -31,6 +31,47 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [studentProgress, setStudentProgress] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Student');
+  const [batchId, setBatchId] = useState<string | null>(null);
+  const [completionStats, setCompletionStats] = useState<{[weekId: string]: any}>({});
+
+  const refreshRoadmapData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Refresh student progress
+      const { data: progressData } = await supabase
+        .from('student_progress')
+        .select('*')
+        .eq('student_id', user.id);
+      
+      setStudentProgress(progressData || []);
+      
+      // Refresh completion statistics if we have weeks and batchId
+      if (weeks.length > 0 && batchId) {
+        await fetchCompletionStats();
+      }
+    } catch (err) {
+      console.error('Error refreshing roadmap data:', err);
+    }
+  };
+
+  const fetchCompletionStats = async () => {
+    if (!batchId || weeks.length === 0) return;
+    
+    try {
+      const stats: {[weekId: string]: any} = {};
+      
+      for (const week of weeks) {
+        const weekStats = await DatabaseService.getWeekCompletionStats(week.id, batchId);
+        stats[week.id] = weekStats;
+      }
+      
+      setCompletionStats(stats);
+    } catch (error) {
+      console.error('Error fetching completion stats:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -43,6 +84,20 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         // Fetch user data first
         const dashboardData = await DatabaseService.getDashboardData(user.id);
         
+        // Set user name from dashboard data
+        if (dashboardData?.userData?.first_name) {
+          setUserName(dashboardData.userData.first_name);
+        } else if (user?.user_metadata?.full_name) {
+          setUserName(user.user_metadata.full_name);
+        } else if (user?.email) {
+          setUserName(user.email.split('@')[0]);
+        }
+        
+        // Get student's batch information
+        if (dashboardData?.batch?.id) {
+          setBatchId(dashboardData.batch.id);
+        }
+        
         // Get student progress
         const { data: progressData } = await supabase
           .from('student_progress')
@@ -53,18 +108,31 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         let roadmapData: Roadmap | null = null;
         
-        // If we have a slug, try to fetch by slug, otherwise get from user's batch
+        // Use roadmap slug to fetch roadmap data
         if (roadmapSlug) {
+          console.log('🔍 Fetching roadmap by slug:', roadmapSlug);
           roadmapData = await getRoadmapBySlug(roadmapSlug);
+          console.log('📊 Roadmap data from slug:', roadmapData);
+          
+          // Debug: Check what roadmaps exist in the database
+          if (!roadmapData) {
+            console.log('🔍 Debug: Checking all available roadmaps...');
+            const { data: allRoadmaps, error: roadmapsError } = await supabase
+              .from('roadmaps')
+              .select('id, title, category')
+              .order('title');
+            
+            if (!roadmapsError && allRoadmaps) {
+              console.log('📋 Available roadmaps:', allRoadmaps);
+            }
+          }
         }
         
-        // Fallback to user's assigned roadmap
+        // Don't fallback to user's assigned roadmap - only use the slug
         if (!roadmapData) {
-          roadmapData = await DatabaseService.getStudentRoadmap(user.id);
-        }
-        
-        if (!roadmapData) {
-          setError('No roadmap found for your batch');
+          console.error('❌ No roadmap found for slug:', roadmapSlug);
+          setError(`No roadmap found for "${roadmapSlug}". Please check the URL or contact support.`);
+          setLoading(false);
           return;
         }
         
@@ -91,6 +159,13 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
 
     fetchRoadmapData();
   }, [user?.id, roadmapSlug]);
+
+  // Fetch completion statistics after weeks and batchId are loaded
+  useEffect(() => {
+    if (weeks.length > 0 && batchId) {
+      fetchCompletionStats();
+    }
+  }, [weeks, batchId]);
 
   if (loading) {
     return (
@@ -120,51 +195,26 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     );
   }
 
-  // Generate roadmap data from real database data
-  const roadmapData = generateRoadmapData(roadmap, weeks, tasks, studentProgress);
-  const completedNodes = roadmapData.nodes.filter(node => node.status === 'completed').length;
-  const totalNodes = roadmapData.nodes.length;
+  // Generate roadmap data from real database data with completion stats
+  const roadmapData = generateRoadmapData(roadmap, weeks, tasks, studentProgress, batchId || undefined);
+  
+  // Update nodes with completion statistics
+  const nodesWithStats = roadmapData.nodes.map(node => ({
+    ...node,
+    completionStats: completionStats[node.id] || undefined
+  }));
+  
+  const completedNodes = nodesWithStats.filter(node => node.status === 'completed').length;
+  const totalNodes = nodesWithStats.length;
 
   return (
     <div className={`h-screen flex flex-col transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <div className={`border-b h-16 transition-colors duration-200 ${
-        effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xs">10MS</span>
-              </div>
-              <h1 className={`text-xl font-bold transition-colors duration-200 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>10MS SheSTEM</h1>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {effectiveToggleDarkMode && (
-                <button
-                  onClick={effectiveToggleDarkMode}
-                  className={`p-2 rounded-lg transition-colors duration-200 ${
-                    effectiveDarkMode 
-                      ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {effectiveDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
-              )}
-              <div className="flex items-center gap-2">
-                <span className={`text-sm transition-colors duration-200 ${effectiveDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
-                </span>
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                  {(user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'U')[0].toUpperCase()}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudentHeader 
+        userName={userName}
+        userRole="student"
+        pageTitle={roadmap.title}
+      />
 
       {/* Breadcrumb */}
       <div className={`border-b h-16 transition-colors duration-200 ${
@@ -194,10 +244,15 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       {/* Progress Bar */}
       <ProgressBar completed={completedNodes} total={totalNodes} isDarkMode={effectiveDarkMode} />
 
-              {/* Canvas */}
-        <div className="flex-1 relative">
-          <RoadmapCanvas isDarkMode={effectiveDarkMode} roadmapNodes={roadmapData.nodes} />
-        </div>
+      {/* Canvas */}
+      <div className="flex-1 relative">
+        <RoadmapCanvas 
+          isDarkMode={effectiveDarkMode} 
+          roadmapNodes={nodesWithStats} 
+          onRefresh={refreshRoadmapData}
+          batchId={batchId}
+        />
+      </div>
     </div>
   );
 };
