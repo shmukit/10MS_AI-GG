@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { RoadmapNode } from './RoadmapNode';
 import { ConnectionLine } from './ConnectionLine';
 import { NodeContentPanel } from './NodeContentPanel';
-import { roadmapData } from '../../data/roadmapData';
 import { RoadmapNodeData } from './RoadmapNode';
 
 interface RoadmapCanvasProps {
   isDarkMode?: boolean;
+  roadmapNodes: RoadmapNodeData[];
+  onRefresh?: () => void; // Add refresh callback
+  batchId?: string | null; // Add batchId prop for completion data
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false, roadmapNodes, onRefresh, batchId }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -28,14 +30,6 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
       <div className={`transition-all duration-300 ${selectedNode ? 'w-2/3' : 'w-full'}`}>
         <div className="h-full overflow-y-auto">
           <div className="max-w-4xl mx-auto px-8 py-12">
-            {/* Roadmap Title */}
-            <div className="text-center mb-12">
-              <h1 className={`text-3xl font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Python Learning Path</h1>
-              <p className={`max-w-2xl mx-auto transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Master Python programming through this structured learning path. Complete each milestone to unlock the next level.
-              </p>
-            </div>
-
             {/* Roadmap Path */}
             <div className="relative">
               {/* Main Path Line */}
@@ -45,7 +39,7 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
               
               {/* Nodes */}
               <div className="space-y-16">
-                {roadmapData.nodes.map((node, index) => (
+                {roadmapNodes.map((node, index) => (
                   <div key={node.id} className="relative">
                     {/* Connection Point */}
                     <div className={`absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-4 z-10 transition-colors duration-200 ${
@@ -79,6 +73,8 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
           node={selectedNode}
           onClose={handleClosePanel}
           isDarkMode={isDarkMode}
+          onRefresh={onRefresh}
+          batchId={batchId}
         />
       )}
     </div>

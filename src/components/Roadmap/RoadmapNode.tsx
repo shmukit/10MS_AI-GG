@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, CheckCircle, Zap, Clock } from 'lucide-react';
+import { Lock, CheckCircle, Zap, Clock, Users } from 'lucide-react';
 
 export type NodeStatus = 'locked' | 'active' | 'completed';
 
@@ -17,6 +17,12 @@ export interface RoadmapNodeData {
   }>;
   relatedSkills: string[];
   estimatedTime: string;
+  // New fields for completion statistics
+  completionStats?: {
+    totalStudents: number;
+    completedStudents: number;
+    completionPercentage: number;
+  };
 }
 
 interface RoadmapNodeProps {
@@ -83,7 +89,11 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           <h3 className="text-lg font-bold leading-tight">{node.title}</h3>
         </div>
         {node.status === 'active' && (
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+          <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
+            isDarkMode 
+              ? 'bg-blue-900/30 text-blue-300 border border-blue-700' 
+              : 'bg-blue-100 text-blue-700 border border-blue-200'
+          }`}>
             In Progress
           </span>
         )}
@@ -99,11 +109,35 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
         {node.description}
       </p>
 
+      {/* Completion Statistics */}
+      {node.completionStats && (
+        <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Class Progress</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">
+              {node.completionStats.completedStudents}/{node.completionStats.totalStudents} completed
+            </span>
+            <span className="text-sm font-medium text-blue-600">
+              {Math.round(node.completionStats.completionPercentage)}%
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div 
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${node.completionStats.completionPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Progress Bar for Active Nodes */}
       {node.status === 'active' && (
         <div className="mb-4">
           <div className={`flex justify-between items-center text-xs mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            <span>Progress</span>
+            <span>Your Progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
           <div className={`w-full rounded-full h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
@@ -136,7 +170,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
         }`}>
           <div className="text-center">
             <Lock className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
-            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Complete previous milestone</p>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Complete previous week to unlock</p>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Notice } from '../../services/database';
 
 interface Announcement {
   id: string;
@@ -9,59 +10,74 @@ interface Announcement {
   date: string;
   time: string;
   isRead: boolean;
-  tag: 'Reminder' | 'Homework' | 'Assignment' | 'Exam' | 'Cancellation' | 'Resources';
+  tag: string;
 }
 
 interface NoticeBoardProps {
   isDarkMode?: boolean;
+  notices?: Notice[];
+  onMarkAsRead?: (noticeId: string) => void;
 }
 
-const mockAnnouncements: Announcement[] = [
-  {
-    id: '1',
-    title: 'Python Assignment Due Tomorrow',
-    content: 'Please submit your Python loops assignment by 11:59 PM tomorrow. Make sure to include both examples as discussed in class.',
-    sender: 'Uttam Deb',
-    date: 'Sep 11, 2025',
-    time: '2:30 PM',
-    isRead: false,
-    tag: 'Assignment'
-  },
-  {
-    id: '2',
-    title: 'Weekly Quiz Reminder',
-    content: 'Don\'t forget about the weekly quiz on Python fundamentals scheduled for Friday.',
-    sender: 'Uttam Deb',
-    date: 'Sep 10, 2025',
-    time: '10:15 AM',
-    isRead: true,
-    tag: 'Reminder'
-  },
-  {
-    id: '3',
-    title: 'New Learning Resources Available',
-    content: 'I\'ve uploaded additional Python practice exercises and video tutorials to help with your learning.',
-    sender: 'Uttam Deb',
-    date: 'Sep 9, 2025',
-    time: '4:45 PM',
-    isRead: true,
-    tag: 'Resources'
-  }
-];
-
-export const NoticeBoard: React.FC<NoticeBoardProps> = ({ isDarkMode = false }) => {
-  const [announcements, setAnnouncements] = useState(mockAnnouncements);
+export const NoticeBoard: React.FC<NoticeBoardProps> = ({ 
+  isDarkMode = false, 
+  notices = [], 
+  onMarkAsRead 
+}) => {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const currentAnnouncement = announcements[currentIndex];
+  // Convert notices to announcements format
+  useEffect(() => {
+    if (notices && notices.length > 0) {
+      const convertedAnnouncements: Announcement[] = notices.map(notice => ({
+        id: notice.id,
+        title: notice.title,
+        content: notice.content,
+        sender: 'Mentor', // You might want to fetch the actual sender name
+        date: new Date(notice.created_at).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        }),
+        time: new Date(notice.created_at).toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit' 
+        }),
+        isRead: false, // Initialize as unread
+        tag: notice.tag || 'General'
+      }));
+      setAnnouncements(convertedAnnouncements);
+    } else {
+      setAnnouncements([]);
+    }
+  }, [notices]);
+
+  const currentAnnouncement = announcements[currentIndex] || null;
   const unreadCount = announcements.filter(a => !a.isRead).length;
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    // Update local state immediately for better UX
     setAnnouncements(prev => 
       prev.map(announcement => 
         announcement.id === id ? { ...announcement, isRead: true } : announcement
       )
     );
+
+    // Call the parent callback to persist the read status
+    if (onMarkAsRead) {
+      try {
+        await onMarkAsRead(id);
+      } catch (error) {
+        console.error('Error marking notice as read:', error);
+        // Revert local state if the API call fails
+        setAnnouncements(prev => 
+          prev.map(announcement => 
+            announcement.id === id ? { ...announcement, isRead: false } : announcement
+          )
+        );
+      }
+    }
   };
 
   const nextAnnouncement = () => {
@@ -111,22 +127,32 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({ isDarkMode = false }) 
       </div>
 
       {/* Current Announcement */}
-      <div className="mb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {currentAnnouncement.title}
-              </h4>
-              {!currentAnnouncement.isRead && (
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-            </div>
-            <p className={`text-sm mb-3 leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              {currentAnnouncement.content}
-            </p>
+      {announcements.length === 0 ? (
+        <div className="text-center py-8">
+          <div className={`text-gray-400 mb-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+            <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
           </div>
+          <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            No notices available at the moment
+          </p>
         </div>
+      ) : currentAnnouncement ? (
+        <div className="mb-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {currentAnnouncement.title}
+                </h4>
+                {!currentAnnouncement.isRead && (
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                )}
+              </div>
+              <p className={`text-sm mb-3 leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                {currentAnnouncement.content}
+              </p>
+            </div>
+          </div>
 
         {/* Tag */}
         <div className="mb-3">
@@ -141,46 +167,49 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({ isDarkMode = false }) 
           <span>{currentAnnouncement.date} • {currentAnnouncement.time}</span>
         </div>
       </div>
+      ) : null}
 
       {/* Navigation Controls */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={prevAnnouncement}
-          disabled={currentIndex === 0}
-          className={`p-2 rounded-lg transition-colors ${
-            currentIndex === 0
-              ? `cursor-not-allowed ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`
-              : `${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
-          }`}
-        >
-          <span className="text-lg font-bold">‹</span>
-        </button>
-
-        {!currentAnnouncement.isRead && (
+      {announcements.length > 0 && (
+        <div className="flex items-center justify-between">
           <button
-            onClick={() => markAsRead(currentAnnouncement.id)}
-            className={`text-xs px-3 py-1 rounded-full transition-colors ${
-              isDarkMode 
-                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            onClick={prevAnnouncement}
+            disabled={currentIndex === 0}
+            className={`p-2 rounded-lg transition-colors ${
+              currentIndex === 0
+                ? `cursor-not-allowed ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`
+                : `${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
             }`}
           >
-            Mark as Read
+            <span className="text-lg font-bold">‹</span>
           </button>
-        )}
 
-        <button
-          onClick={nextAnnouncement}
-          disabled={currentIndex === announcements.length - 1}
-          className={`p-2 rounded-lg transition-colors ${
-            currentIndex === announcements.length - 1
-              ? `cursor-not-allowed ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`
-              : `${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
-          }`}
-        >
-          <span className="text-lg font-bold">›</span>
-        </button>
-      </div>
+          {currentAnnouncement && !currentAnnouncement.isRead && (
+            <button
+              onClick={() => markAsRead(currentAnnouncement.id)}
+              className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                isDarkMode 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              Mark as Read
+            </button>
+          )}
+
+          <button
+            onClick={nextAnnouncement}
+            disabled={currentIndex === announcements.length - 1}
+            className={`p-2 rounded-lg transition-colors ${
+              currentIndex === announcements.length - 1
+                ? `cursor-not-allowed ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`
+                : `${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+            }`}
+          >
+            <span className="text-lg font-bold">›</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../lib';
 
-interface LoginPageProps {
-  onLogin: (role: 'student' | 'mentor') => void;
-  isDarkMode?: boolean;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = false }) => {
-  const { signIn, signUp, loading, error } = useAuthContext();
+export const LoginPage: React.FC = () => {
+  const { signIn, signUp, loading, error, user } = useAuthContext();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState<'student' | 'mentor'>('student');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,32 +16,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
     confirmPassword: ''
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      // Role-based navigation will be handled by App.tsx after role is fetched
+      // This prevents premature navigation before the role is available
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
+    console.log('Form submitted with:', { email: formData.email, isLogin, role });
+    
     try {
       if (isLogin) {
+        console.log('Attempting sign in...');
         const result = await signIn(formData.email, formData.password);
-        if (result.error) {
-          console.error('Sign in error:', result.error);
-        } else {
-          onLogin(role);
+        console.log('Sign in result:', result);
+        
+        if (result.success) {
+          console.log('✔ Sign in successful, role will be fetched from database');
         }
       } else {
+        console.log('Attempting sign up...');
         const result = await signUp(formData.email, formData.password);
-        if (result.error) {
-          console.error('Sign up error:', result.error);
-        } else {
-          alert('Please check your email for verification link');
+        console.log('Sign up result:', result);
+        
+        if (result.success) {
+          console.log('✔ Sign up successful, navigation will be handled by useEffect');
         }
       }
-    } catch (err) {
-      console.error('Authentication error:', err);
+    } catch (error) {
+      console.error('Auth error:', error);
     }
   };
 
@@ -56,39 +60,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-100'
-    }`}>
-      <div className={`max-w-md w-full mx-4 p-8 rounded-xl shadow-lg border transition-colors duration-200 ${
-        isDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
-          : 'bg-white border-gray-200'
-      }`}>
+    <div className="min-h-screen flex items-center justify-center transition-colors duration-200 bg-gray-100">
+      <div className="max-w-md w-full mx-4 p-8 rounded-xl shadow-lg border transition-colors duration-200 bg-white border-gray-200">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-lg">10MS</span>
           </div>
-          <h1 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h1 className="text-2xl font-bold transition-colors duration-200 text-gray-900">
             10MS SheSTEM
           </h1>
-          <p className={`text-sm mt-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className="text-sm mt-2 transition-colors duration-200 text-gray-600">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
           </p>
         </div>
 
         {/* Role Toggle */}
         <div className="mb-6">
-          <div className={`flex rounded-lg p-1 transition-colors duration-200 ${
-            isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-          }`}>
+          <div className="flex rounded-lg p-1 transition-colors duration-200 bg-gray-100">
             <button
               type="button"
               onClick={() => setRole('student')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 role === 'student'
                   ? 'bg-blue-600 text-white'
-                  : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Student
@@ -99,15 +95,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 role === 'mentor'
                   ? 'bg-blue-600 text-white'
-                  : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Mentor
             </button>
           </div>
         </div>
-
-
 
         {/* Error Display */}
         {error && (
@@ -120,9 +114,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
+              <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700">
                 Full Name
               </label>
               <input
@@ -130,11 +122,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                }`}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 placeholder="Enter your full name"
                 required
               />
@@ -142,30 +130,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
           )}
 
           <div>
-            <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
+            <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700">
               Email Address
             </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-              }`}
+                          <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               placeholder="Enter your email"
               required
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
+            <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700">
               Password
             </label>
             <div className="relative">
@@ -174,20 +154,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                }`}
+                className="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 placeholder="Enter your password"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${
-                  isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors text-gray-500 hover:text-gray-700"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -196,9 +170,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
 
           {!isLogin && (
             <div>
-              <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
+              <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700">
                 Confirm Password
               </label>
               <input
@@ -206,11 +178,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                }`}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 placeholder="Confirm your password"
                 required
               />
@@ -228,7 +196,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isDarkMode = fals
 
         {/* Toggle Login/Signup */}
         <div className="mt-6 text-center">
-          <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className="text-sm transition-colors duration-200 text-gray-600">
             {isLogin ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => setIsLogin(!isLogin)}

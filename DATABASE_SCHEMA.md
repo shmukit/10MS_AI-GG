@@ -18,6 +18,7 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+```
 
 ### 2. student_profiles
 ```sql
@@ -28,20 +29,33 @@ CREATE TABLE student_profiles (
   year VARCHAR(50) NOT NULL,
   subject VARCHAR(255) NOT NULL,
   degree VARCHAR(100) NOT NULL,
-  batch_id UUID REFERENCES batches(id),
-  completed_weeks INTEGER DEFAULT 0,
-  progress_percentage DECIMAL(5,2) DEFAULT 0.00,
-  enrollment_date DATE DEFAULT CURRENT_DATE,
+  -- Note: batch_id has been removed to support multiple batch enrollments
+  -- Students are now linked to batches through student_batch_assignments table
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
-### 3. mentor_profiles
+### 3. student_batch_assignments (NEW TABLE)
+```sql
+CREATE TABLE student_batch_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  batch_id UUID REFERENCES batches(id) ON DELETE CASCADE,
+  enrollment_date DATE DEFAULT CURRENT_DATE,
+  status VARCHAR(20) CHECK (status IN ('active', 'completed', 'dropped', 'suspended')) DEFAULT 'active',
+  progress_percentage DECIMAL(5,2) DEFAULT 0.00,
+  completed_weeks INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(student_id, batch_id) -- Prevent duplicate assignments
+);
+```
+
+### 4. mentor_profiles
 ```sql
 CREATE TABLE mentor_profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT users(id) ON DELETE CASCADE,
   organization VARCHAR(255) NOT NULL,
   designation VARCHAR(255) NOT NULL,
   expertise_areas TEXT[],
@@ -52,7 +66,7 @@ CREATE TABLE mentor_profiles (
 );
 ```
 
-### 4. batches
+### 5. batches
 ```sql
 CREATE TABLE batches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -72,7 +86,7 @@ CREATE TABLE batches (
 );
 ```
 
-### 5. roadmaps
+### 6. roadmaps
 ```sql
 CREATE TABLE roadmaps (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -87,7 +101,7 @@ CREATE TABLE roadmaps (
 );
 ```
 
-### 6. roadmap_weeks
+### 7. roadmap_weeks
 ```sql
 CREATE TABLE roadmap_weeks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -100,7 +114,7 @@ CREATE TABLE roadmap_weeks (
 );
 ```
 
-### 7. roadmap_tasks
+### 8. roadmap_tasks
 ```sql
 CREATE TABLE roadmap_tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -117,7 +131,7 @@ CREATE TABLE roadmap_tasks (
 );
 ```
 
-### 8. student_progress
+### 9. student_progress
 ```sql
 CREATE TABLE student_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -133,7 +147,7 @@ CREATE TABLE student_progress (
 );
 ```
 
-### 9. notices
+### 10. notices
 ```sql
 CREATE TABLE notices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -151,9 +165,7 @@ CREATE TABLE notices (
 );
 ```
 
-
-
-### 10. user_sessions
+### 11. user_sessions
 ```sql
 CREATE TABLE user_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -164,11 +176,29 @@ CREATE TABLE user_sessions (
 );
 ```
 
+## Key Changes Made
+
+### Student-Batch Relationship
+- **Before**: Students could only be enrolled in one batch at a time (via `student_profiles.batch_id`)
+- **After**: Students can be enrolled in multiple batches simultaneously via the `student_batch_assignments` table
+- This enables students to participate in multiple roadmaps/programs concurrently
+
+### Benefits of New Structure
+1. **Multiple Enrollments**: Students can join multiple batches without losing progress in others
+2. **Flexible Progress Tracking**: Each enrollment maintains its own progress metrics
+3. **Status Management**: Each enrollment can have different statuses (active, completed, dropped, suspended)
+4. **Scalability**: Easy to add new batch enrollments without affecting existing ones
+
 ## Indexes for Performance
 ```sql
 -- User lookups
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
+
+-- Student-batch assignments
+CREATE INDEX idx_student_batch_assignments_student ON student_batch_assignments(student_id);
+CREATE INDEX idx_student_batch_assignments_batch ON student_batch_assignments(batch_id);
+CREATE INDEX idx_student_batch_assignments_status ON student_batch_assignments(status);
 
 -- Student progress
 CREATE INDEX idx_student_progress_student_task ON student_progress(student_id, task_id);
@@ -177,8 +207,6 @@ CREATE INDEX idx_student_progress_status ON student_progress(status);
 -- Roadmap queries
 CREATE INDEX idx_roadmap_tasks_week ON roadmap_tasks(week_id);
 CREATE INDEX idx_roadmap_weeks_roadmap ON roadmap_weeks(roadmap_id);
-
-
 ```
 
 ## Row Level Security (RLS) Policies
@@ -186,6 +214,7 @@ CREATE INDEX idx_roadmap_weeks_roadmap ON roadmap_weeks(roadmap_id);
 -- Enable RLS on all tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_batch_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mentor_profiles ENABLE ROW LEVEL SECURITY;
 -- ... (enable on all tables)
 
@@ -193,6 +222,14 @@ ALTER TABLE mentor_profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
+CREATE POLICY "Students can view their own batch assignments" ON student_batch_assignments
+  FOR SELECT USING (auth.uid() = student_id);
+
 CREATE POLICY "Students can view their own progress" ON student_progress
   FOR SELECT USING (auth.uid() = student_id);
 ```
+
+## Migration Notes
+- The `student_profiles.batch_id` column has been removed
+- Existing student-batch relationships have been migrated to `student_batch_assignments`
+- All queries that previously used `student_profiles.batch_id` should be updated to use the new table structure
