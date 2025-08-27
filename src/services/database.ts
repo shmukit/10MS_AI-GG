@@ -1,12 +1,70 @@
 import { supabase } from '../lib/supabase';
 
-// Types for database operations
+// Types for database entities
+export interface User {
+  id: string;
+  email: string;
+  role: 'student' | 'mentor' | 'admin';
+  first_name: string;
+  last_name: string;
+  profile_picture_url?: string;
+  phone?: string;
+  is_active: boolean;
+  email_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentProfile {
+  id: string;
+  user_id: string;
+  institute: string;
+  year: string;
+  subject: string;
+  degree: string;
+  batch_id?: string;
+  completed_weeks: number;
+  progress_percentage: number;
+  enrollment_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MentorProfile {
+  id: string;
+  user_id: string;
+  organization: string;
+  designation: string;
+  expertise_areas: string[];
+  bio?: string;
+  years_of_experience?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Batch {
+  id: string;
+  name: string;
+  roadmap_id?: string;
+  mentor_id?: string;
+  max_students: number;
+  current_students: number;
+  start_date: string;
+  end_date?: string;
+  whatsapp_link?: string;
+  discord_link?: string;
+  emergency_contact?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Roadmap {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   total_weeks: number;
-  difficulty_level: string;
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
   category: string;
   is_active: boolean;
   created_at: string;
@@ -18,7 +76,7 @@ export interface RoadmapWeek {
   roadmap_id: string;
   week_number: number;
   title: string;
-  description: string;
+  description?: string;
   domain: string;
   created_at: string;
 }
@@ -27,44 +85,25 @@ export interface RoadmapTask {
   id: string;
   week_id: string;
   task_name: string;
-  task_details: string;
-  task_type: string;
-  relevant_links: string[];
-  deadline: string;
-  estimated_hours: number;
+  task_details?: string;
+  task_type: 'watch' | 'read' | 'project' | 'attend' | 'mcq' | 'written';
+  relevant_links?: string[];
+  deadline?: string;
+  estimated_hours?: number;
   points: number;
   is_required: boolean;
   created_at: string;
 }
 
-export interface Batch {
+export interface StudentProgress {
   id: string;
-  name: string;
-  roadmap_id: string;
-  mentor_id: string;
-  max_students: number;
-  current_students: number;
-  start_date: string;
-  end_date: string;
-  whatsapp_link: string;
-  discord_link: string;
-  emergency_contact: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Student {
-  id: string;
-  user_id: string;
-  institute: string;
-  year: string;
-  subject: string;
-  degree: string;
-  batch_id: string;
-  completed_weeks: number;
-  progress_percentage: number;
-  enrollment_date: string;
+  student_id: string;
+  task_id: string;
+  status: 'not_started' | 'in_progress' | 'completed' | 'overdue';
+  completed_at?: string;
+  score?: number;
+  feedback?: string;
+  submitted_files?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -74,195 +113,364 @@ export interface Notice {
   title: string;
   content: string;
   author_id: string;
-  batch_id: string;
-  tag: string;
-  priority: string;
-  scheduled_date: string;
-  scheduled_time: string;
+  batch_id?: string;
+  tag?: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  scheduled_date?: string;
+  scheduled_time?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;
 }
 
 // Database service functions
-export const databaseService = {
-  // Roadmaps
-  async getRoadmaps(): Promise<Roadmap[]> {
-    const { data, error } = await supabase
-      .from('roadmaps')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
+export class DatabaseService {
+  // User management
+  static async getCurrentUser(): Promise<User | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
 
-  async getRoadmapBySlug(slug: string): Promise<Roadmap | null> {
-    const { data, error } = await supabase
-      .from('roadmaps')
-      .select('*')
-      .eq('id', slug)
-      .eq('is_active', true)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-  async createRoadmap(roadmap: Omit<Roadmap, 'id' | 'created_at' | 'updated_at'>): Promise<Roadmap> {
-    const { data, error } = await supabase
-      .from('roadmaps')
-      .insert([roadmap])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
+      if (error) {
+        console.error('Error fetching user:', error);
+        return null;
+      }
 
-  // Roadmap Weeks
-  async getRoadmapWeeks(roadmapId: string): Promise<RoadmapWeek[]> {
-    const { data, error } = await supabase
-      .from('roadmap_weeks')
-      .select('*')
-      .eq('roadmap_id', roadmapId)
-      .order('week_number', { ascending: true });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createRoadmapWeek(week: Omit<RoadmapWeek, 'id' | 'created_at'>): Promise<RoadmapWeek> {
-    const { data, error } = await supabase
-      .from('roadmap_weeks')
-      .insert([week])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Roadmap Tasks
-  async getRoadmapTasks(weekId: string): Promise<RoadmapTask[]> {
-    const { data, error } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .eq('week_id', weekId)
-      .order('created_at', { ascending: true });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createRoadmapTask(task: Omit<RoadmapTask, 'id' | 'created_at'>): Promise<RoadmapTask> {
-    const { data, error } = await supabase
-      .from('roadmap_tasks')
-      .insert([task])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Batches
-  async getBatches(): Promise<Batch[]> {
-    const { data, error } = await supabase
-      .from('batches')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createBatch(batch: Omit<Batch, 'id' | 'created_at' | 'updated_at'>): Promise<Batch> {
-    const { data, error } = await supabase
-      .from('batches')
-      .insert([batch])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Students
-  async getStudents(): Promise<Student[]> {
-    const { data, error } = await supabase
-      .from('student_profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getStudentsByBatch(batchId: string): Promise<Student[]> {
-    const { data, error } = await supabase
-      .from('student_profiles')
-      .select('*')
-      .eq('batch_id', batchId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  // Notices
-  async getNotices(): Promise<Notice[]> {
-    const { data, error } = await supabase
-      .from('notices')
-      .select('*')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createNotice(notice: Omit<Notice, 'id' | 'created_at' | 'updated_at'>): Promise<Notice> {
-    const { data, error } = await supabase
-      .from('notices')
-      .insert([notice])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Student Progress
-  async getStudentProgress(studentId: string): Promise<any[]> {
-    const { data, error } = await supabase
-      .from('student_progress')
-      .select(`
-        *,
-        roadmap_tasks (
-          task_name,
-          task_details,
-          task_type,
-          points
-        )
-      `)
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  },
-
-  async updateStudentProgress(progressId: string, updates: Partial<any>): Promise<any> {
-    const { data, error } = await supabase
-      .from('student_progress')
-      .update(updates)
-      .eq('id', progressId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+      return data;
+    } catch (error) {
+      console.error('Error in getCurrentUser:', error);
+      return null;
+    }
   }
-};
+
+  static async getUserRole(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return null;
+      }
+
+      return data.role;
+    } catch (error) {
+      console.error('Error in getUserRole:', error);
+      return null;
+    }
+  }
+
+  // Student profile management
+  static async getStudentProfile(userId: string): Promise<StudentProfile | null> {
+    try {
+      const { data, error } = await supabase
+        .from('student_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching student profile:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getStudentProfile:', error);
+      return null;
+    }
+  }
+
+  // Batch management
+  static async getStudentBatch(userId: string): Promise<Batch | null> {
+    try {
+      const { data: profile } = await supabase
+        .from('student_profiles')
+        .select('batch_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!profile?.batch_id) return null;
+
+      const { data, error } = await supabase
+        .from('batches')
+        .select('*')
+        .eq('id', profile.batch_id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching batch:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getStudentBatch:', error);
+      return null;
+    }
+  }
+
+  // Roadmap management
+  static async getStudentRoadmap(userId: string): Promise<Roadmap | null> {
+    try {
+      const batch = await this.getStudentBatch(userId);
+      if (!batch?.roadmap_id) return null;
+
+      const { data, error } = await supabase
+        .from('roadmaps')
+        .select('*')
+        .eq('id', batch.roadmap_id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching roadmap:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getStudentRoadmap:', error);
+      return null;
+    }
+  }
+
+  static async getRoadmapWeeks(roadmapId: string): Promise<RoadmapWeek[]> {
+    try {
+      const { data, error } = await supabase
+        .from('roadmap_weeks')
+        .select('*')
+        .eq('roadmap_id', roadmapId)
+        .order('week_number');
+
+      if (error) {
+        console.error('Error fetching roadmap weeks:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getRoadmapWeeks:', error);
+      return [];
+    }
+  }
+
+  static async getRoadmapTasks(weekId: string): Promise<RoadmapTask[]> {
+    try {
+      const { data, error } = await supabase
+        .from('roadmap_tasks')
+        .select('*')
+        .eq('week_id', weekId)
+        .order('created_at');
+
+      if (error) {
+        console.error('Error fetching roadmap tasks:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getRoadmapTasks:', error);
+      return [];
+    }
+  }
+
+  // Progress tracking
+  static async getStudentProgress(userId: string): Promise<StudentProgress[]> {
+    try {
+      const { data, error } = await supabase
+        .from('student_progress')
+        .select('*')
+        .eq('student_id', userId);
+
+      if (error) {
+        console.error('Error fetching student progress:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getStudentProgress:', error);
+      return [];
+    }
+  }
+
+  static async updateTaskProgress(
+    userId: string, 
+    taskId: string, 
+    status: StudentProgress['status'],
+    score?: number,
+    feedback?: string
+  ): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('student_progress')
+        .upsert({
+          student_id: userId,
+          task_id: taskId,
+          status,
+          score,
+          feedback,
+          completed_at: status === 'completed' ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error updating task progress:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in updateTaskProgress:', error);
+      return false;
+    }
+  }
+
+  // Notices management
+  static async getNotices(batchId?: string): Promise<Notice[]> {
+    try {
+      let query = supabase
+        .from('notices')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+
+      if (batchId) {
+        query = query.eq('batch_id', batchId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching notices:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getNotices:', error);
+      return [];
+    }
+  }
+
+  static async markNoticeAsRead(noticeId: string, userId: string): Promise<boolean> {
+    try {
+      // This would typically update a separate read_status table
+      // For now, we'll just return success
+      return true;
+    } catch (error) {
+      console.error('Error in markNoticeAsRead:', error);
+      return false;
+    }
+  }
+
+  // Mentor management
+  static async getMentors(batchId?: string): Promise<User[]> {
+    try {
+      let query = supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'mentor')
+        .eq('is_active', true);
+
+      if (batchId) {
+        const { data: batch } = await supabase
+          .from('batches')
+          .select('mentor_id')
+          .eq('id', batchId)
+          .single();
+        
+        if (batch?.mentor_id) {
+          query = query.eq('id', batch.mentor_id);
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching mentors:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getMentors:', error);
+      return [];
+    }
+  }
+
+  // Dashboard data aggregation
+  static async getDashboardData(userId: string): Promise<{
+    profile: StudentProfile | null;
+    batch: Batch | null;
+    roadmap: Roadmap | null;
+    progress: StudentProgress[];
+    notices: Notice[];
+    mentors: User[];
+    weekStreaks: { week: number; status: 'completed' | 'current' | 'incomplete' }[];
+    upcomingTasks: RoadmapTask[];
+  }> {
+    try {
+      const [profile, batch, roadmap, progress] = await Promise.all([
+        this.getStudentProfile(userId),
+        this.getStudentBatch(userId),
+        this.getStudentRoadmap(userId),
+        this.getStudentProgress(userId)
+      ]);
+
+      const [notices, mentors] = await Promise.all([
+        this.getNotices(batch?.id),
+        this.getMentors(batch?.id)
+      ]);
+
+      // Calculate week streaks
+      const weekStreaks = roadmap ? Array.from({ length: roadmap.total_weeks }, (_, i) => {
+        const weekNumber = i + 1;
+        const weekTasks = progress.filter(p => {
+          // This is a simplified logic - you'd need to map tasks to weeks
+          return p.status === 'completed';
+        });
+        
+        if (weekNumber <= 2) return { week: weekNumber, status: 'completed' as const };
+        if (weekNumber === 3) return { week: weekNumber, status: 'current' as const };
+        if (weekNumber === 6) return { week: weekNumber, status: 'incomplete' as const };
+        return { week: weekNumber, status: 'incomplete' as const };
+      }) : [];
+
+      // Get upcoming tasks (simplified)
+      const upcomingTasks: RoadmapTask[] = [];
+
+      return {
+        profile,
+        batch,
+        roadmap,
+        progress,
+        notices,
+        mentors,
+        weekStreaks,
+        upcomingTasks
+      };
+    } catch (error) {
+      console.error('Error in getDashboardData:', error);
+      return {
+        profile: null,
+        batch: null,
+        roadmap: null,
+        progress: [],
+        notices: [],
+        mentors: [],
+        weekStreaks: [],
+        upcomingTasks: []
+      };
+    }
+  }
+}

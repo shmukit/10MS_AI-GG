@@ -7,6 +7,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<AuthError | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     // Get initial session
@@ -111,11 +112,44 @@ export function useAuth() {
     }
   }
 
+  // Fetch user role from custom database
+  const fetchUserRole = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('email', email)
+        .single()
+      
+      if (error) {
+        console.error('Error fetching user role:', error)
+        return null
+      }
+      
+      return data?.role || null
+    } catch (err) {
+      console.error('Error fetching user role:', err)
+      return null
+    }
+  }
+
+  // Update user role when session changes
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchUserRole(session.user.email).then(role => {
+        setUserRole(role)
+      })
+    } else {
+      setUserRole(null)
+    }
+  }, [session])
+
   return {
     user,
     session,
     loading,
     error,
+    userRole,
     signIn,
     signUp,
     signOut,

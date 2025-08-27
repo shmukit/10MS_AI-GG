@@ -17,22 +17,29 @@ import { MentorSettings } from './components/Mentor/MentorSettings';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, userRole } = useAuthContext();
+  
+  console.log('🔒 ProtectedRoute - User:', user, 'Loading:', loading, 'User Role:', userRole, 'Allowed roles:', allowedRoles);
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
+    console.log('🔒 No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
-  // Check if user has required role (safely handle undefined role)
-  const userRole = user.role || 'student'; // Default to student if no role
-  if (!allowedRoles.includes(userRole)) {
+  // Check if user has required role from database
+  const role = userRole || 'student'; // Default to student if no role
+  console.log('🔒 User role from database:', role, 'Allowed roles:', allowedRoles);
+  
+  if (!allowedRoles.includes(role)) {
+    console.log('🔒 Access denied, redirecting to unauthorized');
     return <Navigate to="/unauthorized" replace />;
   }
   
+  console.log('🔒 Access granted');
   return <>{children}</>;
 };
 
@@ -42,12 +49,20 @@ const UnauthorizedPage = () => (
     <div className="text-center">
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
       <p className="text-gray-600 mb-6">You don't have permission to access this page.</p>
-      <button 
-        onClick={() => window.history.back()} 
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        Go Back
-      </button>
+      <div className="space-y-3">
+        <a 
+          href="/login"
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mr-3 no-underline"
+        >
+          Go to Login
+        </a>
+        <button 
+          onClick={() => window.history.back()} 
+          className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+        >
+          Go Back
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -82,7 +97,7 @@ const MentorRoutes = () => {
 
 // Main App Routes
 const AppRoutes = () => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, userRole } = useAuthContext();
   
   // Test database connection
   useEffect(() => {
@@ -103,24 +118,36 @@ const AppRoutes = () => {
     testConnection();
   }, []);
 
+  console.log('🔍 AppRoutes - User:', user, 'Loading:', loading, 'User Role from DB:', userRole);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
+    console.log('🔍 No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect based on user role (safely handle undefined role)
-  const userRole = user.role || 'student'; // Default to student if no role
+  // For admin users, let them choose their route
+  // For other users, redirect based on their role from database
+  const role = userRole || 'student'; // Default to student if no role
+  console.log('🔍 User role from database:', role);
   
-  if (userRole === 'student' || userRole === 'admin') {
+  if (role === 'student') {
+    console.log('🔍 Redirecting student to dashboard');
     return <Navigate to="/student/dashboard" replace />;
-  } else if (userRole === 'mentor') {
+  } else if (role === 'mentor') {
+    console.log('🔍 Redirecting mentor to dashboard');
     return <Navigate to="/mentor/dashboard" replace />;
+  } else if (role === 'admin') {
+    // Admin users can access both, so redirect to student dashboard as default
+    console.log('🔍 Redirecting admin to student dashboard');
+    return <Navigate to="/student/dashboard" replace />;
   }
 
   // Fallback for unknown roles
+  console.log('🔍 Unknown role, redirecting to login');
   return <Navigate to="/login" replace />;
 };
 

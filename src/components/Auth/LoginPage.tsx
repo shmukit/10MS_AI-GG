@@ -19,16 +19,18 @@ export const LoginPage: React.FC = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      if (user.role === 'student' || user.role === 'admin') {
+      // Use the selected role from the form, not the database role
+      if (role === 'student') {
         navigate('/student/dashboard');
-      } else if (user.role === 'mentor') {
+      } else if (role === 'mentor') {
         navigate('/mentor/dashboard');
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🚀 Form submitted with:', { email: formData.email, role, isLogin });
     
     if (!isLogin && formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
@@ -37,22 +39,26 @@ export const LoginPage: React.FC = () => {
 
     try {
       if (isLogin) {
+        console.log('🔐 Attempting sign in...');
         const result = await signIn(formData.email, formData.password);
+        console.log('📝 Sign in result:', result);
         if (result.error) {
-          console.error('Sign in error:', result.error);
+          console.error('❌ Sign in error:', result.error);
         } else {
-          // Navigation will be handled by useEffect above
+          console.log('✅ Sign in successful, navigation will be handled by useEffect');
         }
       } else {
+        console.log('📝 Attempting sign up...');
         const result = await signUp(formData.email, formData.password);
+        console.log('📝 Sign up result:', result);
         if (result.error) {
-          console.error('Sign up error:', result.error);
+          console.error('❌ Sign up error:', result.error);
         } else {
           alert('Please check your email for verification link');
         }
       }
     } catch (err) {
-      console.error('Authentication error:', err);
+      console.error('💥 Authentication error:', err);
     }
   };
 

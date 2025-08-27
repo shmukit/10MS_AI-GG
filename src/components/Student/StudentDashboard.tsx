@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Moon, Sun, User, Map, Users, Bell } from 'lucide-react';
+import { Moon, Sun, Map, Users, Bell } from 'lucide-react';
 import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
 import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
+import { ProfileDropdown } from '../Profile/ProfileDropdown';
+import { DatabaseService } from '../../services/database';
+import { useAuth } from '../../lib/useAuth';
 
 export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -22,6 +29,27 @@ export const StudentDashboard: React.FC = () => {
     console.log('Task marked as completed');
     setShowConfirmation(false);
   };
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await DatabaseService.getDashboardData(user.id);
+        setDashboardData(data);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user?.id]);
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
@@ -49,12 +77,11 @@ export const StudentDashboard: React.FC = () => {
               </button>
               <div className="flex items-center gap-2">
                 <span className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Student</span>
-                <button
-                  onClick={() => navigate('/student/profile')}
-                  className="w-8 h-8 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors"
-                >
-                  <User className="w-4 h-4 mx-auto" />
-                </button>
+                <ProfileDropdown 
+                  isDarkMode={isDarkMode}
+                  userName={dashboardData?.profile?.first_name || 'Student'}
+                  userRole="student"
+                />
               </div>
             </div>
           </div>
@@ -63,7 +90,36 @@ export const StudentDashboard: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                Loading dashboard...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 text-sm">!</span>
+              </div>
+              <div>
+                <h3 className="text-red-800 font-medium">Error Loading Dashboard</h3>
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dashboard Content */}
+        {!loading && !error && dashboardData && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Welcome Section */}
@@ -325,7 +381,14 @@ export const StudentDashboard: React.FC = () => {
             </div>
 
             {/* Notice Board */}
-            <NoticeBoard isDarkMode={isDarkMode} />
+            <NoticeBoard 
+              isDarkMode={isDarkMode} 
+              notices={dashboardData?.notices || []}
+              onMarkAsRead={(noticeId) => {
+                // Handle marking notice as read
+                console.log('Marking notice as read:', noticeId);
+              }}
+            />
 
             {/* Next Zoom Call */}
             <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
@@ -384,6 +447,7 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+        )}
 
         {/* Confirmation Modal */}
         <ConfirmationModal
