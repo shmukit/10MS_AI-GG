@@ -34,7 +34,7 @@ interface RoadmapNodeProps {
 
 export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlternate = false, isDarkMode = false }) => {
   const getNodeStyles = () => {
-    const baseStyles = "w-80 p-6 rounded-xl border-2 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md";
+    const baseStyles = "w-80 p-6 rounded-xl border-2 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg";
     
     switch (node.status) {
       case 'locked':
@@ -46,14 +46,14 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
       case 'active':
         return `${baseStyles} ${
           isDarkMode 
-            ? 'bg-gray-800 border-blue-400 text-white shadow-lg hover:shadow-xl' 
-            : 'bg-white border-blue-500 text-gray-900 shadow-lg hover:shadow-xl'
+            ? 'bg-gray-800 border-blue-400 text-white shadow-lg hover:shadow-xl border-opacity-80' 
+            : 'bg-white border-blue-500 text-gray-900 shadow-lg hover:shadow-xl border-opacity-80'
         }`;
       case 'completed':
         return `${baseStyles} ${
           isDarkMode 
-            ? 'bg-green-900/20 border-green-400 text-green-300 shadow-md hover:shadow-lg' 
-            : 'bg-green-50 border-green-500 text-green-900 shadow-md hover:shadow-lg'
+            ? 'bg-green-900/20 border-green-400 text-green-300 shadow-md hover:shadow-lg border-opacity-80' 
+            : 'bg-green-50 border-green-500 text-green-900 shadow-md hover:shadow-lg border-opacity-80'
         }`;
       default:
         return baseStyles;
@@ -67,7 +67,17 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
       case 'active':
         return <Zap className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />;
       case 'completed':
-        return <CheckCircle className={`w-5 h-5 fill-current ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />;
+        return (
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
+            isDarkMode 
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25' 
+              : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+          }`}>
+            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </div>
+        );
       default:
         return null;
     }
@@ -89,17 +99,21 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           <h3 className="text-lg font-bold leading-tight">{node.title}</h3>
         </div>
         {node.status === 'active' && (
-          <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
+          <span className={`text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 ${
             isDarkMode 
-              ? 'bg-blue-900/30 text-blue-300 border border-blue-700' 
-              : 'bg-blue-100 text-blue-700 border border-blue-200'
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm' 
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
           }`}>
-            In Progress
+            🔄 In Progress
           </span>
         )}
         {node.status === 'completed' && (
-          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-            Completed
+          <span className={`text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 ${
+            isDarkMode 
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm' 
+              : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm'
+          }`}>
+            ✓ Completed
           </span>
         )}
       </div>
@@ -142,7 +156,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           </div>
           <div className={`w-full rounded-full h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
             <div 
-              className={`h-2 rounded-full transition-all duration-300 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'}`}
+              className={`h-2 rounded-full transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'}`}
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -158,7 +172,9 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
         <div className="flex items-center gap-2">
           <span>{totalTasks} tasks</span>
           {node.status !== 'locked' && (
-            <span className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>View Details →</span>
+            <span className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+              View Details <span className="inline-block transform transition-transform group-hover:translate-x-1">→</span>
+            </span>
           )}
         </div>
       </div>

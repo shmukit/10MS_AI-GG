@@ -20,6 +20,7 @@ interface RoadmapItem {
   taskDetails: string;
   relevantLinks: string;
   deadline: string;
+  meetingTime?: string;
 }
 
 interface Batch {
@@ -77,6 +78,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [selectedBatch, setSelectedBatch] = useState<string>('');
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingBatch, setIsAddingBatch] = useState(false);
+  const [isEditingBatch, setIsEditingBatch] = useState(false);
+  const [editingBatchData, setEditingBatchData] = useState<Batch | null>(null);
+  const [noticeToDelete, setNoticeToDelete] = useState<string | null>(null);
+  const [noticeToEdit, setNoticeToEdit] = useState<Notice | null>(null);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [isAddingNotice, setIsAddingNotice] = useState(false);
   const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
@@ -100,14 +105,15 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     return current && current.total_weeks ? Array.from({ length: current.total_weeks }, (_, i) => i + 1) : [];
   };
 
-  const [newTask, setNewTask] = useState<Omit<RoadmapItem, 'id'>>({
+  const [newTask, setNewTask] = useState<Omit<RoadmapItem, 'id'> & { meetingTime?: string }>({
     weekNumber: 1,
     domain: '',
     taskType: 'Watch',
     taskName: '',
     taskDetails: '',
     relevantLinks: '',
-    deadline: ''
+    deadline: '',
+    meetingTime: ''
   });
 
   const [newRoadmap, setNewRoadmap] = useState({
@@ -120,6 +126,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   });
 
   const [editingTaskData, setEditingTaskData] = useState<RoadmapItem | null>(null);
+  const [weekFilter, setWeekFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
 
   const [newBatch, setNewBatch] = useState<Omit<Batch, 'id' | 'createdDate'>>({
     name: '',
@@ -183,6 +191,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           task_type: newTask.taskType.toLowerCase(),
           relevant_links: newTask.relevantLinks ? [newTask.relevantLinks] : [],
           deadline: newTask.deadline || null,
+          meeting_time: newTask.meetingTime || null,
           is_active: true
         }])
         .select()
@@ -204,7 +213,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         taskName: newTask.taskName,
         taskDetails: newTask.taskDetails,
         relevantLinks: newTask.relevantLinks,
-        deadline: newTask.deadline
+        deadline: newTask.deadline,
+        meetingTime: newTask.meetingTime
       };
       
       setRoadmapData([...roadmapData, task]);
@@ -217,7 +227,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         taskName: '',
         taskDetails: '',
         relevantLinks: '',
-        deadline: ''
+        deadline: '',
+        meetingTime: ''
       });
       
       setIsAddingTask(false);
@@ -249,26 +260,195 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     setIsAddingBatch(false);
   };
 
-  const handleAddStudent = () => {
-    const student: Student = {
-      ...newStudent,
-      id: Date.now().toString(),
-      batchId: selectedBatch,
-      completedWeeks: 0,
-      progressPercentage: 0
-    };
-    setStudents([...students, student]);
-    setNewStudent({
-      name: '',
-      email: '',
-      phone: '',
-      institute: '',
-      year: '1st Year',
-      subject: '',
-      degree: 'BSc',
-      batchId: selectedBatch
-    });
-    setIsAddingStudent(false);
+  const handleUpdateBatch = async () => {
+    if (!editingBatchData) return;
+    
+    try {
+      console.log('🔄 Updating batch:', editingBatchData);
+      
+      // Update batch in database - using correct column names
+      const { data, error } = await supabase
+        .from('batches')
+        .update({
+          whatsapp_link: editingBatchData.whatsappLink || null,
+          discord_link: editingBatchData.discordLink || null,
+          emergency_contact: editingBatchData.emergencyContact || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingBatchData.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating batch:', error);
+        throw error;
+      }
+
+      console.log('✅ Batch updated successfully:', data);
+      
+      // Update local state with the updated data
+      const updatedBatch = {
+        ...editingBatchData,
+        whatsappLink: editingBatchData.whatsappLink || '',
+        discordLink: editingBatchData.discordLink || '',
+        emergencyContact: editingBatchData.emergencyContact || ''
+      };
+      
+      setBatches(batches.map(batch => 
+        batch.id === editingBatchData.id ? updatedBatch : batch
+      ));
+      
+      // The selectedBatchData will automatically update since it's computed from the batches array
+      
+      setIsEditingBatch(false);
+      setEditingBatchData(null);
+      
+      // Refresh data to show updated batch information
+      await fetchData();
+      
+      alert(`✅ Batch "${editingBatchData.name}" updated successfully!`);
+      
+    } catch (err) {
+      console.error('❌ Error updating batch:', err);
+      setError('Failed to update batch');
+      alert(`❌ Failed to update batch: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleAddStudent = async () => {
+    if (!newStudent.name || !newStudent.email || !selectedBatch) {
+      setError('Please fill in name, email, and select a batch');
+      return;
+    }
+
+    try {
+      console.log('🔄 Adding new student:', newStudent);
+      
+      // First, create a user account for the student
+      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
+        email: newStudent.email,
+        password: 'temporary123', // This should be changed by the student on first login
+        email_confirm: true,
+        user_metadata: {
+          full_name: newStudent.name,
+          role: 'student'
+        }
+      });
+
+      if (userError) {
+        console.error('Error creating user:', userError);
+        throw userError;
+      }
+
+      if (!userData.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      console.log('✅ User account created:', userData.user.id);
+
+      // Insert user into users table
+      const { data: insertedUser, error: userInsertError } = await supabase
+        .from('users')
+        .insert([{
+          id: userData.user.id,
+          email: newStudent.email,
+          role: 'student',
+          first_name: newStudent.name.split(' ')[0] || newStudent.name,
+          last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
+          is_active: true,
+          email_verified: true
+        }])
+        .select()
+        .single();
+
+      if (userInsertError) {
+        console.error('Error inserting user:', userInsertError);
+        throw userInsertError;
+      }
+
+      console.log('✅ User inserted into users table:', insertedUser);
+
+      // Create student profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('student_profiles')
+        .insert([{
+          user_id: userData.user.id,
+          institute: newStudent.institute,
+          year: newStudent.year,
+          subject: newStudent.subject,
+          degree: newStudent.degree,
+          batch_id: selectedBatch,
+          completed_weeks: 0,
+          progress_percentage: 0,
+          enrollment_date: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Error creating student profile:', profileError);
+        throw profileError;
+      }
+
+      console.log('✅ Student profile created:', profileData);
+
+      // Add student to batch assignments
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('student_batch_assignments')
+        .insert([{
+          student_id: userData.user.id,
+          batch_id: selectedBatch,
+          status: 'active',
+          enrolled_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (assignmentError) {
+        console.error('Error assigning student to batch:', assignmentError);
+        throw assignmentError;
+      }
+
+      console.log('✅ Student assigned to batch:', assignmentData);
+
+      // Add to local state
+      const student: Student = {
+        id: userData.user.id,
+        name: newStudent.name,
+        email: newStudent.email,
+        phone: newStudent.phone,
+        institute: newStudent.institute,
+        year: newStudent.year,
+        subject: newStudent.subject,
+        degree: newStudent.degree,
+        batchId: selectedBatch,
+        completedWeeks: 0,
+        progressPercentage: 0
+      };
+      
+      setStudents([...students, student]);
+      
+      // Reset form
+      setNewStudent({
+        name: '',
+        email: '',
+        phone: '',
+        institute: '',
+        year: '1st Year',
+        subject: '',
+        degree: 'BSc',
+        batchId: selectedBatch
+      });
+      
+      setIsAddingStudent(false);
+      
+      alert(`✅ Student "${newStudent.name}" added successfully! They can login with their email and password: temporary123`);
+      
+    } catch (err) {
+      console.error('❌ Error adding student:', err);
+      setError('Failed to add student');
+      alert(`❌ Failed to add student: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   const handleAddNotice = async () => {
@@ -381,8 +561,72 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     setStudents(students.filter(student => student.id !== id));
   };
 
-  const handleDeleteNotice = (id: string) => {
-    setNotices(notices.filter(notice => notice.id !== id));
+  const handleDeleteNotice = async (id: string) => {
+    try {
+      console.log('🔄 Deleting notice:', id);
+      
+      // Delete notice from database
+      const { error } = await supabase
+        .from('notices')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting notice:', error);
+        throw error;
+      }
+
+      console.log('✅ Notice deleted from database');
+      
+      // Update local state
+      setNotices(notices.filter(notice => notice.id !== id));
+      
+      alert('✅ Notice deleted successfully!');
+      
+    } catch (err) {
+      console.error('❌ Error deleting notice:', err);
+      setError('Failed to delete notice');
+      alert(`❌ Failed to delete notice: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleEditNotice = async (updatedNotice: Notice) => {
+    try {
+      console.log('🔄 Updating notice:', updatedNotice);
+      
+      // Update notice in database
+      const { error } = await supabase
+        .from('notices')
+        .update({
+          title: updatedNotice.title,
+          content: updatedNotice.content,
+          tag: updatedNotice.tag,
+          scheduled_date: updatedNotice.scheduledDate,
+          scheduled_time: updatedNotice.scheduledTime,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', updatedNotice.id);
+
+      if (error) {
+        console.error('Error updating notice:', error);
+        throw error;
+      }
+
+      console.log('✅ Notice updated in database');
+      
+      // Update local state
+      setNotices(notices.map(notice => 
+        notice.id === updatedNotice.id ? updatedNotice : notice
+      ));
+      
+      setNoticeToEdit(null);
+      alert('✅ Notice updated successfully!');
+      
+    } catch (err) {
+      console.error('❌ Error updating notice:', err);
+      setError('Failed to update notice');
+      alert(`❌ Failed to update notice: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   const handleAddWeek = async () => {
@@ -463,7 +707,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           task_details: editingTaskData.taskDetails,
           task_type: editingTaskData.taskType.toLowerCase(),
           relevant_links: editingTaskData.relevantLinks ? [editingTaskData.relevantLinks] : [],
-          deadline: editingTaskData.deadline || null
+          deadline: editingTaskData.deadline || null,
+          meeting_time: editingTaskData.meetingTime || null
         })
         .eq('id', editingTask)
         .select()
@@ -484,6 +729,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       
       setEditingTask(null);
       setEditingTaskData(null);
+      
+      // Refresh roadmap tasks to ensure data consistency
+      if (selectedRoadmap) {
+        await fetchRoadmapTasks(selectedRoadmap);
+      }
       
       alert(`✅ Task "${editingTaskData.taskName}" updated successfully!`);
       
@@ -660,6 +910,20 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   };
 
   const stats = getDashboardStats();
+
+  const getFilteredTasks = () => {
+    let filteredTasks = roadmapData;
+
+    if (weekFilter) {
+      filteredTasks = filteredTasks.filter(task => task.weekNumber.toString() === weekFilter);
+    }
+
+    if (typeFilter) {
+      filteredTasks = filteredTasks.filter(task => task.taskType === typeFilter);
+    }
+
+    return filteredTasks;
+  };
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -840,6 +1104,80 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         </div>
       </div>
 
+      {/* Filters */}
+      {selectedRoadmap && (
+        <div className={`rounded-xl p-4 border transition-colors duration-200 ${
+          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Filter by Week
+                </label>
+                <select
+                  value={weekFilter}
+                  onChange={(e) => setWeekFilter(e.target.value)}
+                  className={`px-3 py-2 border rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                >
+                  <option value="">All Weeks</option>
+                  {getWeekOptions().map(week => (
+                    <option key={week} value={week.toString()}>Week {week}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Filter by Task Type
+                </label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className={`px-3 py-2 border rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                >
+                  <option value="">All Types</option>
+                  <option value="Watch">Watch</option>
+                  <option value="Read">Read</option>
+                  <option value="Project">Project</option>
+                  <option value="Attend">Attend</option>
+                  <option value="MCQ">MCQ</option>
+                  <option value="Written">Written</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setWeekFilter('');
+                  setTypeFilter('');
+                }}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
@@ -862,7 +1200,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               </tr>
             </thead>
             <tbody>
-              {roadmapData.map((task, index) => (
+              {getFilteredTasks().map((task, index) => (
                 <tr key={task.id} className={`border-t transition-colors duration-200 ${
                   isDarkMode ? 'border-gray-600' : 'border-gray-200'
                 }`}>
@@ -1051,6 +1389,23 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               </div>
             </div>
 
+            {/* Meeting Time - Only show for Attend tasks */}
+            {newTask.taskType === 'Attend' && (
+              <div className="mb-6">
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Meeting Time
+                </label>
+                <input
+                  type="time"
+                  value={newTask.meetingTime}
+                  onChange={(e) => setNewTask({...newTask, meetingTime: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
                 onClick={handleAddTask}
@@ -1181,7 +1536,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                     <option value="Watch">Watch</option>
                     <option value="Read">Read</option>
                     <option value="Project">Project</option>
-                    <option value="Assignment">Assignment</option>
+                    <option value="Attend">Attend</option>
+                    <option value="MCQ">MCQ</option>
+                    <option value="Written">Written</option>
                   </select>
                 </div>
               </div>
@@ -1261,6 +1618,23 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Meeting Time for Attend Tasks */}
+              {editingTaskData.taskType === 'Attend' && (
+                <div>
+                  <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Meeting Time
+                  </label>
+                  <input
+                    type="time"
+                    value={editingTaskData.meetingTime || ''}
+                    onChange={(e) => setEditingTaskData({...editingTaskData, meetingTime: e.target.value})}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -1676,24 +2050,65 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-green-500" />
-                <a href={selectedBatchData.whatsappLink} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 text-sm">
-                  WhatsApp Group
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-indigo-500" />
-                <a href={selectedBatchData.discordLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 text-sm">
-                  Discord Server
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-red-500" />
-                <a href={`tel:${selectedBatchData.emergencyContact}`} className="text-red-600 hover:text-red-700 text-sm">
-                  {selectedBatchData.emergencyContact}
-                </a>
-              </div>
+              {selectedBatchData.whatsappLink && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-green-500" />
+                    <a href={selectedBatchData.whatsappLink} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 text-sm">
+                      WhatsApp Group
+                    </a>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setEditingBatchData(selectedBatchData);
+                      setIsEditingBatch(true);
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${
+                      isDarkMode 
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Edit
+                  </button>
+                </div>
+              )}
+              {selectedBatchData.discordLink && (
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-indigo-500" />
+                  <a href={selectedBatchData.discordLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 text-sm">
+                    Discord Server
+                  </a>
+                </div>
+              )}
+              {selectedBatchData.emergencyContact && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-red-500" />
+                  <a href={`tel:${selectedBatchData.emergencyContact}`} className="text-red-600 hover:text-red-700 text-sm">
+                    {selectedBatchData.emergencyContact}
+                  </a>
+                </div>
+              )}
+              {!selectedBatchData.whatsappLink && !selectedBatchData.discordLink && !selectedBatchData.emergencyContact && (
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500 italic">No community links added yet</div>
+                  <button
+                    onClick={() => {
+                      setEditingBatchData(selectedBatchData);
+                      setIsEditingBatch(true);
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${
+                      isDarkMode 
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Add Links
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1888,6 +2303,85 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               </button>
               <button
                 onClick={() => setIsAddingBatch(false)}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Batch Modal */}
+      {isEditingBatch && editingBatchData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`max-w-md w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Edit Batch: {editingBatchData.name}
+            </h3>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  WhatsApp Group Link
+                </label>
+                <input
+                  type="url"
+                  value={editingBatchData.whatsappLink}
+                  onChange={(e) => setEditingBatchData({...editingBatchData, whatsappLink: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Discord Server Link
+                </label>
+                <input
+                  type="url"
+                  value={editingBatchData.discordLink}
+                  onChange={(e) => setEditingBatchData({...editingBatchData, discordLink: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Emergency Contact
+                </label>
+                <input
+                  type="tel"
+                  value={editingBatchData.emergencyContact}
+                  onChange={(e) => setEditingBatchData({...editingBatchData, emergencyContact: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleUpdateBatch}
+                className="flex-1 py-2 px-4 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Update Batch
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditingBatch(false);
+                  setEditingBatchData(null);
+                }}
                 className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
                   isDarkMode 
                     ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
@@ -2115,7 +2609,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                   
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {/* Handle edit */}}
+                      onClick={() => setNoticeToEdit(notice)}
                       className={`p-2 rounded transition-colors ${
                         isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
                       }`}
@@ -2123,7 +2617,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteNotice(notice.id)}
+                      onClick={() => setNoticeToDelete(notice.id)}
                       className="p-2 rounded hover:bg-red-100 text-red-600"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -2330,7 +2824,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           taskName: task.task_name,
           taskDetails: task.task_details || '',
           relevantLinks: Array.isArray(task.relevant_links) ? task.relevant_links[0] || '' : task.relevant_links || '',
-          deadline: task.deadline || ''
+          deadline: task.deadline || '',
+          meetingTime: task.meeting_time || ''
         }));
 
         allTasks.push(...weekTasks);
@@ -2443,8 +2938,19 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       
       console.log('✅ Notices fetched:', noticesData?.length || 0);
 
-      // Update state with real data
-      setBatches(batchesData || []);
+      // Map batches data to frontend format
+      const mappedBatches = (batchesData || []).map((batch: any) => ({
+        id: batch.id,
+        name: batch.name,
+        studentCount: batch.student_count || 0,
+        roadmapId: batch.roadmap_id || '',
+        roadmapName: batch.roadmap_name || '',
+        whatsappLink: batch.whatsapp_link || '',
+        discordLink: batch.discord_link || '',
+        emergencyContact: batch.emergency_contact || '',
+        createdDate: batch.created_at ? new Date(batch.created_at).toLocaleDateString() : 'N/A'
+      }));
+      setBatches(mappedBatches);
       
       // Map students data by combining assignments, users, and profiles
       const mappedStudents = (assignmentsData || []).map((assignment: any) => {
@@ -2571,6 +3077,151 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           </>
         )}
       </div>
+
+      {/* Notice Delete Confirmation Modal */}
+      {noticeToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`max-w-md w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Confirm Delete
+            </h3>
+            <p className={`mb-6 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              Are you sure you want to delete this notice? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setNoticeToDelete(null)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-600 hover:bg-gray-500 text-gray-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleDeleteNotice(noticeToDelete);
+                  setNoticeToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg font-medium bg-red-600 hover:bg-red-700 text-white transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Notice Modal */}
+      {noticeToEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Edit Notice
+              </h3>
+              <button
+                onClick={() => setNoticeToEdit(null)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
+                }`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={noticeToEdit.title}
+                  onChange={(e) => setNoticeToEdit({...noticeToEdit, title: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Content
+                </label>
+                <textarea
+                  value={noticeToEdit.content}
+                  onChange={(e) => setNoticeToEdit({...noticeToEdit, content: e.target.value})}
+                  rows={4}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Tag
+                  </label>
+                  <select
+                    value={noticeToEdit.tag}
+                    onChange={(e) => setNoticeToEdit({...noticeToEdit, tag: e.target.value as any})}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                  >
+                    <option value="Reminder">Reminder</option>
+                    <option value="Homework">Homework</option>
+                    <option value="Assignment">Assignment</option>
+                    <option value="Exam">Exam</option>
+                    <option value="Cancellation">Cancellation</option>
+                    <option value="Resources">Resources</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={noticeToEdit.scheduledDate}
+                    onChange={(e) => setNoticeToEdit({...noticeToEdit, scheduledDate: e.target.value})}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setNoticeToEdit(null)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-600 hover:bg-gray-500 text-gray-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleEditNotice(noticeToEdit)}
+                className="px-4 py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+              >
+                Update Notice
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

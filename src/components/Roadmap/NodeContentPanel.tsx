@@ -86,15 +86,25 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const getTaskIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
+      case 'watch':
+        return <Play className="w-4 h-4 text-blue-500" />;
+      case 'read':
+        return <BookOpen className="w-4 h-4 text-purple-500" />;
+      case 'project':
+        return <Code className="w-4 h-4 text-orange-500" />;
+      case 'attend':
+        return <Users className="w-4 h-4 text-green-500" />;
+      case 'mcq':
+        return <FileText className="w-4 h-4 text-indigo-500" />;
+      case 'written':
+        return <FileText className="w-4 h-4 text-teal-500" />;
       case 'video':
         return <Play className="w-4 h-4 text-blue-500" />;
       case 'exercise':
         return <Code className="w-4 h-4 text-green-500" />;
       case 'reading':
         return <BookOpen className="w-4 h-4 text-purple-500" />;
-      case 'project':
-        return <FileText className="w-4 h-4 text-orange-500" />;
       default:
         return <Circle className="w-4 h-4 text-gray-500" />;
     }
@@ -154,7 +164,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
 
   return (
     <>
-      <div className={`w-1/3 border-l h-full flex flex-col transition-colors duration-200 ${
+      <div className={`w-full lg:w-1/3 border-t lg:border-l lg:border-t-0 h-full flex flex-col transition-colors duration-200 ${
         isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-200'
@@ -165,7 +175,15 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         }`}>
           <div className="flex items-center gap-3">
             {node.status === 'completed' ? (
-              <CheckCircle className={`w-6 h-6 fill-current ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25' 
+                  : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+              }`}>
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
             ) : node.status === 'active' ? (
               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                 isDarkMode ? 'border-blue-400' : 'border-blue-500'
@@ -219,7 +237,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
               </div>
               <div className={`w-full rounded-full h-2 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
                 <div 
-                  className={`h-2 rounded-full transition-all duration-500 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'}`}
+                  className={`h-2 rounded-full transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'}`}
                   style={{ width: `${completionRate * 100}%` }}
                 />
               </div>
@@ -257,12 +275,20 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     title={node.status === 'completed' ? 'Tasks are locked after week completion' : ''}
                   >
                     {completedTasks[index] ? (
-                      <CheckCircle className={`w-5 h-5 fill-current ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
-                    ) : (
-                      <Circle className={`w-5 h-5 transition-colors ${
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
                         isDarkMode 
-                          ? 'text-gray-500 hover:text-gray-400' 
-                          : 'text-gray-400 hover:text-gray-600'
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25' 
+                          : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+                      }`}>
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                        isDarkMode 
+                          ? 'border-gray-500 hover:border-gray-400 hover:bg-gray-600' 
+                          : 'border-gray-400 hover:border-gray-500 hover:bg-gray-100'
                       }`} />
                     )}
                   </button>
@@ -386,9 +412,9 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             <div className="mb-6">
               <button
                 onClick={handleMarkAsComplete}
-                className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
+                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${
                   isCompleted
-                    ? `${isDarkMode ? 'bg-green-500 hover:bg-green-600' : 'bg-green-500 hover:bg-green-600'} text-white`
+                    ? `${isDarkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'} text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]`
                     : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
                 }`}
                 disabled={!isCompleted}

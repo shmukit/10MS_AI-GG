@@ -164,11 +164,22 @@ export const StudentDashboard: React.FC = () => {
       }));
     }
 
-    // Use the actual roadmap weeks from the database
-    return Array.from({ length: roadmap.total_weeks }, (_, index) => ({
-      week: index + 1,
-      status: index < 3 ? 'done' : index === 3 ? 'current' : 'incomplete'
-    }));
+    // Get actual student progress from the database
+    const studentProgress = dashboardData?.studentProgress || [];
+    
+    // Map weeks based on actual progress data
+    return Array.from({ length: roadmap.total_weeks }, (_, index) => {
+      const weekNumber = index + 1;
+      const weekProgress = studentProgress.find((p: any) => p.week_number === weekNumber);
+      
+      if (weekProgress?.is_completed) {
+        return { week: weekNumber, status: 'done' as const };
+      } else if (weekProgress?.is_active) {
+        return { week: weekNumber, status: 'current' as const };
+      } else {
+        return { week: weekNumber, status: 'incomplete' as const };
+      }
+    });
   };
 
   // Force re-render when selectedRoadmap changes
@@ -178,6 +189,32 @@ export const StudentDashboard: React.FC = () => {
       console.log('Selected roadmap changed to:', selectedRoadmap);
     }
   }, [selectedRoadmap]);
+
+  // Note: Dashboard data is fetched once on component mount
+  // Real-time updates should come from WebSocket or server-sent events in production
+
+  // Get next attend task for zoom call
+  const getNextAttendTask = () => {
+    if (!dashboardData?.currentWeekTasks && !dashboardData?.upcomingTasks) return null;
+    
+    const allTasks = [
+      ...(dashboardData.currentWeekTasks || []),
+      ...(dashboardData.upcomingTasks || [])
+    ];
+    
+    const attendTasks = allTasks.filter(task => 
+      task.task_type?.toLowerCase() === 'attend'
+    );
+    
+    if (attendTasks.length === 0) return null;
+    
+    // Sort by deadline and return the earliest one
+    return attendTasks.sort((a, b) => {
+      const dateA = a.deadline ? new Date(a.deadline) : new Date(0);
+      const dateB = b.deadline ? new Date(b.deadline) : new Date(0);
+      return dateA.getTime() - dateB.getTime();
+    })[0];
+  };
 
   const debugRoadmaps = () => {
     console.log('🔄 Debugging Roadmaps:');
@@ -225,7 +262,7 @@ export const StudentDashboard: React.FC = () => {
 
         {/* Dashboard Content */}
         {!loading && !error && dashboardData && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Welcome Section with Roadmap Selection */}
@@ -241,10 +278,10 @@ export const StudentDashboard: React.FC = () => {
                 <div className="relative roadmap-dropdown-container">
                   <button
                     onClick={() => setShowRoadmapDropdown(!showRoadmapDropdown)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 hover:shadow-md ${
                       isDarkMode 
-                        ? 'bg-gray-800 border-gray-600 text-white hover:bg-gray-700' 
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-gray-800 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500' 
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
                     }`}
                   >
                     <Map className="w-4 h-4" />
@@ -266,10 +303,10 @@ export const StudentDashboard: React.FC = () => {
                           <button
                             key={roadmap.id}
                             onClick={() => handleRoadmapChange(roadmap.id)}
-                            className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
+                            className={`w-full text-left px-4 py-2 text-sm transition-all duration-200 ${
                               isDarkMode 
-                                ? 'hover:bg-gray-700 text-gray-300 hover:text-white' 
-                                : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+                                ? 'hover:bg-gray-700 text-gray-300 hover:text-white hover:bg-opacity-80' 
+                                : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900 hover:bg-opacity-80'
                             } ${selectedRoadmap === roadmap.id ? 'bg-blue-50 text-blue-700' : ''}`}
                           >
                             {roadmap.title}
@@ -297,12 +334,20 @@ export const StudentDashboard: React.FC = () => {
                     navigate('/student/roadmap');
                   }
                 }}
-                className="border rounded-xl p-4 text-center transition-colors group cursor-pointer hover:bg-green-100"
+                className={`border rounded-xl p-4 text-center transition-all duration-200 group cursor-pointer hover:shadow-lg transform hover:scale-[1.02] ${
+                  isDarkMode 
+                    ? 'bg-orange-900/20 border-orange-800 hover:bg-orange-900/30 hover:border-orange-700' 
+                    : 'bg-orange-50 border-orange-200 hover:bg-orange-100 hover:border-orange-300'
+                }`}
               >
-                <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-blue-600 group-hover:bg-blue-700">
+                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-all duration-200 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 group-hover:from-orange-600 group-hover:to-orange-700' 
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 group-hover:from-orange-600 group-hover:to-orange-700'
+                }`}>
                   <Map className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-sm font-medium text-gray-900">Roadmap</span>
+                <span className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Roadmap</span>
               </div>
 
               <button
@@ -319,16 +364,16 @@ export const StudentDashboard: React.FC = () => {
                     navigate('/student/community');
                   }
                 }}
-                className={`border rounded-xl p-4 text-center transition-colors group ${
+                className={`border rounded-xl p-4 text-center transition-all duration-200 group hover:shadow-lg transform hover:scale-[1.02] ${
                   isDarkMode 
-                    ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30' 
-                    : 'bg-green-50 border-green-200 hover:bg-green-100'
+                    ? 'bg-blue-900/20 border-blue-800 hover:bg-blue-900/30 hover:border-blue-700' 
+                    : 'bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300'
                 }`}
               >
-                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-colors ${
+                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-all duration-200 ${
                   isDarkMode 
-                    ? 'bg-purple-500 group-hover:bg-purple-600' 
-                    : 'bg-purple-500 group-hover:bg-purple-600'
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 group-hover:from-blue-500 group-hover:to-blue-600' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700'
                 }`}>
                   <Users className="w-6 h-6 text-white" />
                 </div>
@@ -336,29 +381,15 @@ export const StudentDashboard: React.FC = () => {
               </button>
             </div>
 
-            {/* Debug Section */}
-            <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Debug Info</h3>
-              <div className="text-xs text-gray-600 space-y-1">
-                <div>Current Roadmap: {getCurrentRoadmap()?.title || 'None'}</div>
-                <div>Generated Slug: {getCurrentRoadmap() ? generateRoadmapSlug(getCurrentRoadmap()?.title || '') : 'None'}</div>
-                <div>Available Roadmaps: {dashboardData?.enrolledRoadmaps?.length || 0}</div>
-                <button 
-                  onClick={debugRoadmaps}
-                  className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                >
-                  Debug Roadmaps
-                </button>
-              </div>
-            </div>
+
 
             {/* This Week's Tasks and Upcoming - Stacked Vertically */}
             <div className="space-y-6">
               {/* This Week's Tasks */}
-              <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
+              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
                 isDarkMode 
-                  ? 'bg-gray-800 border-gray-700' 
-                  : 'bg-white border-gray-200'
+                  ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                  : 'bg-white border-gray-200 hover:border-gray-300'
               }`}>
                 <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>This Week's Tasks</h3>
                 
@@ -366,45 +397,37 @@ export const StudentDashboard: React.FC = () => {
                    <div className="space-y-4">
                      {dashboardData.currentWeekTasks.map((task: any, index: number) => (
                       <div key={task.id} className={`rounded-lg p-4 transition-colors duration-200 ${
-                        isDarkMode ? 'bg-green-900/20' : 'bg-green-50'
+                        isDarkMode ? 'bg-gray-700/50 border border-gray-600' : 'bg-gray-50 border border-gray-200'
                       }`}>
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                             {task.task_name}
                           </h4>
-                          <span className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          <span className={`text-sm px-3 py-1 rounded-full transition-colors duration-200 ${
+                            isDarkMode ? 'bg-orange-900/30 text-orange-300 border border-orange-700' : 'bg-orange-100 text-orange-700 border border-orange-200'
+                          }`}>
                             {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Due'}
                           </span>
                         </div>
                         {task.task_details && (
-                          <p className={`text-sm mb-3 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <p className={`text-sm mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {task.task_details}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
-                            isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+                        <div className="flex items-center gap-3">
+                          <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
+                            isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-200'
                           }`}>
                             {task.task_type}
                           </span>
                           {task.estimated_hours && (
-                            <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
-                              isDarkMode ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'
+                            <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
+                              isDarkMode ? 'bg-purple-900/30 text-purple-300 border border-purple-700' : 'bg-purple-100 text-purple-700 border border-purple-200'
                             }`}>
-                              {task.estimated_hours}h
+                              ⏱️ {task.estimated_hours}h
                             </span>
                           )}
                         </div>
-                        <button 
-                          onClick={handleMarkAsDone}
-                          className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
-                            isDarkMode 
-                              ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                              : 'bg-blue-600 hover:bg-blue-700 text-white'
-                          }`}
-                        >
-                          ✓ Mark as Done
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -421,10 +444,10 @@ export const StudentDashboard: React.FC = () => {
               </div>
 
               {/* Upcoming Tasks */}
-              <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
+              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
                 isDarkMode 
-                  ? 'bg-gray-800 border-gray-700' 
-                  : 'bg-white border-gray-200'
+                  ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                  : 'bg-white border-gray-200 hover:border-gray-300'
               }`}>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Upcoming</h3>
@@ -489,29 +512,29 @@ export const StudentDashboard: React.FC = () => {
                       {/* Right Column */}
             <div className="space-y-6">
               {/* Days Streaks */}
-            <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
+            <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
               isDarkMode 
-                ? 'bg-gray-800 border-gray-700' 
-                : 'bg-white border-gray-200'
+                ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                : 'bg-white border-gray-200 hover:border-gray-300'
             }`}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className={`font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Week Streaks</h3>
                 <div className={`flex items-center gap-4 text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-sm">
                       <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span>Done</span>
+                    <span className="text-xs font-medium">Done</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300"></div>
-                    <span>Current</span>
+                    <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full border-2 border-blue-300 shadow-sm"></div>
+                    <span className="text-xs font-medium">Current</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span>Incomplete</span>
+                    <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-sm"></div>
+                    <span className="text-xs font-medium">Incomplete</span>
                   </div>
                 </div>
               </div>
@@ -527,11 +550,11 @@ export const StudentDashboard: React.FC = () => {
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
                         isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
                       }`}>
-                        <div className={`w-3 h-3 rounded-full ${
-                          streak.status === 'done' ? 'bg-green-500' :
-                          streak.status === 'current' ? 'bg-blue-500 border-2 border-blue-300' :
-                          'bg-red-500'
-                        }`} />
+                                              <div className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                        streak.status === 'done' ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-sm' :
+                        streak.status === 'current' ? 'bg-gradient-to-r from-blue-500 to-blue-600 border-2 border-blue-300 shadow-sm' :
+                        'bg-gradient-to-r from-red-500 to-red-600 shadow-sm'
+                      }`} />
                       </div>
                     </div>
                   ))}
@@ -559,37 +582,87 @@ export const StudentDashboard: React.FC = () => {
             />
 
             {/* Next Zoom Call */}
-            <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-700' 
-                : 'bg-white border-gray-200'
-            }`}>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className={`font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Next Zoom Call</h3>
-                  <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Mentor: Uttam Deb</p>
+            {getNextAttendTask() ? (
+              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                  : 'bg-white border-gray-200 hover:border-gray-300'
+              }`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className={`font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Next Zoom Call</h3>
+                    <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {getNextAttendTask()?.task_name || 'Zoom Meeting'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <div className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {getNextAttendTask()?.deadline ? 
+                      new Date(getNextAttendTask()?.deadline).toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      }) : 'TBD'
+                    }
+                  </div>
+                  <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {getNextAttendTask()?.meeting_time ? 
+                      (() => {
+                        // Convert 24-hour format to 12-hour AM/PM format
+                        const [hours, minutes] = getNextAttendTask()?.meeting_time.split(':');
+                        const hour = parseInt(hours);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                        return `${displayHour}:${minutes} ${ampm}`;
+                      })() : 
+                      getNextAttendTask()?.deadline ? 
+                        new Date(getNextAttendTask()?.deadline).toLocaleTimeString('en-US', { 
+                          hour: 'numeric', 
+                          minute: '2-digit' 
+                        }) : 'Time TBD'
+                    }
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => {
+                    const task = getNextAttendTask();
+                    if (task?.relevant_links && task.relevant_links.length > 0) {
+                      window.open(task.relevant_links[0], '_blank');
+                    } else {
+                      alert('No zoom link available for this meeting');
+                    }
+                  }}
+                  className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-lg transform hover:scale-[1.02] ${
+                    isDarkMode 
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white' 
+                      : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
+                  }`}>
+                  📹 Join Zoom
+                </button>
+              </div>
+            ) : (
+              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                  : 'bg-white border-gray-200 hover:border-gray-300'
+              }`}>
+                <div className="text-center">
+                  <h3 className={`font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>No Zoom Calls Scheduled</h3>
+                  <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    No zoom classes to attend soon. Check back later for updates.
+                  </p>
                 </div>
               </div>
-              
-              <div className="mb-4">
-                <div className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Thu, 3:30 PM</div>
-                <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>September 12, 2025</div>
-              </div>
-
-              <button className={`w-full py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-                isDarkMode 
-                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}>
-                📹 Join Zoom
-              </button>
-            </div>
+            )}
 
             {/* Mentors */}
-            <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
+            <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${
               isDarkMode 
-                ? 'bg-gray-800 border-gray-700' 
-                : 'bg-white border-gray-200'
+                ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
+                : 'bg-white border-gray-200 hover:border-gray-300'
             }`}>
               <h3 className={`font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Mentors</h3>
               

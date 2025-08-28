@@ -146,12 +146,12 @@ export const StudentProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
+      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} p-6`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-lg text-gray-600">Loading profile...</p>
+              <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Loading profile...</p>
             </div>
           </div>
         </div>
@@ -171,30 +171,36 @@ export const StudentProfile: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/student/dashboard')}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+            className={`flex items-center gap-2 transition-colors duration-200 ${
+              isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
+            }`}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
           
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+          <h1 className={`text-3xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Profile</h1>
         </div>
         
-        <div className="bg-white rounded-lg p-8 shadow-sm">
+        <div className={`rounded-lg p-8 shadow-sm transition-colors duration-200 ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
           {/* Profile Header */}
           <div className="flex items-start justify-between mb-8">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors duration-200 ${
+                isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+              }`}>
                 {profileData?.userData?.first_name?.[0] || profileData?.profile?.first_name?.[0] || 'S'}
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className={`text-3xl font-bold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {profileData?.userData?.first_name || profileData?.profile?.first_name || 'Student'}
                 </h2>
-                <p className="text-lg text-gray-600">
+                <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'Computer Science'} • {profileData?.profile?.year || '3rd'} Year
                 </p>
-                <p className="text-gray-500">{profileData?.profile?.institute || 'University'}</p>
+                <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{profileData?.profile?.institute || 'University'}</p>
               </div>
             </div>
             {isEditing ? (
@@ -246,28 +252,32 @@ export const StudentProfile: React.FC = () => {
             {/* Left Column */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <BookOpen className="w-5 h-5 text-gray-500" />
+                <BookOpen className={`w-5 h-5 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-500">Full Name</p>
+                  <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Full Name</p>
                   {isEditing ? (
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={editForm.first_name}
                         onChange={(e) => handleInputChange('first_name', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                         placeholder="First Name"
                       />
                       <input
                         type="text"
                         value={editForm.last_name}
                         onChange={(e) => handleInputChange('last_name', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                         placeholder="Last Name"
                       />
                     </div>
                   ) : (
-                    <p className="font-medium text-gray-900">
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {profileData?.userData?.first_name || 'Student'} {profileData?.userData?.last_name || ''}
                     </p>
                   )}
@@ -296,7 +306,7 @@ export const StudentProfile: React.FC = () => {
                       />
                     </div>
                   ) : (
-                    <p className="font-medium text-gray-900">
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'Computer Science'}
                     </p>
                   )}
@@ -308,15 +318,17 @@ export const StudentProfile: React.FC = () => {
                 <div className="flex-1">
                   <p className="text-sm text-gray-500">Academic Institute</p>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      value={editForm.institute}
-                      onChange={(e) => handleInputChange('institute', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Institute"
-                    />
+                                          <input
+                        type="text"
+                        value={editForm.institute}
+                        onChange={(e) => handleInputChange('institute', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                        placeholder="Institute"
+                      />
                   ) : (
-                    <p className="font-medium text-gray-900">{profileData?.profile?.institute || 'University'}</p>
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{profileData?.profile?.institute || 'University'}</p>
                   )}
                 </div>
               </div>
@@ -333,16 +345,20 @@ export const StudentProfile: React.FC = () => {
                       <input
                         type="email"
                         value={user?.email || ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${
+                          isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
+                        }`}
                         placeholder="Email"
                         disabled
                       />
-                      <div className="absolute right-2 top-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${
+                        isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
+                      }`}>
                         Read-only
                       </div>
                     </div>
                   ) : (
-                    <p className="font-medium text-gray-900">{user?.email || 'email@example.com'}</p>
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{user?.email || 'email@example.com'}</p>
                   )}
                 </div>
               </div>
@@ -355,7 +371,9 @@ export const StudentProfile: React.FC = () => {
                     <select
                       value={editForm.year}
                       onChange={(e) => handleInputChange('year', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                        isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="1st">1st Year</option>
                       <option value="2nd">2nd Year</option>
@@ -364,7 +382,7 @@ export const StudentProfile: React.FC = () => {
                       <option value="5th">5th Year</option>
                     </select>
                   ) : (
-                    <p className="font-medium text-gray-900">{profileData?.profile?.year || '3rd'} Year</p>
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{profileData?.profile?.year || '3rd'} Year</p>
                   )}
                 </div>
               </div>
@@ -378,15 +396,19 @@ export const StudentProfile: React.FC = () => {
                       <input
                         type="date"
                         value={profileData?.profile?.enrollment_date ? new Date(profileData.profile.enrollment_date).toISOString().split('T')[0] : ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${
+                          isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
+                        }`}
                         disabled
                       />
-                      <div className="absolute right-2 top-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${
+                        isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
+                      }`}>
                         Read-only
                       </div>
                     </div>
                   ) : (
-                    <p className="font-medium text-gray-900">
+                    <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {profileData?.profile?.enrollment_date ? 
                         new Date(profileData.profile.enrollment_date).toLocaleDateString() : 
                         'Not specified'

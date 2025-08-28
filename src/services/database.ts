@@ -537,7 +537,23 @@ export class DatabaseService {
         return [];
       }
 
-      return data || [];
+      // Transform database field names to frontend field names
+      const transformedTasks = (data || []).map((task: any) => ({
+        id: task.id,
+        week_id: task.week_id,
+        task_name: task.task_name,
+        task_details: task.task_details,
+        task_type: task.task_type,
+        relevant_links: task.relevant_links,
+        deadline: task.deadline,
+        estimated_hours: task.estimated_hours,
+        points: task.points,
+        is_required: task.is_required,
+        created_at: task.created_at,
+        meeting_time: task.meeting_time // Keep the original field name for now
+      }));
+
+      return transformedTasks;
     } catch (error) {
       console.error('Error in getRoadmapTasks:', error);
       return [];

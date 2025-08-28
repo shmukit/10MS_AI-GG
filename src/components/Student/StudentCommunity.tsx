@@ -250,18 +250,42 @@ export const StudentCommunity: React.FC = () => {
             
             {/* Communication CTAs at top right */}
             <div className="flex gap-3">
-              <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                <span>📱</span>
-                WhatsApp
-              </button>
-              <button className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                <span>💬</span>
-                Discord
-              </button>
-              <button className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                <span>🚨</span>
-                Emergency
-              </button>
+              {batch?.whatsapp_link && (
+                <a 
+                  href={batch.whatsapp_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <span>📱</span>
+                  WhatsApp
+                </a>
+              )}
+              {batch?.discord_link && (
+                <a 
+                  href={batch.discord_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  <span>💬</span>
+                  Discord
+                </a>
+              )}
+              {batch?.emergency_contact && (
+                <a 
+                  href={`tel:${batch.emergency_contact}`}
+                  className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <span>🚨</span>
+                  Emergency
+                </a>
+              )}
+              {!batch?.whatsapp_link && !batch?.discord_link && !batch?.emergency_contact && (
+                <div className="text-sm text-gray-500 italic px-4 py-2">
+                  No community links available yet
+                </div>
+              )}
             </div>
           </div>
         </div>
