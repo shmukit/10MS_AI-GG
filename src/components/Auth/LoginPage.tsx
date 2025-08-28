@@ -7,7 +7,6 @@ export const LoginPage: React.FC = () => {
   const { signIn, signUp, loading, error, user } = useAuthContext();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  const [role, setRole] = useState<'student' | 'mentor'>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -16,18 +15,18 @@ export const LoginPage: React.FC = () => {
     confirmPassword: ''
   });
 
-  // Redirect if already logged in
+  // Redirect if already logged in - All users go to student dashboard
   useEffect(() => {
     if (user) {
-      // Role-based navigation will be handled by App.tsx after role is fetched
-      // This prevents premature navigation before the role is available
+      console.log('✔ User logged in, redirecting to student dashboard');
+      navigate('/student/dashboard');
     }
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submitted with:', { email: formData.email, isLogin, role });
+    console.log('Form submitted with:', { email: formData.email, isLogin });
     
     try {
       if (isLogin) {
@@ -36,7 +35,7 @@ export const LoginPage: React.FC = () => {
         console.log('Sign in result:', result);
         
         if (result.success) {
-          console.log('✔ Sign in successful, role will be fetched from database');
+          console.log('✔ Sign in successful, redirecting to student dashboard');
         }
       } else {
         console.log('Attempting sign up...');
@@ -44,7 +43,7 @@ export const LoginPage: React.FC = () => {
         console.log('Sign up result:', result);
         
         if (result.success) {
-          console.log('✔ Sign up successful, navigation will be handled by useEffect');
+          console.log('✔ Sign up successful, redirecting to student dashboard');
         }
       }
     } catch (error) {
@@ -73,34 +72,6 @@ export const LoginPage: React.FC = () => {
           <p className="text-sm mt-2 transition-colors duration-200 text-gray-600">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
           </p>
-        </div>
-
-        {/* Role Toggle */}
-        <div className="mb-6">
-          <div className="flex rounded-lg p-1 transition-colors duration-200 bg-gray-100">
-            <button
-              type="button"
-              onClick={() => setRole('student')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                role === 'student'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Student
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('mentor')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                role === 'mentor'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Mentor
-            </button>
-          </div>
         </div>
 
         {/* Error Display */}
@@ -133,11 +104,11 @@ export const LoginPage: React.FC = () => {
             <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700">
               Email Address
             </label>
-                          <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               placeholder="Enter your email"
               required
@@ -204,6 +175,13 @@ export const LoginPage: React.FC = () => {
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
+          </p>
+        </div>
+
+        {/* Info for mentors */}
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-blue-700 text-center">
+            <strong>For mentors:</strong> After login, navigate to <span className="font-mono">/mentor/dashboard</span> to access mentor features
           </p>
         </div>
       </div>
