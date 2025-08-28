@@ -68,7 +68,7 @@ export const generateRoadmapData = (
         return {
           id: task.id,
           title: task.task_name,
-          type: 'exercise' as const, // Default to exercise, could be enhanced based on task_type
+          type: task.task_type as any, // Use actual task_type from database
           url: task.relevant_links?.[0] || '#',
           completed: isCompleted
         };
