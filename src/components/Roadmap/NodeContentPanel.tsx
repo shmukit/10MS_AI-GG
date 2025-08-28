@@ -154,7 +154,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
 
   return (
     <>
-      <div className={`w-1/3 border-l h-full flex flex-col transition-colors duration-200 ${
+      <div className={`w-full lg:w-1/3 border-t lg:border-l lg:border-t-0 h-full flex flex-col transition-colors duration-200 ${
         isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-200'
