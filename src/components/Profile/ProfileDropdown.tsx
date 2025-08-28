@@ -44,19 +44,11 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     }
   };
 
-    const handleProfileClick = () => {
-    if (userRole === 'mentor') {
-      navigate('/mentor/profile');
-    } else {
-      // For students, use slug based on first name
-      const firstName = userName || 'student';
-      const slug = firstName.toLowerCase().replace(/\s+/g, '-');
-      navigate(`/student/profile/${slug}`);
-    }
+  const handleProfileClick = () => {
+    // Always navigate to student profile as it's the default user profile
+    navigate('/student/profile');
     setIsOpen(false);
   };
-
-
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -107,8 +99,6 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                 <User className="w-4 h-4" />
                 Profile
               </button>
-
-
 
               {/* Divider */}
               <div className={`my-1 border-t transition-colors duration-200 ${

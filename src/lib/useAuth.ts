@@ -8,6 +8,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<AuthError | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [roleLoading, setRoleLoading] = useState(true)
 
   useEffect(() => {
     // Get initial session
@@ -123,6 +124,7 @@ export function useAuth() {
   // Fetch user role from custom database
   const fetchUserRole = async (email: string) => {
     try {
+      setRoleLoading(true)
       console.log('🔍 Fetching user role for email:', email);
       const { data, error } = await supabase
         .from('users')
@@ -140,6 +142,8 @@ export function useAuth() {
     } catch (err) {
       console.error('❌ Error fetching user role:', err);
       return null
+    } finally {
+      setRoleLoading(false)
     }
   }
 
@@ -147,13 +151,16 @@ export function useAuth() {
   useEffect(() => {
     if (session?.user?.email) {
       console.log('🔄 Session changed, fetching role for:', session.user.email);
+      setRoleLoading(true)
       fetchUserRole(session.user.email).then(role => {
         console.log('🎭 Setting user role to:', role);
         setUserRole(role)
+        setRoleLoading(false)
       })
     } else {
       console.log('🔄 No session, clearing user role');
       setUserRole(null)
+      setRoleLoading(false)
     }
   }, [session])
 
@@ -163,6 +170,7 @@ export function useAuth() {
     loading,
     error,
     userRole,
+    roleLoading,
     signIn,
     signUp,
     signOut,
