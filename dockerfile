@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20.19.2 AS builder
 
 ARG AWS_DEFAULT_REGION
 ARG AWS_ACCESS_KEY_ID
