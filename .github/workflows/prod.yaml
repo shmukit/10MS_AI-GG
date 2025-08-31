@@ -34,8 +34,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
           SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
         run: |
-          docker build . --file dockerfile -t $ECR_REGISTRY/tenms_ai_gg:${{ steps.vars.outputs.tag }}
-          docker push $ECR_REGISTRY/tenms_ai_gg:${{ steps.vars.outputs.tag }}
+          docker build . --file dockerfile -t $ECR_REGISTRY/tenms-ai-gg:${{ steps.vars.outputs.tag }}
+          docker push $ECR_REGISTRY/tenms-ai-gg:${{ steps.vars.outputs.tag }}
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -50,4 +50,4 @@ jobs:
 
       - name: Deploy to AKS Cluster
         run: |
-          kubectl set image --record deployment/tenms_ai_gg tenms_ai_gg=${{ secrets.AWS_ECR_REGISTRY }}/tenms_ai_gg:${{ steps.vars.outputs.tag }}
+          kubectl set image --record deployment/tenms-ai-gg tenms-ai-gg=${{ secrets.AWS_ECR_REGISTRY }}/tenms-ai-gg:${{ steps.vars.outputs.tag }}
