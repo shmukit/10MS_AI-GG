@@ -68,20 +68,45 @@ export function useAuth() {
     }
   }
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, name?: string) => {
     try {
       setError(null)
+      
+      // Parse first and last name from full name
+      let firstName = '';
+      let lastName = '';
+      if (name) {
+        const nameParts = name.trim().split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: import.meta.env.VITE_AUTH_REDIRECT_URL
+          emailRedirectTo: import.meta.env.VITE_AUTH_REDIRECT_URL,
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
         }
       })
       if (error) {
         setError(error)
         return { success: false, error }
       }
+      
+      // Check if email confirmation is required
+      if (data.user && !data.user.email_confirmed_at) {
+        return { 
+          success: true, 
+          data,
+          requiresEmailConfirmation: true,
+          message: 'Please check your email and click the confirmation link to complete your registration.'
+        }
+      }
+      
       return { success: true, data }
     } catch (err) {
       console.error('Sign up error:', err)
