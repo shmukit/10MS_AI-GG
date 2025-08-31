@@ -23,6 +23,8 @@ export const LoginPage: React.FC = () => {
     }
   }, [user, navigate]);
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -39,11 +41,16 @@ export const LoginPage: React.FC = () => {
         }
       } else {
         console.log('Attempting sign up...');
-        const result = await signUp(formData.email, formData.password);
+        const result = await signUp(formData.email, formData.password, formData.name);
         console.log('Sign up result:', result);
         
         if (result.success) {
-          console.log('✔ Sign up successful, redirecting to student dashboard');
+          if (result.requiresEmailConfirmation) {
+            console.log('⚠️ Sign up successful but email confirmation required');
+            // Show message to user about email confirmation
+          } else {
+            console.log('✔ Sign up successful, redirecting to student dashboard');
+          }
         }
       }
     } catch (error) {
@@ -178,12 +185,7 @@ export const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Info for mentors */}
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-xs text-blue-700 text-center">
-            <strong>For mentors:</strong> After login, navigate to <span className="font-mono">/mentor/dashboard</span> to access mentor features
-          </p>
-        </div>
+
       </div>
     </div>
   );
