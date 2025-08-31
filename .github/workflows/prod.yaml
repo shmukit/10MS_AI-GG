@@ -34,7 +34,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
           SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
         run: |
-          docker build . --file dockerfile -t $ECR_REGISTRY/tenms-ai-gg:${{ steps.vars.outputs.tag }}
+          docker build . --file dockerfile -t $ECR_REGISTRY/tenms-ai-gg:${{ steps.vars.outputs.tag }} --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} --build-arg AWS_DEFAULT_REGION=ap-southeast-1
           docker push $ECR_REGISTRY/tenms-ai-gg:${{ steps.vars.outputs.tag }}
 
       - name: Login to Azure

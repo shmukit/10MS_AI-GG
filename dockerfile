@@ -1,6 +1,11 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
+ARG AWS_DEFAULT_REGION
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+RUN echo $AWS_SECRET_ACCESS_KEY
+
 # Set working directory
 WORKDIR /app
 
@@ -11,6 +16,17 @@ RUN npm install
 
 # Copy project files
 COPY . .
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    python3 \
+    python3-pip \
+ && pip3 install --break-system-packages --upgrade pip \
+ && pip3 install --break-system-packages --no-cache-dir awscli \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN aws ssm get-parameters --output text --region ap-southeast-1 --names prod-tenms-ai-gg --with-decryption --query Parameters[0].Value > .env
 
 # Build the app
 RUN npm run build
