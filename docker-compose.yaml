@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  ai-gg-app:
+    container_name: ai-gg
+    build:
+      context: .
+      dockerfile: dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3100:80
+
