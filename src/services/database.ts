@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../lib/cache';
 
 // Types for database entities
 export interface User {
@@ -1071,12 +1072,17 @@ export class DatabaseService {
     userData: User | null;
   }> {
     try {
-      console.log('🔄 getDashboardData called with selectedRoadmapId:', selectedRoadmapId);
+      // Check cache first
+      const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, userId, selectedRoadmapId || 'default');
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+
       // IMMEDIATE cleanup of duplicate profiles before doing anything else
-      console.log('🔄 Starting immediate cleanup of duplicate profiles...');
       await this.cleanupDuplicateProfiles(userId);
       
-      console.log('🔄 Fetching dashboard data components...');
+      // Fetching dashboard data components
       const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
         this.getStudentProfile(userId),
         this.getStudentBatch(userId),
@@ -1086,13 +1092,13 @@ export class DatabaseService {
         this.getUserById(userId)
       ]);
       
-      console.log('📊 Dashboard data components fetched:');
-      console.log('  - Profile:', profile ? '✅' : '❌');
-      console.log('  - Batch:', batch ? '✅' : '❌');
-      console.log('  - Roadmap:', roadmap ? '✅' : '❌');
-      console.log('  - Enrolled Roadmaps:', enrolledRoadmaps?.length || 0, 'items');
-      console.log('  - Progress:', progress?.length || 0, 'items');
-      console.log('  - User Data:', userData ? '✅' : '❌');
+      // Dashboard data components fetched
+
+
+
+
+
+
 
       // Get notices and mentors based on the selected roadmap
       let notices: Notice[] = [];
@@ -1100,7 +1106,7 @@ export class DatabaseService {
       
       if (selectedRoadmapId) {
         // If a specific roadmap is selected, get data for that roadmap
-        console.log('🔄 Getting roadmap-specific data for:', selectedRoadmapId);
+        // Getting roadmap-specific data
         
         // Get the roadmap to find its associated batch
         const { data: roadmapData, error: roadmapError } = await supabase
@@ -1221,10 +1227,7 @@ export class DatabaseService {
         this.getCurrentWeekTasks(userId, selectedRoadmapId),
         this.getUpcomingTasks(userId, selectedRoadmapId)
       ]);
-      console.log('📝 Current week tasks:', currentWeekTasks.length);
-      console.log('📝 Upcoming tasks:', upcomingTasks.length);
-
-      return {
+      const dashboardData = {
         profile,
         batch,
         roadmap,
@@ -1237,8 +1240,13 @@ export class DatabaseService {
         currentWeekTasks,
         userData
       };
+
+      // Cache the result for faster subsequent loads
+      cache.set(cacheKey, dashboardData, CACHE_TTL.MEDIUM);
+
+      return dashboardData;
     } catch (error) {
-      console.error('Error in getDashboardData:', error);
+      // Error in getDashboardData
       return {
         profile: null,
         batch: null,
