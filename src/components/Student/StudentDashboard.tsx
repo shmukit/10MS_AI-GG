@@ -269,7 +269,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
               <div className="flex-1">
-                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Good afternoon, {dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || 'Student'}</h2>
+                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Hello, {dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || 'Student'}</h2>
                 <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI-Enabled Group Guidance Program</p>
               </div>
               
