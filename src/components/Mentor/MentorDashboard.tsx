@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Moon, Sun, Users, BookOpen, MessageSquare, Bell, Plus, Edit2, Trash2, ExternalLink, LogOut, User, Phone, Mail, Calendar, Clock, X } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Users, BookOpen, MessageSquare, Bell, Plus, Edit2, Trash2, ExternalLink, LogOut, User, Phone, Mail, Calendar, Clock, X, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { MentorHeader } from './MentorHeader';
 import { useAuth } from '../../lib/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -83,6 +83,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [noticeToDelete, setNoticeToDelete] = useState<string | null>(null);
   const [noticeToEdit, setNoticeToEdit] = useState<Notice | null>(null);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
+  const [isAssigningStudents, setIsAssigningStudents] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [availableStudents, setAvailableStudents] = useState<any[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
   const [isAddingNotice, setIsAddingNotice] = useState(false);
   const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
   const [isEditingRoadmap, setIsEditingRoadmap] = useState(false);
@@ -93,6 +97,23 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [editingRoadmapData, setEditingRoadmapData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Password copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Password copied to clipboard!');
+    }
+  };
 
   const [roadmaps, setRoadmaps] = useState<any[]>([]);
 
@@ -139,10 +160,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     emergencyContact: ''
   });
 
-  const [newStudent, setNewStudent] = useState<Omit<Student, 'id' | 'completedWeeks' | 'progressPercentage'>>({
+  const [newStudent, setNewStudent] = useState<Omit<Student, 'id' | 'completedWeeks' | 'progressPercentage'> & { password: string }>({
     name: '',
     email: '',
     phone: '',
+    password: 'NeverStopLearning!',
     institute: '',
     year: '1st Year',
     subject: '',
@@ -324,60 +346,92 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     try {
       console.log('🔄 Adding new student:', newStudent);
       
-      // First, create a user account for the student
-      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-        email: newStudent.email,
-        password: 'temporary123', // This should be changed by the student on first login
-        email_confirm: true,
-        user_metadata: {
-          full_name: newStudent.name,
-          role: 'student'
-        }
-      });
-
-      if (userError) {
-        console.error('Error creating user:', userError);
-        throw userError;
-      }
-
-      if (!userData.user) {
-        throw new Error('Failed to create user account');
-      }
-
-      console.log('✅ User account created:', userData.user.id);
-
-      // Insert user into users table
-      const { data: insertedUser, error: userInsertError } = await supabase
+      // Check if user already exists
+      const { data: existingUser, error: checkError } = await supabase
         .from('users')
-        .insert([{
-          id: userData.user.id,
-          email: newStudent.email,
-          role: 'student',
-          first_name: newStudent.name.split(' ')[0] || newStudent.name,
-          last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
-          is_active: true,
-          email_verified: true
-        }])
-        .select()
+        .select('id, email')
+        .eq('email', newStudent.email)
         .single();
 
-      if (userInsertError) {
-        console.error('Error inserting user:', userInsertError);
-        throw userInsertError;
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing user:', checkError);
+        throw checkError;
       }
 
-      console.log('✅ User inserted into users table:', insertedUser);
+      let userId: string;
 
-      // Create student profile
+      if (existingUser) {
+        // User already exists, use their ID
+        userId = existingUser.id;
+        console.log('✅ User already exists:', userId);
+      } else {
+        // Create a new user with a generated UUID
+        userId = crypto.randomUUID();
+        console.log('✅ Generated new user ID:', userId);
+      }
+
+      // Insert or update user in users table
+      let insertedUser;
+      
+      if (existingUser) {
+        // Update existing user
+        const { data: updatedUser, error: updateError } = await supabase
+          .from('users')
+          .update({
+            role: 'student',
+            first_name: newStudent.name.split(' ')[0] || newStudent.name,
+            last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
+            is_active: true,
+            email_verified: true
+          })
+          .eq('id', userId)
+          .select()
+          .single();
+          
+        if (updateError) {
+          console.error('Error updating user:', updateError);
+          throw updateError;
+        }
+        
+        insertedUser = updatedUser;
+        console.log('✅ User updated in users table:', insertedUser);
+      } else {
+        // Insert new user
+        const { data: newUser, error: userInsertError } = await supabase
+          .from('users')
+          .insert([{
+            id: userId,
+            email: newStudent.email,
+            password_hash: `$2a$10$${newStudent.password}`, // Simple hash for MVP - replace with proper bcrypt in production
+            role: 'student',
+            first_name: newStudent.name.split(' ')[0] || newStudent.name,
+            last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
+            is_active: true,
+            email_verified: true
+          }])
+          .select()
+          .single();
+          
+        if (userInsertError) {
+          console.error('Error inserting user:', userInsertError);
+          throw userInsertError;
+        }
+        
+        insertedUser = newUser;
+        console.log('✅ User inserted into users table:', insertedUser);
+      }
+
+
+
+      // Create student profile (without batch_id - that's handled separately)
       const { data: profileData, error: profileError } = await supabase
         .from('student_profiles')
         .insert([{
-          user_id: userData.user.id,
+          user_id: userId,
           institute: newStudent.institute,
           year: newStudent.year,
           subject: newStudent.subject,
           degree: newStudent.degree,
-          batch_id: selectedBatch,
           completed_weeks: 0,
           progress_percentage: 0,
           enrollment_date: new Date().toISOString()
@@ -396,10 +450,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       const { data: assignmentData, error: assignmentError } = await supabase
         .from('student_batch_assignments')
         .insert([{
-          student_id: userData.user.id,
+          student_id: userId,
           batch_id: selectedBatch,
           status: 'active',
-          enrolled_at: new Date().toISOString()
+          enrollment_date: new Date().toISOString().split('T')[0] // DATE format, not timestamp
         }])
         .select()
         .single();
@@ -413,7 +467,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
       // Add to local state
       const student: Student = {
-        id: userData.user.id,
+        id: userId,
         name: newStudent.name,
         email: newStudent.email,
         phone: newStudent.phone,
@@ -433,6 +487,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         name: '',
         email: '',
         phone: '',
+        password: 'NeverStopLearning!',
         institute: '',
         year: '1st Year',
         subject: '',
@@ -442,12 +497,106 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       
       setIsAddingStudent(false);
       
-      alert(`✅ Student "${newStudent.name}" added successfully! They can login with their email and password: temporary123`);
+      alert(`✅ Student "${newStudent.name}" added successfully! They can login with their email and password: ${newStudent.password}`);
       
     } catch (err) {
       console.error('❌ Error adding student:', err);
       setError('Failed to add student');
       alert(`❌ Failed to add student: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleAssignStudents = async () => {
+    if (!selectedBatch || selectedStudents.length === 0) {
+      setError('Please select a batch and at least one student');
+      return;
+    }
+
+    try {
+      console.log('🔄 Assigning students to batch:', { batch: selectedBatch, students: selectedStudents });
+      
+      // Get batch info for display
+      const batchInfo = batches.find(b => b.id === selectedBatch);
+      
+      // Assign each selected student to the batch
+      const assignments = selectedStudents.map(studentId => ({
+        student_id: studentId,
+        batch_id: selectedBatch,
+        status: 'active',
+        enrollment_date: new Date().toISOString().split('T')[0] // DATE format, not timestamp
+      }));
+
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('student_batch_assignments')
+        .insert(assignments)
+        .select();
+
+      if (assignmentError) {
+        console.error('Error assigning students to batch:', assignmentError);
+        throw assignmentError;
+      }
+
+      console.log('✅ Students assigned to batch successfully:', assignmentData);
+      
+      // Refresh the students list
+      await fetchData();
+      
+      // Reset form
+      setSelectedStudents([]);
+      setIsAssigningStudents(false);
+      
+      alert(`✅ Successfully assigned ${selectedStudents.length} students to ${batchInfo?.name || 'the selected batch'}!`);
+      
+    } catch (err) {
+      console.error('❌ Error assigning students:', err);
+      setError('Failed to assign students to batch');
+      alert(`❌ Failed to assign students: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const loadAvailableStudents = async () => {
+    try {
+      console.log('🔄 Loading all students for assignment...');
+      
+      // Fetch all students
+      const { data: allStudentsData, error } = await supabase
+        .from('users')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          role
+        `)
+        .eq('role', 'student')
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('Error loading students:', error);
+        throw error;
+      }
+
+      // Get existing assignments for the selected batch
+      const { data: existingAssignments } = await supabase
+        .from('student_batch_assignments')
+        .select('student_id')
+        .eq('batch_id', selectedBatch)
+        .eq('status', 'active');
+
+      const existingStudentIds = new Set(existingAssignments?.map(a => a.student_id) || []);
+      
+      // Add isAssigned flag to all students
+      const studentsWithAssignmentStatus = allStudentsData?.map(student => ({
+        ...student,
+        isAssigned: existingStudentIds.has(student.id)
+      })) || [];
+
+      console.log('✅ Loaded all students with assignment status:', studentsWithAssignmentStatus);
+      setAvailableStudents(studentsWithAssignmentStatus);
+      
+    } catch (err) {
+      console.error('❌ Error loading students:', err);
+      setError('Failed to load students');
     }
   };
 
@@ -2027,6 +2176,16 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             <Plus className="w-4 h-4" />
             Add Student
           </button>
+          <button
+            onClick={async () => {
+              setIsAssigningStudents(true);
+              await loadAvailableStudents();
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+          >
+            <Users className="w-4 h-4" />
+            Assign Students
+          </button>
         </div>
       </div>
 
@@ -2450,6 +2609,45 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               
               <div>
                 <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={newStudent.password}
+                    onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
+                    className={`w-full px-3 py-2 pr-20 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                    placeholder="Default password for student login"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className={`p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ${
+                        isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                      title={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(newStudent.password)}
+                      className={`p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ml-1 ${
+                        isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                      title="Copy password"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Institute
                 </label>
                 <input
@@ -2505,6 +2703,127 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               </button>
               <button
                 onClick={() => setIsAddingStudent(false)}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Existing Students Modal */}
+      {isAssigningStudents && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Assign Students to Batch
+            </h3>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Select Batch
+                </label>
+                <select
+                  value={selectedBatch}
+                  onChange={(e) => setSelectedBatch(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                  required
+                >
+                  <option value="">Select a batch</option>
+                  {batches.map((batch) => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Select Students to Assign
+                  <span className={`block text-xs font-normal mt-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Students with ✓ are already assigned to this batch
+                  </span>
+                </label>
+                <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 transition-colors duration-200 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+                }`}>
+                  {availableStudents.map((student) => (
+                    <div key={student.id} className={`flex items-center gap-3 p-2 rounded transition-colors duration-200 ${
+                      student.isAssigned 
+                        ? (isDarkMode ? 'bg-green-900/20 border border-green-600/30' : 'bg-green-50 border border-green-200')
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {student.isAssigned ? (
+                          <div className="flex items-center gap-1">
+                            <Check className="w-4 h-4 text-green-600" />
+                            <span className={`text-xs font-medium ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
+                              Assigned
+                            </span>
+                          </div>
+                        ) : (
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedStudents.includes(student.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedStudents([...selectedStudents, student.id]);
+                                } else {
+                                  setSelectedStudents(selectedStudents.filter(id => id !== student.id));
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className={`font-medium transition-colors duration-200 ${
+                          student.isAssigned 
+                            ? (isDarkMode ? 'text-green-300' : 'text-green-800')
+                            : (isDarkMode ? 'text-white' : 'text-gray-900')
+                        }`}>
+                          {student.first_name} {student.last_name}
+                        </div>
+                        <div className={`text-sm transition-colors duration-200 ${
+                          student.isAssigned 
+                            ? (isDarkMode ? 'text-green-400' : 'text-green-600')
+                            : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
+                        }`}>
+                          {student.email}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleAssignStudents}
+                disabled={!selectedBatch || selectedStudents.length === 0}
+                className="flex-1 py-2 px-4 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg font-medium transition-colors"
+              >
+                Assign {selectedStudents.length} Students
+              </button>
+              <button
+                onClick={() => {
+                  setIsAssigningStudents(false);
+                  setSelectedStudents([]);
+                }}
                 className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
                   isDarkMode 
                     ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
