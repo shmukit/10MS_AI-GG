@@ -2,6 +2,7 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { ProfileDropdown } from '../Profile/ProfileDropdown';
 import { useTheme } from '../../lib/ThemeContext';
+import { SheSTEMLogo } from '../Logo/SheSTEMLogo';
 
 interface MentorHeaderProps {
   userName?: string;
@@ -21,10 +22,7 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xs">10MS</span>
-            </div>
-            <h1 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>10MS SheSTEM</h1>
+            <SheSTEMLogo />
             {pageTitle && (
               <span className={`text-lg text-gray-500 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 • {pageTitle}

@@ -275,76 +275,82 @@ export class DatabaseService {
       console.log('Fetching batch for user:', userId);
       
       // Use the new student_batch_assignments table
-      const { data: batchAssignment, error: assignmentError } = await supabase
+      console.log('🔍 Querying student_batch_assignments for user:', userId);
+      const { data: batchAssignments, error: assignmentError } = await supabase
         .from('student_batch_assignments')
         .select(`
           batch_id,
           batches!inner(*)
         `)
         .eq('student_id', userId)
-        .eq('status', 'active')
-        .single();
+        .eq('status', 'active');
+      
+      console.log('📊 Batch assignments query result:', { batchAssignments, assignmentError });
 
       if (assignmentError) {
         console.error('Error fetching batch assignment:', assignmentError);
-        // Try the old method as fallback
-        const { data: profile, error: profileError } = await supabase
-          .from('student_profiles')
-          .select('batch_id')
-          .eq('user_id', userId)
-          .single();
+        return null;
+      }
 
-        if (profileError) {
-          console.error('Error fetching student profile:', profileError);
-          // Profile doesn't exist, try to create one
-          const newProfile = await this.createDefaultStudentProfile(userId);
-          if (newProfile?.batch_id) {
-            // Profile was created with a batch, fetch it
-            const { data: batchData, error: batchError } = await supabase
-              .from('batches')
-              .select('*')
-              .eq('id', newProfile.batch_id)
-              .single();
+      if (batchAssignments && batchAssignments.length > 0) {
+        // Get the most recent active assignment
+        const latestAssignment = batchAssignments[0];
+        console.log('✅ Batch found from new assignment table:', latestAssignment.batches);
+        return latestAssignment.batches as any;
+      }
 
-            if (batchError) {
-              console.error('Error fetching batch from new profile:', batchError);
-              return null;
-            }
+      console.log('⚠️  No active batch assignments found, trying fallback method');
+      
+      // Try the old method as fallback
+      const { data: profile, error: profileError } = await supabase
+        .from('student_profiles')
+        .select('batch_id')
+        .eq('user_id', userId)
+        .single();
 
-            console.log('Batch found from new profile:', batchData);
-            return batchData;
-          }
-        }
-
-        if (profile?.batch_id) {
-          console.log('User has batch_id:', profile.batch_id);
-          
-          const { data, error } = await supabase
+      if (profileError) {
+        console.error('Error fetching student profile:', profileError);
+        // Profile doesn't exist, try to create one
+        const newProfile = await this.createDefaultStudentProfile(userId);
+        if (newProfile?.batch_id) {
+          // Profile was created with a batch, fetch it
+          const { data: batchData, error: batchError } = await supabase
             .from('batches')
             .select('*')
-            .eq('id', profile.batch_id)
+            .eq('id', newProfile.batch_id)
             .single();
 
-          if (error) {
-            console.error('Error fetching batch:', error);
+          if (batchError) {
+            console.error('Error fetching batch from new profile:', batchError);
             return null;
           }
 
-          console.log('Batch found:', data);
-          return data;
+          console.log('Batch found from new profile:', batchData);
+          return batchData;
+        }
+      }
+
+      if (profile?.batch_id) {
+        console.log('User has batch_id:', profile.batch_id);
+        
+        const { data, error } = await supabase
+          .from('batches')
+          .select('*')
+          .eq('id', profile.batch_id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching batch:', error);
+          return null;
         }
 
-        console.log('No batch assigned to user:', userId);
-        // Try to assign user to an available batch
-        return await this.assignUserToAvailableBatch(userId);
+        console.log('Batch found:', data);
+        return data;
       }
 
-      if (batchAssignment?.batches) {
-        console.log('Batch found from new assignment table:', batchAssignment.batches);
-        return batchAssignment.batches as any; // Type assertion to fix the array issue
-      }
-
-      console.log('No batch assignment found for user:', userId);
+      console.log('No batch assigned to user:', userId);
+      // Don't auto-assign here to prevent conflicts - let the dashboard handle it
+      // The user should have been assigned during signup or by admin
       return null;
     } catch (error) {
       console.error('Error in getStudentBatch:', error);
@@ -357,44 +363,175 @@ export class DatabaseService {
     try {
       console.log('Attempting to assign user to available batch:', userId);
       
-      // First, try to find any existing batch
-      const { data: existingBatches, error: existingError } = await supabase
-        .from('batches')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: true })
-        .limit(1);
+      // Check if user has a specific intended roadmap (from email domain or other criteria)
+      const userData = await this.getUserById(userId);
+      let preferredRoadmapId: string | null = null;
+      
+      // Check if user should be assigned to Augmedix roadmap based on email
+      if (userData?.email?.includes('10minuteschool.com') || userData?.email?.includes('lightcastlepartners.com')) {
+        console.log('🏢 Company email detected:', userData.email, '- Looking for Augmedix roadmap');
+        
+        // First try exact title match for "Augmedix" (case insensitive)
+        let { data: augmedixRoadmap, error: exactError } = await supabase
+          .from('roadmaps')
+          .select('id, title')
+          .ilike('title', '%augmedix%')
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+        
+        if (exactError && exactError.code !== 'PGRST116') {
+          console.error('Error searching for Augmedix roadmap:', exactError);
+        }
+        
+        // If exact match failed, try broader search
+        if (!augmedixRoadmap) {
+          console.log('🔍 Exact Augmedix match not found, trying broader search...');
+          const { data: allRoadmaps, error: allError } = await supabase
+            .from('roadmaps')
+            .select('id, title, description')
+            .eq('is_active', true);
+          
+          if (!allError && allRoadmaps) {
+            // Find roadmap that contains "augmedix" in title or description
+            augmedixRoadmap = allRoadmaps.find(r => 
+              r.title?.toLowerCase().includes('augmedix') || 
+              r.description?.toLowerCase().includes('augmedix')
+            ) || null;
+            
+            if (augmedixRoadmap) {
+              console.log('🎯 Found Augmedix roadmap via broader search:', augmedixRoadmap.title);
+            } else {
+              // Try to find a roadmap with "machine learning" or "ai" for Augmedix users
+              augmedixRoadmap = allRoadmaps.find(r => 
+                r.title?.toLowerCase().includes('machine learning') || 
+                r.title?.toLowerCase().includes('ai') ||
+                r.title?.toLowerCase().includes('ml')
+              ) || null;
+              
+              if (augmedixRoadmap) {
+                console.log('🤖 Found ML/AI roadmap for company user:', augmedixRoadmap.title);
+              }
+            }
+          }
+        }
+        
+        if (augmedixRoadmap) {
+          preferredRoadmapId = augmedixRoadmap.id;
+          console.log('✅ Company user will be assigned to roadmap:', augmedixRoadmap.title, 'ID:', preferredRoadmapId);
+        } else {
+          console.warn('⚠️ No suitable roadmap found for company email:', userData.email);
+        }
+      }
+      
+      // First, try to find existing batch with preferred roadmap
+      let existingBatches;
+      if (preferredRoadmapId) {
+        const { data, error } = await supabase
+          .from('batches')
+          .select('*')
+          .eq('status', 'active')
+          .eq('roadmap_id', preferredRoadmapId)
+          .order('created_at', { ascending: true })
+          .limit(1);
+          
+        if (!error && data && data.length > 0) {
+          existingBatches = data;
+          console.log('Found preferred roadmap batch:', existingBatches[0]);
+        }
+      }
+      
+      // If no preferred batch found, try any existing batch
+      if (!existingBatches || existingBatches.length === 0) {
+        const { data, error: existingError } = await supabase
+          .from('batches')
+          .select('*')
+          .eq('status', 'active')
+          .order('created_at', { ascending: true })
+          .limit(1);
 
-      if (existingError) {
-        console.error('Error fetching existing batches:', existingError);
+        if (existingError) {
+          console.error('Error fetching existing batches:', existingError);
+        } else {
+          existingBatches = data;
+        }
       }
 
       if (existingBatches && existingBatches.length > 0) {
         const selectedBatch = existingBatches[0];
         console.log('Found existing batch for assignment:', selectedBatch);
         
-        // Try to update student profile with batch_id
-        const { error: updateError } = await supabase
-          .from('student_profiles')
-          .update({ batch_id: selectedBatch.id })
-          .eq('user_id', userId);
+        // Create assignment in student_batch_assignments table
+        const { error: assignmentError } = await supabase
+          .from('student_batch_assignments')
+          .insert([{
+            student_id: userId,
+            batch_id: selectedBatch.id,
+            status: 'active',
+            enrollment_date: new Date().toISOString().split('T')[0]
+          }]);
 
-        if (updateError) {
-          console.error('Error updating student profile with batch:', updateError);
+        if (assignmentError) {
+          console.error('Error creating batch assignment:', assignmentError);
         }
 
         return selectedBatch;
       }
 
-      // If no existing batches, create a new one
+      // If no existing batches, create a new one with appropriate roadmap
       console.log('No existing batches found, creating new batch');
+      
+      // Determine roadmap for new batch
+      let roadmapId = preferredRoadmapId;
+      let batchName = 'General Learning Cohort - Batch 1';
+      
+      if (preferredRoadmapId) {
+        // Get roadmap details for proper naming
+        const { data: roadmapData } = await supabase
+          .from('roadmaps')
+          .select('title')
+          .eq('id', preferredRoadmapId)
+          .single();
+        
+        if (roadmapData) {
+          batchName = `${roadmapData.title} - Batch 1`;
+          console.log('🎯 Creating new batch with preferred roadmap:', roadmapData.title);
+        }
+      } else {
+        console.log('🔍 No preferred roadmap, selecting default...');
+        
+        // Prioritize non-Python roadmaps for better user experience
+        const { data: availableRoadmaps } = await supabase
+          .from('roadmaps')
+          .select('id, title')
+          .eq('is_active', true)
+          .order('created_at', { ascending: true });
+        
+        if (availableRoadmaps && availableRoadmaps.length > 0) {
+          // Try to avoid Python as the default (look for other options first)
+          const nonPythonRoadmap = availableRoadmaps.find(r => 
+            !r.title?.toLowerCase().includes('python')
+          );
+          
+          const selectedRoadmap = nonPythonRoadmap || availableRoadmaps[0];
+          roadmapId = selectedRoadmap.id;
+          batchName = `${selectedRoadmap.title} - Batch 1`;
+          
+          console.log('📚 Selected default roadmap:', selectedRoadmap.title, 
+                     nonPythonRoadmap ? '(non-Python preferred)' : '(fallback to first available)');
+        } else {
+          console.warn('⚠️ No active roadmaps found! Creating batch without roadmap.');
+        }
+      }
+      
       const newBatch: Partial<Batch> = {
-        name: 'Python Learning Cohort - Batch 1',
+        name: batchName,
+        roadmap_id: roadmapId || undefined,
         status: 'active',
         max_students: 30,
         current_students: 1,
         start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 6 * 7 * 24 * 60 * 60 * 1000).toISOString(), // 6 weeks from now
+        end_date: new Date(Date.now() + 12 * 7 * 24 * 60 * 60 * 1000).toISOString(), // 12 weeks from now
       };
 
       const { data: createdBatch, error: createError } = await supabase
@@ -462,11 +599,17 @@ export class DatabaseService {
     try {
       console.log('🔍 getEnrolledRoadmaps called for user:', userId);
       
+      // Get user email to determine if this is a company user
+      const userData = await this.getUserById(userId);
+      const isCompanyUser = userData?.email?.includes('@10minuteschool.com') || userData?.email?.includes('@lightcastlepartners.com');
+      
       // Get all batches the user is enrolled in
+      console.log('🔍 Querying student_batch_assignments for enrolled roadmaps, user:', userId);
       const { data: batchEnrollments, error: batchError } = await supabase
         .from('student_batch_assignments')
         .select(`
           batch_id,
+          enrollment_date,
           batches!inner(
             id,
             name,
@@ -475,7 +618,10 @@ export class DatabaseService {
           )
         `)
         .eq('student_id', userId)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .order('enrollment_date', { ascending: false }); // Most recent enrollments first
+      
+      console.log('📊 Batch enrollments query result:', { batchEnrollments, batchError });
 
       if (batchError) {
         console.error('❌ Error fetching batch enrollments:', batchError);
@@ -495,6 +641,31 @@ export class DatabaseService {
       if (roadmaps.length === 0) {
         console.log('📝 No roadmaps found for user:', userId);
         return [];
+      }
+
+      // For company users, sort roadmaps to prioritize Augmedix/AI/ML over Python
+      if (isCompanyUser && roadmaps.length > 1) {
+        roadmaps.sort((a: any, b: any) => {
+          const aTitle = a.title?.toLowerCase() || '';
+          const bTitle = b.title?.toLowerCase() || '';
+          const aDesc = a.description?.toLowerCase() || '';
+          const bDesc = b.description?.toLowerCase() || '';
+          
+          // Priority scoring
+          const getScore = (title: string, desc: string) => {
+            if (title.includes('augmedix') || desc.includes('augmedix')) return 4;
+            if (title.includes('ai') || title.includes('ml') || title.includes('machine learning')) return 3;
+            if (title.includes('python')) return 1; // Lowest priority for company users
+            return 2; // Default priority
+          };
+          
+          const scoreA = getScore(aTitle, aDesc);
+          const scoreB = getScore(bTitle, bDesc);
+          
+          return scoreB - scoreA; // Higher score first
+        });
+        
+        console.log('🏢 Company user - roadmaps sorted for priority:', roadmaps.map((r: any) => r.title));
       }
 
       console.log('✅ Returning real roadmaps:', roadmaps);
@@ -955,6 +1126,7 @@ export class DatabaseService {
   // Get user by ID
   static async getUserById(userId: string): Promise<User | null> {
     try {
+      console.log('🔍 getUserById called with userId:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -962,13 +1134,39 @@ export class DatabaseService {
         .single();
 
       if (error) {
-        console.error('Error fetching user:', error);
+        console.error('❌ Error fetching user from database:', error);
+        console.log('📝 Error details - code:', error.code, 'message:', error.message);
         return null;
       }
 
+      console.log('✅ User data found:', data);
       return data;
     } catch (error) {
-      console.error('Error in getUserById:', error);
+      console.error('❌ Exception in getUserById:', error);
+      return null;
+    }
+  }
+
+  // Get user by email (fallback method)
+  static async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      console.log('🔍 getUserByEmail called with email:', email);
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (error) {
+        console.error('❌ Error fetching user by email:', error);
+        console.log('📝 Error details - code:', error.code, 'message:', error.message);
+        return null;
+      }
+
+      console.log('✅ User data found by email:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Exception in getUserByEmail:', error);
       return null;
     }
   }
@@ -1072,15 +1270,25 @@ export class DatabaseService {
     userData: User | null;
   }> {
     try {
-      // Check cache first
+      // Check cache first (but bypass cache for company users during debugging)
+      const userInfo = await this.getUserById(userId);
+      const isCompanyUser = userInfo?.email?.includes('@10minuteschool.com') || userInfo?.email?.includes('@lightcastlepartners.com');
+      
       const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, userId, selectedRoadmapId || 'default');
-      const cachedData = cache.get(cacheKey);
-      if (cachedData) {
-        return cachedData;
+      
+      // Temporarily bypass cache for company users to ensure fresh data
+      if (!isCompanyUser) {
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+          console.log('🎯 Returning cached data for non-company user');
+          return cachedData as any;
+        }
+      } else {
+        console.log('🏢 Bypassing cache for company user to ensure fresh data');
       }
 
-      // IMMEDIATE cleanup of duplicate profiles before doing anything else
-      await this.cleanupDuplicateProfiles(userId);
+      // Skip expensive cleanup unless there are known issues
+      // await this.cleanupDuplicateProfiles(userId);
       
       // Fetching dashboard data components
       const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
@@ -1093,6 +1301,21 @@ export class DatabaseService {
       ]);
       
       // Dashboard data components fetched
+      console.log('📊 Dashboard data components fetched');
+      console.log('👤 Profile:', profile);
+      console.log('📦 Batch:', batch);
+      console.log('🗺️  Roadmap:', roadmap);
+      console.log('📚 Enrolled Roadmaps:', enrolledRoadmaps);
+      console.log('📈 Progress:', progress);
+      console.log('👤 User Data:', userData);
+      
+      // Debug: Check if any component is null
+      if (!profile) console.log('⚠️  Profile is null');
+      if (!batch) console.log('⚠️  Batch is null');
+      if (!roadmap) console.log('⚠️  Roadmap is null');
+      if (!enrolledRoadmaps || enrolledRoadmaps.length === 0) console.log('⚠️  No enrolled roadmaps');
+      if (!progress || progress.length === 0) console.log('⚠️  No progress data');
+      if (!userData) console.log('⚠️  User data is null');
 
 
 
@@ -1696,9 +1919,17 @@ export const getBatchBySlug = async (slug: string): Promise<Batch | null> => {
   }
 };
 
-// Get roadmap by slug
+// Get roadmap by slug with caching
 export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> => {
   try {
+    // Check cache first
+    const cacheKey = `roadmap_slug_${slug}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      console.log('✅ Returning cached roadmap for slug:', slug);
+      return cached as Roadmap;
+    }
+
     console.log('🔍 Searching for roadmap with slug:', slug);
     
     // Convert slug back to a more precise search pattern
@@ -1718,6 +1949,8 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
     
     if (data) {
       console.log('✅ Found roadmap with exact title match:', data.title);
+      // Cache the result
+      cache.set(cacheKey, data, CACHE_TTL.LONG);
       return data;
     }
     
@@ -1769,6 +2002,8 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
       
       if (bestMatch) {
         console.log('✅ Found best partial match:', bestMatch.title, 'Score:', bestScore);
+        // Cache the result
+        cache.set(cacheKey, bestMatch, CACHE_TTL.LONG);
         return bestMatch;
       }
     }

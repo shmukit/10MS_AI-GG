@@ -27,6 +27,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [completedTasks, setCompletedTasks] = useState(node.tasks.map(t => t.completed));
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showTaskConfirmation, setShowTaskConfirmation] = useState(false);
+  const [showTaskUncheckConfirmation, setShowTaskUncheckConfirmation] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1);
   const [studentCompletions, setStudentCompletions] = useState<StudentCompletion[]>([]);
   const [loadingCompletions, setLoadingCompletions] = useState(false);
@@ -64,12 +65,9 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       setSelectedTaskIndex(taskIndex);
       setShowTaskConfirmation(true);
     } else {
-      // If task is being unchecked, do it immediately
-      setCompletedTasks(prev => {
-        const newCompleted = [...prev];
-        newCompleted[taskIndex] = !newCompleted[taskIndex];
-        return newCompleted;
-      });
+      // If task is being unchecked, show confirmation modal
+      setSelectedTaskIndex(taskIndex);
+      setShowTaskUncheckConfirmation(true);
     }
   };
 
@@ -81,6 +79,18 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         return newCompleted;
       });
       setShowTaskConfirmation(false);
+      setSelectedTaskIndex(-1);
+    }
+  };
+
+  const handleConfirmTaskUncheck = () => {
+    if (selectedTaskIndex >= 0) {
+      setCompletedTasks(prev => {
+        const newCompleted = [...prev];
+        newCompleted[selectedTaskIndex] = false;
+        return newCompleted;
+      });
+      setShowTaskUncheckConfirmation(false);
       setSelectedTaskIndex(-1);
     }
   };
@@ -465,6 +475,19 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         onConfirm={handleConfirmTaskCompletion}
         title="Confirm Task Completion"
         message={`Are you sure you have completed the task "${getSelectedTask()?.title}"? Please double-check before confirming as this will mark the task as done and update your progress.`}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Confirmation Modal for Task Uncheck */}
+      <ConfirmationModal
+        isOpen={showTaskUncheckConfirmation}
+        onClose={() => {
+          setShowTaskUncheckConfirmation(false);
+          setSelectedTaskIndex(-1);
+        }}
+        onConfirm={handleConfirmTaskUncheck}
+        title="Confirm Task Uncheck"
+        message={`Are you sure you want to mark the task "${getSelectedTask()?.title}" as incomplete? This will update your progress and remove the completion status.`}
         isDarkMode={isDarkMode}
       />
     </>

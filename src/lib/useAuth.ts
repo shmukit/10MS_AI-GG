@@ -81,6 +81,12 @@ export function useAuth() {
         lastName = nameParts.slice(1).join(' ') || '';
       }
       
+      // Determine user type based on email domain
+      const isCompanyEmail = email.includes('@10minuteschool.com') || email.includes('@lightcastlepartners.com');
+      const userRole = isCompanyEmail ? 'admin' : 'student';
+      
+      console.log('🔐 Signing up user:', email, 'Role:', userRole, 'Company:', isCompanyEmail);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -88,7 +94,10 @@ export function useAuth() {
           emailRedirectTo: import.meta.env.VITE_AUTH_REDIRECT_URL,
           data: {
             first_name: firstName,
-            last_name: lastName
+            last_name: lastName,
+            role: userRole,
+            is_company_user: isCompanyEmail,
+            intended_roadmap: isCompanyEmail ? 'augmedix' : 'general'
           }
         }
       })
@@ -97,13 +106,34 @@ export function useAuth() {
         return { success: false, error }
       }
       
+      // For company users, try to connect them to existing data
+      if (data.user && isCompanyEmail) {
+        console.log('🏢 Company user signup detected, checking for existing profile...');
+        
+        // Check if this email already exists in public.users
+        try {
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('id, role, first_name, last_name')
+            .eq('email', email)
+            .single();
+          
+          if (existingUser) {
+            console.log('✅ Found existing public user profile for:', email);
+            console.log('🔄 User will be connected to existing batch assignments on first login');
+          }
+        } catch (existingUserError) {
+          console.log('ℹ️ No existing public user found - new profile will be created');
+        }
+      }
+      
       // Check if email confirmation is required
       if (data.user && !data.user.email_confirmed_at) {
         return { 
           success: true, 
           data,
           requiresEmailConfirmation: true,
-          message: 'Please check your email and click the confirmation link to complete your registration.'
+          message: `Please check your email and click the confirmation link to complete your registration.${isCompanyEmail ? ' You will be automatically assigned to the Augmedix learning program.' : ''}`
         }
       }
       
