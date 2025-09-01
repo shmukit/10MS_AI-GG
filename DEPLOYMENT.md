@@ -92,7 +92,7 @@ npm run build
 ```
 
 ### 2. Deploy to Sub-domain
-The application is configured to work with the sub-domain `shestem.10minuteschool.com`
+The application is configured to work with the sub-domain `roadmaps.10minuteschool.com`
 
 ### 3. Server Configuration
 Ensure your server is configured to:
