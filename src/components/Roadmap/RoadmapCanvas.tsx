@@ -1,6 +1,5 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import { RoadmapNode } from './RoadmapNode';
-import { ConnectionLine } from './ConnectionLine';
 import { NodeContentPanel } from './NodeContentPanel';
 import { RoadmapNodeData } from './RoadmapNode';
 
@@ -9,9 +8,10 @@ interface RoadmapCanvasProps {
   roadmapNodes: RoadmapNodeData[];
   onRefresh?: () => void; // Add refresh callback
   batchId?: string | null; // Add batchId prop for completion data
+  targetWeekNumber?: number | null; // Add target week number for auto-opening
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = false, roadmapNodes, onRefresh, batchId }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = false, roadmapNodes, onRefresh, batchId, targetWeekNumber }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -23,6 +23,36 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
   const handleClosePanel = () => {
     setSelectedNode(null);
   };
+
+  // Auto-open target week if specified in URL
+  useEffect(() => {
+    if (targetWeekNumber && roadmapNodes.length > 0) {
+      // Find the node with the target week number
+      const targetNode = roadmapNodes.find(node => {
+        // Extract week number from node title (assuming format like "Week 1: ...")
+        const weekMatch = node.title.match(/Week (\d+)/i);
+        if (weekMatch) {
+          return parseInt(weekMatch[1], 10) === targetWeekNumber;
+        }
+        return false;
+      });
+      
+      if (targetNode && targetNode.status !== 'locked') {
+        setSelectedNode(targetNode);
+        
+        // Optional: Scroll to the target node
+        setTimeout(() => {
+          const nodeElement = document.getElementById(`week-${targetWeekNumber}`);
+          if (nodeElement) {
+            nodeElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 100);
+      }
+    }
+  }, [targetWeekNumber, roadmapNodes]);
 
   return (
     <div className={`flex flex-col lg:flex-row h-full transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -39,8 +69,13 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
               
               {/* Nodes */}
               <div className="space-y-8 lg:space-y-16">
-                {roadmapNodes.map((node, index) => (
-                  <div key={node.id} className="relative">
+                {roadmapNodes.map((node, index) => {
+                  // Extract week number from node title for ID
+                  const weekMatch = node.title.match(/Week (\d+)/i);
+                  const weekNumber = weekMatch ? weekMatch[1] : index + 1;
+                  
+                  return (
+                  <div key={node.id} id={`week-${weekNumber}`} className="relative">
                     {/* Connection Point */}
                     <div className={`absolute left-1/2 transform -translate-x-1/2 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 sm:border-4 z-10 transition-colors duration-200 ${
                       isDarkMode 
@@ -60,7 +95,8 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -74,7 +110,7 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
           onClose={handleClosePanel}
           isDarkMode={isDarkMode}
           onRefresh={onRefresh}
-          batchId={batchId}
+          batchId={batchId || undefined}
         />
       )}
     </div>

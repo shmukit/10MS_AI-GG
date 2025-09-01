@@ -14,6 +14,16 @@ export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
+
+  // Helper function to get user display name with fallbacks
+  const getUserDisplayName = () => {
+    return dashboardData?.userData?.first_name || 
+           dashboardData?.profile?.first_name || 
+           user?.user_metadata?.first_name ||
+           user?.user_metadata?.full_name || 
+           user?.email?.split('@')[0] || 
+           'Student';
+  };
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -96,12 +106,50 @@ export const StudentDashboard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🔍 Fetching dashboard data for user ID:', userId);
       const data = await DatabaseService.getDashboardData(userId, roadmapId);
+      console.log('📊 Dashboard data received:', data);
+      console.log('👤 User data in response:', data?.userData);
+      console.log('📝 Profile data in response:', data?.profile);
       setDashboardData(data);
       
       // Set initial selections if not already set
       if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
-        setSelectedRoadmap(data.enrolledRoadmaps[0].id);
+        // For company users, prioritize Augmedix/AI/ML roadmaps over Python
+        const isCompanyUser = user?.email?.includes('@10minuteschool.com') || user?.email?.includes('@lightcastlepartners.com');
+        
+        let preferredRoadmap = data.enrolledRoadmaps[0]; // Default to first
+        
+        if (isCompanyUser && data.enrolledRoadmaps.length > 1) {
+          // Look for Augmedix, AI, or ML roadmaps first
+          const augmedixRoadmap = data.enrolledRoadmaps.find((r: any) => 
+            r.title?.toLowerCase().includes('augmedix') ||
+            r.description?.toLowerCase().includes('augmedix')
+          );
+          
+          const aiMlRoadmap = data.enrolledRoadmaps.find((r: any) => 
+            r.title?.toLowerCase().includes('ai') ||
+            r.title?.toLowerCase().includes('ml') ||
+            r.title?.toLowerCase().includes('machine learning')
+          );
+          
+          // Avoid Python roadmaps for company users
+          const nonPythonRoadmap = data.enrolledRoadmaps.find((r: any) => 
+            !r.title?.toLowerCase().includes('python')
+          );
+          
+          // Priority order: Augmedix > AI/ML > Non-Python > First available
+          preferredRoadmap = augmedixRoadmap || aiMlRoadmap || nonPythonRoadmap || data.enrolledRoadmaps[0];
+          
+          console.log('🏢 Company user roadmap selection:', {
+            userEmail: user?.email,
+            totalRoadmaps: data.enrolledRoadmaps.length,
+            selectedRoadmap: preferredRoadmap?.title,
+            allRoadmaps: data.enrolledRoadmaps.map((r: any) => r.title)
+          });
+        }
+        
+        setSelectedRoadmap(preferredRoadmap.id);
       }
       if (!selectedBatch && data?.batch?.id) {
         setSelectedBatch(data.batch.id);
@@ -119,6 +167,10 @@ export const StudentDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('🔍 Auth user object:', user);
+    console.log('🆔 User ID:', user?.id);
+    console.log('📧 User email:', user?.email);
+    console.log('📋 User metadata:', user?.user_metadata);
     if (!user?.id) return;
     fetchDashboardData(user.id);
   }, [user?.id]);
@@ -214,7 +266,7 @@ export const StudentDashboard: React.FC = () => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
       <StudentHeader 
-        userName={dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student'}
+        userName={getUserDisplayName()}
         userRole="student"
         pageTitle="Dashboard"
       />
@@ -257,7 +309,9 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
               <div className="flex-1">
-                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Hello, {dashboardData?.userData?.first_name || dashboardData?.profile?.first_name || 'Student'}</h2>
+                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Hello, {getUserDisplayName()}
+                </h2>
                 <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI-Enabled Group Guidance Program</p>
               </div>
               
@@ -317,8 +371,15 @@ export const StudentDashboard: React.FC = () => {
                   if (getCurrentRoadmap()) {
                     const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
                     navigate(`/student/roadmap/${roadmapSlug}`);
+                  } else if (dashboardData?.enrolledRoadmaps?.length > 0) {
+                    // Fallback: use first available roadmap
+                    const firstRoadmap = dashboardData.enrolledRoadmaps[0];
+                    const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                    navigate(`/student/roadmap/${roadmapSlug}`);
                   } else {
-                    navigate('/student/roadmap');
+                    // No roadmaps available, stay on dashboard
+                    console.warn('No roadmaps available for navigation');
+                    alert('No roadmaps available. Please contact your administrator.');
                   }
                 }}
                 className={`border rounded-xl p-4 text-center transition-all duration-200 group cursor-pointer hover:shadow-lg transform hover:scale-[1.02] ${
@@ -343,11 +404,18 @@ export const StudentDashboard: React.FC = () => {
                   if (getCurrentRoadmap()) {
                     const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
                     navigate(`/student/community/${roadmapSlug}`);
+                  } else if (dashboardData?.enrolledRoadmaps?.length > 0) {
+                    // Fallback: use first available roadmap
+                    const firstRoadmap = dashboardData.enrolledRoadmaps[0];
+                    const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                    navigate(`/student/community/${roadmapSlug}`);
                   } else if (dashboardData?.batch) {
                     const batchSlug = generateBatchSlug(dashboardData.batch.name);
                     navigate(`/student/community/${batchSlug}`);
                   } else {
-                    navigate('/student/community');
+                    // No roadmaps or batches available, stay on dashboard
+                    console.warn('No roadmaps or batches available for navigation');
+                    alert('No roadmaps available. Please contact your administrator.');
                   }
                 }}
                 className={`border rounded-xl p-4 text-center transition-all duration-200 group hover:shadow-lg transform hover:scale-[1.02] ${
@@ -379,43 +447,60 @@ export const StudentDashboard: React.FC = () => {
               }`}>
                 <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>This Week's Tasks</h3>
                 
-                                 {dashboardData?.currentWeekTasks && dashboardData.currentWeekTasks.length > 0 ? (
-                   <div className="space-y-4">
-                     {dashboardData.currentWeekTasks.map((task: any, index: number) => (
-                      <div key={task.id} className={`rounded-lg p-4 transition-colors duration-200 ${
-                        isDarkMode ? 'bg-gray-700/50 border border-gray-600' : 'bg-gray-50 border border-gray-200'
-                      }`}>
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {task.task_name}
-                          </h4>
-                          <span className={`text-sm px-3 py-1 rounded-full transition-colors duration-200 ${
-                            isDarkMode ? 'bg-orange-900/30 text-orange-300 border border-orange-700' : 'bg-orange-100 text-orange-700 border border-orange-200'
-                          }`}>
-                            {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Due'}
-                          </span>
-                        </div>
-                        {task.task_details && (
-                          <p className={`text-sm mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {task.task_details}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3">
-                          <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
-                            isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-200'
-                          }`}>
-                            {task.task_type}
-                          </span>
-                          {task.estimated_hours && (
-                            <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
-                              isDarkMode ? 'bg-purple-900/30 text-purple-300 border border-purple-700' : 'bg-purple-100 text-purple-700 border border-purple-200'
-                            }`}>
-                              ⏱️ {task.estimated_hours}h
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                                                 {dashboardData?.currentWeekTasks && dashboardData.currentWeekTasks.length > 0 ? (
+                  <div className="space-y-4">
+                    {dashboardData.currentWeekTasks.map((task: any, index: number) => (
+                     <div 
+                       key={task.id} 
+                       onClick={() => {
+                         if (getCurrentRoadmap()) {
+                           const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
+                           navigate(`/student/roadmap/${roadmapSlug}?week=${task.week_number || 1}`);
+                         } else if (dashboardData?.enrolledRoadmaps?.length > 0) {
+                           // Fallback: use first available roadmap
+                           const firstRoadmap = dashboardData.enrolledRoadmaps[0];
+                           const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                           navigate(`/student/roadmap/${roadmapSlug}?week=${task.week_number || 1}`);
+                         } else {
+                           // No roadmaps available, stay on dashboard
+                           console.warn('No roadmaps available for navigation');
+                           alert('No roadmaps available. Please contact your administrator.');
+                         }
+                       }}
+                       className={`rounded-lg p-4 transition-all duration-200 cursor-pointer hover:shadow-lg transform hover:scale-[1.02] ${
+                         isDarkMode ? 'bg-gray-700/50 border border-gray-600 hover:bg-gray-700/70 hover:border-gray-500' : 'bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300'
+                       }`}>
+                       <div className="flex justify-between items-start mb-3">
+                         <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                           {task.task_name}
+                         </h4>
+                         <span className={`text-sm px-3 py-1 rounded-full transition-colors duration-200 ${
+                           isDarkMode ? 'bg-orange-900/30 text-orange-300 border border-orange-700' : 'bg-orange-100 text-orange-700 border border-orange-200'
+                         }`}>
+                           {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Due'}
+                         </span>
+                       </div>
+                       {task.task_details && (
+                         <p className={`text-sm mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                           {task.task_details}
+                         </p>
+                       )}
+                       <div className="flex items-center gap-3">
+                         <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
+                           isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-200'
+                         }`}>
+                           {task.task_type}
+                         </span>
+                         {task.estimated_hours && (
+                           <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${
+                             isDarkMode ? 'bg-purple-900/30 text-purple-300 border border-purple-700' : 'bg-purple-100 text-purple-700 border border-purple-200'
+                           }`}>
+                             ⏱️ {task.estimated_hours}h
+                           </span>
+                         )}
+                       </div>
+                     </div>
+                   ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -443,9 +528,26 @@ export const StudentDashboard: React.FC = () => {
                 {dashboardData?.upcomingTasks && dashboardData.upcomingTasks.length > 0 ? (
                   <div className="space-y-3">
                     {dashboardData.upcomingTasks.slice(0, 3).map((task: any) => (
-                      <div key={task.id} className={`rounded-lg p-4 border transition-colors duration-200 ${
-                        isDarkMode ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'
-                      }`}>
+                      <div 
+                        key={task.id} 
+                        onClick={() => {
+                          if (getCurrentRoadmap()) {
+                            const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
+                            navigate(`/student/roadmap/${roadmapSlug}?week=${(task as any).week_number || 2}`);
+                          } else if (dashboardData?.enrolledRoadmaps?.length > 0) {
+                            // Fallback: use first available roadmap
+                            const firstRoadmap = dashboardData.enrolledRoadmaps[0];
+                            const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                            navigate(`/student/roadmap/${roadmapSlug}?week=${(task as any).week_number || 2}`);
+                          } else {
+                            // No roadmaps available, stay on dashboard
+                            console.warn('No roadmaps available for navigation');
+                            alert('No roadmaps available. Please contact your administrator.');
+                          }
+                        }}
+                        className={`rounded-lg p-4 border transition-all duration-200 cursor-pointer hover:shadow-lg transform hover:scale-[1.02] ${
+                          isDarkMode ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30 hover:border-green-700' : 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300'
+                        }`}>
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             <span className="text-sm">📝</span>

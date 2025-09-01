@@ -2,6 +2,7 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { ProfileDropdown } from '../Profile/ProfileDropdown';
 import { useTheme } from '../../lib/ThemeContext';
+import { SheSTEMLogo } from '../Logo/SheSTEMLogo';
 
 interface StudentHeaderProps {
   userName?: string;
@@ -20,12 +21,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xs">10MS</span>
-            </div>
-            <h1 className={`text-lg sm:text-xl font-bold transition-colors duration-200 truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              10MS SheSTEM
-            </h1>
+            <SheSTEMLogo className="flex-shrink-0" />
             {pageTitle && (
               <span className={`hidden sm:inline text-lg text-gray-500 transition-colors duration-200 truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 • {pageTitle}

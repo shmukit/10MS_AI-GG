@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Roadmap, RoadmapWeek, RoadmapTask, getRoadmapBySlug } from '../../services/database';
 import { supabase } from '../../lib/supabase';
@@ -18,6 +18,7 @@ interface RoadmapInterfaceProps {
 
 export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { roadmapSlug } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
   
@@ -34,6 +35,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [userName, setUserName] = useState<string>('Student');
   const [batchId, setBatchId] = useState<string | null>(null);
   const [completionStats, setCompletionStats] = useState<{[weekId: string]: any}>({});
+  const [targetWeekNumber, setTargetWeekNumber] = useState<number | null>(null);
 
   const refreshRoadmapData = async () => {
     if (!user?.id) return;
@@ -81,18 +83,28 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         setLoading(true);
         setError(null);
         
-        // Use Promise.all for parallel fetching to improve performance
-        const [dashboardData, progressQuery] = await Promise.all([
-          DatabaseService.getDashboardData(user.id),
+        // Check for week parameter in URL
+        const weekParam = searchParams.get('week');
+        if (weekParam) {
+          const weekNum = parseInt(weekParam, 10);
+          if (!isNaN(weekNum) && weekNum > 0) {
+            setTargetWeekNumber(weekNum);
+          }
+        }
+        
+        // Fetch only essential data in parallel - avoid heavy getDashboardData
+        const [userDataQuery, batchQuery, progressQuery] = await Promise.all([
+          DatabaseService.getUserById(user.id),
+          DatabaseService.getStudentBatch(user.id),
           supabase
             .from('student_progress')
             .select('*')
             .eq('student_id', user.id)
         ]);
         
-        // Set user name from dashboard data
-        if (dashboardData?.userData?.first_name) {
-          setUserName(dashboardData.userData.first_name);
+        // Set user name from lightweight user data
+        if (userDataQuery?.first_name) {
+          setUserName(userDataQuery.first_name);
         } else if (user?.user_metadata?.full_name) {
           setUserName(user.user_metadata.full_name);
         } else if (user?.email) {
@@ -100,36 +112,23 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         }
         
         // Get student's batch information
-        if (dashboardData?.batch?.id) {
-          setBatchId(dashboardData.batch.id);
+        if (batchQuery?.id) {
+          setBatchId(batchQuery.id);
         }
         
         // Set progress data
         setStudentProgress(progressQuery.data || []);
         
-        let roadmapData: Roadmap | null = null;
-        
-        // Use roadmap slug to fetch roadmap data
-        if (roadmapSlug) {
-          console.log('🔍 Fetching roadmap by slug:', roadmapSlug);
-          roadmapData = await getRoadmapBySlug(roadmapSlug);
-          console.log('📊 Roadmap data from slug:', roadmapData);
-          
-          // Debug: Check what roadmaps exist in the database (only if needed)
-          if (!roadmapData) {
-            console.log('🔍 Debug: Checking all available roadmaps...');
-            const { data: allRoadmaps, error: roadmapsError } = await supabase
-              .from('roadmaps')
-              .select('id, title, category')
-              .order('title');
-            
-            if (!roadmapsError && allRoadmaps) {
-              console.log('📋 Available roadmaps:', allRoadmaps);
-            }
-          }
+        // Optimize roadmap fetching with parallel processing
+        if (!roadmapSlug) {
+          setError('No roadmap specified in URL');
+          setLoading(false);
+          return;
         }
+
+        console.log('🔍 Fetching roadmap by slug:', roadmapSlug);
+        const roadmapData = await getRoadmapBySlug(roadmapSlug);
         
-        // Don't fallback to user's assigned roadmap - only use the slug
         if (!roadmapData) {
           console.error('❌ No roadmap found for slug:', roadmapSlug);
           setError(`No roadmap found for "${roadmapSlug}". Please check the URL or contact support.`);
@@ -139,17 +138,28 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         setRoadmap(roadmapData);
         
-        // Fetch weeks and tasks in parallel for better performance
+        // Fetch weeks and all tasks in a single optimized query
         const weeksData = await DatabaseService.getRoadmapWeeks(roadmapData.id);
         setWeeks(weeksData);
         
-        // Parallelize task fetching for all weeks
-        const taskPromises = weeksData.map(week => 
-          DatabaseService.getRoadmapTasks(week.id)
-        );
-        const allTaskArrays = await Promise.all(taskPromises);
-        const allTasks: RoadmapTask[] = allTaskArrays.flat();
-        setTasks(allTasks);
+        // Fetch all tasks for all weeks in parallel (much faster)
+        if (weeksData.length > 0) {
+          const weekIds = weeksData.map(week => week.id);
+          const { data: allTasks, error: tasksError } = await supabase
+            .from('roadmap_tasks')
+            .select('*')
+            .in('week_id', weekIds)
+            .order('created_at');
+          
+          if (!tasksError && allTasks) {
+            setTasks(allTasks);
+          } else {
+            console.error('Error fetching tasks:', tasksError);
+            setTasks([]);
+          }
+        } else {
+          setTasks([]);
+        }
         
       } catch (err) {
         console.error('Error fetching roadmap data:', err);
@@ -162,12 +172,15 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     fetchRoadmapData();
   }, [user?.id, roadmapSlug]);
 
-  // Fetch completion statistics after weeks and batchId are loaded
+  // Lazy-load completion statistics after initial render for better performance
   useEffect(() => {
-    if (weeks.length > 0 && batchId) {
-      fetchCompletionStats();
+    if (weeks.length > 0 && batchId && !loading) {
+      // Delay completion stats to avoid blocking initial render
+      setTimeout(() => {
+        fetchCompletionStats();
+      }, 100);
     }
-  }, [weeks, batchId]);
+  }, [weeks, batchId, loading]);
 
   if (loading) {
     return (
@@ -253,6 +266,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
           roadmapNodes={nodesWithStats} 
           onRefresh={refreshRoadmapData}
           batchId={batchId}
+          targetWeekNumber={targetWeekNumber}
         />
       </div>
     </div>
