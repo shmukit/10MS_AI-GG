@@ -81,8 +81,14 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         setLoading(true);
         setError(null);
         
-        // Fetch user data first
-        const dashboardData = await DatabaseService.getDashboardData(user.id);
+        // Use Promise.all for parallel fetching to improve performance
+        const [dashboardData, progressQuery] = await Promise.all([
+          DatabaseService.getDashboardData(user.id),
+          supabase
+            .from('student_progress')
+            .select('*')
+            .eq('student_id', user.id)
+        ]);
         
         // Set user name from dashboard data
         if (dashboardData?.userData?.first_name) {
@@ -98,13 +104,8 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
           setBatchId(dashboardData.batch.id);
         }
         
-        // Get student progress
-        const { data: progressData } = await supabase
-          .from('student_progress')
-          .select('*')
-          .eq('student_id', user.id);
-        
-        setStudentProgress(progressData || []);
+        // Set progress data
+        setStudentProgress(progressQuery.data || []);
         
         let roadmapData: Roadmap | null = null;
         
@@ -114,7 +115,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
           roadmapData = await getRoadmapBySlug(roadmapSlug);
           console.log('📊 Roadmap data from slug:', roadmapData);
           
-          // Debug: Check what roadmaps exist in the database
+          // Debug: Check what roadmaps exist in the database (only if needed)
           if (!roadmapData) {
             console.log('🔍 Debug: Checking all available roadmaps...');
             const { data: allRoadmaps, error: roadmapsError } = await supabase
@@ -138,15 +139,16 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         setRoadmap(roadmapData);
         
+        // Fetch weeks and tasks in parallel for better performance
         const weeksData = await DatabaseService.getRoadmapWeeks(roadmapData.id);
         setWeeks(weeksData);
         
-        // Get tasks for all weeks
-        const allTasks: RoadmapTask[] = [];
-        for (const week of weeksData) {
-          const weekTasks = await DatabaseService.getRoadmapTasks(week.id);
-          allTasks.push(...weekTasks);
-        }
+        // Parallelize task fetching for all weeks
+        const taskPromises = weeksData.map(week => 
+          DatabaseService.getRoadmapTasks(week.id)
+        );
+        const allTaskArrays = await Promise.all(taskPromises);
+        const allTasks: RoadmapTask[] = allTaskArrays.flat();
         setTasks(allTasks);
         
       } catch (err) {
@@ -217,11 +219,11 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       />
 
       {/* Breadcrumb */}
-      <div className={`border-b h-16 transition-colors duration-200 ${
+      <div className={`border-b min-h-16 transition-colors duration-200 ${
         effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
             <button
               onClick={onBack}
               className={`flex items-center gap-2 transition-colors ${
@@ -230,13 +232,13 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back to Dashboard</span>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-medium text-sm sm:text-base">Back to Dashboard</span>
             </button>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <h1 className={`text-2xl font-bold transition-colors duration-200 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>{roadmap.title}</h1>
+            
+            <h1 className={`text-lg sm:text-2xl font-bold transition-colors duration-200 truncate ml-4 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {roadmap.title}
+            </h1>
           </div>
         </div>
       </div>

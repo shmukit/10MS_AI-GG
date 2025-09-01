@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, ExternalLink, CheckCircle, Circle, Play, BookOpen, Code, FileText, Award, Users, Trophy } from 'lucide-react';
+import { X, Clock, ExternalLink, Circle, Play, BookOpen, Code, FileText, Award, Users, Trophy } from 'lucide-react';
 import { RoadmapNodeData } from './RoadmapNode';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
@@ -164,16 +164,35 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
 
   return (
     <>
-      <div className={`w-full lg:w-1/3 border-t lg:border-l lg:border-t-0 h-full flex flex-col transition-colors duration-200 ${
-        isDarkMode 
+      {/* Mobile Modal Overlay */}
+      <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
+      
+      {/* Task Panel - Mobile Modal or Desktop Sidebar */}
+      <div className={`
+        fixed lg:relative 
+        inset-x-0 bottom-0 lg:inset-auto lg:bottom-auto
+        w-full lg:w-1/3 
+        max-h-[80vh] lg:max-h-none lg:h-full
+        border-t lg:border-l lg:border-t-0 
+        flex flex-col 
+        transition-all duration-300 ease-in-out
+        z-50 lg:z-auto
+        rounded-t-xl lg:rounded-none
+        ${isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-200'
-      }`}>
+        }
+      `}>
+        {/* Mobile drag handle */}
+        <div className="lg:hidden flex justify-center pt-2 pb-1">
+          <div className={`w-8 h-1 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+        </div>
+
         {/* Header */}
-        <div className={`flex items-center justify-between p-6 border-b transition-colors duration-200 ${
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b transition-colors duration-200 ${
           isDarkMode ? 'border-gray-700' : 'border-gray-200'
         }`}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {node.status === 'completed' ? (
               <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
                 isDarkMode 
@@ -193,11 +212,11 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             ) : (
               <div className={`w-6 h-6 rounded-full border-2 ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`} />
             )}
-            <h2 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{node.title}</h2>
+            <h2 className={`text-lg sm:text-xl font-bold transition-colors duration-200 truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{node.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
               isDarkMode 
                 ? 'hover:bg-gray-700 text-gray-400' 
                 : 'hover:bg-gray-100 text-gray-500'
@@ -208,7 +227,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Description */}
           <div className="mb-6">
             <p className={`leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{node.description}</p>
