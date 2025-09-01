@@ -43,7 +43,6 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const handleConfirmTask = () => {
-    console.log('Task marked as completed');
     setShowTaskConfirmation(false);
     // Here you would typically call an API to mark the task as done
     // For now, just showing a success message
@@ -52,13 +51,10 @@ export const StudentDashboard: React.FC = () => {
 
   // Handle roadmap selection change
   const handleRoadmapChange = (roadmapId: string) => {
-    console.log('🔄 Roadmap selection changed to:', roadmapId);
-    console.log('🔄 Roadmap title:', dashboardData?.enrolledRoadmaps?.find((r: any) => r.id === roadmapId)?.title);
     setSelectedRoadmap(roadmapId);
     setShowRoadmapDropdown(false);
     // Refresh dashboard data with new roadmap
     if (user?.id) {
-      console.log('🔄 Fetching dashboard data for roadmap:', roadmapId);
       fetchDashboardData(user.id, roadmapId);
       // Also refresh tasks for the new roadmap
       refreshTasksForRoadmap(roadmapId);
@@ -82,7 +78,7 @@ export const StudentDashboard: React.FC = () => {
         upcomingTasks: upcomingTasks
       }));
     } catch (error) {
-      console.error('Error refreshing tasks:', error);
+      // Silently handle error - could show user notification in production
     }
   };
 
@@ -98,11 +94,9 @@ export const StudentDashboard: React.FC = () => {
   // Fetch dashboard data
   const fetchDashboardData = async (userId: string, roadmapId?: string, batchId?: string) => {
     try {
-      console.log('🔄 fetchDashboardData called with roadmapId:', roadmapId);
       setLoading(true);
       setError(null);
       const data = await DatabaseService.getDashboardData(userId, roadmapId);
-      console.log('📊 Dashboard data received:', data);
       setDashboardData(data);
       
       // Set initial selections if not already set
@@ -118,7 +112,6 @@ export const StudentDashboard: React.FC = () => {
         setSelectedRoadmap(roadmapId);
       }
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -134,7 +127,6 @@ export const StudentDashboard: React.FC = () => {
   const getCurrentRoadmap = () => {
     if (!dashboardData?.enrolledRoadmaps) return null;
     const roadmap = dashboardData.enrolledRoadmaps.find((r: any) => r.id === selectedRoadmap) || dashboardData.enrolledRoadmaps[0];
-    console.log('🎯 getCurrentRoadmap called, selectedRoadmap:', selectedRoadmap, 'returning:', roadmap?.title);
     return roadmap;
   };
 
@@ -186,7 +178,6 @@ export const StudentDashboard: React.FC = () => {
   useEffect(() => {
     if (selectedRoadmap) {
       // This will trigger a re-render of components that depend on selectedRoadmap
-      console.log('Selected roadmap changed to:', selectedRoadmap);
     }
   }, [selectedRoadmap]);
 
@@ -217,10 +208,7 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const debugRoadmaps = () => {
-    console.log('🔄 Debugging Roadmaps:');
-    console.log('Current Roadmap:', getCurrentRoadmap()?.title);
-    console.log('Generated Slug:', generateRoadmapSlug(getCurrentRoadmap()?.title || ''));
-    console.log('Available Roadmaps:', dashboardData?.enrolledRoadmaps || []);
+    // Debug function removed for production
   };
 
   return (
@@ -328,7 +316,6 @@ export const StudentDashboard: React.FC = () => {
                 onClick={() => {
                   if (getCurrentRoadmap()) {
                     const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
-                    console.log('🔍 Navigating to roadmap with slug:', roadmapSlug);
                     navigate(`/student/roadmap/${roadmapSlug}`);
                   } else {
                     navigate('/student/roadmap');
@@ -355,7 +342,6 @@ export const StudentDashboard: React.FC = () => {
                   // Navigate to community with roadmap context
                   if (getCurrentRoadmap()) {
                     const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
-                    console.log('🔍 Navigating to community with slug:', roadmapSlug);
                     navigate(`/student/community/${roadmapSlug}`);
                   } else if (dashboardData?.batch) {
                     const batchSlug = generateBatchSlug(dashboardData.batch.name);
@@ -572,11 +558,10 @@ export const StudentDashboard: React.FC = () => {
                   const success = await DatabaseService.markNoticeAsRead(noticeId, user.id);
                   if (success) {
                     // Refresh dashboard data to update notice status
-                    // For now, just log success - in a real app you'd refresh the data
-                    console.log('Notice marked as read successfully');
+                    // For now, just silently succeed - in a real app you'd refresh the data
                   }
                 } catch (error) {
-                  console.error('Error marking notice as read:', error);
+                  // Silently handle error - could show user notification in production
                 }
               }}
             />

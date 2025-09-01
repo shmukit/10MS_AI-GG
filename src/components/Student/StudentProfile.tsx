@@ -6,6 +6,31 @@ import { DatabaseService } from '../../services/database';
 import { StudentHeader } from './StudentHeader';
 import { useTheme } from '../../lib/ThemeContext';
 
+// Add skeleton loading component at the top
+const ProfileSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+          <div className="flex-1">
+            <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const { profileSlug } = useParams();
@@ -145,18 +170,7 @@ export const StudentProfile: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} p-6`}>
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Loading profile...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
