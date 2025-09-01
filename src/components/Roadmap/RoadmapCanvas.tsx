@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { RoadmapNode } from './RoadmapNode';
 import { ConnectionLine } from './ConnectionLine';
 import { NodeContentPanel } from './NodeContentPanel';
@@ -11,7 +11,7 @@ interface RoadmapCanvasProps {
   batchId?: string | null; // Add batchId prop for completion data
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false, roadmapNodes, onRefresh, batchId }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = false, roadmapNodes, onRefresh, batchId }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -29,7 +29,7 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
       {/* Main Roadmap Area */}
       <div className={`transition-all duration-300 ${selectedNode ? 'w-full lg:w-2/3' : 'w-full'}`}>
         <div className="h-full overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-12 pb-20 lg:pb-12">
             {/* Roadmap Path */}
             <div className="relative">
               {/* Main Path Line */}
@@ -79,4 +79,4 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = ({ isDarkMode = false
       )}
     </div>
   );
-};
+});
