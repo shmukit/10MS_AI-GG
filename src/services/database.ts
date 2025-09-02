@@ -274,16 +274,32 @@ export class DatabaseService {
     try {
       console.log('Fetching batch for user:', userId);
       
-      // Use the new student_batch_assignments table
+      // Use the new student_batch_assignments table with correct syntax
       console.log('🔍 Querying student_batch_assignments for user:', userId);
       const { data: batchAssignments, error: assignmentError } = await supabase
         .from('student_batch_assignments')
         .select(`
           batch_id,
-          batches!inner(*)
+          batches (
+            id,
+            name,
+            roadmap_id,
+            mentor_id,
+            max_students,
+            current_students,
+            start_date,
+            end_date,
+            whatsapp_link,
+            discord_link,
+            emergency_contact,
+            status,
+            created_at,
+            updated_at
+          )
         `)
         .eq('student_id', userId)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .order('enrollment_date', { ascending: false }); // Get most recent assignment first
       
       console.log('📊 Batch assignments query result:', { batchAssignments, assignmentError });
 
@@ -299,58 +315,8 @@ export class DatabaseService {
         return latestAssignment.batches as any;
       }
 
-      console.log('⚠️  No active batch assignments found, trying fallback method');
-      
-      // Try the old method as fallback
-      const { data: profile, error: profileError } = await supabase
-        .from('student_profiles')
-        .select('batch_id')
-        .eq('user_id', userId)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching student profile:', profileError);
-        // Profile doesn't exist, try to create one
-        const newProfile = await this.createDefaultStudentProfile(userId);
-        if (newProfile?.batch_id) {
-          // Profile was created with a batch, fetch it
-          const { data: batchData, error: batchError } = await supabase
-            .from('batches')
-            .select('*')
-            .eq('id', newProfile.batch_id)
-            .single();
-
-          if (batchError) {
-            console.error('Error fetching batch from new profile:', batchError);
-            return null;
-          }
-
-          console.log('Batch found from new profile:', batchData);
-          return batchData;
-        }
-      }
-
-      if (profile?.batch_id) {
-        console.log('User has batch_id:', profile.batch_id);
-        
-        const { data, error } = await supabase
-          .from('batches')
-          .select('*')
-          .eq('id', profile.batch_id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching batch:', error);
-          return null;
-        }
-
-        console.log('Batch found:', data);
-        return data;
-      }
-
-      console.log('No batch assigned to user:', userId);
-      // Don't auto-assign here to prevent conflicts - let the dashboard handle it
-      // The user should have been assigned during signup or by admin
+      console.log('⚠️  No active batch assignments found');
+      console.log('❌ User is not assigned to any batch. Please contact administrator to assign user to a batch.');
       return null;
     } catch (error) {
       console.error('Error in getStudentBatch:', error);
@@ -610,11 +576,21 @@ export class DatabaseService {
         .select(`
           batch_id,
           enrollment_date,
-          batches!inner(
+          batches (
             id,
             name,
             roadmap_id,
-            roadmaps!inner(*)
+            roadmaps (
+              id,
+              title,
+              description,
+              total_weeks,
+              difficulty_level,
+              category,
+              is_active,
+              created_at,
+              updated_at
+            )
           )
         `)
         .eq('student_id', userId)
@@ -838,7 +814,7 @@ export class DatabaseService {
         .from('student_batch_assignments')
         .select(`
           student_id,
-          users!inner(first_name, last_name)
+          users (first_name, last_name)
         `)
         .eq('batch_id', batchId)
         .eq('status', 'active');
@@ -963,7 +939,7 @@ export class DatabaseService {
         .from('student_batch_assignments')
         .select(`
           student_id,
-          users!inner(first_name, last_name)
+          users (first_name, last_name)
         `)
         .eq('batch_id', batchId)
         .eq('status', 'active');
@@ -1127,20 +1103,47 @@ export class DatabaseService {
   static async getUserById(userId: string): Promise<User | null> {
     try {
       console.log('🔍 getUserById called with userId:', userId);
+      
+      // First try to get a single user
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('❌ Error fetching user from database:', error);
         console.log('📝 Error details - code:', error.code, 'message:', error.message);
+        
+        // If single query fails, try to get all users with this ID and take the first one
+        console.log('🔄 Trying fallback method to get user...');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .limit(1);
+
+        if (fallbackError) {
+          console.error('❌ Fallback query also failed:', fallbackError);
+          return null;
+        }
+
+        if (fallbackData && fallbackData.length > 0) {
+          console.log('✅ User data found via fallback (multiple records detected):', fallbackData[0]);
+          console.log('⚠️  WARNING: Multiple user records found for ID:', userId);
+          return fallbackData[0];
+        }
+        
         return null;
       }
 
-      console.log('✅ User data found:', data);
-      return data;
+      if (data) {
+        console.log('✅ User data found:', data);
+        return data;
+      }
+
+      console.log('❌ No user found with ID:', userId);
+      return null;
     } catch (error) {
       console.error('❌ Exception in getUserById:', error);
       return null;
@@ -1182,7 +1185,7 @@ export class DatabaseService {
         .select(`
           student_id,
           status,
-          users!inner(
+          users (
             id,
             first_name,
             last_name,
@@ -1270,21 +1273,57 @@ export class DatabaseService {
     userData: User | null;
   }> {
     try {
-      // Check cache first (but bypass cache for company users during debugging)
-      const userInfo = await this.getUserById(userId);
+      console.log('🔍 getDashboardData called with userId:', userId, 'selectedRoadmapId:', selectedRoadmapId);
+      
+      // Get user info first
+      let userInfo = await this.getUserById(userId);
+      console.log('👤 User info retrieved:', userInfo);
+      
+      // If userInfo is null, try to find user by email from Supabase Auth
+      if (!userInfo) {
+        console.log('⚠️ User not found by ID, trying to find by email from Supabase Auth...');
+        
+        // Get the current session to find the email
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          console.log('📧 Found email in session:', session.user.email);
+          
+          // Look up user by email in our custom users table
+          const { data: userByEmail, error: emailError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', session.user.email)
+            .single();
+            
+          if (emailError) {
+            console.error('❌ Error finding user by email:', emailError);
+          } else if (userByEmail) {
+            console.log('✅ Found user by email:', userByEmail);
+            userInfo = userByEmail;
+            // Update the userId to use the correct ID from our users table
+            userId = userByEmail.id;
+            console.log('🔄 Updated userId to:', userId);
+          }
+        }
+      }
+      
+      // Check if this is a company user (bypass cache for fresh data)
       const isCompanyUser = userInfo?.email?.includes('@10minuteschool.com') || userInfo?.email?.includes('@lightcastlepartners.com');
+      console.log('🏢 Is company user:', isCompanyUser);
       
+      // Create cache key
       const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, userId, selectedRoadmapId || 'default');
+      console.log('🔑 Cache key:', cacheKey);
       
-      // Temporarily bypass cache for company users to ensure fresh data
-      if (!isCompanyUser) {
+      // Check cache first (skip for company users to ensure fresh data)
+      if (!isCompanyUser && userInfo) {
         const cachedData = cache.get(cacheKey);
         if (cachedData) {
           console.log('🎯 Returning cached data for non-company user');
           return cachedData as any;
         }
       } else {
-        console.log('🏢 Bypassing cache for company user to ensure fresh data');
+        console.log('🏢 Bypassing cache for company user or user not found to ensure fresh data');
       }
 
       // Skip expensive cleanup unless there are known issues

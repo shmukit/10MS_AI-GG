@@ -9,6 +9,7 @@ class SimpleCache {
   private cache = new Map<string, CacheEntry<any>>();
   
   set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void { // Default 5 minutes
+    console.log('🔍 Cache set for key:', key, 'Data:', data);
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -20,15 +21,18 @@ class SimpleCache {
     const entry = this.cache.get(key);
     
     if (!entry) {
+      console.log('🔍 Cache miss for key:', key);
       return null;
     }
     
     // Check if cache entry has expired
     if (Date.now() - entry.timestamp > entry.ttl) {
+      console.log('🔍 Cache expired for key:', key);
       this.cache.delete(key);
       return null;
     }
     
+    console.log('🔍 Cache hit for key:', key, 'Data:', entry.data);
     return entry.data as T;
   }
   
