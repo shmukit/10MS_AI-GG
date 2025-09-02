@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Roadmap, RoadmapWeek, RoadmapTask, getRoadmapBySlug } from '../../services/database';
 import { supabase } from '../../lib/supabase';
@@ -18,6 +18,7 @@ interface RoadmapInterfaceProps {
 
 export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { roadmapSlug } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
   
@@ -34,6 +35,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [userName, setUserName] = useState<string>('Student');
   const [batchId, setBatchId] = useState<string | null>(null);
   const [completionStats, setCompletionStats] = useState<{[weekId: string]: any}>({});
+  const [targetWeekNumber, setTargetWeekNumber] = useState<number | null>(null);
 
   const refreshRoadmapData = async () => {
     if (!user?.id) return;
@@ -81,12 +83,28 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         setLoading(true);
         setError(null);
         
-        // Fetch user data first
-        const dashboardData = await DatabaseService.getDashboardData(user.id);
+        // Check for week parameter in URL
+        const weekParam = searchParams.get('week');
+        if (weekParam) {
+          const weekNum = parseInt(weekParam, 10);
+          if (!isNaN(weekNum) && weekNum > 0) {
+            setTargetWeekNumber(weekNum);
+          }
+        }
         
-        // Set user name from dashboard data
-        if (dashboardData?.userData?.first_name) {
-          setUserName(dashboardData.userData.first_name);
+        // Fetch only essential data in parallel - avoid heavy getDashboardData
+        const [userDataQuery, batchQuery, progressQuery] = await Promise.all([
+          DatabaseService.getUserById(user.id),
+          DatabaseService.getStudentBatch(user.id),
+          supabase
+            .from('student_progress')
+            .select('*')
+            .eq('student_id', user.id)
+        ]);
+        
+        // Set user name from lightweight user data
+        if (userDataQuery?.first_name) {
+          setUserName(userDataQuery.first_name);
         } else if (user?.user_metadata?.full_name) {
           setUserName(user.user_metadata.full_name);
         } else if (user?.email) {
@@ -94,41 +112,23 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         }
         
         // Get student's batch information
-        if (dashboardData?.batch?.id) {
-          setBatchId(dashboardData.batch.id);
+        if (batchQuery?.id) {
+          setBatchId(batchQuery.id);
         }
         
-        // Get student progress
-        const { data: progressData } = await supabase
-          .from('student_progress')
-          .select('*')
-          .eq('student_id', user.id);
+        // Set progress data
+        setStudentProgress(progressQuery.data || []);
         
-        setStudentProgress(progressData || []);
-        
-        let roadmapData: Roadmap | null = null;
-        
-        // Use roadmap slug to fetch roadmap data
-        if (roadmapSlug) {
-          console.log('🔍 Fetching roadmap by slug:', roadmapSlug);
-          roadmapData = await getRoadmapBySlug(roadmapSlug);
-          console.log('📊 Roadmap data from slug:', roadmapData);
-          
-          // Debug: Check what roadmaps exist in the database
-          if (!roadmapData) {
-            console.log('🔍 Debug: Checking all available roadmaps...');
-            const { data: allRoadmaps, error: roadmapsError } = await supabase
-              .from('roadmaps')
-              .select('id, title, category')
-              .order('title');
-            
-            if (!roadmapsError && allRoadmaps) {
-              console.log('📋 Available roadmaps:', allRoadmaps);
-            }
-          }
+        // Optimize roadmap fetching with parallel processing
+        if (!roadmapSlug) {
+          setError('No roadmap specified in URL');
+          setLoading(false);
+          return;
         }
+
+        console.log('🔍 Fetching roadmap by slug:', roadmapSlug);
+        const roadmapData = await getRoadmapBySlug(roadmapSlug);
         
-        // Don't fallback to user's assigned roadmap - only use the slug
         if (!roadmapData) {
           console.error('❌ No roadmap found for slug:', roadmapSlug);
           setError(`No roadmap found for "${roadmapSlug}". Please check the URL or contact support.`);
@@ -138,16 +138,28 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         setRoadmap(roadmapData);
         
+        // Fetch weeks and all tasks in a single optimized query
         const weeksData = await DatabaseService.getRoadmapWeeks(roadmapData.id);
         setWeeks(weeksData);
         
-        // Get tasks for all weeks
-        const allTasks: RoadmapTask[] = [];
-        for (const week of weeksData) {
-          const weekTasks = await DatabaseService.getRoadmapTasks(week.id);
-          allTasks.push(...weekTasks);
+        // Fetch all tasks for all weeks in parallel (much faster)
+        if (weeksData.length > 0) {
+          const weekIds = weeksData.map(week => week.id);
+          const { data: allTasks, error: tasksError } = await supabase
+            .from('roadmap_tasks')
+            .select('*')
+            .in('week_id', weekIds)
+            .order('created_at');
+          
+          if (!tasksError && allTasks) {
+            setTasks(allTasks);
+          } else {
+            console.error('Error fetching tasks:', tasksError);
+            setTasks([]);
+          }
+        } else {
+          setTasks([]);
         }
-        setTasks(allTasks);
         
       } catch (err) {
         console.error('Error fetching roadmap data:', err);
@@ -160,12 +172,15 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     fetchRoadmapData();
   }, [user?.id, roadmapSlug]);
 
-  // Fetch completion statistics after weeks and batchId are loaded
+  // Lazy-load completion statistics after initial render for better performance
   useEffect(() => {
-    if (weeks.length > 0 && batchId) {
-      fetchCompletionStats();
+    if (weeks.length > 0 && batchId && !loading) {
+      // Delay completion stats to avoid blocking initial render
+      setTimeout(() => {
+        fetchCompletionStats();
+      }, 100);
     }
-  }, [weeks, batchId]);
+  }, [weeks, batchId, loading]);
 
   if (loading) {
     return (
@@ -217,11 +232,11 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       />
 
       {/* Breadcrumb */}
-      <div className={`border-b h-16 transition-colors duration-200 ${
+      <div className={`border-b min-h-16 transition-colors duration-200 ${
         effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
             <button
               onClick={onBack}
               className={`flex items-center gap-2 transition-colors ${
@@ -230,13 +245,13 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back to Dashboard</span>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-medium text-sm sm:text-base">Back to Dashboard</span>
             </button>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <h1 className={`text-2xl font-bold transition-colors duration-200 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>{roadmap.title}</h1>
+            
+            <h1 className={`text-lg sm:text-2xl font-bold transition-colors duration-200 truncate ml-4 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {roadmap.title}
+            </h1>
           </div>
         </div>
       </div>
@@ -251,6 +266,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
           roadmapNodes={nodesWithStats} 
           onRefresh={refreshRoadmapData}
           batchId={batchId}
+          targetWeekNumber={targetWeekNumber}
         />
       </div>
     </div>

@@ -18,7 +18,6 @@ export const LoginPage: React.FC = () => {
   // Redirect if already logged in - All users go to student dashboard
   useEffect(() => {
     if (user) {
-      console.log('✔ User logged in, redirecting to student dashboard');
       navigate('/student/dashboard');
     }
   }, [user, navigate]);
@@ -28,33 +27,26 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submitted with:', { email: formData.email, isLogin });
-    
     try {
       if (isLogin) {
-        console.log('Attempting sign in...');
         const result = await signIn(formData.email, formData.password);
-        console.log('Sign in result:', result);
         
         if (result.success) {
-          console.log('✔ Sign in successful, redirecting to student dashboard');
+          // Sign in successful, redirect will happen via useEffect
         }
       } else {
-        console.log('Attempting sign up...');
         const result = await signUp(formData.email, formData.password, formData.name);
-        console.log('Sign up result:', result);
         
         if (result.success) {
           if (result.requiresEmailConfirmation) {
-            console.log('⚠️ Sign up successful but email confirmation required');
             // Show message to user about email confirmation
           } else {
-            console.log('✔ Sign up successful, redirecting to student dashboard');
+            // Sign up successful, redirect will happen via useEffect
           }
         }
       }
     } catch (error) {
-      console.error('Auth error:', error);
+      // Silently handle error - could show user notification in production
     }
   };
 

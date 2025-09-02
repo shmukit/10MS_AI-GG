@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
     exclude: ['lucide-react'],
   },
   server: {
@@ -15,11 +16,38 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    minify: 'esbuild',
+    target: 'esnext',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          supabase: ['@supabase/supabase-js'],
+        manualChunks: (id) => {
+          // Split vendor libraries
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('react-router')) {
+              return 'router';
+            }
+            return 'vendor';
+          }
+          
+          // Split our own components
+          if (id.includes('components/Mentor')) {
+            return 'mentor';
+          }
+          if (id.includes('components/Student')) {
+            return 'student';
+          }
+          if (id.includes('components/Roadmap')) {
+            return 'roadmap';
+          }
         },
       },
     },
