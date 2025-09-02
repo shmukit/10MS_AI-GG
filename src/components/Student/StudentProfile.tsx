@@ -6,6 +6,31 @@ import { DatabaseService } from '../../services/database';
 import { StudentHeader } from './StudentHeader';
 import { useTheme } from '../../lib/ThemeContext';
 
+// Add skeleton loading component at the top
+const ProfileSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+          <div className="flex-1">
+            <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const { profileSlug } = useParams();
@@ -41,7 +66,12 @@ export const StudentProfile: React.FC = () => {
       
       try {
         setLoading(true);
+        console.log('🔍 Profile: Auth user object:', user);
+        console.log('🆔 Profile: User ID:', user?.id);
+        console.log('📧 Profile: User email:', user?.email);
+        console.log('📋 Profile: User metadata:', user?.user_metadata);
         const data = await DatabaseService.getDashboardData(user.id);
+        console.log('📊 Profile: Dashboard data received:', data);
         setProfileData(data);
         // Initialize edit form with current data
         setEditForm({
@@ -145,24 +175,20 @@ export const StudentProfile: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} p-6`}>
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Loading profile...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
       <StudentHeader 
-        userName={profileData?.userData?.first_name || profileData?.profile?.first_name || 'Student'}
+        userName={
+          profileData?.userData?.first_name || 
+          profileData?.profile?.first_name || 
+          user?.user_metadata?.first_name ||
+          user?.user_metadata?.full_name || 
+          user?.email?.split('@')[0] || 
+          'Student'
+        }
         userRole="student"
         pageTitle="Profile"
       />
@@ -191,11 +217,25 @@ export const StudentProfile: React.FC = () => {
               <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors duration-200 ${
                 isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
               }`}>
-                {profileData?.userData?.first_name?.[0] || profileData?.profile?.first_name?.[0] || 'S'}
+                {
+                  profileData?.userData?.first_name?.[0] || 
+                  profileData?.profile?.first_name?.[0] || 
+                  user?.user_metadata?.first_name?.[0] ||
+                  user?.user_metadata?.full_name?.[0] || 
+                  user?.email?.[0] || 
+                  'S'
+                }
               </div>
               <div>
                 <h2 className={`text-3xl font-bold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {profileData?.userData?.first_name || profileData?.profile?.first_name || 'Student'}
+                  {
+                    profileData?.userData?.first_name || 
+                    profileData?.profile?.first_name || 
+                    user?.user_metadata?.first_name ||
+                    user?.user_metadata?.full_name || 
+                    user?.email?.split('@')[0] || 
+                    'Student'
+                  }
                 </h2>
                 <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'Computer Science'} • {profileData?.profile?.year || '3rd'} Year
@@ -278,7 +318,18 @@ export const StudentProfile: React.FC = () => {
                     </div>
                   ) : (
                     <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {profileData?.userData?.first_name || 'Student'} {profileData?.userData?.last_name || ''}
+                      {
+                        profileData?.userData?.first_name || 
+                        user?.user_metadata?.first_name ||
+                        user?.user_metadata?.full_name?.split(' ')[0] || 
+                        user?.email?.split('@')[0] || 
+                        'Student'
+                      } {
+                        profileData?.userData?.last_name || 
+                        user?.user_metadata?.last_name ||
+                        user?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || 
+                        ''
+                      }
                     </p>
                   )}
                 </div>
