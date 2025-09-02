@@ -31,14 +31,18 @@ const RouteLoader = () => (
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
   
+  console.log('🔄 ProtectedRoute: user =', user?.email || 'no user', 'loading =', loading);
+  
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
+    console.log('🔄 ProtectedRoute: No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
+  console.log('🔄 ProtectedRoute: User authenticated, rendering children');
   return <>{children}</>;
 };
 
@@ -80,15 +84,19 @@ const MentorRoutes = () => {
 const AppRoutes = () => {
   const { user, loading } = useAuthContext();
 
+  console.log('🔄 AppRoutes: user =', user?.email || 'no user', 'loading =', loading);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
+    console.log('🔄 AppRoutes: No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // All authenticated users go to student dashboard by default
+  console.log('🔄 AppRoutes: User authenticated, redirecting to student dashboard');
   return <Navigate to="/student/dashboard" replace />;
 };
 

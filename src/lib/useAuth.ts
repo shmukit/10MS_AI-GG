@@ -36,9 +36,16 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔄 Auth state changed:', event, session?.user?.email || 'no user');
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
+        
+        // Clear user role when user logs out
+        if (event === 'SIGNED_OUT' || !session) {
+          setUserRole(null)
+          console.log('🧹 User role cleared due to sign out');
+        }
       }
     )
 
@@ -157,23 +164,27 @@ export function useAuth() {
       
       if (currentSession) {
         console.log('✅ Active session found, proceeding with logout...')
-        // Try to sign out from Supabase
+        // Try to sign out from Supabase - this will trigger the auth state change listener
         const { error } = await supabase.auth.signOut()
         
         if (error) {
           console.error('❌ Supabase logout error:', error)
+          // If Supabase logout fails, manually clear state as fallback
+          setUser(null)
+          setSession(null)
+          setUserRole(null)
+          console.log('🧹 Local state cleared due to Supabase error')
         } else {
-          console.log('✅ Supabase logout successful')
+          console.log('✅ Supabase logout successful - auth state change will handle cleanup')
         }
       } else {
-        console.log('⚠️ No active session found, skipping Supabase logout...')
+        console.log('⚠️ No active session found, manually clearing state...')
+        // No session exists, manually clear state
+        setUser(null)
+        setSession(null)
+        setUserRole(null)
+        console.log('🧹 Local state cleared - no session found')
       }
-      
-      // Always clear local state regardless of Supabase response
-      setUser(null)
-      setSession(null)
-      setUserRole(null)
-      console.log('🧹 Local state cleared')
       
       // Clear any stored session data as a fallback
       try {
