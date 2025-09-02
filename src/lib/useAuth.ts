@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 
+// Get Supabase URL for session cleanup
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -147,15 +150,60 @@ export function useAuth() {
   const signOut = async () => {
     try {
       setError(null)
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        setError(error)
-        return { error }
+      console.log('🔄 Starting logout process...')
+      
+      // Check if there's an active session before attempting logout
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      
+      if (currentSession) {
+        console.log('✅ Active session found, proceeding with logout...')
+        // Try to sign out from Supabase
+        const { error } = await supabase.auth.signOut()
+        
+        if (error) {
+          console.error('❌ Supabase logout error:', error)
+        } else {
+          console.log('✅ Supabase logout successful')
+        }
+      } else {
+        console.log('⚠️ No active session found, skipping Supabase logout...')
       }
+      
+      // Always clear local state regardless of Supabase response
+      setUser(null)
+      setSession(null)
+      setUserRole(null)
+      console.log('🧹 Local state cleared')
+      
+      // Clear any stored session data as a fallback
+      try {
+        localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
+        sessionStorage.clear()
+        console.log('🧹 Stored session data cleared')
+      } catch (storageError) {
+        console.log('⚠️ Could not clear stored session data:', storageError)
+      }
+      
+      // Always return success to ensure user gets redirected
       return { success: true }
     } catch (err) {
-      console.error('Sign out error:', err)
-      return { error: err as AuthError }
+      console.error('❌ Exception during logout:', err)
+      // Clear local state even if there's an exception
+      setUser(null)
+      setSession(null)
+      setUserRole(null)
+      console.log('🧹 Local state cleared after exception')
+      
+      // Clear any stored session data as a fallback
+      try {
+        localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
+        sessionStorage.clear()
+        console.log('🧹 Stored session data cleared after exception')
+      } catch (storageError) {
+        console.log('⚠️ Could not clear stored session data after exception:', storageError)
+      }
+      
+      return { success: true } // Still return success to redirect user
     }
   }
 
