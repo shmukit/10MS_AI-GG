@@ -1630,24 +1630,77 @@ export class DatabaseService {
   // Update student profile
   static async updateStudentProfile(userId: string, updates: Partial<StudentProfile>): Promise<boolean> {
     try {
-      console.log('Updating student profile for user:', userId, 'Updates:', updates);
+      console.log('🔄 Starting updateStudentProfile with userId:', userId, 'Updates:', updates);
       
-      const { error } = await supabase
+      // Get current auth user to verify permissions
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      console.log('🔐 Current auth user for profile update:', authUser?.id, authUser?.email);
+      console.log('🔍 Auth user ID matches userId?', authUser?.id === userId);
+      
+      // Try to update using the auth user ID instead of the custom user ID
+      const targetUserId = authUser?.id || userId;
+      console.log('🎯 Using target user ID for profile update:', targetUserId);
+      
+      const { data, error } = await supabase
         .from('student_profiles')
         .update(updates)
-        .eq('user_id', userId);
+        .eq('user_id', targetUserId)
+        .select(); // Add select to see what was actually updated
 
       if (error) {
-        console.error('Error updating student profile:', error);
+        console.error('❌ Error updating student profile:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Try alternative approach - find profile by email if ID fails
+        if (authUser?.email) {
+          console.log('🔄 Trying to find and update profile by email as fallback:', authUser.email);
+          
+          // First, find the user by email to get the correct user_id
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', authUser.email)
+            .single();
+            
+          if (userError || !userData) {
+            console.error('❌ Could not find user by email:', userError);
+            return false;
+          }
+          
+          console.log('✅ Found user by email, user_id:', userData.id);
+          
+          // Now update the profile using the correct user_id
+          const { data: profileData, error: profileError } = await supabase
+            .from('student_profiles')
+            .update(updates)
+            .eq('user_id', userData.id)
+            .select();
+            
+          if (profileError) {
+            console.error('❌ Profile update by email lookup also failed:', profileError);
+            return false;
+          } else {
+            console.log('✅ Profile update by email lookup successful:', profileData);
+            cache.clear();
+            return true;
+          }
+        }
+        
         return false;
       }
 
+      console.log('✅ Student profile updated successfully:', data);
       // Clear cache for this user's dashboard data
       cache.clear();
-      console.log('Student profile updated successfully and cache cleared');
+      console.log('🧹 Cache cleared after successful profile update');
       return true;
     } catch (error) {
-      console.error('Error in updateStudentProfile:', error);
+      console.error('❌ Exception in updateStudentProfile:', error);
       return false;
     }
   }
@@ -1655,24 +1708,61 @@ export class DatabaseService {
   // Update user data
   static async updateUser(userId: string, updates: Partial<User>): Promise<boolean> {
     try {
-      console.log('Updating user data for user:', userId, 'Updates:', updates);
+      console.log('🔄 Starting updateUser with userId:', userId, 'Updates:', updates);
       
-      const { error } = await supabase
+      // Get current auth user to verify permissions
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      console.log('🔐 Current auth user:', authUser?.id, authUser?.email);
+      console.log('🔍 Auth user ID matches userId?', authUser?.id === userId);
+      
+      // Try to update using the auth user ID instead of the custom user ID
+      const targetUserId = authUser?.id || userId;
+      console.log('🎯 Using target user ID:', targetUserId);
+      
+      const { data, error } = await supabase
         .from('users')
         .update(updates)
-        .eq('id', userId);
+        .eq('id', targetUserId)
+        .select(); // Add select to see what was actually updated
 
       if (error) {
-        console.error('Error updating user data:', error);
+        console.error('❌ Error updating user data:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Try alternative approach - update by email if ID fails
+        if (authUser?.email) {
+          console.log('🔄 Trying to update by email as fallback:', authUser.email);
+          const { data: emailData, error: emailError } = await supabase
+            .from('users')
+            .update(updates)
+            .eq('email', authUser.email)
+            .select();
+            
+          if (emailError) {
+            console.error('❌ Email update also failed:', emailError);
+            return false;
+          } else {
+            console.log('✅ Email update successful:', emailData);
+            cache.clear();
+            return true;
+          }
+        }
+        
         return false;
       }
 
+      console.log('✅ User data updated successfully:', data);
       // Clear cache for this user's dashboard data
       cache.clear();
-      console.log('User data updated successfully and cache cleared');
+      console.log('🧹 Cache cleared after successful update');
       return true;
     } catch (error) {
-      console.error('Error in updateUser:', error);
+      console.error('❌ Exception in updateUser:', error);
       return false;
     }
   }
