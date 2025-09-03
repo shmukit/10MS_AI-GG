@@ -196,7 +196,15 @@ export const StudentDashboard: React.FC = () => {
 
   // Get weekly streaks based on current roadmap and batch
   const getWeeklyStreaks = () => {
-    // Get data from current roadmap
+    // Use the weekStreaks data from dashboardData which now includes date-based calculation
+    if (dashboardData?.weekStreaks && dashboardData.weekStreaks.length > 0) {
+      return dashboardData.weekStreaks.map((streak: any) => ({
+        week: streak.week,
+        status: streak.status
+      }));
+    }
+
+    // Fallback: Get data from current roadmap
     const roadmap = getCurrentRoadmap();
     const batch = getCurrentBatch();
     

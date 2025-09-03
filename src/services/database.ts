@@ -1444,10 +1444,40 @@ export class DatabaseService {
         ];
       }
 
-      // Calculate week streaks based on actual progress
+      // Calculate week streaks based on actual progress and date-based current week
       let weekStreaks: { week: number; status: 'done' | 'current' | 'incomplete'; completion: number }[] = [];
       
       if (roadmap) {
+        // Calculate current week based on dates
+        let currentWeek = 1; // Default fallback
+        
+        if (profile?.enrollment_date && batch?.start_date) {
+          const enrollmentDate = new Date(profile.enrollment_date);
+          const batchStartDate = new Date(batch.start_date);
+          const currentDate = new Date();
+          
+          // Use the later of enrollment date or batch start date
+          const startDate = enrollmentDate > batchStartDate ? enrollmentDate : batchStartDate;
+          
+          // Calculate weeks elapsed since start
+          const timeDiff = currentDate.getTime() - startDate.getTime();
+          const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+          const weeksElapsed = Math.floor(daysDiff / 7);
+          
+          // Current week is weeks elapsed + 1 (since we start counting from week 1)
+          currentWeek = Math.max(1, weeksElapsed + 1);
+          
+          console.log('📅 Dashboard week calculation:', {
+            enrollmentDate: enrollmentDate.toISOString(),
+            batchStartDate: batchStartDate.toISOString(),
+            currentDate: currentDate.toISOString(),
+            startDate: startDate.toISOString(),
+            daysDiff,
+            weeksElapsed,
+            currentWeek
+          });
+        }
+        
         // Use roadmap data if available
         weekStreaks = Array.from({ length: roadmap.total_weeks }, (_, i) => {
           const weekNumber = i + 1;
@@ -1467,10 +1497,12 @@ export class DatabaseService {
           
           if (weekCompletion >= 80) {
             status = 'done';
-          } else if (weekNumber === Math.ceil((profile?.completed_weeks || 0) + 1)) {
+          } else if (weekNumber === currentWeek) {
             status = 'current';
+          } else if (weekNumber < currentWeek) {
+            status = 'incomplete'; // Past weeks that weren't completed
           } else {
-            status = 'incomplete';
+            status = 'incomplete'; // Future weeks
           }
           
           return { week: weekNumber, status, completion: weekCompletion };
@@ -1610,7 +1642,9 @@ export class DatabaseService {
         return false;
       }
 
-      console.log('Student profile updated successfully');
+      // Clear cache for this user's dashboard data
+      cache.clear();
+      console.log('Student profile updated successfully and cache cleared');
       return true;
     } catch (error) {
       console.error('Error in updateStudentProfile:', error);
@@ -1633,7 +1667,9 @@ export class DatabaseService {
         return false;
       }
 
-      console.log('User data updated successfully');
+      // Clear cache for this user's dashboard data
+      cache.clear();
+      console.log('User data updated successfully and cache cleared');
       return true;
     } catch (error) {
       console.error('Error in updateUser:', error);
@@ -1833,8 +1869,41 @@ export class DatabaseService {
         targetRoadmapId = batch.roadmap_id;
       }
 
-      // Get current week (you might want to calculate this based on enrollment date)
-      const currentWeek = 1; // For now, hardcoded to week 1
+      // Calculate current week based on enrollment date and current date
+      const profile = await this.getStudentProfile(userId);
+      const batch = await this.getStudentBatch(userId);
+      
+      let currentWeek = 1; // Default fallback
+      
+      if (profile?.enrollment_date && batch?.start_date) {
+        const enrollmentDate = new Date(profile.enrollment_date);
+        const batchStartDate = new Date(batch.start_date);
+        const currentDate = new Date();
+        
+        // Use the later of enrollment date or batch start date
+        const startDate = enrollmentDate > batchStartDate ? enrollmentDate : batchStartDate;
+        
+        // Calculate weeks elapsed since start
+        const timeDiff = currentDate.getTime() - startDate.getTime();
+        const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+        const weeksElapsed = Math.floor(daysDiff / 7);
+        
+        // Current week is weeks elapsed + 1 (since we start counting from week 1)
+        currentWeek = Math.max(1, weeksElapsed + 1);
+        
+        console.log('📅 Date-based calculation:', {
+          enrollmentDate: enrollmentDate.toISOString(),
+          batchStartDate: batchStartDate.toISOString(),
+          currentDate: currentDate.toISOString(),
+          startDate: startDate.toISOString(),
+          daysDiff,
+          weeksElapsed,
+          currentWeek
+        });
+      } else {
+        console.log('📅 Using default week 1 (no enrollment/batch dates available)');
+      }
+      
       console.log('📅 Current week:', currentWeek);
 
       // Get roadmap weeks

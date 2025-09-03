@@ -142,18 +142,22 @@ export const StudentProfile: React.FC = () => {
         return;
       }
       
-      // Update local state after successful API calls
-      setProfileData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          userData: { ...prev.userData, ...userUpdates },
-          profile: { ...prev.profile, ...profileUpdates }
-        };
+      // Refresh profile data from server to ensure we have the latest data
+      const refreshedData = await DatabaseService.getDashboardData(user.id);
+      setProfileData(refreshedData);
+      
+      // Update edit form with refreshed data
+      setEditForm({
+        first_name: refreshedData?.userData?.first_name || '',
+        last_name: refreshedData?.userData?.last_name || '',
+        degree: refreshedData?.profile?.degree || '',
+        subject: refreshedData?.profile?.subject || '',
+        year: refreshedData?.profile?.year || '',
+        institute: refreshedData?.profile?.institute || ''
       });
 
       setIsEditing(false);
-      console.log('✅ Profile updated successfully via API');
+      console.log('✅ Profile updated successfully via API and data refreshed');
     } catch (error) {
       console.error('❌ Error saving profile:', error);
     } finally {
