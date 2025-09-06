@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter, CheckCircle, Clock } from 'lucide-react';
+import { DatabaseService } from '../../services/database';
+import { useAuth } from '../../lib/useAuth';
 
 interface Student {
   id: string;
@@ -84,8 +86,58 @@ const mockStudents: Student[] = [
 ];
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
-  const [students, setStudents] = useState(mockStudents);
+  const { user } = useAuth();
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'completion'>('name');
+
+  // Fetch real student data
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Get user's batch
+        const batch = await DatabaseService.getStudentBatch(user.id);
+        if (!batch) {
+          setError('No batch found for user');
+          return;
+        }
+        
+        // Get students in the same batch
+        const batchStudents = await DatabaseService.getStudentsByBatch(batch.id, user.id);
+        
+        // Transform data to match interface
+        const transformedStudents: Student[] = batchStudents.map((student: any) => ({
+          id: student.id,
+          name: `${student.first_name} ${student.last_name}`.trim(),
+          profilePhoto: '',
+          institute: student.profile?.institute || 'Unknown',
+          year: student.profile?.year || 'Unknown',
+          subject: student.profile?.subject || 'Unknown',
+          degree: student.profile?.degree || 'Unknown',
+          email: student.email,
+          completedWeeks: student.progress?.completed_weeks || 0,
+          progressPercentage: student.progress?.progress_percentage || 0
+        }));
+        
+        setStudents(transformedStudents);
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        setError('Failed to load community data');
+        // Fallback to mock data
+        setStudents(mockStudents);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStudents();
+  }, [user?.id]);
 
   const sortedStudents = [...students].sort((a, b) => {
     if (sortBy === 'name') {
@@ -265,9 +317,37 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Loading community...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 text-sm">!</span>
+                </div>
+                <div>
+                  <h3 className="text-red-800 font-medium">Error Loading Community</h3>
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Students Grid */}
-          <div className="space-y-4">
-            {sortedStudents.map((student) => (
+          {!loading && !error && (
+            <div className="space-y-4">
+              {sortedStudents.map((student) => (
               <div
                 key={student.id}
                 className={`p-4 rounded-lg border transition-colors duration-200 ${
@@ -331,7 +411,8 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

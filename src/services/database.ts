@@ -791,9 +791,41 @@ export class DatabaseService {
         }
         
         console.log('✅ Successfully marked task as completed:', task.id);
+      
+      // Sync progress after task completion
+      try {
+        const { ProgressSyncService } = await import('./progressSync');
+        await ProgressSyncService.syncStudentProgress(userId);
+        console.log('✅ Progress synced after task completion');
+      } catch (syncError) {
+        console.warn('⚠️ Progress sync failed after task completion:', syncError);
+      }
       }
 
       console.log('🎉 All tasks for week marked as completed successfully');
+      
+      // Update student profile with completed weeks
+      const weekData = await this.getRoadmapWeeks(weekId);
+      if (weekData && weekData.length > 0) {
+        const weekNumber = weekData[0].week_number;
+        
+        // Get current profile
+        const currentProfile = await this.getStudentProfile(userId);
+        if (currentProfile) {
+          const newCompletedWeeks = Math.max(currentProfile.completed_weeks, weekNumber);
+          const newProgressPercentage = Math.min(100, (newCompletedWeeks / 6) * 100); // Assuming 6 weeks total
+          
+          // Update profile
+          await this.updateStudentProfile(userId, {
+            completed_weeks: newCompletedWeeks,
+            progress_percentage: newProgressPercentage,
+            updated_at: new Date().toISOString()
+          });
+          
+          console.log(`✅ Updated student profile: ${newCompletedWeeks} weeks completed, ${newProgressPercentage}% progress`);
+        }
+      }
+      
       return true;
     } catch (error) {
       console.error('❌ Error in markWeekAsComplete:', error);
@@ -991,12 +1023,12 @@ export class DatabaseService {
         
         // Get completed task names
         const completedTaskNames = studentProgress
-          .map(p => 'Task Completed') // Simplified for now, can be enhanced later
+          .map(() => 'Task Completed') // Simplified for now, can be enhanced later
           .sort();
 
         // Get last completion time
         const lastCompletedAt = studentProgress.length > 0 
-          ? Math.max(...studentProgress.map(p => new Date(p.completed_at || 0).getTime()))
+          ? Math.max(...studentProgress.map(progress => new Date(progress.completed_at || 0).getTime()))
           : undefined;
 
         return {
@@ -1175,7 +1207,7 @@ export class DatabaseService {
   }
 
   // Get students by batch ID using the new student_batch_assignments table
-  static async getStudentsByBatch(batchId: string, currentUserId?: string, roadmapId?: string): Promise<(User & { profile?: any })[]> {
+  static async getStudentsByBatch(batchId: string, currentUserId?: string): Promise<(User & { profile?: any })[]> {
     try {
       console.log('🔍 getStudentsByBatch called for batch:', batchId);
       
@@ -1339,6 +1371,40 @@ export class DatabaseService {
         this.getUserById(userId)
       ]);
       
+      // Fetch weeks and tasks for the selected roadmap
+      let weeks: RoadmapWeek[] = [];
+      let tasks: RoadmapTask[] = [];
+      
+      if (selectedRoadmapId) {
+        weeks = await this.getRoadmapWeeks(selectedRoadmapId);
+        if (weeks.length > 0) {
+          const weekIds = weeks.map(week => week.id);
+          const { data: allTasks, error: tasksError } = await supabase
+            .from('roadmap_tasks')
+            .select('*')
+            .in('week_id', weekIds)
+            .order('created_at');
+          
+          if (!tasksError && allTasks) {
+            tasks = allTasks;
+          }
+        }
+      } else if (roadmap) {
+        weeks = await this.getRoadmapWeeks(roadmap.id);
+        if (weeks.length > 0) {
+          const weekIds = weeks.map(week => week.id);
+          const { data: allTasks, error: tasksError } = await supabase
+            .from('roadmap_tasks')
+            .select('*')
+            .in('week_id', weekIds)
+            .order('created_at');
+          
+          if (!tasksError && allTasks) {
+            tasks = allTasks;
+          }
+        }
+      }
+      
       // Dashboard data components fetched
       console.log('📊 Dashboard data components fetched');
       console.log('👤 Profile:', profile);
@@ -1371,7 +1437,7 @@ export class DatabaseService {
         // Getting roadmap-specific data
         
         // Get the roadmap to find its associated batch
-        const { data: roadmapData, error: roadmapError } = await supabase
+        const { data: roadmapData } = await supabase
           .from('roadmaps')
           .select('*')
           .eq('id', selectedRoadmapId)
@@ -1381,7 +1447,7 @@ export class DatabaseService {
           console.log('📊 Found roadmap:', roadmapData.title);
           
           // Find batches associated with this roadmap
-          const { data: roadmapBatches, error: batchError } = await supabase
+          const { data: roadmapBatches } = await supabase
             .from('batches')
             .select('*')
             .eq('roadmap_id', selectedRoadmapId);
@@ -1482,16 +1548,22 @@ export class DatabaseService {
         weekStreaks = Array.from({ length: roadmap.total_weeks }, (_, i) => {
           const weekNumber = i + 1;
           
+          // Get all tasks for this specific week
+          const weekTasks = tasks.filter(task => {
+            // Find the week that contains this task
+            const taskWeek = weeks.find(w => w.id === task.week_id);
+            return taskWeek && taskWeek.week_number === weekNumber;
+          });
+          
           // Get completed tasks for this week
-          const weekProgress = progress.filter(p => {
-            // Map task_id to week number (you may need to adjust this logic based on your data structure)
-            // For now, we'll use a simple calculation
-            return p.status === 'completed';
+          const completedTasks = weekTasks.filter(task => {
+            const taskProgress = progress.find(p => p.task_id === task.id);
+            return taskProgress && taskProgress.status === 'completed';
           });
           
           // Calculate completion percentage for the week
-          const weekCompletion = weekProgress.length > 0 ? 
-            (weekProgress.filter(p => p.status === 'completed').length / weekProgress.length) * 100 : 0;
+          const weekCompletion = weekTasks.length > 0 ? 
+            (completedTasks.length / weekTasks.length) * 100 : 0;
           
           let status: 'done' | 'current' | 'incomplete';
           

@@ -1077,7 +1077,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const renderDashboard = () => (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className={`p-6 rounded-xl border transition-colors duration-200 ${
           isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
@@ -1186,7 +1186,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     <div className="space-y-6">
       {/* Roadmap Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full sm:w-auto">
           <div>
             <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
               isDarkMode ? 'text-gray-300' : 'text-gray-700'
@@ -1228,24 +1228,24 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           )}
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsAddingRoadmap(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Roadmap
           </button>
           <button
             onClick={() => setShowAddWeekModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Week
           </button>
           <button
             onClick={() => setIsAddingTask(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Task
@@ -1259,8 +1259,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full sm:w-auto">
+            <div className="w-full sm:w-auto">
                 <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}>
@@ -2282,69 +2282,149 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             Students ({batchStudents.length})
           </h4>
           
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
             {batchStudents.map((student) => (
               <div
                 key={student.id}
-                className={`p-4 rounded-lg border transition-colors duration-200 ${
+                className={`p-3 lg:p-4 rounded-lg border transition-colors duration-200 ${
                   isDarkMode 
                     ? 'bg-gray-700 border-gray-600' 
                     : 'bg-gray-50 border-gray-200'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-600">
-                        {student.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h5 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {student.name}
-                      </h5>
-                      <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        {student.degree} {student.subject} • {student.year}
+                {/* Mobile Layout */}
+                <div className="lg:hidden">
+                  {/* Student Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-600">
+                          {student.name.split(' ').map(n => n[0]).join('')}
+                        </span>
                       </div>
-                      <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {student.institute}
-                      </div>
-                      <div className="flex items-center gap-4 mt-1">
-                        <a href={`mailto:${student.email}`} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
-                          <Mail className="w-3 h-3" />
-                          {student.email}
-                        </a>
-                        <a href={`tel:${student.phone}`} className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700">
-                          <Phone className="w-3 h-3" />
-                          {student.phone}
-                        </a>
+                      <div className="flex-1 min-w-0">
+                        <h5 className={`font-semibold text-sm truncate transition-colors duration-200 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {student.name}
+                        </h5>
+                        <p className={`text-xs truncate transition-colors duration-200 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {student.degree} {student.subject}
+                        </p>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        Week {student.completedWeeks}/6
-                      </div>
-                      <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {student.progressPercentage}% Complete
-                      </div>
-                      <div className={`w-20 h-2 rounded-full mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                        <div 
-                          className="h-2 rounded-full bg-blue-500 transition-all duration-300"
-                          style={{ width: `${student.progressPercentage}%` }}
-                        />
-                      </div>
-                    </div>
-                    
                     <button
                       onClick={() => handleDeleteStudent(student.id)}
-                      className="p-2 rounded hover:bg-red-100 text-red-600"
+                      className="p-1 rounded hover:bg-red-100 text-red-600"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                  </div>
+
+                  {/* Student Details */}
+                  <div className="space-y-2 mb-3">
+                    <div className={`text-xs transition-colors duration-200 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      {student.institute}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a href={`mailto:${student.email}`} className="flex items-center gap-1 text-xs text-blue-600">
+                        <Mail className="w-3 h-3" />
+                        <span className="truncate">{student.email}</span>
+                      </a>
+                    </div>
+                    {student.phone && (
+                      <div className="flex items-center gap-1 text-xs text-green-600">
+                        <Phone className="w-3 h-3" />
+                        <span>{student.phone}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress Section */}
+                  <div className="border-t pt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-sm font-medium transition-colors duration-200 ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        Week {student.completedWeeks}/6
+                      </span>
+                      <span className={`text-xs transition-colors duration-200 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {student.progressPercentage}% Complete
+                      </span>
+                    </div>
+                    <div className={`w-full h-2 rounded-full ${
+                      isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+                    }`}>
+                      <div 
+                        className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                        style={{ width: `${student.progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden lg:block">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-600">
+                          {student.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h5 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {student.name}
+                        </h5>
+                        <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {student.degree} {student.subject} • {student.year}
+                        </div>
+                        <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {student.institute}
+                        </div>
+                        <div className="flex items-center gap-4 mt-1">
+                          <a href={`mailto:${student.email}`} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
+                            <Mail className="w-3 h-3" />
+                            {student.email}
+                          </a>
+                          <a href={`tel:${student.phone}`} className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700">
+                            <Phone className="w-3 h-3" />
+                            {student.phone}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          Week {student.completedWeeks}/6
+                        </div>
+                        <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {student.progressPercentage}% Complete
+                        </div>
+                        <div className={`w-20 h-2 rounded-full mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                          <div 
+                            className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                            style={{ width: `${student.progressPercentage}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleDeleteStudent(student.id)}
+                        className="p-2 rounded hover:bg-red-100 text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2845,7 +2925,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Notice Management
         </h3>
-        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full sm:w-auto">
           {/* Batch Dropdown */}
           <div>
             <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
@@ -3286,8 +3366,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           subject: profile?.subject || '',
           degree: profile?.degree || '',
           batchId: assignment.batch_id,
-          completedWeeks: assignment.completed_weeks || 0,
-          progressPercentage: assignment.progress_percentage || 0
+          completedWeeks: profile?.completed_weeks || 0,
+          progressPercentage: profile?.progress_percentage || 0
         };
       });
       setStudents(mappedStudents);
@@ -3337,10 +3417,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         pageTitle="Mentor Dashboard"
       />
 
-      {/* Navigation Tabs */}
+      {/* Navigation Tabs - Mobile Responsive */}
       <div className={`border-b h-16 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex space-x-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex space-x-8">
             {[
               { id: 'dashboard', label: 'Mentor Dashboard', icon: Users },
               { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
@@ -3358,6 +3439,33 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               >
                 <Icon className="w-4 h-4" />
                 {label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Mobile Navigation */}
+          <div className="lg:hidden grid grid-cols-4 h-16">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: Users },
+              { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
+              { id: 'students', label: 'Students', icon: Users },
+              { id: 'notice', label: 'Notice', icon: Bell }
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id as any)}
+                className={`flex flex-col items-center justify-center py-2 px-1 transition-colors ${
+                  activeTab === id
+                    ? isDarkMode 
+                      ? 'text-blue-400 bg-gray-700' 
+                      : 'text-blue-600 bg-blue-50'
+                    : isDarkMode 
+                      ? 'text-gray-400' 
+                      : 'text-gray-600'
+                }`}
+              >
+                <Icon className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium">{label}</span>
               </button>
             ))}
           </div>

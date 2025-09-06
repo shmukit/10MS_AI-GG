@@ -71,25 +71,103 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
     }
   };
 
-  const handleConfirmTaskCompletion = () => {
-    if (selectedTaskIndex >= 0) {
-      setCompletedTasks(prev => {
-        const newCompleted = [...prev];
-        newCompleted[selectedTaskIndex] = true;
-        return newCompleted;
-      });
+  const handleConfirmTaskCompletion = async () => {
+    if (selectedTaskIndex >= 0 && user?.id) {
+      const task = node.tasks[selectedTaskIndex];
+      
+      try {
+        console.log('🔄 Marking task as completed:', task.id, task.title);
+        
+        // Update task progress in database
+        const success = await DatabaseService.updateTaskProgress(
+          user.id,
+          task.id,
+          'completed'
+        );
+        
+        if (success) {
+          console.log('✅ Task marked as completed successfully');
+          
+          // Update local state
+          setCompletedTasks(prev => {
+            const newCompleted = [...prev];
+            newCompleted[selectedTaskIndex] = true;
+            return newCompleted;
+          });
+          
+          // Show success message
+          alert('Task marked as completed successfully!');
+          
+          // Call refresh callback if provided
+          if (onRefresh) {
+            console.log('🔄 Calling onRefresh callback');
+            onRefresh();
+          }
+        } else {
+          console.error('❌ Failed to mark task as completed');
+          alert('Failed to mark task as completed. Please try again.');
+        }
+      } catch (error) {
+        console.error('❌ Error marking task as completed:', error);
+        alert('Error marking task as completed. Please try again.');
+      } finally {
+        setShowTaskConfirmation(false);
+        setSelectedTaskIndex(-1);
+      }
+    } else {
+      console.error('❌ No user ID or invalid task index');
+      alert('Unable to complete task. Please try again.');
       setShowTaskConfirmation(false);
       setSelectedTaskIndex(-1);
     }
   };
 
-  const handleConfirmTaskUncheck = () => {
-    if (selectedTaskIndex >= 0) {
-      setCompletedTasks(prev => {
-        const newCompleted = [...prev];
-        newCompleted[selectedTaskIndex] = false;
-        return newCompleted;
-      });
+  const handleConfirmTaskUncheck = async () => {
+    if (selectedTaskIndex >= 0 && user?.id) {
+      const task = node.tasks[selectedTaskIndex];
+      
+      try {
+        console.log('🔄 Marking task as not completed:', task.id, task.title);
+        
+        // Update task progress in database
+        const success = await DatabaseService.updateTaskProgress(
+          user.id,
+          task.id,
+          'not_started'
+        );
+        
+        if (success) {
+          console.log('✅ Task marked as not completed successfully');
+          
+          // Update local state
+          setCompletedTasks(prev => {
+            const newCompleted = [...prev];
+            newCompleted[selectedTaskIndex] = false;
+            return newCompleted;
+          });
+          
+          // Show success message
+          alert('Task marked as not completed.');
+          
+          // Call refresh callback if provided
+          if (onRefresh) {
+            console.log('🔄 Calling onRefresh callback');
+            onRefresh();
+          }
+        } else {
+          console.error('❌ Failed to mark task as not completed');
+          alert('Failed to update task status. Please try again.');
+        }
+      } catch (error) {
+        console.error('❌ Error updating task status:', error);
+        alert('Error updating task status. Please try again.');
+      } finally {
+        setShowTaskUncheckConfirmation(false);
+        setSelectedTaskIndex(-1);
+      }
+    } else {
+      console.error('❌ No user ID or invalid task index');
+      alert('Unable to update task. Please try again.');
       setShowTaskUncheckConfirmation(false);
       setSelectedTaskIndex(-1);
     }
