@@ -143,7 +143,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name);
     } else {
-      return b.progressPercentage - a.progressPercentage;
+      // Sort by progress percentage (highest first), then by completed weeks
+      const progressDiff = b.progressPercentage - a.progressPercentage;
+      if (progressDiff !== 0) return progressDiff;
+      return b.completedWeeks - a.completedWeeks;
     }
   });
 

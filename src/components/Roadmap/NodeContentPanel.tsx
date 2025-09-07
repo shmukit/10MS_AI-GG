@@ -468,16 +468,16 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                 </div>
               ) : studentCompletions.length > 0 ? (
                 <div>
-                  {/* Filter to only show students who completed ALL tasks */}
+                  {/* Show students who completed 80%+ of tasks (week completion threshold) */}
                   {(() => {
-                    const fullyCompletedStudents = studentCompletions.filter(
-                      student => student.completionPercentage === 100
+                    const completedStudents = studentCompletions.filter(
+                      student => student.completionPercentage >= 80
                     );
                     
-                    if (fullyCompletedStudents.length === 0) {
+                    if (completedStudents.length === 0) {
                       return (
                         <p className={`text-sm text-center py-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          No students have completed all tasks for this week yet.
+                          No students have completed this week yet.
                         </p>
                       );
                     }
@@ -485,10 +485,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     return (
                       <div className="space-y-2">
                         <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          This week's tasks completed by:
+                          This week completed by ({completedStudents.length} student{completedStudents.length !== 1 ? 's' : ''}):
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {fullyCompletedStudents.map((student, index) => (
+                          {completedStudents.map((student, index) => (
                             <div key={student.studentId} className="flex items-center gap-2">
                               {index === 0 && <Trophy className="w-4 h-4 text-yellow-500" />}
                               <span className={`text-sm font-medium ${
@@ -496,7 +496,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                               }`}>
                                 {student.studentName}
                               </span>
-                              {index < fullyCompletedStudents.length - 1 && (
+                              <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                ({Math.round(student.completionPercentage)}%)
+                              </span>
+                              {index < completedStudents.length - 1 && (
                                 <span className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>,</span>
                               )}
                             </div>

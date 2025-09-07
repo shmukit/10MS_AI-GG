@@ -791,39 +791,23 @@ export class DatabaseService {
         }
         
         console.log('✅ Successfully marked task as completed:', task.id);
-      
-      // Sync progress after task completion
-      try {
-        const { ProgressSyncService } = await import('./progressSync');
-        await ProgressSyncService.syncStudentProgress(userId);
-        console.log('✅ Progress synced after task completion');
-      } catch (syncError) {
-        console.warn('⚠️ Progress sync failed after task completion:', syncError);
-      }
       }
 
       console.log('🎉 All tasks for week marked as completed successfully');
       
-      // Update student profile with completed weeks
-      const weekData = await this.getRoadmapWeeks(weekId);
-      if (weekData && weekData.length > 0) {
-        const weekNumber = weekData[0].week_number;
+      // Sync progress after all tasks are completed - this will update all progress tables
+      try {
+        const { ProgressSyncService } = await import('./progressSync');
+        const syncResult = await ProgressSyncService.syncStudentProgress(userId);
+        console.log('✅ Progress synced after week completion:', syncResult);
         
-        // Get current profile
-        const currentProfile = await this.getStudentProfile(userId);
-        if (currentProfile) {
-          const newCompletedWeeks = Math.max(currentProfile.completed_weeks, weekNumber);
-          const newProgressPercentage = Math.min(100, (newCompletedWeeks / 6) * 100); // Assuming 6 weeks total
-          
-          // Update profile
-          await this.updateStudentProfile(userId, {
-            completed_weeks: newCompletedWeeks,
-            progress_percentage: newProgressPercentage,
-            updated_at: new Date().toISOString()
-          });
-          
-          console.log(`✅ Updated student profile: ${newCompletedWeeks} weeks completed, ${newProgressPercentage}% progress`);
+        if (!syncResult.success) {
+          console.error('❌ Progress sync failed:', syncResult.errors);
+          // Don't return false here as tasks were marked complete, just log the error
         }
+      } catch (syncError) {
+        console.warn('⚠️ Progress sync failed after week completion:', syncError);
+        // Don't return false here as tasks were marked complete, just log the error
       }
       
       return true;

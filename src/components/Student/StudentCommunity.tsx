@@ -197,8 +197,11 @@ export const StudentCommunity: React.FC = () => {
     if (sortBy === 'name') {
       return (a.first_name || '').localeCompare(b.first_name || '');
     } else {
-      // Sort by progress (for now, just by role - mentors first)
-      return (a.role === 'mentor' ? 1 : 0) - (b.role === 'mentor' ? 1 : 0);
+      // Sort by progress percentage (highest first)
+      const aProgress = a.progress?.progress_percentage || 0;
+      const bProgress = b.progress?.progress_percentage || 0;
+      console.log('Progress comparison:', { a: a.first_name, aProgress, b: b.first_name, bProgress });
+      return bProgress - aProgress;
     }
   });
 
