@@ -115,41 +115,10 @@ export const StudentDashboard: React.FC = () => {
       
       // Set initial selections if not already set
       if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
-        // For company users, prioritize Augmedix/AI/ML roadmaps over Python
-        const isCompanyUser = user?.email?.includes('@10minuteschool.com') || user?.email?.includes('@lightcastlepartners.com');
-        
-        let preferredRoadmap = data.enrolledRoadmaps[0]; // Default to first
-        
-        if (isCompanyUser && data.enrolledRoadmaps.length > 1) {
-          // Look for Augmedix, AI, or ML roadmaps first
-          const augmedixRoadmap = data.enrolledRoadmaps.find((r: any) => 
-            r.title?.toLowerCase().includes('augmedix') ||
-            r.description?.toLowerCase().includes('augmedix')
-          );
-          
-          const aiMlRoadmap = data.enrolledRoadmaps.find((r: any) => 
-            r.title?.toLowerCase().includes('ai') ||
-            r.title?.toLowerCase().includes('ml') ||
-            r.title?.toLowerCase().includes('machine learning')
-          );
-          
-          // Avoid Python roadmaps for company users
-          const nonPythonRoadmap = data.enrolledRoadmaps.find((r: any) => 
-            !r.title?.toLowerCase().includes('python')
-          );
-          
-          // Priority order: Augmedix > AI/ML > Non-Python > First available
-          preferredRoadmap = augmedixRoadmap || aiMlRoadmap || nonPythonRoadmap || data.enrolledRoadmaps[0];
-          
-          console.log('🏢 Company user roadmap selection:', {
-            userEmail: user?.email,
-            totalRoadmaps: data.enrolledRoadmaps.length,
-            selectedRoadmap: preferredRoadmap?.title,
-            allRoadmaps: data.enrolledRoadmaps.map((r: any) => r.title)
-          });
-        }
-        
-        setSelectedRoadmap(preferredRoadmap.id);
+        // Use the roadmap that's currently active (from the batch)
+        const currentRoadmap = data.roadmap || data.enrolledRoadmaps[0];
+        setSelectedRoadmap(currentRoadmap.id);
+        console.log('🎯 Initial roadmap selected (from current batch):', currentRoadmap.title, currentRoadmap.id);
       }
       if (!selectedBatch && data?.batch?.id) {
         setSelectedBatch(data.batch.id);

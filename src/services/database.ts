@@ -736,23 +736,54 @@ export class DatabaseService {
     feedback?: string
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      console.log('🔄 Updating task progress:', { userId, taskId, status, score, feedback });
+      
+      // First, check if progress already exists
+      const { data: existingProgress, error: fetchError } = await supabase
         .from('student_progress')
-        .upsert({
-          student_id: userId,
-          task_id: taskId,
-          status,
-          score,
-          feedback,
-          completed_at: status === 'completed' ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString()
-        });
+        .select('*')
+        .eq('student_id', userId)
+        .eq('task_id', taskId)
+        .single();
 
-      if (error) {
-        console.error('Error updating task progress:', error);
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching existing progress:', fetchError);
         return false;
       }
 
+      const progressData = {
+        student_id: userId,
+        task_id: taskId,
+        status,
+        score,
+        feedback,
+        completed_at: status === 'completed' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString()
+      };
+
+      let result;
+      if (existingProgress) {
+        // Update existing progress
+        console.log('📝 Updating existing progress');
+        result = await supabase
+          .from('student_progress')
+          .update(progressData)
+          .eq('student_id', userId)
+          .eq('task_id', taskId);
+      } else {
+        // Insert new progress
+        console.log('➕ Inserting new progress');
+        result = await supabase
+          .from('student_progress')
+          .insert(progressData);
+      }
+
+      if (result.error) {
+        console.error('Error updating task progress:', result.error);
+        return false;
+      }
+
+      console.log('✅ Task progress updated successfully');
       return true;
     } catch (error) {
       console.error('Error in updateTaskProgress:', error);
@@ -1354,14 +1385,32 @@ export class DatabaseService {
       // await this.cleanupDuplicateProfiles(userId);
       
       // Fetching dashboard data components
-      const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
+      const [profile, enrolledRoadmaps, progress, userData] = await Promise.all([
         this.getStudentProfile(userId),
-        this.getStudentBatch(userId),
-        this.getStudentRoadmap(userId),
         this.getEnrolledRoadmaps(userId),
         this.getStudentProgress(userId),
         this.getUserById(userId)
       ]);
+      
+      // Determine which roadmap and batch to use
+      let roadmap: Roadmap | null = null;
+      let batch: Batch | null = null;
+      
+      if (selectedRoadmapId) {
+        // Use the selected roadmap
+        console.log('🎯 Using selected roadmap:', selectedRoadmapId);
+        roadmap = enrolledRoadmaps.find(r => r.id === selectedRoadmapId) || null;
+        if (roadmap) {
+          batch = await this.getBatchForRoadmap(userId, selectedRoadmapId);
+        }
+      } else {
+        // Use the most recent batch (default behavior)
+        console.log('📅 Using most recent batch (default)');
+        batch = await this.getStudentBatch(userId);
+        if (batch?.roadmap_id) {
+          roadmap = enrolledRoadmaps.find(r => r.id === batch!.roadmap_id) || null;
+        }
+      }
       
       // Fetch weeks and tasks for the selected roadmap
       let weeks: RoadmapWeek[] = [];
@@ -1420,58 +1469,16 @@ export class DatabaseService {
 
 
 
-      // Get notices and mentors based on the selected roadmap
+      // Get notices and mentors based on the current batch (roadmap-specific)
       let notices: Notice[] = [];
       let mentors: User[] = [];
       
-      if (selectedRoadmapId) {
-        // If a specific roadmap is selected, get data for that roadmap
-        // Getting roadmap-specific data
-        
-        // Get the roadmap to find its associated batch
-        const { data: roadmapData } = await supabase
-          .from('roadmaps')
-          .select('*')
-          .eq('id', selectedRoadmapId)
-          .single();
-          
-        if (roadmapData) {
-          console.log('📊 Found roadmap:', roadmapData.title);
-          
-          // Find batches associated with this roadmap
-          const { data: roadmapBatches } = await supabase
-            .from('batches')
-            .select('*')
-            .eq('roadmap_id', selectedRoadmapId);
-            
-          if (roadmapBatches && roadmapBatches.length > 0) {
-            console.log('📊 Found batches for roadmap:', roadmapBatches.length);
-            
-            // Get notices for all batches of this roadmap
-            const roadmapNotices: Notice[] = [];
-            const roadmapMentors: User[] = [];
-            
-            for (const batch of roadmapBatches) {
-              const batchNotices = await this.getNotices(batch.id);
-              const batchMentors = await this.getMentors(batch.id);
-              roadmapNotices.push(...batchNotices);
-              roadmapMentors.push(...batchMentors);
-            }
-            
-            notices = roadmapNotices;
-            mentors = roadmapMentors;
-            console.log('📝 Roadmap-specific notices:', notices.length);
-            console.log('👥 Roadmap-specific mentors:', mentors.length);
-          }
-        }
-      }
-      
-      // Fallback to batch-specific data if no roadmap-specific data found
-      if (notices.length === 0) {
-        notices = await this.getNotices(batch?.id);
-      }
-      if (mentors.length === 0) {
-        mentors = await this.getMentors(batch?.id);
+      if (batch?.id) {
+        console.log('📊 Getting data for batch:', batch.name, 'ID:', batch.id);
+        notices = await this.getNotices(batch.id);
+        mentors = await this.getMentors(batch.id);
+        console.log('📝 Notices for batch:', notices.length);
+        console.log('👥 Mentors for batch:', mentors.length);
       }
 
       // Add sample notices if none exist, based on the selected roadmap
@@ -1525,7 +1532,7 @@ export class DatabaseService {
           // Current week is weeks elapsed + 1 (since we start counting from week 1)
           currentWeek = Math.max(1, weeksElapsed + 1);
           
-          console.log('📅 Dashboard week calculation:', {
+          console.log('📅 Dashboard week calculation for roadmap:', roadmap.title, {
             enrollmentDate: enrollmentDate.toISOString(),
             batchStartDate: batchStartDate.toISOString(),
             currentDate: currentDate.toISOString(),
@@ -1580,10 +1587,11 @@ export class DatabaseService {
       }
 
       // Get current week tasks and upcoming tasks
-      console.log('🔄 Fetching tasks for roadmapId:', selectedRoadmapId);
+      const roadmapIdForTasks = selectedRoadmapId || roadmap?.id;
+      console.log('🔄 Fetching tasks for roadmapId:', roadmapIdForTasks);
       const [currentWeekTasks, upcomingTasks] = await Promise.all([
-        this.getCurrentWeekTasks(userId, selectedRoadmapId),
-        this.getUpcomingTasks(userId, selectedRoadmapId)
+        this.getCurrentWeekTasks(userId, roadmapIdForTasks),
+        this.getUpcomingTasks(userId, roadmapIdForTasks)
       ]);
       const dashboardData = {
         profile,
@@ -2000,6 +2008,61 @@ export class DatabaseService {
       return data;
     } catch (error) {
       console.error('Error in createMentorProfile:', error);
+      return null;
+    }
+  }
+
+  // Get batch for a specific roadmap
+  static async getBatchForRoadmap(userId: string, roadmapId: string): Promise<Batch | null> {
+    try {
+      console.log('🔍 Getting batch for roadmap:', roadmapId, 'user:', userId);
+      
+      const { data: batchAssignments, error: assignmentError } = await supabase
+        .from('student_batch_assignments')
+        .select(`
+          batch_id,
+          batches (
+            id,
+            name,
+            roadmap_id,
+            mentor_id,
+            max_students,
+            current_students,
+            start_date,
+            end_date,
+            whatsapp_link,
+            discord_link,
+            emergency_contact,
+            status,
+            created_at,
+            updated_at
+          )
+        `)
+        .eq('student_id', userId)
+        .eq('status', 'active')
+        .order('enrollment_date', { ascending: false });
+      
+      if (assignmentError) {
+        console.error('Error fetching batch assignments:', assignmentError);
+        return null;
+      }
+
+      if (batchAssignments && batchAssignments.length > 0) {
+        // Find the batch that matches the roadmap ID
+        const matchingAssignment = batchAssignments.find(assignment => 
+          assignment.batches && (assignment.batches as any).roadmap_id === roadmapId
+        );
+        
+        if (matchingAssignment && matchingAssignment.batches) {
+          console.log('✅ Found batch for roadmap:', (matchingAssignment.batches as any).name);
+          return matchingAssignment.batches as any;
+        }
+      }
+
+      console.log('⚠️ No batch found for roadmap:', roadmapId);
+      return null;
+    } catch (error) {
+      console.error('Error in getBatchForRoadmap:', error);
       return null;
     }
   }
