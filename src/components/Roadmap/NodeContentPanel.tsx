@@ -31,7 +31,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1);
   const [studentCompletions, setStudentCompletions] = useState<StudentCompletion[]>([]);
   const [loadingCompletions, setLoadingCompletions] = useState(false);
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
 
   // Fetch student completion data when the panel opens
   useEffect(() => {
@@ -72,15 +72,16 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const handleConfirmTaskCompletion = async () => {
-    if (selectedTaskIndex >= 0 && user?.id) {
+    if (selectedTaskIndex >= 0 && databaseUserId) {
       const task = node.tasks[selectedTaskIndex];
       
       try {
         console.log('🔄 Marking task as completed:', task.id, task.title);
+        console.log('🔄 Using database user ID:', databaseUserId);
         
         // Update task progress in database
         const success = await DatabaseService.updateTaskProgress(
-          user.id,
+          databaseUserId,
           task.id,
           'completed'
         );
@@ -115,7 +116,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         setSelectedTaskIndex(-1);
       }
     } else {
-      console.error('❌ No user ID or invalid task index');
+      console.error('❌ No database user ID or invalid task index');
       alert('Unable to complete task. Please try again.');
       setShowTaskConfirmation(false);
       setSelectedTaskIndex(-1);
@@ -123,15 +124,16 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const handleConfirmTaskUncheck = async () => {
-    if (selectedTaskIndex >= 0 && user?.id) {
+    if (selectedTaskIndex >= 0 && databaseUserId) {
       const task = node.tasks[selectedTaskIndex];
       
       try {
         console.log('🔄 Marking task as not completed:', task.id, task.title);
+        console.log('🔄 Using database user ID:', databaseUserId);
         
         // Update task progress in database
         const success = await DatabaseService.updateTaskProgress(
-          user.id,
+          databaseUserId,
           task.id,
           'not_started'
         );
@@ -213,10 +215,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         return;
       }
       
-      console.log('🔄 Calling markWeekAsComplete for user:', user.id, 'week:', node.id);
+      console.log('🔄 Calling markWeekAsComplete for user:', databaseUserId, 'week:', node.id);
       
       // Mark week as complete
-      const success = await DatabaseService.markWeekAsComplete(user.id, node.id);
+      const success = await DatabaseService.markWeekAsComplete(databaseUserId, node.id);
       console.log('📊 markWeekAsComplete result:', success);
       
       if (success) {

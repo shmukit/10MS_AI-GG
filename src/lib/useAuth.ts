@@ -12,6 +12,7 @@ export function useAuth() {
   const [error, setError] = useState<AuthError | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [roleLoading, setRoleLoading] = useState(true)
+  const [databaseUserId, setDatabaseUserId] = useState<string | null>(null)
 
   useEffect(() => {
     // Get initial session
@@ -235,27 +236,28 @@ export function useAuth() {
     }
   }
 
-  // Fetch user role from custom database
+  // Fetch user role and ID from custom database
   const fetchUserRole = async (email: string) => {
     try {
       setRoleLoading(true)
-      console.log('🔍 Fetching user role for email:', email);
+      console.log('🔍 Fetching user role and ID for email:', email);
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('email', email)
         .single()
       
       if (error) {
-        console.error('❌ Error fetching user role:', error);
-        return null
+        console.error('❌ Error fetching user data:', error);
+        return { role: null, id: null }
       }
       
-      console.log('✅ User role fetched successfully:', data?.role);
-      return data?.role || null
+      console.log('✅ User data fetched successfully:', data);
+      setDatabaseUserId(data.id)
+      return { role: data?.role || null, id: data?.id || null }
     } catch (err) {
-      console.error('❌ Error fetching user role:', err);
-      return null
+      console.error('❌ Error fetching user data:', err);
+      return { role: null, id: null }
     } finally {
       setRoleLoading(false)
     }
@@ -266,14 +268,15 @@ export function useAuth() {
     if (session?.user?.email) {
       console.log('🔄 Session changed, fetching role for:', session.user.email);
       setRoleLoading(true)
-      fetchUserRole(session.user.email).then(role => {
-        console.log('🎭 Setting user role to:', role);
-        setUserRole(role)
+      fetchUserRole(session.user.email).then(userData => {
+        console.log('🎭 Setting user role to:', userData.role);
+        setUserRole(userData.role)
         setRoleLoading(false)
       })
     } else {
       console.log('🔄 No session, clearing user role');
       setUserRole(null)
+      setDatabaseUserId(null)
       setRoleLoading(false)
     }
   }, [session])
@@ -285,6 +288,7 @@ export function useAuth() {
     error,
     userRole,
     roleLoading,
+    databaseUserId,
     signIn,
     signUp,
     signOut,

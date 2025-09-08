@@ -12,7 +12,7 @@ import { generateBatchSlug, generateRoadmapSlug } from '../../services/database'
 
 export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
 
   // Helper function to get user display name with fallbacks
@@ -65,7 +65,7 @@ export const StudentDashboard: React.FC = () => {
     setShowRoadmapDropdown(false);
     // Refresh dashboard data with new roadmap
     if (user?.id) {
-      fetchDashboardData(user.id, roadmapId);
+      fetchDashboardData(databaseUserId, roadmapId);
       // Also refresh tasks for the new roadmap
       refreshTasksForRoadmap(roadmapId);
     }
@@ -77,8 +77,8 @@ export const StudentDashboard: React.FC = () => {
     
     try {
       const [currentTasks, upcomingTasks] = await Promise.all([
-        DatabaseService.getCurrentWeekTasks(user.id, roadmapId),
-        DatabaseService.getUpcomingTasks(user.id, roadmapId)
+        DatabaseService.getCurrentWeekTasks(databaseUserId, roadmapId),
+        DatabaseService.getUpcomingTasks(databaseUserId, roadmapId)
       ]);
       
       // Update dashboard data with new tasks
@@ -97,7 +97,7 @@ export const StudentDashboard: React.FC = () => {
     setSelectedBatch(batchId);
     // Refresh dashboard data with new batch
     if (user?.id) {
-      fetchDashboardData(user.id, selectedRoadmap, batchId);
+      fetchDashboardData(databaseUserId, selectedRoadmap, batchId);
     }
   };
 
@@ -141,7 +141,7 @@ export const StudentDashboard: React.FC = () => {
     console.log('📧 User email:', user?.email);
     console.log('📋 User metadata:', user?.user_metadata);
     if (!user?.id) return;
-    fetchDashboardData(user.id);
+    fetchDashboardData(databaseUserId);
   }, [user?.id]);
 
   // Get current roadmap data
@@ -634,7 +634,7 @@ export const StudentDashboard: React.FC = () => {
                 if (!user?.id) return;
                 
                 try {
-                  const success = await DatabaseService.markNoticeAsRead(noticeId, user.id);
+                  const success = await DatabaseService.markNoticeAsRead(noticeId, databaseUserId);
                   if (success) {
                     // Refresh dashboard data to update notice status
                     // For now, just silently succeed - in a real app you'd refresh the data
