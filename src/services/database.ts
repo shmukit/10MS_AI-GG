@@ -2261,22 +2261,42 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
     const searchPattern = slug.replace(/_/g, ' ').toLowerCase();
     console.log('🔍 Search pattern:', searchPattern);
     
-    // First try exact title match (case insensitive)
+    // First try partial title match (case insensitive)
     let { data, error } = await supabase
       .from('roadmaps')
       .select('*')
-      .ilike('title', searchPattern)
+      .ilike('title', `%${searchPattern}%`)
       .single();
     
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error in exact title match:', error);
+      console.error('Error in partial title match:', error);
     }
     
     if (data) {
-      console.log('✅ Found roadmap with exact title match:', data.title);
+      console.log('✅ Found roadmap with partial title match:', data.title);
       // Cache the result
       cache.set(cacheKey, data, CACHE_TTL.LONG);
       return data;
+    }
+    
+    // If partial match failed, try searching for key terms
+    console.log('🔍 Partial match failed, trying key terms search...');
+    const keyTerms = searchPattern.split(' ').filter(term => term.length > 2);
+    console.log('🔍 Key terms:', keyTerms);
+    
+    for (const term of keyTerms) {
+      const { data: termData, error: termError } = await supabase
+        .from('roadmaps')
+        .select('*')
+        .ilike('title', `%${term}%`)
+        .single();
+      
+      if (!termError && termData) {
+        console.log(`✅ Found roadmap with key term "${term}":`, termData.title);
+        // Cache the result
+        cache.set(cacheKey, termData, CACHE_TTL.LONG);
+        return termData;
+      }
     }
     
     // If no exact match, try to find the best match by generating slugs for all roadmaps
