@@ -911,9 +911,12 @@ export class DatabaseService {
         }
       });
 
-      // Find students who completed all tasks
+      // Find students who completed 80% or more tasks (week completion threshold)
       const completedStudents = Array.from(studentCompletion.values())
-        .filter(student => student.completed === student.total);
+        .filter(student => {
+          const completionPercentage = (student.completed / student.total) * 100;
+          return completionPercentage >= 80; // Same threshold as Class Completion section
+        });
       
       
       const completedStudentNames = completedStudents
@@ -996,18 +999,23 @@ export class DatabaseService {
         const studentId = batchStudent.student_id;
         const studentName = `${(batchStudent.users as any).first_name} ${(batchStudent.users as any).last_name}`.trim();
         
-        // Get completed tasks for this student
+        // Get completed tasks for this student (unique task IDs only)
         const studentProgress = progressData?.filter(p => 
           p.student_id === studentId && p.status === 'completed'
         ) || [];
 
-        const completedTasks = studentProgress.length;
+        // Count unique completed tasks to avoid duplicates
+        const uniqueCompletedTasks = new Set(studentProgress.map(p => p.task_id));
+        const completedTasks = uniqueCompletedTasks.size;
         const totalTasks = weekTasks.length;
         const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
         
-        // Get completed task names
-        const completedTaskNames = studentProgress
-          .map(() => 'Task Completed') // Simplified for now, can be enhanced later
+        // Get completed task names (unique only)
+        const completedTaskNames = Array.from(uniqueCompletedTasks)
+          .map(taskId => {
+            const task = weekTasks.find(t => t.id === taskId);
+            return task ? task.task_name : 'Unknown Task';
+          })
           .sort();
 
         // Get last completion time

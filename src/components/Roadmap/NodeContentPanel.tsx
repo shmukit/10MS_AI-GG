@@ -355,11 +355,11 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Tasks & Resources</h3>
-              {node.status === 'completed' && (
+              {node.status === 'locked' && (
                 <span className={`text-xs px-2 py-1 rounded-full ${
                   isDarkMode 
-                    ? 'bg-green-900/30 text-green-300 border border-green-700' 
-                    : 'bg-green-100 text-green-700 border border-green-200'
+                    ? 'bg-gray-900/30 text-gray-300 border border-gray-700' 
+                    : 'bg-gray-100 text-gray-700 border border-gray-200'
                 }`}>
                   🔒 Tasks Locked
                 </span>
