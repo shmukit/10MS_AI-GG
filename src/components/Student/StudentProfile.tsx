@@ -34,7 +34,7 @@ const ProfileSkeleton = () => (
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const { profileSlug } = useParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [profileData, setProfileData] = useState<{
     profile: any;
@@ -72,7 +72,7 @@ export const StudentProfile: React.FC = () => {
         console.log('🆔 Profile: User ID:', user?.id);
         console.log('📧 Profile: User email:', user?.email);
         console.log('📋 Profile: User metadata:', user?.user_metadata);
-        const data = await DatabaseService.getDashboardData(user.id);
+        const data = await DatabaseService.getDashboardData(databaseUserId);
         console.log('📊 Profile: Dashboard data received:', data);
         setProfileData(data);
         // Initialize edit form with current data
@@ -110,7 +110,7 @@ export const StudentProfile: React.FC = () => {
     
     try {
       console.log('🔄 Starting to save profile updates...');
-      console.log('👤 User ID being used:', user.id);
+      console.log('👤 User ID being used:', databaseUserId);
       console.log('📧 User email:', user.email);
       
       // Update user data
@@ -133,7 +133,7 @@ export const StudentProfile: React.FC = () => {
       
       // Update user data
       console.log('🔄 Updating user data...');
-      const userUpdateSuccess = await DatabaseService.updateUser(user.id, userUpdates);
+      const userUpdateSuccess = await DatabaseService.updateUser(databaseUserId, userUpdates);
       if (!userUpdateSuccess) {
         console.error('❌ Failed to update user data');
         setSaveError('Failed to update user information. Please try again.');
@@ -143,7 +143,7 @@ export const StudentProfile: React.FC = () => {
       
       // Update profile data
       console.log('🔄 Updating student profile...');
-      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(user.id, profileUpdates);
+      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(databaseUserId, profileUpdates);
       if (!profileUpdateSuccess) {
         console.error('❌ Failed to update student profile');
         setSaveError('Failed to update profile information. Please try again.');
@@ -153,7 +153,7 @@ export const StudentProfile: React.FC = () => {
       
       // Refresh profile data from server to ensure we have the latest data
       console.log('🔄 Refreshing profile data from server...');
-      const refreshedData = await DatabaseService.getDashboardData(user.id);
+      const refreshedData = await DatabaseService.getDashboardData(databaseUserId);
       setProfileData(refreshedData);
       
       // Update edit form with refreshed data

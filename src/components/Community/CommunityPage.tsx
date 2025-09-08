@@ -86,7 +86,7 @@ const mockStudents: Student[] = [
 ];
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,14 +102,14 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
         setError(null);
         
         // Get user's batch
-        const batch = await DatabaseService.getStudentBatch(user.id);
+        const batch = await DatabaseService.getStudentBatch(databaseUserId);
         if (!batch) {
           setError('No batch found for user');
           return;
         }
         
         // Get students in the same batch
-        const batchStudents = await DatabaseService.getStudentsByBatch(batch.id, user.id);
+        const batchStudents = await DatabaseService.getStudentsByBatch(batch.id, databaseUserId);
         
         // Transform data to match interface
         const transformedStudents: Student[] = batchStudents.map((student: any) => ({
