@@ -2265,18 +2265,17 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
     let { data, error } = await supabase
       .from('roadmaps')
       .select('*')
-      .ilike('title', `%${searchPattern}%`)
-      .single();
+      .ilike('title', `%${searchPattern}%`);
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (error) {
       console.error('Error in partial title match:', error);
     }
     
-    if (data) {
-      console.log('✅ Found roadmap with partial title match:', data.title);
+    if (data && data.length > 0) {
+      console.log('✅ Found roadmap with partial title match:', data[0].title);
       // Cache the result
-      cache.set(cacheKey, data, CACHE_TTL.LONG);
-      return data;
+      cache.set(cacheKey, data[0], CACHE_TTL.LONG);
+      return data[0];
     }
     
     // If partial match failed, try searching for key terms
@@ -2288,14 +2287,13 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
       const { data: termData, error: termError } = await supabase
         .from('roadmaps')
         .select('*')
-        .ilike('title', `%${term}%`)
-        .single();
+        .ilike('title', `%${term}%`);
       
-      if (!termError && termData) {
-        console.log(`✅ Found roadmap with key term "${term}":`, termData.title);
+      if (!termError && termData && termData.length > 0) {
+        console.log(`✅ Found roadmap with key term "${term}":`, termData[0].title);
         // Cache the result
-        cache.set(cacheKey, termData, CACHE_TTL.LONG);
-        return termData;
+        cache.set(cacheKey, termData[0], CACHE_TTL.LONG);
+        return termData[0];
       }
     }
     
