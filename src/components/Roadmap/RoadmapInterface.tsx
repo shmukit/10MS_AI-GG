@@ -19,7 +19,7 @@ interface RoadmapInterfaceProps {
 export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { roadmapSlug } = useParams();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
   
   // Use theme context if no props provided
@@ -38,14 +38,14 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [targetWeekNumber, setTargetWeekNumber] = useState<number | null>(null);
 
   const refreshRoadmapData = async () => {
-    if (!user?.id) return;
+    if (!databaseUserId) return;
     
     try {
       // Refresh student progress
       const { data: progressData } = await supabase
         .from('student_progress')
         .select('*')
-        .eq('student_id', user.id);
+        .eq('student_id', databaseUserId);
       
       setStudentProgress(progressData || []);
       
@@ -77,7 +77,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
-      if (!user?.id) return;
+      if (!databaseUserId) return;
       
       try {
         setLoading(true);
@@ -94,12 +94,12 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         // Fetch only essential data in parallel - avoid heavy getDashboardData
         const [userDataQuery, batchQuery, progressQuery] = await Promise.all([
-          DatabaseService.getUserById(user.id),
-          DatabaseService.getStudentBatch(user.id),
+          DatabaseService.getUserById(databaseUserId),
+          DatabaseService.getStudentBatch(databaseUserId),
           supabase
             .from('student_progress')
             .select('*')
-            .eq('student_id', user.id)
+            .eq('student_id', databaseUserId)
         ]);
         
         // Set user name from lightweight user data
@@ -170,7 +170,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     };
 
     fetchRoadmapData();
-  }, [user?.id, roadmapSlug]);
+  }, [databaseUserId, roadmapSlug]);
 
   // Lazy-load completion statistics after initial render for better performance
   useEffect(() => {
