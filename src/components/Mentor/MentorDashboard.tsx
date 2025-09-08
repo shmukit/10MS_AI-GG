@@ -263,23 +263,87 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     }
   };
 
-  const handleAddBatch = () => {
-    const batch: Batch = {
-      ...newBatch,
-      id: Date.now().toString(),
-      createdDate: new Date().toISOString().split('T')[0]
-    };
-    setBatches([...batches, batch]);
-    setNewBatch({
-      name: '',
-      studentCount: 0,
-      roadmapId: '',
-      roadmapName: '',
-      whatsappLink: '',
-      discordLink: '',
-      emergencyContact: ''
-    });
-    setIsAddingBatch(false);
+  const handleAddBatch = async () => {
+    if (!newBatch.name || !newBatch.roadmapId) {
+      setError('Please fill in batch name and select a roadmap');
+      return;
+    }
+
+    try {
+      console.log('🔄 Creating new batch:', newBatch);
+      
+      // Create batch in database
+      const { data: batchData, error } = await supabase
+        .from('batches')
+        .insert([{
+          name: newBatch.name,
+          roadmap_id: newBatch.roadmapId,
+          mentor_id: user?.id,
+          max_students: 30,
+          current_students: 0,
+          start_date: new Date().toISOString().split('T')[0],
+          whatsapp_link: newBatch.whatsappLink || null,
+          discord_link: newBatch.discordLink || null,
+          emergency_contact: newBatch.emergencyContact || null,
+          status: 'active'
+        }])
+        .select(`
+          id,
+          name,
+          roadmap_id,
+          current_students,
+          whatsapp_link,
+          discord_link,
+          emergency_contact,
+          created_at,
+          roadmaps (
+            title
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error('Error creating batch:', error);
+        throw error;
+      }
+
+      console.log('✅ Batch created successfully:', batchData);
+      
+      // Add to local state
+      const batch: Batch = {
+        id: batchData.id,
+        name: batchData.name,
+        studentCount: batchData.current_students || 0,
+        roadmapId: batchData.roadmap_id,
+        roadmapName: batchData.roadmaps?.[0]?.title || 'Unknown Roadmap',
+        whatsappLink: batchData.whatsapp_link || '',
+        discordLink: batchData.discord_link || '',
+        emergencyContact: batchData.emergency_contact || '',
+        createdDate: batchData.created_at.split('T')[0]
+      };
+      
+      setBatches([...batches, batch]);
+      setSelectedBatch(batch.id);
+      
+      // Reset form
+      setNewBatch({
+        name: '',
+        studentCount: 0,
+        roadmapId: '',
+        roadmapName: '',
+        whatsappLink: '',
+        discordLink: '',
+        emergencyContact: ''
+      });
+      
+      setIsAddingBatch(false);
+      alert(`✅ Batch "${newBatch.name}" created successfully!`);
+      
+    } catch (err) {
+      console.error('❌ Error creating batch:', err);
+      setError('Failed to create batch');
+      alert(`❌ Failed to create batch: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   const handleUpdateBatch = async () => {
@@ -556,9 +620,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
   const loadAvailableStudents = async () => {
     try {
-      console.log('🔄 Loading all students for assignment...');
+      console.log('🔄 Loading all users for assignment...');
       
-      // Fetch all students
+      // Fetch all users (students, admins, mentors) - allow all roles to be assigned to batches
       const { data: allStudentsData, error } = await supabase
         .from('users')
         .select(`
@@ -568,7 +632,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           last_name,
           role
         `)
-        .eq('role', 'student')
+        .in('role', ['student', 'admin', 'mentor'])
         .eq('is_active', true);
 
       if (error) {
@@ -3271,10 +3335,22 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       
       console.log('✅ Roadmaps fetched:', roadmapsData?.length || 0);
 
-      // Fetch all batches
+      // Fetch all batches with roadmap names
       const { data: batchesData, error: batchesError } = await supabase
         .from('batches')
-        .select('*')
+        .select(`
+          id,
+          name,
+          roadmap_id,
+          current_students,
+          whatsapp_link,
+          discord_link,
+          emergency_contact,
+          created_at,
+          roadmaps (
+            title
+          )
+        `)
         .eq('status', 'active')
         .order('name');
 
@@ -3341,9 +3417,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       const mappedBatches = (batchesData || []).map((batch: any) => ({
         id: batch.id,
         name: batch.name,
-        studentCount: batch.student_count || 0,
+        studentCount: batch.current_students || 0,
         roadmapId: batch.roadmap_id || '',
-        roadmapName: batch.roadmap_name || '',
+        roadmapName: batch.roadmaps?.title || 'Unknown Roadmap',
         whatsappLink: batch.whatsapp_link || '',
         discordLink: batch.discord_link || '',
         emergencyContact: batch.emergency_contact || '',
