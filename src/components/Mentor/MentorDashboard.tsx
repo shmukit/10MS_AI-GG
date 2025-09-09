@@ -69,7 +69,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   isDarkMode = false, 
   toggleDarkMode 
 }) => {
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice'>('dashboard');
   const [roadmapData, setRoadmapData] = useState<RoadmapItem[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -684,7 +684,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           scheduled_time: newNotice.scheduledTime || null,
           is_published: newNotice.isPublished,
           batch_id: selectedBatch || null,
-          author_id: user?.id || null
+          author_id: databaseUserId || null
         }])
         .select()
         .single();

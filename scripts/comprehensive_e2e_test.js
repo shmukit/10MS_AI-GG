@@ -1,425 +1,590 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive End-to-End Test for 10MS AI GG Project
- * 
- * This script tests all major features:
- * 1. User authentication and role management
- * 2. Student progress tracking
- * 3. Task completion functionality
- * 4. Batch assignments
- * 5. Roadmap data access
- * 6. Database consistency
+ * Comprehensive End-to-End Test for 10MS SheSTEM Application
+ * Tests all features: Authentication, Notices, Students, Batches, Roadmaps, Progress
  */
 
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
-const supabaseUrl = 'https://hayhwvddwhgdvlxrxqun.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhheWh3dmRkd2hnZHZseHJ4cXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxODY1ODEsImV4cCI6MjA3MTc2MjU4MX0.nMtduZsKfoE9GT6DQPloXQIYd_6UcJV5UgX_mhgu1N8';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Missing Supabase environment variables');
+  console.error('Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Color codes for console output
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+// Test results tracking
+const testResults = {
+  passed: 0,
+  failed: 0,
+  errors: [],
+  warnings: []
 };
 
-function log(message, color = 'reset') {
-  console.log(`${colors[color]}${message}${colors.reset}`);
+// Test user credentials
+const testUsers = {
+  mentor: {
+    email: 'mentor@10minuteschool.com',
+    password: 'TestPassword123!'
+  },
+  student: {
+    email: 'student@10minuteschool.com', 
+    password: 'TestPassword123!'
+  }
+};
+
+// Utility functions
+function logTest(testName, status, message = '') {
+  const statusIcon = status === 'PASS' ? '✅' : status === 'FAIL' ? '❌' : '⚠️';
+  console.log(`${statusIcon} ${testName}: ${message}`);
+  
+  if (status === 'PASS') {
+    testResults.passed++;
+  } else if (status === 'FAIL') {
+    testResults.failed++;
+    testResults.errors.push(`${testName}: ${message}`);
+  } else {
+    testResults.warnings.push(`${testName}: ${message}`);
+  }
 }
 
-class E2ETestSuite {
-  constructor() {
-    this.results = {
-      passed: 0,
-      failed: 0,
-      total: 0,
-      tests: []
-    };
-  }
-
-  async runTest(testName, testFunction) {
-    this.results.total++;
-    log(`\n🧪 Running: ${testName}`, 'blue');
-    
-    try {
-      const result = await testFunction();
-      if (result) {
-        this.results.passed++;
-        this.results.tests.push({ name: testName, status: 'PASSED' });
-        log(`✅ ${testName} - PASSED`, 'green');
+async function testDatabaseConnection() {
+  try {
+    const { data, error } = await supabase.from('users').select('count').limit(1);
+    if (error) throw error;
+    logTest('Database Connection', 'PASS', 'Successfully connected to Supabase');
         return true;
-      } else {
-        this.results.failed++;
-        this.results.tests.push({ name: testName, status: 'FAILED' });
-        log(`❌ ${testName} - FAILED`, 'red');
-        return false;
-      }
     } catch (error) {
-      this.results.failed++;
-      this.results.tests.push({ name: testName, status: 'FAILED', error: error.message });
-      log(`❌ ${testName} - FAILED: ${error.message}`, 'red');
+    logTest('Database Connection', 'FAIL', error.message);
       return false;
     }
   }
 
-  async testDatabaseConnection() {
-    const { data, error } = await supabase
-      .from('users')
-      .select('count')
-      .limit(1);
-    
-    return !error;
-  }
-
-  async testUserDataAccess() {
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, email, role, first_name, last_name')
-      .limit(10);
-    
-    if (error) return false;
-    
-    log(`  Found ${users.length} users`, 'yellow');
-    users.forEach(user => {
-      log(`    - ${user.email} (${user.role})`, 'yellow');
+async function testAuthentication() {
+  try {
+    // Test mentor login
+    const { data: mentorData, error: mentorError } = await supabase.auth.signInWithPassword({
+      email: testUsers.mentor.email,
+      password: testUsers.mentor.password
     });
     
-    return users.length > 0;
-  }
-
-  async testStudentProgressAccess() {
-    const { data: progress, error } = await supabase
-      .from('student_progress')
-      .select('*')
-      .limit(5);
+    if (mentorError) {
+      logTest('Mentor Authentication', 'FAIL', mentorError.message);
+      return false;
+    }
     
-    if (error) return false;
+    logTest('Mentor Authentication', 'PASS', `Logged in as ${mentorData.user?.email}`);
     
-    log(`  Found ${progress.length} progress records`, 'yellow');
-    return true;
+    // Test student login
+    const { data: studentData, error: studentError } = await supabase.auth.signInWithPassword({
+      email: testUsers.student.email,
+      password: testUsers.student.password
+    });
+    
+    if (studentError) {
+      logTest('Student Authentication', 'FAIL', studentError.message);
+      return false;
+    }
+    
+    logTest('Student Authentication', 'PASS', `Logged in as ${studentData.user?.email}`);
+    
+    return { mentor: mentorData.user, student: studentData.user };
+  } catch (error) {
+    logTest('Authentication', 'FAIL', error.message);
+    return false;
   }
+}
 
-  async testTaskCompletion() {
-    // Get a test user
-    const { data: testUser, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'student')
-      .limit(1)
+async function testNoticesCRUD(user) {
+  try {
+    // Switch to mentor user for notice operations
+    await supabase.auth.signInWithPassword({
+      email: testUsers.mentor.email,
+      password: testUsers.mentor.password
+    });
+    
+    // Test 1: Create Notice
+    const testNotice = {
+      title: `Test Notice ${Date.now()}`,
+      content: 'This is a test notice for E2E testing',
+      tag: 'Test',
+      priority: 'medium',
+      is_published: true,
+      author_id: user.id,
+      batch_id: null
+    };
+    
+    const { data: createData, error: createError } = await supabase
+      .from('notices')
+      .insert([testNotice])
+      .select()
       .single();
     
-    if (userError || !testUser) return false;
+    if (createError) {
+      logTest('Notice Creation', 'FAIL', createError.message);
+      return false;
+    }
     
-    // Get a test task
-    const { data: testTask, error: taskError } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .limit(1)
-      .single();
+    logTest('Notice Creation', 'PASS', `Created notice: ${createData.title}`);
     
-    if (taskError || !testTask) return false;
-    
-    // Test task completion
-    const { error: progressError } = await supabase
-      .from('student_progress')
-      .upsert({
-        student_id: testUser.id,
-        task_id: testTask.id,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (progressError) return false;
-    
-    // Clean up test data
-    await supabase
-      .from('student_progress')
-      .delete()
-      .eq('student_id', testUser.id)
-      .eq('task_id', testTask.id);
-    
-    log(`  Tested with user: ${testUser.email}`, 'yellow');
-    log(`  Tested with task: ${testTask.task_name}`, 'yellow');
-    
-    return true;
-  }
-
-  async testBatchAssignments() {
-    const { data: assignments, error } = await supabase
-      .from('student_batch_assignments')
-      .select(`
-        *,
-        users!student_batch_assignments_student_id_fkey(id, email, first_name, last_name),
-        batches!student_batch_assignments_batch_id_fkey(id, name, status)
-      `)
-      .limit(5);
-    
-    if (error) return false;
-    
-    log(`  Found ${assignments.length} batch assignments`, 'yellow');
-    return true;
-  }
-
-  async testRoadmapData() {
-    // Test roadmaps
-    const { data: roadmaps, error: roadmapsError } = await supabase
-      .from('roadmaps')
-      .select('*')
-      .limit(5);
-    
-    if (roadmapsError) return false;
-    
-    // Test roadmap weeks
-    const { data: weeks, error: weeksError } = await supabase
-      .from('roadmap_weeks')
-      .select('*')
-      .limit(10);
-    
-    if (weeksError) return false;
-    
-    // Test roadmap tasks
-    const { data: tasks, error: tasksError } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .limit(20);
-    
-    if (tasksError) return false;
-    
-    log(`  Found ${roadmaps.length} roadmaps`, 'yellow');
-    log(`  Found ${weeks.length} roadmap weeks`, 'yellow');
-    log(`  Found ${tasks.length} roadmap tasks`, 'yellow');
-    
-    return true;
-  }
-
-  async testStudentProfiles() {
-    const { data: profiles, error } = await supabase
-      .from('student_profiles')
-      .select(`
-        *,
-        users!student_profiles_user_id_fkey(id, email, first_name, last_name)
-      `)
-      .limit(5);
-    
-    if (error) return false;
-    
-    log(`  Found ${profiles.length} student profiles`, 'yellow');
-    return true;
-  }
-
-  async testNotices() {
-    const { data: notices, error } = await supabase
+    // Test 2: Read Notice
+    const { data: readData, error: readError } = await supabase
       .from('notices')
       .select('*')
-      .eq('is_published', true)
+      .eq('id', createData.id)
+      .single();
+    
+    if (readError) {
+      logTest('Notice Reading', 'FAIL', readError.message);
+      return false;
+    }
+    
+    logTest('Notice Reading', 'PASS', `Read notice: ${readData.title}`);
+    
+    // Test 3: Update Notice
+    const { data: updateData, error: updateError } = await supabase
+      .from('notices')
+      .update({ 
+        title: `Updated Test Notice ${Date.now()}`,
+        content: 'This notice has been updated for testing'
+      })
+      .eq('id', createData.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      logTest('Notice Update', 'FAIL', updateError.message);
+      return false;
+    }
+    
+    logTest('Notice Update', 'PASS', `Updated notice: ${updateData.title}`);
+    
+    // Test 4: Delete Notice
+    const { error: deleteError } = await supabase
+      .from('notices')
+      .delete()
+      .eq('id', createData.id);
+    
+    if (deleteError) {
+      logTest('Notice Deletion', 'FAIL', deleteError.message);
+      return false;
+    }
+    
+    logTest('Notice Deletion', 'PASS', 'Successfully deleted test notice');
+    
+    return true;
+  } catch (error) {
+    logTest('Notices CRUD', 'FAIL', error.message);
+    return false;
+  }
+}
+
+async function testBatchesCRUD(user) {
+  try {
+    // Test 1: Create Batch
+    const testBatch = {
+      name: `Test Batch ${Date.now()}`,
+      max_students: 30,
+      current_students: 0,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: new Date(Date.now() + 12 * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'active',
+      mentor_id: user.id
+    };
+    
+    const { data: createData, error: createError } = await supabase
+      .from('batches')
+      .insert([testBatch])
+      .select()
+      .single();
+    
+    if (createError) {
+      logTest('Batch Creation', 'FAIL', createError.message);
+      return false;
+    }
+    
+    logTest('Batch Creation', 'PASS', `Created batch: ${createData.name}`);
+    
+    // Test 2: Read Batch
+    const { data: readData, error: readError } = await supabase
+      .from('batches')
+      .select('*')
+      .eq('id', createData.id)
+      .single();
+    
+    if (readError) {
+      logTest('Batch Reading', 'FAIL', readError.message);
+      return false;
+    }
+    
+    logTest('Batch Reading', 'PASS', `Read batch: ${readData.name}`);
+    
+    // Test 3: Update Batch
+    const { data: updateData, error: updateError } = await supabase
+      .from('batches')
+      .update({ 
+        name: `Updated Test Batch ${Date.now()}`,
+        current_students: 1
+      })
+      .eq('id', createData.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      logTest('Batch Update', 'FAIL', updateError.message);
+      return false;
+    }
+    
+    logTest('Batch Update', 'PASS', `Updated batch: ${updateData.name}`);
+    
+    // Test 4: Delete Batch
+    const { error: deleteError } = await supabase
+      .from('batches')
+      .delete()
+      .eq('id', createData.id);
+    
+    if (deleteError) {
+      logTest('Batch Deletion', 'FAIL', deleteError.message);
+      return false;
+    }
+    
+    logTest('Batch Deletion', 'PASS', 'Successfully deleted test batch');
+    
+    return true;
+  } catch (error) {
+    logTest('Batches CRUD', 'FAIL', error.message);
+    return false;
+  }
+}
+
+async function testRoadmapsCRUD(user) {
+  try {
+    // Test 1: Create Roadmap
+    const testRoadmap = {
+      title: `Test Roadmap ${Date.now()}`,
+      description: 'This is a test roadmap for E2E testing',
+      total_weeks: 6,
+      difficulty_level: 'beginner',
+      category: 'Programming',
+      is_active: true
+    };
+    
+    const { data: createData, error: createError } = await supabase
+      .from('roadmaps')
+      .insert([testRoadmap])
+      .select()
+      .single();
+    
+    if (createError) {
+      logTest('Roadmap Creation', 'FAIL', createError.message);
+      return false;
+    }
+    
+    logTest('Roadmap Creation', 'PASS', `Created roadmap: ${createData.title}`);
+    
+    // Test 2: Read Roadmap
+    const { data: readData, error: readError } = await supabase
+      .from('roadmaps')
+      .select('*')
+      .eq('id', createData.id)
+      .single();
+    
+    if (readError) {
+      logTest('Roadmap Reading', 'FAIL', readError.message);
+      return false;
+    }
+    
+    logTest('Roadmap Reading', 'PASS', `Read roadmap: ${readData.title}`);
+    
+    // Test 3: Update Roadmap
+    const { data: updateData, error: updateError } = await supabase
+      .from('roadmaps')
+      .update({ 
+        title: `Updated Test Roadmap ${Date.now()}`,
+        description: 'This roadmap has been updated for testing'
+      })
+      .eq('id', createData.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      logTest('Roadmap Update', 'FAIL', updateError.message);
+      return false;
+    }
+    
+    logTest('Roadmap Update', 'PASS', `Updated roadmap: ${updateData.title}`);
+    
+    // Test 4: Delete Roadmap
+    const { error: deleteError } = await supabase
+      .from('roadmaps')
+      .delete()
+      .eq('id', createData.id);
+    
+    if (deleteError) {
+      logTest('Roadmap Deletion', 'FAIL', deleteError.message);
+      return false;
+    }
+    
+    logTest('Roadmap Deletion', 'PASS', 'Successfully deleted test roadmap');
+    
+    return true;
+  } catch (error) {
+    logTest('Roadmaps CRUD', 'FAIL', error.message);
+    return false;
+  }
+}
+
+async function testStudentProgressCRUD(user) {
+  try {
+    // First, we need to create a roadmap and task for progress testing
+    const { data: roadmapData, error: roadmapError } = await supabase
+      .from('roadmaps')
+      .insert([{
+        title: `Progress Test Roadmap ${Date.now()}`,
+        description: 'Test roadmap for progress testing',
+        total_weeks: 1,
+        difficulty_level: 'beginner',
+        category: 'Testing',
+        is_active: true
+      }])
+      .select()
+      .single();
+    
+    if (roadmapError) {
+      logTest('Progress Test Setup', 'FAIL', roadmapError.message);
+      return false;
+    }
+    
+    // Create a week
+    const { data: weekData, error: weekError } = await supabase
+      .from('roadmap_weeks')
+      .insert([{
+        roadmap_id: roadmapData.id,
+        week_number: 1,
+        title: 'Test Week 1',
+        description: 'Test week for progress testing',
+        domain: 'Testing'
+      }])
+      .select()
+      .single();
+    
+    if (weekError) {
+      logTest('Progress Test Setup', 'FAIL', weekError.message);
+      return false;
+    }
+    
+    // Create a task
+    const { data: taskData, error: taskError } = await supabase
+      .from('roadmap_tasks')
+      .insert([{
+        week_id: weekData.id,
+        task_name: 'Test Task',
+        task_details: 'Test task for progress testing',
+        task_type: 'read',
+        points: 10,
+        is_required: true
+      }])
+      .select()
+      .single();
+    
+    if (taskError) {
+      logTest('Progress Test Setup', 'FAIL', taskError.message);
+      return false;
+    }
+    
+    // Test 1: Create Student Progress
+    const testProgress = {
+      student_id: user.id,
+      task_id: taskData.id,
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+      score: 95
+    };
+    
+    const { data: createData, error: createError } = await supabase
+      .from('student_progress')
+      .insert([testProgress])
+      .select()
+      .single();
+    
+    if (createError) {
+      logTest('Student Progress Creation', 'FAIL', createError.message);
+      return false;
+    }
+    
+    logTest('Student Progress Creation', 'PASS', `Created progress for task: ${taskData.task_name}`);
+    
+    // Test 2: Read Student Progress
+    const { data: readData, error: readError } = await supabase
+      .from('student_progress')
+      .select('*')
+      .eq('id', createData.id)
+      .single();
+    
+    if (readError) {
+      logTest('Student Progress Reading', 'FAIL', readError.message);
+      return false;
+    }
+    
+    logTest('Student Progress Reading', 'PASS', `Read progress: ${readData.status}`);
+    
+    // Test 3: Update Student Progress
+    const { data: updateData, error: updateError } = await supabase
+      .from('student_progress')
+      .update({ 
+        status: 'completed',
+        score: 100,
+        feedback: 'Excellent work!'
+      })
+      .eq('id', createData.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      logTest('Student Progress Update', 'FAIL', updateError.message);
+      return false;
+    }
+    
+    logTest('Student Progress Update', 'PASS', `Updated progress: ${updateData.status}`);
+    
+    // Cleanup
+    await supabase.from('student_progress').delete().eq('id', createData.id);
+    await supabase.from('roadmap_tasks').delete().eq('id', taskData.id);
+    await supabase.from('roadmap_weeks').delete().eq('id', weekData.id);
+    await supabase.from('roadmaps').delete().eq('id', roadmapData.id);
+    
+    logTest('Student Progress Cleanup', 'PASS', 'Cleaned up test data');
+    
+    return true;
+  } catch (error) {
+    logTest('Student Progress CRUD', 'FAIL', error.message);
+    return false;
+  }
+}
+
+async function testRLSPolicies() {
+  try {
+    // Test if we can access different tables with different user roles
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select('id, email, role')
       .limit(5);
     
-    if (error) return false;
-    
-    log(`  Found ${notices.length} published notices`, 'yellow');
-    return true;
-  }
-
-  async testForeignKeys() {
-    // Test that all foreign key relationships are valid
-    const { data: progress, error: progressError } = await supabase
-      .from('student_progress')
-      .select(`
-        student_id,
-        task_id,
-        users!student_progress_student_id_fkey(id, email),
-        roadmap_tasks!student_progress_task_id_fkey(id, task_name)
-      `)
-      .limit(10);
-    
-    if (progressError) return false;
-    
-    // Check for any null references
-    const invalidRefs = progress.filter(p => !p.users || !p.roadmap_tasks);
-    if (invalidRefs.length > 0) {
-      log(`  Found ${invalidRefs.length} invalid foreign key references`, 'red');
-      return false;
-    }
-    
-    log(`  All ${progress.length} foreign key references are valid`, 'yellow');
-    return true;
-  }
-
-  async testDataConsistency() {
-    // Check that all student_progress records have valid student_id
-    const { data: allProgress, error: progressError } = await supabase
-      .from('student_progress')
-      .select('student_id');
-    
-    if (progressError) return false;
-    
-    const { data: allUsers, error: usersError } = await supabase
-      .from('users')
-      .select('id');
-    
-    if (usersError) return false;
-    
-    const userIds = new Set(allUsers.map(u => u.id));
-    const orphanedProgress = allProgress.filter(p => !userIds.has(p.student_id));
-    
-    if (orphanedProgress.length > 0) {
-      log(`  Found ${orphanedProgress.length} orphaned progress records`, 'red');
-      return false;
-    }
-    
-    log(`  All ${allProgress.length} progress records have valid student references`, 'yellow');
-    return true;
-  }
-
-  async testTaskUpdateWorkflow() {
-    // Simulate the complete task update workflow
-    const { data: testUser, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'student')
-      .limit(1)
-      .single();
-    
-    if (userError || !testUser) return false;
-    
-    const { data: testTask, error: taskError } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (taskError || !testTask) return false;
-    
-    // Test the exact workflow from the frontend
-    const { error: upsertError } = await supabase
-      .from('student_progress')
-      .upsert({
-        student_id: testUser.id,
-        task_id: testTask.id,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (upsertError) {
-      log(`  Upsert failed: ${upsertError.message}`, 'red');
-      return false;
-    }
-    
-    // Verify the update was successful
-    const { data: updatedProgress, error: verifyError } = await supabase
-      .from('student_progress')
-      .select('*')
-      .eq('student_id', testUser.id)
-      .eq('task_id', testTask.id)
-      .single();
-    
-    if (verifyError || !updatedProgress) return false;
-    
-    // Clean up
-    await supabase
-      .from('student_progress')
-      .delete()
-      .eq('student_id', testUser.id)
-      .eq('task_id', testTask.id);
-    
-    log(`  Complete workflow test passed for user: ${testUser.email}`, 'yellow');
-    return true;
-  }
-
-  async runAllTests() {
-    log('🚀 Starting Comprehensive End-to-End Test Suite\n', 'bright');
-    log('='.repeat(60), 'cyan');
-    
-    // Core functionality tests
-    await this.runTest('Database Connection', () => this.testDatabaseConnection());
-    await this.runTest('User Data Access', () => this.testUserDataAccess());
-    await this.runTest('Student Progress Access', () => this.testStudentProgressAccess());
-    await this.runTest('Task Completion', () => this.testTaskCompletion());
-    await this.runTest('Batch Assignments', () => this.testBatchAssignments());
-    await this.runTest('Roadmap Data', () => this.testRoadmapData());
-    await this.runTest('Student Profiles', () => this.testStudentProfiles());
-    await this.runTest('Notices', () => this.testNotices());
-    
-    // Data integrity tests
-    await this.runTest('Foreign Key Constraints', () => this.testForeignKeys());
-    await this.runTest('Data Consistency', () => this.testDataConsistency());
-    
-    // Workflow tests
-    await this.runTest('Complete Task Update Workflow', () => this.testTaskUpdateWorkflow());
-    
-    this.generateReport();
-  }
-
-  generateReport() {
-    log('\n' + '='.repeat(60), 'cyan');
-    log('📊 TEST RESULTS SUMMARY', 'bright');
-    log('='.repeat(60), 'cyan');
-    
-    log(`\n📈 Overall Results:`, 'blue');
-    log(`  Total Tests: ${this.results.total}`, 'blue');
-    log(`  Passed: ${this.results.passed}`, 'green');
-    log(`  Failed: ${this.results.failed}`, this.results.failed > 0 ? 'red' : 'green');
-    log(`  Success Rate: ${((this.results.passed / this.results.total) * 100).toFixed(1)}%`, 
-        this.results.failed === 0 ? 'green' : 'yellow');
-    
-    if (this.results.failed > 0) {
-      log(`\n❌ Failed Tests:`, 'red');
-      this.results.tests
-        .filter(test => test.status === 'FAILED')
-        .forEach(test => {
-          log(`  • ${test.name}`, 'red');
-          if (test.error) {
-            log(`    Error: ${test.error}`, 'red');
-          }
-        });
-    }
-    
-    log(`\n✅ Passed Tests:`, 'green');
-    this.results.tests
-      .filter(test => test.status === 'PASSED')
-      .forEach(test => {
-        log(`  • ${test.name}`, 'green');
-      });
-    
-    if (this.results.failed === 0) {
-      log('\n🎉 ALL TESTS PASSED! The application is ready for use.', 'green');
-      log('\n📋 Next Steps:', 'cyan');
-      log('1. Start the development server: npm run dev', 'blue');
-      log('2. Open the application in your browser', 'blue');
-      log('3. Test the task completion functionality in the roadmap page', 'blue');
-      log('4. Verify that students can update their weekly tasks', 'blue');
+    if (usersError) {
+      logTest('RLS - Users Access', 'FAIL', usersError.message);
     } else {
-      log('\n⚠️ Some tests failed. Please review the errors above.', 'yellow');
+      logTest('RLS - Users Access', 'PASS', `Can access users table: ${usersData.length} records`);
     }
     
-    log('\n' + '='.repeat(60), 'cyan');
-  }
-}
-
-async function main() {
-  try {
-    const testSuite = new E2ETestSuite();
-    await testSuite.runAllTests();
+    const { data: noticesData, error: noticesError } = await supabase
+      .from('notices')
+      .select('id, title, author_id')
+      .limit(5);
+    
+    if (noticesError) {
+      logTest('RLS - Notices Access', 'FAIL', noticesError.message);
+    } else {
+      logTest('RLS - Notices Access', 'PASS', `Can access notices table: ${noticesData.length} records`);
+    }
+    
+    const { data: batchesData, error: batchesError } = await supabase
+      .from('batches')
+      .select('id, name, status')
+      .limit(5);
+    
+    if (batchesError) {
+      logTest('RLS - Batches Access', 'FAIL', batchesError.message);
+    } else {
+      logTest('RLS - Batches Access', 'PASS', `Can access batches table: ${batchesData.length} records`);
+    }
+    
+    return true;
   } catch (error) {
-    log(`\n💥 Test suite failed: ${error.message}`, 'red');
-    process.exit(1);
+    logTest('RLS Policies', 'FAIL', error.message);
+    return false;
   }
 }
 
-// Run the test suite
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+async function runComprehensiveTest() {
+  console.log('🚀 Starting Comprehensive End-to-End Test for 10MS SheSTEM Application\n');
+  
+  // Test 1: Database Connection
+  const dbConnected = await testDatabaseConnection();
+  if (!dbConnected) {
+    console.log('\n❌ Database connection failed. Exiting tests.');
+    return;
+  }
+  
+  // Test 2: Authentication
+  const authResult = await testAuthentication();
+  if (!authResult) {
+    console.log('\n❌ Authentication failed. Exiting tests.');
+    return;
+  }
+  
+  // Test 3: RLS Policies
+  await testRLSPolicies();
+  
+  // Test 4: Notices CRUD (with mentor user)
+  await testNoticesCRUD(authResult.mentor);
+  
+  // Test 5: Batches CRUD
+  await testBatchesCRUD(authResult.mentor);
+  
+  // Test 6: Roadmaps CRUD
+  await testRoadmapsCRUD(authResult.mentor);
+  
+  // Test 7: Student Progress CRUD (with student user)
+  await testStudentProgressCRUD(authResult.student);
+  
+  // Print Summary
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 TEST SUMMARY');
+  console.log('='.repeat(60));
+  console.log(`✅ Passed: ${testResults.passed}`);
+  console.log(`❌ Failed: ${testResults.failed}`);
+  console.log(`⚠️  Warnings: ${testResults.warnings.length}`);
+  
+  if (testResults.errors.length > 0) {
+    console.log('\n❌ ERRORS:');
+    testResults.errors.forEach(error => console.log(`  - ${error}`));
+  }
+  
+  if (testResults.warnings.length > 0) {
+    console.log('\n⚠️  WARNINGS:');
+    testResults.warnings.forEach(warning => console.log(`  - ${warning}`));
+  }
+  
+  // Save results to file
+  const resultsFile = path.join(__dirname, 'test_results.json');
+  fs.writeFileSync(resultsFile, JSON.stringify(testResults, null, 2));
+  console.log(`\n📄 Detailed results saved to: ${resultsFile}`);
+  
+  const successRate = (testResults.passed / (testResults.passed + testResults.failed)) * 100;
+  console.log(`\n🎯 Success Rate: ${successRate.toFixed(1)}%`);
+  
+  if (testResults.failed === 0) {
+    console.log('\n🎉 All tests passed! The application is working correctly.');
+  } else {
+    console.log('\n⚠️  Some tests failed. Please review the errors above.');
+  }
 }
 
-export { E2ETestSuite };
+// Run the tests
+runComprehensiveTest().catch(console.error);
