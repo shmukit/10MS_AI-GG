@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter, CheckCircle, Clock } from 'lucide-react';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
+import { usePostHog } from 'posthog-js/react';
 
 interface Student {
   id: string;
@@ -87,6 +88,7 @@ const mockStudents: Student[] = [
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { user, databaseUserId } = useAuth();
+  const posthog = usePostHog();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +102,18 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
       try {
         setLoading(true);
         setError(null);
+        
+        // Track community view and MAU
+        posthog?.capture('community_view', {
+          user_id: databaseUserId,
+          viewed_at: new Date().toISOString()
+        });
+        
+        // Track MAU (Monthly Active User)
+        posthog?.capture('$pageview', {
+          page: 'community',
+          user_id: databaseUserId
+        });
         
         // Get user's batch
         const batch = await DatabaseService.getStudentBatch(databaseUserId);
@@ -151,6 +165,11 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
   });
 
   const handleWhatsAppClick = () => {
+    posthog?.capture('whatsapp_group_clicked', {
+      user_id: databaseUserId,
+      group_type: 'community',
+      clicked_at: new Date().toISOString()
+    });
     window.open('https://chat.whatsapp.com/example-group-link', '_blank');
   };
 
@@ -159,6 +178,13 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
   };
 
   const handleEmergencyContact = () => {
+    posthog?.capture('student_contact_clicked', {
+      user_id: databaseUserId,
+      contact_type: 'phone',
+      contact_number: '+8801234567890',
+      contact_purpose: 'emergency',
+      clicked_at: new Date().toISOString()
+    });
     window.open('tel:+8801234567890', '_self');
   };
 
@@ -383,6 +409,15 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                     {/* Contact */}
                     <a
                       href={`mailto:${student.email}`}
+                      onClick={() => {
+                        posthog?.capture('student_contact_clicked', {
+                          user_id: databaseUserId,
+                          contact_type: 'email',
+                          student_email: student.email,
+                          student_name: student.name,
+                          clicked_at: new Date().toISOString()
+                        });
+                      }}
                       className={`p-2 rounded-lg transition-colors ${
                         isDarkMode 
                           ? 'hover:bg-gray-600 text-gray-400' 

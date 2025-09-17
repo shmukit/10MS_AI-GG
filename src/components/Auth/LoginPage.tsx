@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../lib';
+import { usePostHog } from 'posthog-js/react';
 
 export const LoginPage: React.FC = () => {
   const { signIn, signUp, loading, error, user } = useAuthContext();
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,6 +24,13 @@ export const LoginPage: React.FC = () => {
     }
   }, [user, navigate]);
 
+  // Track page view
+  useEffect(() => {
+    posthog?.capture('$pageview', {
+      page: isLogin ? 'login' : 'signup'
+    });
+  }, [posthog, isLogin]);
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,24 +38,35 @@ export const LoginPage: React.FC = () => {
     
     try {
       if (isLogin) {
+        posthog?.capture('login_attempt', { email: formData.email });
         const result = await signIn(formData.email, formData.password);
         
         if (result.success) {
-          // Sign in successful, redirect will happen via useEffect
+          posthog?.capture('login_success', { email: formData.email });
+          posthog?.identify(formData.email, { email: formData.email });
+        } else {
+          posthog?.capture('login_failed', { email: formData.email, error: result.error });
         }
       } else {
+        posthog?.capture('signup_attempt', { email: formData.email, name: formData.name });
         const result = await signUp(formData.email, formData.password, formData.name);
         
         if (result.success) {
+          posthog?.capture('signup_success', { email: formData.email, name: formData.name });
+          posthog?.identify(formData.email, { email: formData.email, name: formData.name });
           if (result.requiresEmailConfirmation) {
-            // Show message to user about email confirmation
-          } else {
-            // Sign up successful, redirect will happen via useEffect
+            posthog?.capture('email_confirmation_required', { email: formData.email });
           }
+        } else {
+          posthog?.capture('signup_failed', { email: formData.email, error: result.error });
         }
       }
     } catch (error) {
-      // Silently handle error - could show user notification in production
+      posthog?.capture('auth_error', { 
+        action: isLogin ? 'login' : 'signup', 
+        email: formData.email,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   };
 

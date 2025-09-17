@@ -17,12 +17,14 @@ interface NoticeBoardProps {
   isDarkMode?: boolean;
   notices?: Notice[];
   onMarkAsRead?: (noticeId: string) => void;
+  onNoticeClick?: (notice: Notice) => void;
 }
 
 export const NoticeBoard: React.FC<NoticeBoardProps> = ({ 
   isDarkMode = false, 
   notices = [], 
-  onMarkAsRead 
+  onMarkAsRead,
+  onNoticeClick
 }) => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -137,7 +139,17 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({
           </p>
         </div>
       ) : currentAnnouncement ? (
-        <div className="mb-4">
+        <div 
+          className="mb-4 cursor-pointer hover:opacity-90 transition-opacity duration-200"
+          onClick={() => {
+            if (onNoticeClick && notices.length > 0) {
+              const originalNotice = notices.find(n => n.id === currentAnnouncement.id);
+              if (originalNotice) {
+                onNoticeClick(originalNotice);
+              }
+            }
+          }}
+        >
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">

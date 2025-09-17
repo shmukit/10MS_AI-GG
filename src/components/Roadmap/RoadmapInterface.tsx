@@ -9,6 +9,7 @@ import { ProgressBar } from './ProgressBar';
 import { useTheme } from '../../lib/ThemeContext';
 import { generateRoadmapData } from '../../data/roadmapData';
 import { StudentHeader } from '../Student/StudentHeader';
+import { usePostHog } from 'posthog-js/react';
 
 interface RoadmapInterfaceProps {
   onBack: () => void;
@@ -21,6 +22,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [searchParams] = useSearchParams();
   const { user, databaseUserId } = useAuth();
   const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
+  const posthog = usePostHog();
   
   // Use theme context if no props provided
   const effectiveDarkMode = isDarkMode ?? themeDarkMode;
@@ -82,6 +84,21 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       try {
         setLoading(true);
         setError(null);
+        
+        // Track roadmap view and WAU/MAU
+        posthog?.capture('roadmap_view', {
+          user_id: databaseUserId,
+          roadmap_slug: roadmapSlug,
+          batch_id: batchId,
+          viewed_at: new Date().toISOString()
+        });
+        
+        // Track WAU (Weekly Active User)
+        posthog?.capture('$pageview', {
+          page: 'roadmap_interface',
+          user_id: databaseUserId,
+          roadmap_slug: roadmapSlug
+        });
         
         // Check for week parameter in URL
         const weekParam = searchParams.get('week');

@@ -9,11 +9,13 @@ import { useAuth } from '../../lib/useAuth';
 import { useTheme } from '../../lib/ThemeContext';
 import { StudentHeader } from './StudentHeader';
 import { generateBatchSlug, generateRoadmapSlug } from '../../services/database';
+import { usePostHog } from 'posthog-js/react';
 
 export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const posthog = usePostHog();
 
   // Helper function to get user display name with fallbacks
   const getUserDisplayName = () => {
@@ -144,6 +146,23 @@ export const StudentDashboard: React.FC = () => {
     fetchDashboardData(databaseUserId);
   }, [user?.id]);
 
+  // Track page view and DAU
+  useEffect(() => {
+    if (user?.id && databaseUserId) {
+      posthog?.capture('student_dashboard_view', {
+        user_id: databaseUserId,
+        batch_id: selectedBatch,
+        roadmap_id: selectedRoadmap
+      });
+      
+      // Track DAU (Daily Active User)
+      posthog?.capture('$pageview', {
+        page: 'student_dashboard',
+        user_id: databaseUserId
+      });
+    }
+  }, [user?.id, databaseUserId, posthog, selectedBatch, selectedRoadmap]);
+
   // Get current roadmap data
   const getCurrentRoadmap = () => {
     if (!dashboardData?.enrolledRoadmaps) return null;
@@ -202,6 +221,114 @@ export const StudentDashboard: React.FC = () => {
       }
     });
   };
+
+  // Handle weekly streak click
+  const handleWeeklyStreakClick = (weekNumber: number, status: string) => {
+    posthog?.capture('weekly_streak_clicked', {
+      user_id: databaseUserId,
+      week_number: weekNumber,
+      streak_status: status,
+      roadmap_id: selectedRoadmap,
+      batch_id: selectedBatch,
+      clicked_at: new Date().toISOString()
+    });
+  };
+
+  // Handle current week task click
+  const handleCurrentWeekTaskClick = (task: any) => {
+    posthog?.capture('current_week_task_clicked', {
+      user_id: databaseUserId,
+      task_id: task.id,
+      task_name: task.task_name,
+      task_type: task.task_type,
+      week_number: task.week_number,
+      roadmap_id: selectedRoadmap,
+      batch_id: selectedBatch,
+      clicked_at: new Date().toISOString()
+    });
+  };
+
+  // Handle upcoming task click
+  const handleUpcomingTaskClick = (task: any) => {
+    posthog?.capture('upcoming_task_clicked', {
+      user_id: databaseUserId,
+      task_id: task.id,
+      task_name: task.task_name,
+      task_type: task.task_type,
+      week_number: task.week_number,
+      roadmap_id: selectedRoadmap,
+      batch_id: selectedBatch,
+      clicked_at: new Date().toISOString()
+    });
+  };
+
+  // Handle notice click
+  const handleNoticeClick = (notice: any) => {
+    posthog?.capture('notice_clicked', {
+      user_id: databaseUserId,
+      notice_id: notice.id,
+      notice_title: notice.title,
+      notice_tag: notice.tag,
+      roadmap_id: selectedRoadmap,
+      batch_id: selectedBatch,
+      clicked_at: new Date().toISOString()
+    });
+  };
+
+  // Check for week completion and track it
+  const checkWeekCompletion = () => {
+    if (!dashboardData?.studentProgress) return;
+    
+    const studentProgress = dashboardData.studentProgress;
+    const currentWeek = studentProgress.find((p: any) => p.is_active);
+    
+    if (currentWeek && currentWeek.is_completed) {
+      posthog?.capture('week_completed', {
+        user_id: databaseUserId,
+        week_number: currentWeek.week_number,
+        roadmap_id: selectedRoadmap,
+        batch_id: selectedBatch,
+        completed_at: new Date().toISOString(),
+        completion_percentage: currentWeek.completion_percentage || 100
+      });
+    }
+  };
+
+  // Check for overdue tasks
+  const checkOverdueTasks = () => {
+    if (!dashboardData?.currentWeekTasks) return;
+    
+    const currentDate = new Date();
+    const overdueTasks = dashboardData.currentWeekTasks.filter((task: any) => {
+      if (!task.deadline) return false;
+      const deadline = new Date(task.deadline);
+      return deadline < currentDate && !task.completed;
+    });
+
+    if (overdueTasks.length > 0) {
+      posthog?.capture('task_overdue', {
+        user_id: databaseUserId,
+        overdue_count: overdueTasks.length,
+        overdue_tasks: overdueTasks.map((task: any) => ({
+          task_id: task.id,
+          task_name: task.task_name,
+          deadline: task.deadline,
+          days_overdue: Math.ceil((currentDate.getTime() - new Date(task.deadline).getTime()) / (1000 * 60 * 60 * 24))
+        })),
+        roadmap_id: selectedRoadmap,
+        batch_id: selectedBatch,
+        detected_at: new Date().toISOString()
+      });
+    }
+  };
+
+  // Run completion and overdue checks when dashboard data changes
+  useEffect(() => {
+    if (dashboardData) {
+      checkWeekCompletion();
+      checkOverdueTasks();
+    }
+  }, [dashboardData]);
 
   // Force re-render when selectedRoadmap changes
   useEffect(() => {
@@ -430,6 +557,7 @@ export const StudentDashboard: React.FC = () => {
                      <div 
                        key={task.id} 
                        onClick={() => {
+                         handleCurrentWeekTaskClick(task);
                          if (getCurrentRoadmap()) {
                            const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
                            navigate(`/student/roadmap/${roadmapSlug}?week=${task.week_number || 1}`);
@@ -508,6 +636,7 @@ export const StudentDashboard: React.FC = () => {
                       <div 
                         key={task.id} 
                         onClick={() => {
+                          handleUpcomingTaskClick(task);
                           if (getCurrentRoadmap()) {
                             const roadmapSlug = generateRoadmapSlug(getCurrentRoadmap()?.title || '');
                             navigate(`/student/roadmap/${roadmapSlug}?week=${(task as any).week_number || 2}`);
@@ -612,9 +741,13 @@ export const StudentDashboard: React.FC = () => {
                       <div className={`text-xs mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                         Week {streak.week}
                       </div>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
-                        isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                      }`}>
+                      <div 
+                        className={`w-10 h-10 rounded-full flex items-center justify-center relative cursor-pointer hover:scale-105 transition-all duration-200 ${
+                          isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
+                        }`}
+                        onClick={() => handleWeeklyStreakClick(streak.week, streak.status)}
+                        title={`Click to view Week ${streak.week} details`}
+                      >
                                               <div className={`w-3 h-3 rounded-full transition-all duration-200 ${
                         streak.status === 'done' ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-sm' :
                         streak.status === 'current' ? 'bg-gradient-to-r from-blue-500 to-blue-600 border-2 border-blue-300 shadow-sm' :
@@ -643,6 +776,7 @@ export const StudentDashboard: React.FC = () => {
                   // Silently handle error - could show user notification in production
                 }
               }}
+              onNoticeClick={handleNoticeClick}
             />
 
             {/* Next Zoom Call */}

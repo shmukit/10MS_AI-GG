@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
+import { PostHogProvider } from 'posthog-js/react';
+import { posthog } from './lib/posthog';
 
 // Critical components (loaded immediately for first paint)
 import { LoginPage } from './components/Auth/LoginPage';
@@ -102,41 +104,43 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<LoginPage />} />
-            
-            {/* Student Routes - All authenticated users can access */}
-            <Route 
-              path="/student/*" 
-              element={
-                <ProtectedRoute>
-                  <StudentRoutes />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Mentor Routes - Hidden but accessible to all authenticated users */}
-            <Route 
-              path="/mentor/*" 
-              element={
-                <ProtectedRoute>
-                  <MentorRoutes />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Default Route */}
-            <Route path="/" element={<AppRoutes />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
+    <PostHogProvider client={posthog}>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<LoginPage />} />
+              
+              {/* Student Routes - All authenticated users can access */}
+              <Route 
+                path="/student/*" 
+                element={
+                  <ProtectedRoute>
+                    <StudentRoutes />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Mentor Routes - Hidden but accessible to all authenticated users */}
+              <Route 
+                path="/mentor/*" 
+                element={
+                  <ProtectedRoute>
+                    <MentorRoutes />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Default Route */}
+              <Route path="/" element={<AppRoutes />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </AuthProvider>
+    </PostHogProvider>
   );
 }
 
