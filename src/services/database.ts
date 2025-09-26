@@ -711,19 +711,27 @@ export class DatabaseService {
   // Progress tracking
   static async getStudentProgress(userId: string): Promise<StudentProgress[]> {
     try {
+      // Guard clause to prevent invalid queries
+      if (!userId || userId === 'null' || userId === 'undefined') {
+        console.warn('⚠️ getStudentProgress called with invalid userId:', userId);
+        return [];
+      }
+
+      console.log('🔍 getStudentProgress called with userId:', userId);
       const { data, error } = await supabase
         .from('student_progress')
         .select('*')
         .eq('student_id', userId);
 
       if (error) {
-        console.error('Error fetching student progress:', error);
+        console.error('❌ Error fetching student progress:', error);
         return [];
       }
 
+      console.log('✅ Student progress fetched successfully:', data?.length || 0, 'records');
       return data || [];
     } catch (error) {
-      console.error('Error in getStudentProgress:', error);
+      console.error('❌ Error in getStudentProgress:', error);
       return [];
     }
   }
@@ -736,6 +744,12 @@ export class DatabaseService {
     feedback?: string
   ): Promise<boolean> {
     try {
+      // Guard clause to prevent invalid queries
+      if (!userId || userId === 'null' || userId === 'undefined') {
+        console.warn('⚠️ updateTaskProgress called with invalid userId:', userId);
+        return false;
+      }
+
       console.log('🔄 Updating task progress:', { userId, taskId, status, score, feedback });
       
       // First, check if progress already exists
@@ -796,56 +810,185 @@ export class DatabaseService {
     weekId: string
   ): Promise<boolean> {
     try {
+      // Guard clause to prevent invalid queries
+      if (!userId || userId === 'null' || userId === 'undefined') {
+        console.warn('⚠️ markWeekAsComplete called with invalid userId:', userId);
+        return false;
+      }
+
       console.log('🔄 Starting markWeekAsComplete for user:', userId, 'week:', weekId);
       
       // First, get all tasks for this week
       const weekTasks = await this.getRoadmapTasks(weekId);
       console.log('📋 Found tasks for week:', weekTasks.length, weekTasks);
       
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+      
       // Mark all tasks as completed for this user
       for (const task of weekTasks) {
-        console.log('✅ Marking task as completed:', task.id, task.task_name);
-        
-        const { error } = await supabase
-          .from('student_progress')
-          .upsert({
-            student_id: userId,
-            task_id: task.id,
-            status: 'completed',
-            completed_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
+        try {
+          console.log('✅ Checking task completion status:', task.id, task.task_name);
+          
+          // First, check if the task is already completed
+          const { data: existingProgress, error: checkError } = await supabase
+            .from('student_progress')
+            .select('id, status')
+            .eq('student_id', userId)
+            .eq('task_id', task.id)
+            .single();
 
-        if (error) {
-          console.error('❌ Error updating task progress:', error);
-          return false;
+          if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('❌ Error checking task progress:', checkError);
+            errors.push(`Task ${task.id}: ${checkError.message}`);
+            errorCount++;
+            continue;
+          }
+
+          if (existingProgress && existingProgress.status === 'completed') {
+            console.log('ℹ️ Task already completed:', task.id, '- skipping');
+            successCount++; // Count as success since it's already completed
+            continue;
+          }
+
+          // Task not completed yet, insert/update it
+          console.log('🔄 Inserting/updating task progress:', task.id);
+          const { error: upsertError } = await supabase
+            .from('student_progress')
+            .upsert({
+              student_id: userId,
+              task_id: task.id,
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (upsertError) {
+            console.error('❌ Error updating task progress:', upsertError);
+            errors.push(`Task ${task.id}: ${upsertError.message}`);
+            errorCount++;
+          } else {
+            console.log('✅ Successfully marked task as completed:', task.id);
+            successCount++;
+          }
+        } catch (taskError) {
+          console.error('❌ Unexpected error for task:', task.id, taskError);
+          errors.push(`Task ${task.id}: ${taskError instanceof Error ? taskError.message : 'Unknown error'}`);
+          errorCount++;
         }
-        
-        console.log('✅ Successfully marked task as completed:', task.id);
       }
 
-      console.log('🎉 All tasks for week marked as completed successfully');
+      // Consider the operation successful if at least some tasks were processed
+      const isSuccessful = successCount > 0 && errorCount < weekTasks.length;
       
-      // Sync progress after all tasks are completed - this will update all progress tables
-      try {
-        const { ProgressSyncService } = await import('./progressSync');
-        const syncResult = await ProgressSyncService.syncStudentProgress(userId);
-        console.log('✅ Progress synced after week completion:', syncResult);
+      console.log(`📊 Week completion summary: ${successCount}/${weekTasks.length} tasks successful, ${errorCount} errors`);
+      
+      if (isSuccessful) {
+        console.log(`🎉 Week completion processed: ${successCount}/${weekTasks.length} tasks successful`);
         
-        if (!syncResult.success) {
-          console.error('❌ Progress sync failed:', syncResult.errors);
+        // Sync progress after tasks are completed
+        try {
+          const { ProgressSyncService } = await import('./progressSync');
+          const syncResult = await ProgressSyncService.syncStudentProgress(userId);
+          console.log('✅ Progress synced after week completion:', syncResult);
+          
+          if (!syncResult.success) {
+            console.error('❌ Progress sync failed:', syncResult.errors);
+            // Don't return false here as tasks were marked complete, just log the error
+          } else {
+            console.log('✅ Progress sync successful - state should be preserved');
+          }
+        } catch (syncError) {
+          console.warn('⚠️ Progress sync failed after week completion:', syncError);
           // Don't return false here as tasks were marked complete, just log the error
         }
-      } catch (syncError) {
-        console.warn('⚠️ Progress sync failed after week completion:', syncError);
-        // Don't return false here as tasks were marked complete, just log the error
+      } else {
+        console.error('❌ No tasks could be processed successfully');
+        if (errors.length > 0) {
+          console.error('❌ Errors encountered:', errors);
+        }
       }
       
-      return true;
+      return isSuccessful;
     } catch (error) {
       console.error('❌ Error in markWeekAsComplete:', error);
       return false;
     }
+  }
+
+  /**
+   * Check the current completion status of tasks for a week
+   */
+  static async checkTasksCompletionStatus(weekId: string, userId: string): Promise<{
+    totalTasks: number;
+    alreadyCompleted: number;
+    needsCompletion: number;
+    completionPercentage: number;
+  } | null> {
+    try {
+      // Guard clause to prevent invalid queries
+      if (!userId || userId === 'null' || userId === 'undefined') {
+        console.warn('⚠️ checkTasksCompletionStatus called with invalid userId:', userId);
+        return null;
+      }
+
+      const weekTasks = await this.getRoadmapTasks(weekId);
+      const { data: existingProgress, error } = await supabase
+        .from('student_progress')
+        .select('task_id, status')
+        .eq('student_id', userId)
+        .in('task_id', weekTasks.map(t => t.id))
+        .eq('status', 'completed');
+      
+      if (error) {
+        console.error('Error checking task completion status:', error);
+        return null;
+      }
+      
+      const completedTaskIds = new Set(existingProgress?.map(p => p.task_id) || []);
+      const alreadyCompleted = weekTasks.filter(task => completedTaskIds.has(task.id));
+      const needsCompletion = weekTasks.length - alreadyCompleted.length;
+      const completionPercentage = weekTasks.length > 0 ? (alreadyCompleted.length / weekTasks.length) * 100 : 0;
+      
+      return {
+        totalTasks: weekTasks.length,
+        alreadyCompleted: alreadyCompleted.length,
+        needsCompletion,
+        completionPercentage
+      };
+    } catch (error) {
+      console.error('Error checking task completion status:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Retry operation with exponential backoff
+   */
+  static async retryOperation<T>(
+    operation: () => Promise<T>, 
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await operation();
+        return result;
+      } catch (error) {
+        console.error(`❌ Attempt ${attempt} failed:`, error);
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        console.log(`⚠️ Retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Max retries exceeded');
   }
 
   // Get week completion statistics for all students in a batch
@@ -2262,7 +2405,7 @@ export const getRoadmapBySlug = async (slug: string): Promise<Roadmap | null> =>
     console.log('🔍 Search pattern:', searchPattern);
     
     // First try partial title match (case insensitive)
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from('roadmaps')
       .select('*')
       .ilike('title', `%${searchPattern}%`);

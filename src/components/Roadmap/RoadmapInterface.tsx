@@ -43,20 +43,26 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     if (!databaseUserId) return;
     
     try {
+      console.log('🔄 Refreshing roadmap data after week completion...');
+      
       // Refresh student progress
       const { data: progressData } = await supabase
         .from('student_progress')
         .select('*')
         .eq('student_id', databaseUserId);
       
+      console.log('📊 Refreshed progress data:', progressData?.length || 0, 'records');
       setStudentProgress(progressData || []);
       
       // Refresh completion statistics if we have weeks and batchId
       if (weeks.length > 0 && batchId) {
+        console.log('🔄 Refreshing completion stats...');
         await fetchCompletionStats();
       }
+      
+      console.log('✅ Roadmap data refresh completed');
     } catch (err) {
-      console.error('Error refreshing roadmap data:', err);
+      console.error('❌ Error refreshing roadmap data:', err);
     }
   };
 
@@ -236,8 +242,18 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     completionStats: completionStats[node.id] || undefined
   }));
   
-  const completedNodes = nodesWithStats.filter(node => node.status === 'completed').length;
+  // Count completed nodes based on task completion, not just status
+  const completedNodes = nodesWithStats.filter(node => {
+    const completedTasks = node.tasks.filter(task => task.completed).length;
+    return completedTasks === node.tasks.length && node.tasks.length > 0;
+  }).length;
   const totalNodes = nodesWithStats.length;
+  
+  console.log('📊 Progress calculation:', {
+    completedNodes,
+    totalNodes,
+    nodeStatuses: nodesWithStats.map(n => ({ title: n.title, status: n.status, completedTasks: n.tasks.filter(t => t.completed).length, totalTasks: n.tasks.length }))
+  });
 
   return (
     <div className={`h-screen flex flex-col transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>

@@ -31,7 +31,17 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1);
   const [studentCompletions, setStudentCompletions] = useState<StudentCompletion[]>([]);
   const [loadingCompletions, setLoadingCompletions] = useState(false);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const { user, databaseUserId } = useAuth();
+
+  // Update completed tasks when node prop changes (after refresh)
+  useEffect(() => {
+    console.log('🔄 NodeContentPanel: Updating completed tasks from node prop');
+    console.log('📊 Node tasks:', node.tasks.map(t => ({ id: t.id, title: t.title, completed: t.completed })));
+    const newCompletedTasks = node.tasks.map(t => t.completed);
+    console.log('📊 New completed tasks state:', newCompletedTasks);
+    setCompletedTasks(newCompletedTasks);
+  }, [node.tasks]);
 
   // Fetch student completion data when the panel opens
   useEffect(() => {
@@ -208,6 +218,9 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const handleConfirmCompletion = async () => {
+    if (isMarkingComplete) return; // Prevent multiple simultaneous requests
+    
+    setIsMarkingComplete(true);
     try {
       if (!user?.id) {
         console.error('❌ User not authenticated');
@@ -217,30 +230,53 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       
       console.log('🔄 Calling markWeekAsComplete for user:', databaseUserId, 'week:', node.id);
       
-      // Mark week as complete
-      const success = await DatabaseService.markWeekAsComplete(databaseUserId, node.id);
+      // Log current completion status for debugging
+      const statusCheck = await DatabaseService.checkTasksCompletionStatus(node.id, databaseUserId!);
+      if (statusCheck) {
+        console.log('📊 Current completion status:', statusCheck);
+      }
+      
+      // Mark week as complete with retry logic
+      const success = await DatabaseService.retryOperation(
+        () => DatabaseService.markWeekAsComplete(databaseUserId!, node.id),
+        3, // max retries
+        1000 // base delay
+      );
+      
       console.log('📊 markWeekAsComplete result:', success);
       
       if (success) {
-        // Update local state to reflect completion
-        // This would typically trigger a refresh of the roadmap data
         console.log('✅ Week marked as complete successfully');
         alert('Week marked as complete!');
-        // Call refresh callback if provided
-        if (onRefresh) {
-          console.log('🔄 Calling onRefresh callback');
-          onRefresh();
-        } else {
-          console.log('⚠️ No onRefresh callback provided');
-        }
       } else {
-        console.error('❌ Failed to mark week as complete');
-        alert('Failed to mark week as complete. Please try again.');
+        console.error('❌ Failed to mark week as complete after retries');
+        alert('Failed to mark week as complete. Please refresh the page to see current status.');
       }
+      
+      // Always refresh to show current state, regardless of success/failure
+      if (onRefresh) {
+        console.log('🔄 Calling onRefresh callback');
+        // Add a small delay to ensure database operations are completed
+        setTimeout(() => {
+          onRefresh();
+        }, 1000);
+      } else {
+        console.log('⚠️ No onRefresh callback provided, forcing page reload');
+        window.location.reload();
+      }
+      
     } catch (error) {
       console.error('❌ Error marking week as complete:', error);
-      alert('Error marking week as complete. Please try again.');
+      alert('Error marking week as complete. Please refresh the page to see current status.');
+      
+      // Always refresh on error to show current state
+      if (onRefresh) {
+        onRefresh();
+      } else {
+        window.location.reload();
+      }
     } finally {
+      setIsMarkingComplete(false);
       setShowConfirmation(false);
     }
   };
@@ -519,19 +555,33 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             </div>
           )}
 
-          {/* Complete Button - Moved near Related Skills */}
-          {node.status === 'active' && (
+          {/* Complete Button - Show for both active and completed weeks */}
+          {(node.status === 'active' || node.status === 'completed') && (
             <div className="mb-6">
               <button
                 onClick={handleMarkAsComplete}
-                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${
-                  isCompleted
-                    ? `${isDarkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'} text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]`
-                    : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
+                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                  isMarkingComplete
+                    ? `${isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500'} cursor-not-allowed`
+                    : node.status === 'completed'
+                      ? `${isDarkMode ? 'bg-green-700 text-green-300' : 'bg-green-600 text-green-100'} cursor-default`
+                      : isCompleted
+                        ? `${isDarkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'} text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]`
+                        : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
                 }`}
-                disabled={!isCompleted}
+                disabled={node.status === 'completed' || !isCompleted || isMarkingComplete}
               >
-                {isCompleted ? 'Mark as Complete' : `Complete ${completedTasks.filter(Boolean).length}/${completedTasks.length} tasks first`}
+                {isMarkingComplete && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                )}
+                {isMarkingComplete 
+                  ? 'Processing...' 
+                  : node.status === 'completed'
+                    ? 'Week Completed ✓'
+                    : isCompleted 
+                      ? 'Mark Week as Complete' 
+                      : `Complete ${completedTasks.filter(Boolean).length}/${completedTasks.length} tasks first`
+                }
               </button>
             </div>
           )}
@@ -541,11 +591,13 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       {/* Confirmation Modal for Week Completion */}
       <ConfirmationModal
         isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
+        onClose={() => !isMarkingComplete && setShowConfirmation(false)}
         onConfirm={handleConfirmCompletion}
         title="Confirm Week Completion"
         message={`Are you sure you have completed all tasks for "${node.title}"? Please double-check before confirming as this will mark the week as complete and update your progress.`}
         isDarkMode={isDarkMode}
+        isLoading={isMarkingComplete}
+        loadingText="Marking as complete..."
       />
 
       {/* Confirmation Modal for Task Completion */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter } from 'lucide-react';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
 import { usePostHog } from 'posthog-js/react';
@@ -116,6 +116,11 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
         });
         
         // Get user's batch
+        if (!databaseUserId) {
+          setError('User not authenticated');
+          return;
+        }
+        
         const batch = await DatabaseService.getStudentBatch(databaseUserId);
         if (!batch) {
           setError('No batch found for user');
