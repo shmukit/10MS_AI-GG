@@ -4,6 +4,7 @@ import { RoadmapNodeData } from './RoadmapNode';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
 import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
+import { DiscussionBoard } from '../Discussion/DiscussionBoard';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
@@ -42,7 +43,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
 
   const fetchStudentCompletions = async () => {
     if (!batchId || !node.id) return;
-    
+
     try {
       setLoadingCompletions(true);
       const completions = await DatabaseService.getWeekStudentCompletionDetails(node.id, batchId);
@@ -59,7 +60,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
     if (node.status === 'completed') {
       return;
     }
-    
+
     // If task is being completed, show confirmation
     if (!completedTasks[taskIndex]) {
       setSelectedTaskIndex(taskIndex);
@@ -134,13 +135,13 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         alert('User not authenticated. Please log in again.');
         return;
       }
-      
+
       console.log('🔄 Calling markWeekAsComplete for user:', user.id, 'week:', node.id);
-      
+
       // Mark week as complete
       const success = await DatabaseService.markWeekAsComplete(user.id, node.id);
       console.log('📊 markWeekAsComplete result:', success);
-      
+
       if (success) {
         // Update local state to reflect completion
         // This would typically trigger a refresh of the roadmap data
@@ -176,7 +177,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
     <>
       {/* Mobile Modal Overlay */}
       <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
-      
+
       {/* Task Panel - Mobile Modal or Desktop Sidebar */}
       <div className={`
         fixed lg:relative 
@@ -188,8 +189,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         transition-all duration-300 ease-in-out
         z-50 lg:z-auto
         rounded-t-xl lg:rounded-none
-        ${isDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
+        ${isDarkMode
+          ? 'bg-gray-800 border-gray-700'
           : 'bg-white border-gray-200'
         }
       `}>
@@ -199,24 +200,21 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         </div>
 
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 sm:p-6 border-b transition-colors duration-200 ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
-        }`}>
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+          }`}>
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {node.status === 'completed' ? (
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                isDarkMode 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25' 
-                  : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
-              }`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${isDarkMode
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25'
+                : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+                }`}>
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
             ) : node.status === 'active' ? (
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                isDarkMode ? 'border-blue-400' : 'border-blue-500'
-              }`}>
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isDarkMode ? 'border-blue-400' : 'border-blue-500'
+                }`}>
                 <div className={`w-2 h-2 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'}`} />
               </div>
             ) : (
@@ -226,11 +224,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
           </div>
           <button
             onClick={onClose}
-            className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
-              isDarkMode 
-                ? 'hover:bg-gray-700 text-gray-400' 
-                : 'hover:bg-gray-100 text-gray-500'
-            }`}
+            className={`flex-shrink-0 p-2 rounded-lg transition-colors ${isDarkMode
+              ? 'hover:bg-gray-700 text-gray-400'
+              : 'hover:bg-gray-100 text-gray-500'
+              }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -265,7 +262,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                 </span>
               </div>
               <div className={`w-full rounded-full h-2 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                <div 
+                <div
                   className={`h-2 rounded-full transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'}`}
                   style={{ width: `${completionRate * 100}%` }}
                 />
@@ -278,11 +275,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             <div className="flex items-center justify-between mb-4">
               <h3 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Tasks & Resources</h3>
               {node.status === 'completed' && (
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  isDarkMode 
-                    ? 'bg-green-900/30 text-green-300 border border-green-700' 
-                    : 'bg-green-100 text-green-700 border border-green-200'
-                }`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${isDarkMode
+                  ? 'bg-green-900/30 text-green-300 border border-green-700'
+                  : 'bg-green-100 text-green-700 border border-green-200'
+                  }`}>
                   🔒 Tasks Locked
                 </span>
               )}
@@ -291,11 +287,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
               {node.tasks.map((task, index) => (
                 <div
                   key={task.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                    isDarkMode 
-                      ? 'border-gray-600 hover:border-gray-500 bg-gray-700/50' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${isDarkMode
+                    ? 'border-gray-600 hover:border-gray-500 bg-gray-700/50'
+                    : 'border-gray-200 hover:border-gray-300'
+                    }`}
                 >
                   <button
                     onClick={() => toggleTaskCompletion(index)}
@@ -304,31 +299,28 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     title={node.status === 'completed' ? 'Tasks are locked after week completion' : ''}
                   >
                     {completedTasks[index] ? (
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        isDarkMode 
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25' 
-                          : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${isDarkMode
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/25'
+                        : 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+                        }`}>
                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
                     ) : (
-                      <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                        isDarkMode 
-                          ? 'border-gray-500 hover:border-gray-400 hover:bg-gray-600' 
-                          : 'border-gray-400 hover:border-gray-500 hover:bg-gray-100'
-                      }`} />
+                      <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${isDarkMode
+                        ? 'border-gray-500 hover:border-gray-400 hover:bg-gray-600'
+                        : 'border-gray-400 hover:border-gray-500 hover:bg-gray-100'
+                        }`} />
                     )}
                   </button>
-                  
+
                   <div className="flex items-center gap-2 flex-1">
                     {getTaskIcon(task.type)}
-                    <span className={`text-sm ${
-                      completedTasks[index] 
-                        ? `line-through ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}` 
-                        : `${isDarkMode ? 'text-white' : 'text-gray-900'}`
-                    }`}>
+                    <span className={`text-sm ${completedTasks[index]
+                      ? `line-through ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`
+                      : `${isDarkMode ? 'text-white' : 'text-gray-900'}`
+                      }`}>
                       {task.title}
                     </span>
                   </div>
@@ -338,11 +330,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                       href={task.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-shrink-0 p-1 rounded transition-colors ${
-                        isDarkMode 
-                          ? 'hover:bg-gray-600 text-gray-400' 
-                          : 'hover:bg-gray-100 text-gray-500'
-                      }`}
+                      className={`flex-shrink-0 p-1 rounded transition-colors ${isDarkMode
+                        ? 'hover:bg-gray-600 text-gray-400'
+                        : 'hover:bg-gray-100 text-gray-500'
+                        }`}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
@@ -360,11 +351,10 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                 {node.relatedSkills.map((skill, index) => (
                   <span
                     key={index}
-                    className={`px-3 py-1 text-sm rounded-full border transition-colors duration-200 ${
-                      isDarkMode 
-                        ? 'bg-blue-900/30 text-blue-300 border-blue-700' 
-                        : 'bg-blue-50 text-blue-700 border-blue-200'
-                    }`}
+                    className={`px-3 py-1 text-sm rounded-full border transition-colors duration-200 ${isDarkMode
+                      ? 'bg-blue-900/30 text-blue-300 border-blue-700'
+                      : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}
                   >
                     {skill}
                   </span>
@@ -382,7 +372,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                   Class Completion
                 </h3>
               </div>
-              
+
               {loadingCompletions ? (
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
@@ -395,7 +385,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     const fullyCompletedStudents = studentCompletions.filter(
                       student => student.completionPercentage === 100
                     );
-                    
+
                     if (fullyCompletedStudents.length === 0) {
                       return (
                         <p className={`text-sm text-center py-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -403,7 +393,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                         </p>
                       );
                     }
-                    
+
                     return (
                       <div className="space-y-2">
                         <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -413,9 +403,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                           {fullyCompletedStudents.map((student, index) => (
                             <div key={student.studentId} className="flex items-center gap-2">
                               {index === 0 && <Trophy className="w-4 h-4 text-yellow-500" />}
-                              <span className={`text-sm font-medium ${
-                                isDarkMode ? 'text-blue-300' : 'text-blue-600'
-                              }`}>
+                              <span className={`text-sm font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-600'
+                                }`}>
                                 {student.studentName}
                               </span>
                               {index < fullyCompletedStudents.length - 1 && (
@@ -441,17 +430,21 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             <div className="mb-6">
               <button
                 onClick={handleMarkAsComplete}
-                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${
-                  isCompleted
-                    ? `${isDarkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'} text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]`
-                    : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
-                }`}
+                className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${isCompleted
+                  ? `${isDarkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'} text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]`
+                  : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
+                  }`}
                 disabled={!isCompleted}
               >
                 {isCompleted ? 'Mark as Complete' : `Complete ${completedTasks.filter(Boolean).length}/${completedTasks.length} tasks first`}
               </button>
             </div>
           )}
+
+          {/* 5. Discussion Board */}
+          <div className="mb-6">
+            <DiscussionBoard entityType="week" entityId={node.id} />
+          </div>
         </div>
       </div>
 
