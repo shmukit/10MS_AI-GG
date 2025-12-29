@@ -11,9 +11,6 @@ type PracticeCardUpdate = Database['public']['Tables']['practice_cards']['Update
 
 // ============ DECK OPERATIONS ============
 
-/**
- * Get all decks created by a specific mentor
- */
 export const getMentorDecks = async (mentorId: string): Promise<PracticeDeck[]> => {
     try {
         const { data, error } = await supabase
@@ -34,9 +31,6 @@ export const getMentorDecks = async (mentorId: string): Promise<PracticeDeck[]> 
     }
 };
 
-/**
- * Get all public decks or decks linked to a roadmap
- */
 export const getAvailableDecks = async (userId: string, roadmapId?: string): Promise<PracticeDeck[]> => {
     try {
         let query = supabase
@@ -46,7 +40,6 @@ export const getAvailableDecks = async (userId: string, roadmapId?: string): Pro
         // Get public decks OR decks created by this user
         query = query.or(`is_public.eq.true,created_by.eq.${userId}`);
 
-        // Filter by roadmap if provided
         if (roadmapId) {
             query = query.eq('roadmap_id', roadmapId);
         }
@@ -65,9 +58,6 @@ export const getAvailableDecks = async (userId: string, roadmapId?: string): Pro
     }
 };
 
-/**
- * Get a single deck by ID
- */
 export const getDeckById = async (deckId: string): Promise<PracticeDeck | null> => {
     try {
         const { data, error } = await supabase
@@ -88,9 +78,6 @@ export const getDeckById = async (deckId: string): Promise<PracticeDeck | null> 
     }
 };
 
-/**
- * Create a new practice deck
- */
 export const createDeck = async (deck: PracticeDeckInsert): Promise<PracticeDeck | null> => {
     try {
         const { data, error } = await supabase
@@ -111,9 +98,6 @@ export const createDeck = async (deck: PracticeDeckInsert): Promise<PracticeDeck
     }
 };
 
-/**
- * Update an existing practice deck
- */
 export const updateDeck = async (deckId: string, updates: PracticeDeckUpdate): Promise<PracticeDeck | null> => {
     try {
         const { data, error } = await supabase
@@ -138,9 +122,6 @@ export const updateDeck = async (deckId: string, updates: PracticeDeckUpdate): P
     }
 };
 
-/**
- * Delete a practice deck (and all its cards via CASCADE)
- */
 export const deleteDeck = async (deckId: string): Promise<boolean> => {
     try {
         const { error } = await supabase
@@ -160,11 +141,12 @@ export const deleteDeck = async (deckId: string): Promise<boolean> => {
     }
 };
 
+// Aliases for compatibility
+export const getUserDecks = getAvailableDecks;
+export const getDeck = getDeckById;
+
 // ============ CARD OPERATIONS ============
 
-/**
- * Get all cards for a specific deck, ordered by order_index
- */
 export const getDeckCards = async (deckId: string): Promise<PracticeCard[]> => {
     try {
         const { data, error } = await supabase
@@ -185,9 +167,6 @@ export const getDeckCards = async (deckId: string): Promise<PracticeCard[]> => {
     }
 };
 
-/**
- * Get a single card by ID
- */
 export const getCardById = async (cardId: string): Promise<PracticeCard | null> => {
     try {
         const { data, error } = await supabase
@@ -208,9 +187,6 @@ export const getCardById = async (cardId: string): Promise<PracticeCard | null> 
     }
 };
 
-/**
- * Create a new practice card
- */
 export const createCard = async (card: PracticeCardInsert): Promise<PracticeCard | null> => {
     try {
         const { data, error } = await supabase
@@ -231,9 +207,6 @@ export const createCard = async (card: PracticeCardInsert): Promise<PracticeCard
     }
 };
 
-/**
- * Update an existing practice card
- */
 export const updateCard = async (cardId: string, updates: PracticeCardUpdate): Promise<PracticeCard | null> => {
     try {
         const { data, error } = await supabase
@@ -255,9 +228,6 @@ export const updateCard = async (cardId: string, updates: PracticeCardUpdate): P
     }
 };
 
-/**
- * Delete a practice card
- */
 export const deleteCard = async (cardId: string): Promise<boolean> => {
     try {
         const { error } = await supabase
@@ -277,24 +247,17 @@ export const deleteCard = async (cardId: string): Promise<boolean> => {
     }
 };
 
-/**
- * Reorder cards in a deck
- * Takes an array of card IDs in the desired order and updates their order_index
- */
 export const reorderCards = async (deckId: string, cardIds: string[]): Promise<boolean> => {
     try {
-        // Update each card's order_index based on its position in the array
         const updates = cardIds.map((cardId, index) =>
             supabase
                 .from('practice_cards')
                 .update({ order_index: index } as unknown as never)
                 .eq('id', cardId)
-                .eq('deck_id', deckId) // Security: ensure card belongs to this deck
+                .eq('deck_id', deckId)
         );
 
         const results = await Promise.all(updates);
-
-        // Check if any updates failed
         const hasErrors = results.some(result => result.error);
 
         if (hasErrors) {
@@ -309,9 +272,6 @@ export const reorderCards = async (deckId: string, cardIds: string[]): Promise<b
     }
 };
 
-/**
- * Batch create multiple cards for a deck
- */
 export const createBatchCards = async (cards: PracticeCardInsert[]): Promise<PracticeCard[]> => {
     try {
         const { data, error } = await supabase
@@ -331,17 +291,8 @@ export const createBatchCards = async (cards: PracticeCardInsert[]): Promise<Pra
     }
 };
 
-// ============ STUDENT PROGRESS TRACKING ============
-
-/**
- * Get the highest card index a student has reached in a deck
- * (For "continue where you left off" functionality)
- */
 export const getStudentDeckProgress = async (_studentId: string, _deckId: string): Promise<number> => {
     try {
-        // This assumes you'll add a student_deck_progress table later
-        // For now, return 0 (start from beginning)
-        // TODO: Implement when student_deck_progress table is created
         return 0;
     } catch (error) {
         console.error('Error in getStudentDeckProgress:', error);
@@ -349,10 +300,6 @@ export const getStudentDeckProgress = async (_studentId: string, _deckId: string
     }
 };
 
-/**
- * Record a student's interaction with a card
- * (For future analytics and spaced repetition)
- */
 export const recordCardInteraction = async (
     studentId: string,
     cardId: string,
@@ -362,24 +309,17 @@ export const recordCardInteraction = async (
     try {
         console.log('Card interaction recorded:', { studentId, cardId, isCorrect });
 
-        // 1. If correct, award XP
         if (isCorrect && batchId) {
-            // Import dynamically to avoid circular dependencies if any (though services should be fine)
-            // But we can import at top level. Let's assume top level import.
             const { awardPracticeXP } = await import('./gamificationService');
             await awardPracticeXP(studentId, batchId);
         }
 
-        // 2. Process Spaced Repetition
         try {
             const { processCardReview } = await import('./spacedRepetitionService');
             await processCardReview(studentId, cardId, !!isCorrect);
         } catch (srError) {
             console.error('Error processing spaced repetition:', srError);
         }
-
-        // 3. TODO: Store the detailed interaction in a dedicated table `student_card_interactions`
-        // for spaced repetition algorithms later.
 
         return true;
     } catch (error) {

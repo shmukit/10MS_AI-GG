@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 
+// Get Supabase URL for session cleanup
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -9,6 +12,7 @@ export function useAuth() {
   const [error, setError] = useState<AuthError | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [roleLoading, setRoleLoading] = useState(true)
+  const [databaseUserId, setDatabaseUserId] = useState<string | null>(null)
 
   useEffect(() => {
     // Get initial session
@@ -33,9 +37,16 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔄 Auth state changed:', event, session?.user?.email || 'no user');
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
+        
+        // Clear user role when user logs out
+        if (event === 'SIGNED_OUT' || !session) {
+          setUserRole(null)
+          console.log('🧹 User role cleared due to sign out');
+        }
       }
     )
 
@@ -147,15 +158,64 @@ export function useAuth() {
   const signOut = async () => {
     try {
       setError(null)
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        setError(error)
-        return { error }
+      console.log('🔄 Starting logout process...')
+      
+      // Check if there's an active session before attempting logout
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      
+      if (currentSession) {
+        console.log('✅ Active session found, proceeding with logout...')
+        // Try to sign out from Supabase - this will trigger the auth state change listener
+        const { error } = await supabase.auth.signOut()
+        
+        if (error) {
+          console.error('❌ Supabase logout error:', error)
+          // If Supabase logout fails, manually clear state as fallback
+          setUser(null)
+          setSession(null)
+          setUserRole(null)
+          console.log('🧹 Local state cleared due to Supabase error')
+        } else {
+          console.log('✅ Supabase logout successful - auth state change will handle cleanup')
+        }
+      } else {
+        console.log('⚠️ No active session found, manually clearing state...')
+        // No session exists, manually clear state
+        setUser(null)
+        setSession(null)
+        setUserRole(null)
+        console.log('🧹 Local state cleared - no session found')
       }
+      
+      // Clear any stored session data as a fallback
+      try {
+        localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
+        sessionStorage.clear()
+        console.log('🧹 Stored session data cleared')
+      } catch (storageError) {
+        console.log('⚠️ Could not clear stored session data:', storageError)
+      }
+      
+      // Always return success to ensure user gets redirected
       return { success: true }
     } catch (err) {
-      console.error('Sign out error:', err)
-      return { error: err as AuthError }
+      console.error('❌ Exception during logout:', err)
+      // Clear local state even if there's an exception
+      setUser(null)
+      setSession(null)
+      setUserRole(null)
+      console.log('🧹 Local state cleared after exception')
+      
+      // Clear any stored session data as a fallback
+      try {
+        localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
+        sessionStorage.clear()
+        console.log('🧹 Stored session data cleared after exception')
+      } catch (storageError) {
+        console.log('⚠️ Could not clear stored session data after exception:', storageError)
+      }
+      
+      return { success: true } // Still return success to redirect user
     }
   }
 
@@ -176,27 +236,28 @@ export function useAuth() {
     }
   }
 
-  // Fetch user role from custom database
+  // Fetch user role and ID from custom database
   const fetchUserRole = async (email: string) => {
     try {
       setRoleLoading(true)
-      console.log('🔍 Fetching user role for email:', email);
+      console.log('🔍 Fetching user role and ID for email:', email);
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('email', email)
         .single()
       
       if (error) {
-        console.error('❌ Error fetching user role:', error);
-        return null
+        console.error('❌ Error fetching user data:', error);
+        return { role: null, id: null }
       }
       
-      console.log('✅ User role fetched successfully:', data?.role);
-      return data?.role || null
+      console.log('✅ User data fetched successfully:', data);
+      setDatabaseUserId(data.id)
+      return { role: data?.role || null, id: data?.id || null }
     } catch (err) {
-      console.error('❌ Error fetching user role:', err);
-      return null
+      console.error('❌ Error fetching user data:', err);
+      return { role: null, id: null }
     } finally {
       setRoleLoading(false)
     }
@@ -207,14 +268,15 @@ export function useAuth() {
     if (session?.user?.email) {
       console.log('🔄 Session changed, fetching role for:', session.user.email);
       setRoleLoading(true)
-      fetchUserRole(session.user.email).then(role => {
-        console.log('🎭 Setting user role to:', role);
-        setUserRole(role)
+      fetchUserRole(session.user.email).then(userData => {
+        console.log('🎭 Setting user role to:', userData.role);
+        setUserRole(userData.role)
         setRoleLoading(false)
       })
     } else {
       console.log('🔄 No session, clearing user role');
       setUserRole(null)
+      setDatabaseUserId(null)
       setRoleLoading(false)
     }
   }, [session])
@@ -226,6 +288,7 @@ export function useAuth() {
     error,
     userRole,
     roleLoading,
+    databaseUserId,
     signIn,
     signUp,
     signOut,

@@ -34,7 +34,7 @@ const ProfileSkeleton = () => (
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const { profileSlug } = useParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [profileData, setProfileData] = useState<{
     profile: any;
@@ -44,6 +44,8 @@ export const StudentProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [editForm, setEditForm] = useState<{
     first_name: string;
     last_name: string;
@@ -70,7 +72,7 @@ export const StudentProfile: React.FC = () => {
         console.log('🆔 Profile: User ID:', user?.id);
         console.log('📧 Profile: User email:', user?.email);
         console.log('📋 Profile: User metadata:', user?.user_metadata);
-        const data = await DatabaseService.getDashboardData(user.id);
+        const data = await DatabaseService.getDashboardData(databaseUserId);
         console.log('📊 Profile: Dashboard data received:', data);
         setProfileData(data);
         // Initialize edit form with current data
@@ -103,9 +105,13 @@ export const StudentProfile: React.FC = () => {
     if (!user?.id) return;
     
     setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
     
     try {
       console.log('🔄 Starting to save profile updates...');
+      console.log('👤 User ID being used:', databaseUserId);
+      console.log('📧 User email:', user.email);
       
       // Update user data
       const userUpdates = {
@@ -125,37 +131,50 @@ export const StudentProfile: React.FC = () => {
 
       console.log('📝 Profile updates to save:', { userUpdates, profileUpdates });
       
-      // Make API calls to update both user and profile
-      console.log('📝 Profile updates to save:', { userUpdates, profileUpdates });
-      
       // Update user data
-      const userUpdateSuccess = await DatabaseService.updateUser(user.id, userUpdates);
+      console.log('🔄 Updating user data...');
+      const userUpdateSuccess = await DatabaseService.updateUser(databaseUserId, userUpdates);
       if (!userUpdateSuccess) {
         console.error('❌ Failed to update user data');
+        setSaveError('Failed to update user information. Please try again.');
         return;
       }
+      console.log('✅ User data updated successfully');
       
       // Update profile data
-      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(user.id, profileUpdates);
+      console.log('🔄 Updating student profile...');
+      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(databaseUserId, profileUpdates);
       if (!profileUpdateSuccess) {
         console.error('❌ Failed to update student profile');
+        setSaveError('Failed to update profile information. Please try again.');
         return;
       }
+      console.log('✅ Student profile updated successfully');
       
-      // Update local state after successful API calls
-      setProfileData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          userData: { ...prev.userData, ...userUpdates },
-          profile: { ...prev.profile, ...profileUpdates }
-        };
+      // Refresh profile data from server to ensure we have the latest data
+      console.log('🔄 Refreshing profile data from server...');
+      const refreshedData = await DatabaseService.getDashboardData(databaseUserId);
+      setProfileData(refreshedData);
+      
+      // Update edit form with refreshed data
+      setEditForm({
+        first_name: refreshedData?.userData?.first_name || '',
+        last_name: refreshedData?.userData?.last_name || '',
+        degree: refreshedData?.profile?.degree || '',
+        subject: refreshedData?.profile?.subject || '',
+        year: refreshedData?.profile?.year || '',
+        institute: refreshedData?.profile?.institute || ''
       });
 
       setIsEditing(false);
-      console.log('✅ Profile updated successfully via API');
+      setSaveSuccess(true);
+      console.log('✅ Profile updated successfully via API and data refreshed');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       console.error('❌ Error saving profile:', error);
+      setSaveError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -211,6 +230,18 @@ export const StudentProfile: React.FC = () => {
         <div className={`rounded-lg p-8 shadow-sm transition-colors duration-200 ${
           isDarkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
+          {/* Success/Error Messages */}
+          {saveSuccess && (
+            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              ✅ Profile updated successfully!
+            </div>
+          )}
+          {saveError && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              ❌ {saveError}
+            </div>
+          )}
+          
           {/* Profile Header */}
           <div className="flex items-start justify-between mb-8">
             <div className="flex items-center gap-6">
@@ -277,6 +308,8 @@ export const StudentProfile: React.FC = () => {
                   console.log('🖊️ Edit Profile button clicked!');
                   console.log('📊 Current profile data:', profileData);
                   console.log('📝 Current edit form:', editForm);
+                  setSaveError(null); // Clear any previous errors
+                  setSaveSuccess(false); // Clear any previous success messages
                   setIsEditing(true);
                 }}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"

@@ -111,6 +111,31 @@ export const markWeekAsComplete = async (
     }
 };
 
+export const checkTasksCompletionStatus = async (
+    weekId: string,
+    userId: string
+): Promise<boolean> => {
+    try {
+        const weekTasks = await getRoadmapTasks(weekId);
+        if (weekTasks.length === 0) return true;
+
+        const { data: progress } = await supabase
+            .from('student_progress')
+            .select('task_id, status')
+            .eq('student_id', userId)
+            .in('task_id', weekTasks.map(t => t.id));
+
+        const completedTaskIds = new Set(
+            progress?.filter(p => p.status === 'completed').map(p => p.task_id)
+        );
+
+        return weekTasks.every(t => completedTaskIds.has(t.id));
+    } catch (error) {
+        console.error('Error in checkTasksCompletionStatus:', error);
+        return false;
+    }
+};
+
 export const getWeekCompletionStats = async (weekId: string, batchId: string): Promise<{
     totalStudents: number;
     completedStudents: number;

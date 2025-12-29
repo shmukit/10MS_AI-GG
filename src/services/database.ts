@@ -18,6 +18,10 @@ import * as RoadmapService from './db/roadmapService';
 import * as ProgressService from './db/progressService';
 import * as NoticeService from './db/noticeService';
 import * as DashboardService from './db/dashboardService';
+import * as LiveSessionService from './liveSessionService';
+import * as SpacedRepetitionService from './db/spacedRepetitionService';
+import * as PracticeDeckService from './db/practiceDeckService';
+import * as GamificationService from './db/gamificationService';
 
 // Re-export types
 export type {
@@ -72,21 +76,32 @@ export class DatabaseService {
   static markWeekAsComplete = ProgressService.markWeekAsComplete;
   static getWeekCompletionStats = ProgressService.getWeekCompletionStats;
   static getWeekStudentCompletionDetails = ProgressService.getWeekStudentCompletionDetails;
+  static checkTasksCompletionStatus = ProgressService.checkTasksCompletionStatus;
 
-  // Notices management
+  // Notice management
   static getNotices = NoticeService.getNotices;
+  static createNotice = NoticeService.createNotice;
   static markNoticeAsRead = NoticeService.markNoticeAsRead;
+  static getUnreadNoticeCount = NoticeService.getUnreadNoticeCount;
 
-  // Mentor management
-  static getMentors = MentorService.getMentors;
-  static createMentorProfile = MentorService.createMentorProfile;
-
-  // Dashboard data aggregation
+  // Dashboard Aggregation
   static getDashboardData = DashboardService.getDashboardData;
-}
 
-// Re-export standalone functions for convenience if needed elsewhere
-export const generateBatchSlug = BatchService.generateBatchSlug;
-export const generateRoadmapSlug = RoadmapService.generateRoadmapSlug;
-export const getBatchBySlug = BatchService.getBatchBySlug;
-export const getRoadmapBySlug = RoadmapService.getRoadmapBySlug;
+  // Live Sessions
+  static getUpcomingSessions = LiveSessionService.getUpcomingSessions;
+
+  // Spaced Repetition & Practice
+  static getDueCards = SpacedRepetitionService.getDueCards;
+  static processCardReview = SpacedRepetitionService.processCardReview;
+  static getUserDecks = PracticeDeckService.getUserDecks;
+  static getDeck = PracticeDeckService.getDeck;
+  static createDeck = PracticeDeckService.createDeck;
+  static updateDeck = PracticeDeckService.updateDeck;
+  static deleteDeck = PracticeDeckService.deleteDeck;
+  static recordCardInteraction = PracticeDeckService.recordCardInteraction;
+
+  // Gamification
+  static initializeGamificationProfile = GamificationService.initializeGamificationProfile;
+  static getLeaderboard = GamificationService.getLeaderboard;
+  static getStudentGamificationProfile = GamificationService.getStudentGamificationProfile;
+}

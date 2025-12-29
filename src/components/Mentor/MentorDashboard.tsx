@@ -20,7 +20,7 @@ interface MentorDashboardProps {
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   isDarkMode = false,
 }) => {
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice'>('dashboard');
 
   // Shared Data State

@@ -4,9 +4,9 @@ import { supabase } from '../../lib/supabase';
  * XP Point Values (as per PLATFORM_EXPANSION_PLAN.md)
  */
 export const XP_VALUES = {
-    CORRECT_PRACTICE: 10,    // Correct answer in practice card
-    FINISH_MODULE: 100,       // Complete a week/module
-    DAILY_STREAK: 50,         // Maintain daily activity
+    CORRECT_PRACTICE: 10,
+    FINISH_MODULE: 100,
+    DAILY_STREAK: 50,
 } as const;
 
 export interface StudentXPStats {
@@ -25,9 +25,6 @@ export interface LeaderboardEntry {
     profilePicture?: string;
 }
 
-/**
- * Award XP points to a student for a specific action
- */
 export const awardXP = async (
     studentId: string,
     batchId: string,
@@ -37,7 +34,6 @@ export const awardXP = async (
     try {
         console.log(`🎮 Awarding ${points} XP to student ${studentId} for: ${reason}`);
 
-        // Get current assignment
         const { data: assignment, error: fetchError } = await supabase
             .from('student_batch_assignments')
             .select('xp_points')
@@ -53,9 +49,6 @@ export const awardXP = async (
         const currentXP = (assignment as any)?.xp_points || 0;
         const newXP = currentXP + points;
 
-        // Update XP
-        // Type casting to 'never' is required here because of a Supabase type inference issue
-        // consistent with practiceDeckService.ts
         const { error: updateError } = await supabase
             .from('student_batch_assignments')
             .update({
@@ -78,9 +71,6 @@ export const awardXP = async (
     }
 };
 
-/**
- * Calculate XP based on action type
- */
 export const calculateXP = (action: 'correct_practice' | 'finish_module' | 'daily_streak'): number => {
     switch (action) {
         case 'correct_practice':
@@ -94,9 +84,6 @@ export const calculateXP = (action: 'correct_practice' | 'finish_module' | 'dail
     }
 };
 
-/**
- * Award XP for completing a task/week
- */
 export const awardTaskCompletionXP = async (
     studentId: string,
     batchId: string
@@ -109,9 +96,6 @@ export const awardTaskCompletionXP = async (
     );
 };
 
-/**
- * Award XP for correct practice answer
- */
 export const awardPracticeXP = async (
     studentId: string,
     batchId: string
@@ -124,9 +108,6 @@ export const awardPracticeXP = async (
     );
 };
 
-/**
- * Get leaderboard for a batch
- */
 export const getLeaderboard = async (
     batchId: string,
     timeframe: 'weekly' | 'all-time' = 'all-time',
@@ -151,9 +132,6 @@ export const getLeaderboard = async (
             .order('xp_points', { ascending: false })
             .limit(limit);
 
-        // For weekly, we would need a created_at or last_xp_update field
-        // Currently not implemented in schema - treating as all-time
-
         const { data, error } = await query;
 
         if (error) {
@@ -165,7 +143,6 @@ export const getLeaderboard = async (
             return [];
         }
 
-        // Transform to leaderboard entries
         const leaderboard: LeaderboardEntry[] = data.map((entry: any, index: number) => ({
             rank: index + 1,
             studentId: entry.student_id,
@@ -182,15 +159,11 @@ export const getLeaderboard = async (
     }
 };
 
-/**
- * Get student's XP stats including rank
- */
 export const getStudentStats = async (
     studentId: string,
     batchId: string
 ): Promise<StudentXPStats | null> => {
     try {
-        // Get student's XP
         const { data: assignment, error: assignmentError } = await supabase
             .from('student_batch_assignments')
             .select('xp_points')
@@ -205,14 +178,12 @@ export const getStudentStats = async (
 
         const studentXP = (assignment as any)?.xp_points || 0;
 
-        // Get total number of students in batch
         const { count: totalStudents } = await supabase
             .from('student_batch_assignments')
             .select('*', { count: 'exact', head: true })
             .eq('batch_id', batchId)
             .eq('status', 'active');
 
-        // Get rank by counting how many students have more XP
         const { count: studentsAbove } = await supabase
             .from('student_batch_assignments')
             .select('*', { count: 'exact', head: true })
@@ -235,9 +206,6 @@ export const getStudentStats = async (
     }
 };
 
-/**
- * Get student's current XP for a batch
- */
 export const getStudentXP = async (
     studentId: string,
     batchId: string
@@ -262,23 +230,37 @@ export const getStudentXP = async (
     }
 };
 
-/**
- * Check if student has maintained daily streak
- * Returns true if student completed any action today
- */
 export const checkDailyStreak = async (
     _studentId: string,
     _batchId: string
 ): Promise<boolean> => {
-    try {
-        // TODO: Implement when we have daily activity tracking
-        // This would check student_progress or a dedicated activity log table
-        // to see if student completed any task today
+    // Placeholder for daily streak logic
+    return false;
+};
 
-        // For now, return false (no streak system yet)
-        return false;
-    } catch (error) {
-        console.error('Error in checkDailyStreak:', error);
-        return false;
+// Aliases and Initializers
+export const initializeGamificationProfile = async (_userId: string): Promise<boolean> => {
+    // Gamification is initialized via student_batch_assignments
+    return true;
+};
+
+export const getStudentGamificationProfile = async (userId: string): Promise<any> => {
+    // Fetch a default batch stats for now, or null
+    // Assuming we can just find any active batch
+    try {
+        const { data: assignment } = await supabase
+            .from('student_batch_assignments')
+            .select('batch_id')
+            .eq('student_id', userId)
+            .eq('status', 'active')
+            .limit(1)
+            .single();
+
+        if (assignment) {
+            return await getStudentStats(userId, assignment.batch_id);
+        }
+        return null;
+    } catch {
+        return null;
     }
 };

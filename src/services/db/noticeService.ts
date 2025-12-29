@@ -27,6 +27,37 @@ export const getNotices = async (batchId?: string): Promise<Notice[]> => {
     }
 };
 
+export const createNotice = async (noticeData: Partial<Notice>): Promise<Notice | null> => {
+    try {
+        const { data, error } = await supabase
+            .from('notices')
+            .insert([noticeData])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error creating notice:', error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error in createNotice:', error);
+        return null;
+    }
+};
+
+export const getUnreadNoticeCount = async (_userId: string): Promise<number> => {
+    try {
+        // Placeholder for unread count logic
+        // In the future, query a 'notice_reads' table
+        return 0;
+    } catch (error) {
+        console.error('Error in getUnreadNoticeCount:', error);
+        return 0;
+    }
+};
+
 export const markNoticeAsRead = async (_noticeId: string, _userId: string): Promise<boolean> => {
     try {
         // This would typically update a separate read_status table

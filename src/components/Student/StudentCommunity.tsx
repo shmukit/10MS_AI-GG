@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase';
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
   const { roadmapSlug } = useParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export const StudentCommunity: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        console.log('Fetching community data for user:', user.id);
+        console.log('Fetching community data for user:', databaseUserId);
         
         // First, get the roadmap by slug if provided
         let roadmapData = null;
@@ -96,7 +96,7 @@ export const StudentCommunity: React.FC = () => {
         setBatch(batchData);
         
         // Get students in this batch
-        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id, user.id);
+        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id, databaseUserId);
         console.log('📊 Students data fetched:', studentsData);
         console.log('🔍 Batch ID used for student fetch:', batchData.id);
         console.log('🔍 Roadmap ID from batch:', batchData.roadmap_id);
@@ -197,8 +197,11 @@ export const StudentCommunity: React.FC = () => {
     if (sortBy === 'name') {
       return (a.first_name || '').localeCompare(b.first_name || '');
     } else {
-      // Sort by progress (for now, just by role - mentors first)
-      return (a.role === 'mentor' ? 1 : 0) - (b.role === 'mentor' ? 1 : 0);
+      // Sort by progress percentage (highest first)
+      const aProgress = a.progress?.progress_percentage || 0;
+      const bProgress = b.progress?.progress_percentage || 0;
+      console.log('Progress comparison:', { a: a.first_name, aProgress, b: b.first_name, bProgress });
+      return bProgress - aProgress;
     }
   });
 

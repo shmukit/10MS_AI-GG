@@ -8,6 +8,8 @@ interface ConfirmationModalProps {
   title: string;
   message: string;
   isDarkMode?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -16,7 +18,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  isDarkMode = false
+  isDarkMode = false,
+  isLoading = false,
+  loadingText = "Processing..."
 }) => {
   if (!isOpen) return null;
 
@@ -53,20 +57,29 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="flex gap-3">
           <button
             onClick={onConfirm}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
-              isDarkMode 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-green-500 hover:bg-green-600 text-white'
+            disabled={isLoading}
+            className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+              isLoading
+                ? `${isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500'} cursor-not-allowed`
+                : isDarkMode 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-green-500 hover:bg-green-600 text-white'
             }`}
           >
-            Yes, I am sure
+            {isLoading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            {isLoading ? loadingText : 'Yes, I am sure'}
           </button>
           <button
             onClick={onClose}
+            disabled={isLoading}
             className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
-              isDarkMode 
-                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              isLoading
+                ? `${isDarkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-200 text-gray-400'} cursor-not-allowed`
+                : isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
             }`}
           >
             No, I am unsure

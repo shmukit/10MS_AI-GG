@@ -9,6 +9,7 @@ import { ProgressBar } from './ProgressBar';
 import { useTheme } from '../../lib/ThemeContext';
 import { generateRoadmapData } from '../../data/roadmapData';
 import { StudentHeader } from '../Student/StudentHeader';
+import { usePostHog } from 'posthog-js/react';
 
 interface RoadmapInterfaceProps {
   onBack: () => void;
@@ -19,8 +20,9 @@ interface RoadmapInterfaceProps {
 export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { roadmapSlug } = useParams();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
+  const posthog = usePostHog();
   
   // Use theme context if no props provided
   const effectiveDarkMode = isDarkMode ?? themeDarkMode;
@@ -38,23 +40,29 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   const [targetWeekNumber, setTargetWeekNumber] = useState<number | null>(null);
 
   const refreshRoadmapData = async () => {
-    if (!user?.id) return;
+    if (!databaseUserId) return;
     
     try {
+      console.log('🔄 Refreshing roadmap data after week completion...');
+      
       // Refresh student progress
       const { data: progressData } = await supabase
         .from('student_progress')
         .select('*')
-        .eq('student_id', user.id);
+        .eq('student_id', databaseUserId);
       
+      console.log('📊 Refreshed progress data:', progressData?.length || 0, 'records');
       setStudentProgress(progressData || []);
       
       // Refresh completion statistics if we have weeks and batchId
       if (weeks.length > 0 && batchId) {
+        console.log('🔄 Refreshing completion stats...');
         await fetchCompletionStats();
       }
+      
+      console.log('✅ Roadmap data refresh completed');
     } catch (err) {
-      console.error('Error refreshing roadmap data:', err);
+      console.error('❌ Error refreshing roadmap data:', err);
     }
   };
 
@@ -77,11 +85,26 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
-      if (!user?.id) return;
+      if (!databaseUserId) return;
       
       try {
         setLoading(true);
         setError(null);
+        
+        // Track roadmap view and WAU/MAU
+        posthog?.capture('roadmap_view', {
+          user_id: databaseUserId,
+          roadmap_slug: roadmapSlug,
+          batch_id: batchId,
+          viewed_at: new Date().toISOString()
+        });
+        
+        // Track WAU (Weekly Active User)
+        posthog?.capture('$pageview', {
+          page: 'roadmap_interface',
+          user_id: databaseUserId,
+          roadmap_slug: roadmapSlug
+        });
         
         // Check for week parameter in URL
         const weekParam = searchParams.get('week');
@@ -94,12 +117,12 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         
         // Fetch only essential data in parallel - avoid heavy getDashboardData
         const [userDataQuery, batchQuery, progressQuery] = await Promise.all([
-          DatabaseService.getUserById(user.id),
-          DatabaseService.getStudentBatch(user.id),
+          DatabaseService.getUserById(databaseUserId),
+          DatabaseService.getStudentBatch(databaseUserId),
           supabase
             .from('student_progress')
             .select('*')
-            .eq('student_id', user.id)
+            .eq('student_id', databaseUserId)
         ]);
         
         // Set user name from lightweight user data
@@ -170,7 +193,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     };
 
     fetchRoadmapData();
-  }, [user?.id, roadmapSlug]);
+  }, [databaseUserId, roadmapSlug]);
 
   // Lazy-load completion statistics after initial render for better performance
   useEffect(() => {
@@ -219,8 +242,18 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
     completionStats: completionStats[node.id] || undefined
   }));
   
-  const completedNodes = nodesWithStats.filter(node => node.status === 'completed').length;
+  // Count completed nodes based on task completion, not just status
+  const completedNodes = nodesWithStats.filter(node => {
+    const completedTasks = node.tasks.filter(task => task.completed).length;
+    return completedTasks === node.tasks.length && node.tasks.length > 0;
+  }).length;
   const totalNodes = nodesWithStats.length;
+  
+  console.log('📊 Progress calculation:', {
+    completedNodes,
+    totalNodes,
+    nodeStatuses: nodesWithStats.map(n => ({ title: n.title, status: n.status, completedTasks: n.tasks.filter(t => t.completed).length, totalTasks: n.tasks.length }))
+  });
 
   return (
     <div className={`h-screen flex flex-col transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>

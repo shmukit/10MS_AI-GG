@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
 import { useTheme } from '../../lib/ThemeContext';
 import { StudentHeader } from './StudentHeader';
@@ -11,11 +11,13 @@ import { StreaksSection } from './dashboard/StreaksSection';
 import { MentorsSection } from './dashboard/MentorsSection';
 import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
-
 import { Leaderboard } from '../Dashboard/Leaderboard';
+import { usePostHog } from 'posthog-js/react';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const posthog = usePostHog();
+
   const {
     loading,
     error,
@@ -29,8 +31,73 @@ export const StudentDashboard: React.FC = () => {
     getCurrentRoadmap,
     getCurrentBatch,
     getWeeklyStreaks,
-    markNoticeAsRead
+    markNoticeAsRead,
+    user
   } = useStudentDashboard();
+
+  // Track page view and DAU (from origin/main logic)
+  useEffect(() => {
+    if (user?.id) {
+      posthog?.capture('student_dashboard_view', {
+        user_id: user.id,
+        batch_id: selectedBatch,
+        roadmap_id: selectedRoadmap
+      });
+
+      // Track DAU (Daily Active User)
+      posthog?.capture('$pageview', {
+        page: 'student_dashboard',
+        user_id: user.id
+      });
+    }
+  }, [user?.id, posthog, selectedBatch, selectedRoadmap]);
+
+  // Check for week completion and track it
+  useEffect(() => {
+    if (dashboardData?.studentProgress && user?.id) {
+      const studentProgress = dashboardData.studentProgress;
+      const currentWeek = studentProgress.find((p: any) => p.is_active);
+
+      if (currentWeek && currentWeek.is_completed) {
+        posthog?.capture('week_completed', {
+          user_id: user.id,
+          week_number: currentWeek.week_number,
+          roadmap_id: selectedRoadmap,
+          batch_id: selectedBatch,
+          completed_at: new Date().toISOString(),
+          completion_percentage: currentWeek.completion_percentage || 100
+        });
+      }
+    }
+  }, [dashboardData, user?.id, selectedRoadmap, selectedBatch]);
+
+  // Check for overdue tasks
+  useEffect(() => {
+    if (dashboardData?.currentWeekTasks && user?.id) {
+      const currentDate = new Date();
+      const overdueTasks = dashboardData.currentWeekTasks.filter((task: any) => {
+        if (!task.deadline) return false;
+        const deadline = new Date(task.deadline);
+        return deadline < currentDate && !task.completed; // Note: 'completed' property might need verifying in task object
+      });
+
+      if (overdueTasks.length > 0) {
+        posthog?.capture('task_overdue', {
+          user_id: user.id,
+          overdue_count: overdueTasks.length,
+          overdue_tasks: overdueTasks.map((task: any) => ({
+            task_id: task.id,
+            task_name: task.task_name,
+            deadline: task.deadline,
+            days_overdue: Math.ceil((currentDate.getTime() - new Date(task.deadline).getTime()) / (1000 * 60 * 60 * 24))
+          })),
+          roadmap_id: selectedRoadmap,
+          batch_id: selectedBatch,
+          detected_at: new Date().toISOString()
+        });
+      }
+    }
+  }, [dashboardData, user?.id, selectedRoadmap, selectedBatch]);
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>

@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter, CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter } from 'lucide-react';
+import { DatabaseService } from '../../services/database';
+import { useAuth } from '../../lib/useAuth';
+import { usePostHog } from 'posthog-js/react';
 
 interface Student {
   id: string;
@@ -84,18 +87,94 @@ const mockStudents: Student[] = [
 ];
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
-  const [students, setStudents] = useState(mockStudents);
+  const { user, databaseUserId } = useAuth();
+  const posthog = usePostHog();
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'completion'>('name');
+
+  // Fetch real student data
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Track community view and MAU
+        posthog?.capture('community_view', {
+          user_id: databaseUserId,
+          viewed_at: new Date().toISOString()
+        });
+        
+        // Track MAU (Monthly Active User)
+        posthog?.capture('$pageview', {
+          page: 'community',
+          user_id: databaseUserId
+        });
+        
+        // Get user's batch
+        if (!databaseUserId) {
+          setError('User not authenticated');
+          return;
+        }
+        
+        const batch = await DatabaseService.getStudentBatch(databaseUserId);
+        if (!batch) {
+          setError('No batch found for user');
+          return;
+        }
+        
+        // Get students in the same batch
+        const batchStudents = await DatabaseService.getStudentsByBatch(batch.id, databaseUserId);
+        
+        // Transform data to match interface
+        const transformedStudents: Student[] = batchStudents.map((student: any) => ({
+          id: student.id,
+          name: `${student.first_name} ${student.last_name}`.trim(),
+          profilePhoto: '',
+          institute: student.profile?.institute || 'Unknown',
+          year: student.profile?.year || 'Unknown',
+          subject: student.profile?.subject || 'Unknown',
+          degree: student.profile?.degree || 'Unknown',
+          email: student.email,
+          completedWeeks: student.progress?.completed_weeks || 0,
+          progressPercentage: student.progress?.progress_percentage || 0
+        }));
+        
+        setStudents(transformedStudents);
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        setError('Failed to load community data');
+        // Fallback to mock data
+        setStudents(mockStudents);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStudents();
+  }, [user?.id]);
 
   const sortedStudents = [...students].sort((a, b) => {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name);
     } else {
-      return b.progressPercentage - a.progressPercentage;
+      // Sort by progress percentage (highest first), then by completed weeks
+      const progressDiff = b.progressPercentage - a.progressPercentage;
+      if (progressDiff !== 0) return progressDiff;
+      return b.completedWeeks - a.completedWeeks;
     }
   });
 
   const handleWhatsAppClick = () => {
+    posthog?.capture('whatsapp_group_clicked', {
+      user_id: databaseUserId,
+      group_type: 'community',
+      clicked_at: new Date().toISOString()
+    });
     window.open('https://chat.whatsapp.com/example-group-link', '_blank');
   };
 
@@ -104,6 +183,13 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
   };
 
   const handleEmergencyContact = () => {
+    posthog?.capture('student_contact_clicked', {
+      user_id: databaseUserId,
+      contact_type: 'phone',
+      contact_number: '+8801234567890',
+      contact_purpose: 'emergency',
+      clicked_at: new Date().toISOString()
+    });
     window.open('tel:+8801234567890', '_self');
   };
 
@@ -265,9 +351,37 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Loading community...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 text-sm">!</span>
+                </div>
+                <div>
+                  <h3 className="text-red-800 font-medium">Error Loading Community</h3>
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Students Grid */}
-          <div className="space-y-4">
-            {sortedStudents.map((student) => (
+          {!loading && !error && (
+            <div className="space-y-4">
+              {sortedStudents.map((student) => (
               <div
                 key={student.id}
                 className={`p-4 rounded-lg border transition-colors duration-200 ${
@@ -300,6 +414,15 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                     {/* Contact */}
                     <a
                       href={`mailto:${student.email}`}
+                      onClick={() => {
+                        posthog?.capture('student_contact_clicked', {
+                          user_id: databaseUserId,
+                          contact_type: 'email',
+                          student_email: student.email,
+                          student_name: student.name,
+                          clicked_at: new Date().toISOString()
+                        });
+                      }}
                       className={`p-2 rounded-lg transition-colors ${
                         isDarkMode 
                           ? 'hover:bg-gray-600 text-gray-400' 
@@ -331,7 +454,8 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

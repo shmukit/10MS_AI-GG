@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
+import { PostHogProvider } from 'posthog-js/react';
+import { posthog } from './lib/posthog';
 
 // Critical components (loaded immediately for first paint)
 import { LoginPage } from './components/Auth/LoginPage';
@@ -36,6 +38,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) {
+    console.log('🔄 ProtectedRoute: No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
@@ -85,50 +88,54 @@ const AppRoutes = () => {
   }
 
   if (!user) {
+    console.log('🔄 AppRoutes: No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // All authenticated users go to student dashboard by default
+  console.log('🔄 AppRoutes: User authenticated, redirecting to student dashboard');
   return <Navigate to="/student/dashboard" replace />;
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<LoginPage />} />
+    <PostHogProvider client={posthog}>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<LoginPage />} />
 
-            {/* Student Routes - All authenticated users can access */}
-            <Route
-              path="/student/*"
-              element={
-                <ProtectedRoute>
-                  <StudentRoutes />
-                </ProtectedRoute>
-              }
-            />
+              {/* Student Routes - All authenticated users can access */}
+              <Route
+                path="/student/*"
+                element={
+                  <ProtectedRoute>
+                    <StudentRoutes />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Mentor Routes - Hidden but accessible to all authenticated users */}
-            <Route
-              path="/mentor/*"
-              element={
-                <ProtectedRoute>
-                  <MentorRoutes />
-                </ProtectedRoute>
-              }
-            />
+              {/* Mentor Routes - Hidden but accessible to all authenticated users */}
+              <Route
+                path="/mentor/*"
+                element={
+                  <ProtectedRoute>
+                    <MentorRoutes />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Default Route */}
-            <Route path="/" element={<AppRoutes />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
+              {/* Default Route */}
+              <Route path="/" element={<AppRoutes />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </AuthProvider>
+    </PostHogProvider>
   );
 }
 

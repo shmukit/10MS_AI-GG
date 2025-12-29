@@ -10,14 +10,15 @@
     "preview": "vite preview",
     "build:prod": "vite build --mode production",
     "build:staging": "vite build --mode staging",
-    "deploy:check": "node -e \"console.log('Environment check:', require('./deployment.config.js').getConfig())\"",
+    "deploy:check": "node -e \"console.log('Environment check:', require('./scripts/deployment.config.js').getConfig())\"",
     "start": "vite preview --port 3000 --host 0.0.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.0",
+    "@supabase/supabase-js": "^2.56.1",
     "@types/react-router-dom": "^5.3.3",
     "dotenv": "^17.2.1",
     "lucide-react": "^0.344.0",
+    "posthog-js": "^1.266.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.8.2"

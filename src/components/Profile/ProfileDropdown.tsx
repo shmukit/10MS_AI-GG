@@ -33,14 +33,25 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 
   const handleLogout = async () => {
     try {
+      console.log('🔄 ProfileDropdown: Starting logout...');
+      setIsOpen(false); // Close dropdown immediately
+      
       const result = await signOut();
-      if (result.success) {
+      console.log('📊 ProfileDropdown: Logout result:', result);
+      
+      // Small delay to ensure auth state has time to update
+      setTimeout(() => {
+        console.log('🔄 ProfileDropdown: Redirecting to login page...');
         navigate('/login');
-      } else {
-        console.error('Logout failed:', result.error);
-      }
+      }, 100);
+      
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ ProfileDropdown: Logout exception:', error);
+      // Even if there's an exception, redirect to login page
+      setTimeout(() => {
+        console.log('🔄 ProfileDropdown: Redirecting to login after exception...');
+        navigate('/login');
+      }, 100);
     }
   };
 
