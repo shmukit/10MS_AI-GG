@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Moon, Sun, Users, MessageCircle, Phone, Mail, Filter } from 'lucide-react';
 import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
-import { usePostHog } from 'posthog-js/react';
+import { posthog } from '../../lib/posthog';
 
 interface Student {
   id: string;
@@ -88,7 +88,7 @@ const mockStudents: Student[] = [
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
   const { user, databaseUserId } = useAuth();
-  const posthog = usePostHog();
+  // const posthog = usePostHog();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,38 +98,38 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
   useEffect(() => {
     const fetchStudents = async () => {
       if (!user?.id) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         // Track community view and MAU
         posthog?.capture('community_view', {
           user_id: databaseUserId,
           viewed_at: new Date().toISOString()
         });
-        
+
         // Track MAU (Monthly Active User)
         posthog?.capture('$pageview', {
           page: 'community',
           user_id: databaseUserId
         });
-        
+
         // Get user's batch
         if (!databaseUserId) {
           setError('User not authenticated');
           return;
         }
-        
+
         const batch = await DatabaseService.getStudentBatch(databaseUserId);
         if (!batch) {
           setError('No batch found for user');
           return;
         }
-        
+
         // Get students in the same batch
         const batchStudents = await DatabaseService.getStudentsByBatch(batch.id, databaseUserId);
-        
+
         // Transform data to match interface
         const transformedStudents: Student[] = batchStudents.map((student: any) => ({
           id: student.id,
@@ -143,7 +143,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
           completedWeeks: student.progress?.completed_weeks || 0,
           progressPercentage: student.progress?.progress_percentage || 0
         }));
-        
+
         setStudents(transformedStudents);
       } catch (err) {
         console.error('Error fetching students:', err);
@@ -154,7 +154,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
         setLoading(false);
       }
     };
-    
+
     fetchStudents();
   }, [user?.id]);
 
@@ -205,16 +205,15 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
               </div>
               <h1 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>10MS SheSTEM</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               {toggleDarkMode && (
                 <button
                   onClick={toggleDarkMode}
-                  className={`p-2 rounded-lg transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
+                  className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                      ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
@@ -229,22 +228,20 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
       </div>
 
       {/* Breadcrumb */}
-      <div className={`border-b h-16 transition-colors duration-200 ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
+      <div className={`border-b h-16 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={onBack}
-            className={`flex items-center gap-2 transition-colors ${
-              isDarkMode 
-                ? 'text-gray-400 hover:text-white' 
+            className={`flex items-center gap-2 transition-colors ${isDarkMode
+                ? 'text-gray-400 hover:text-white'
                 : 'text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium">Back to Dashboard</span>
           </button>
-          
+
           <h1 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Community</h1>
         </div>
       </div>
@@ -252,11 +249,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Group Info Section */}
-        <div className={`rounded-xl p-6 shadow-sm border mb-8 transition-colors duration-200 ${
-          isDarkMode 
-            ? 'bg-gray-800 border-gray-700' 
+        <div className={`rounded-xl p-6 shadow-sm border mb-8 transition-colors duration-200 ${isDarkMode
+            ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-200'
-        }`}>
+          }`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Group Info */}
             <div>
@@ -266,7 +262,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                   Python Learning Cohort - Batch 15
                 </h2>
               </div>
-              
+
               <div className="space-y-3">
                 <div className={`flex items-center gap-2 text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   <Users className="w-4 h-4" />
@@ -284,11 +280,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
               <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={handleWhatsAppClick}
-                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${
-                    isDarkMode 
-                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${isDarkMode
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-green-500 hover:bg-green-600 text-white'
-                  }`}
+                    }`}
                 >
                   <MessageCircle className="w-3 h-3" />
                   WhatsApp
@@ -296,11 +291,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
 
                 <button
                   onClick={handleDiscordClick}
-                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${
-                    isDarkMode 
-                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white' 
+                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${isDarkMode
+                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                       : 'bg-indigo-500 hover:bg-indigo-600 text-white'
-                  }`}
+                    }`}
                 >
                   <MessageCircle className="w-3 h-3" />
                   Discord
@@ -308,11 +302,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
 
                 <button
                   onClick={handleEmergencyContact}
-                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${
-                    isDarkMode 
-                      ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${isDarkMode
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'bg-red-500 hover:bg-red-600 text-white'
-                  }`}
+                    }`}
                 >
                   <Phone className="w-3 h-3" />
                   Emergency
@@ -323,27 +316,25 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
         </div>
 
         {/* Students List */}
-        <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${
-          isDarkMode 
-            ? 'bg-gray-800 border-gray-700' 
+        <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${isDarkMode
+            ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-200'
-        }`}>
+          }`}>
           {/* Header with Sort Filter */}
           <div className="flex items-center justify-between mb-6">
             <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Group Members
             </h3>
-            
+
             <div className="flex items-center gap-2">
               <Filter className={`w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'completion')}
-                className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
+                className={`px-3 py-1 rounded-lg border text-sm transition-colors ${isDarkMode
+                    ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
-                }`}
+                  }`}
               >
                 <option value="name">Sort by Name</option>
                 <option value="completion">Sort by Progress</option>
@@ -382,78 +373,76 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
           {!loading && !error && (
             <div className="space-y-4">
               {sortedStudents.map((student) => (
-              <div
-                key={student.id}
-                className={`p-4 rounded-lg border transition-colors duration-200 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600' 
-                    : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  {/* Student Info */}
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-600">
-                        {student.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {student.name}
-                      </h4>
-                      <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        {student.degree} {student.subject} • {student.year}
+                <div
+                  key={student.id}
+                  className={`p-4 rounded-lg border transition-colors duration-200 ${isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    {/* Student Info */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-600">
+                          {student.name.split(' ').map(n => n[0]).join('')}
+                        </span>
                       </div>
-                      <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {student.institute}
+
+                      <div className="flex-1">
+                        <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {student.name}
+                        </h4>
+                        <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {student.degree} {student.subject} • {student.year}
+                        </div>
+                        <div className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {student.institute}
+                        </div>
                       </div>
+
+                      {/* Contact */}
+                      <a
+                        href={`mailto:${student.email}`}
+                        onClick={() => {
+                          posthog?.capture('student_contact_clicked', {
+                            user_id: databaseUserId,
+                            contact_type: 'email',
+                            student_email: student.email,
+                            student_name: student.name,
+                            clicked_at: new Date().toISOString()
+                          });
+                        }}
+                        className={`p-2 rounded-lg transition-colors ${isDarkMode
+                            ? 'hover:bg-gray-600 text-gray-400'
+                            : 'hover:bg-gray-200 text-gray-600'
+                          }`}
+                      >
+                        <Mail className="w-4 h-4" />
+                      </a>
                     </div>
 
-                    {/* Contact */}
-                    <a
-                      href={`mailto:${student.email}`}
-                      onClick={() => {
-                        posthog?.capture('student_contact_clicked', {
-                          user_id: databaseUserId,
-                          contact_type: 'email',
-                          student_email: student.email,
-                          student_name: student.name,
-                          clicked_at: new Date().toISOString()
-                        });
-                      }}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDarkMode 
-                          ? 'hover:bg-gray-600 text-gray-400' 
-                          : 'hover:bg-gray-200 text-gray-600'
-                      }`}
-                    >
-                      <Mail className="w-4 h-4" />
-                    </a>
-                  </div>
-
-                  {/* Progress & Contact */}
-                  <div className="flex items-center gap-4">
-                    {/* Progress */}
-                    <div className="text-center">
-                      <div className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        Week {student.completedWeeks}/6
-                      </div>
-                      <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {student.progressPercentage}% Complete
-                      </div>
-                      <div className={`w-20 h-2 rounded-full mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                        <div 
-                          className="h-2 rounded-full bg-blue-500 transition-all duration-300"
-                          style={{ width: `${student.progressPercentage}%` }}
-                        />
+                    {/* Progress & Contact */}
+                    <div className="flex items-center gap-4">
+                      {/* Progress */}
+                      <div className="text-center">
+                        <div className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          Week {student.completedWeeks}/6
+                        </div>
+                        <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {student.progressPercentage}% Complete
+                        </div>
+                        <div className={`w-20 h-2 rounded-full mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                          <div
+                            className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                            style={{ width: `${student.progressPercentage}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             </div>
           )}
         </div>

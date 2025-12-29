@@ -257,7 +257,7 @@ export const getStudentGamificationProfile = async (userId: string): Promise<any
             .single();
 
         if (assignment) {
-            return await getStudentStats(userId, assignment.batch_id);
+            return await getStudentStats(userId, (assignment as any).batch_id);
         }
         return null;
     } catch {

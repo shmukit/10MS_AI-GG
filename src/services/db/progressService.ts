@@ -125,8 +125,9 @@ export const checkTasksCompletionStatus = async (
             .eq('student_id', userId)
             .in('task_id', weekTasks.map(t => t.id));
 
+        const progressList = (progress as unknown as StudentProgress[]) || [];
         const completedTaskIds = new Set(
-            progress?.filter(p => p.status === 'completed').map(p => p.task_id)
+            progressList.filter(p => p.status === 'completed').map(p => p.task_id)
         );
 
         return weekTasks.every(t => completedTaskIds.has(t.id));

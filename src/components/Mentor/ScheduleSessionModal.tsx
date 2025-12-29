@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, Video, Users } from 'lucide-react';
-import { liveSessionService } from '../../services/liveSessionService';
+import { createSession } from '../../services/liveSessionService';
 import { DatabaseService } from '../../services/database';
 
 interface ScheduleSessionModalProps {
@@ -46,7 +46,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
 
         setLoading(true);
         try {
-            await liveSessionService.createSession({
+            await createSession({
                 mentor_id: mentorId,
                 batch_id: batchId || null, // If explicit batch context is missing, might be global or need selection (skipping global selection for now)
                 title,

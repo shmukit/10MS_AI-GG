@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Calendar as CalendarIcon, Loader } from 'lucide-react';
-import { LiveSession, liveSessionService } from '../../services/liveSessionService';
+import { LiveSession, getUpcomingSessions } from '../../services/liveSessionService';
 import { LiveSessionCard } from './LiveSessionCard';
 
 interface LiveSessionListProps {
@@ -25,7 +25,7 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
 
         try {
             setLoading(true);
-            const data = await liveSessionService.getUpcomingSessions(batchId);
+            const data = await getUpcomingSessions(batchId);
             // Client-side sort just in case: Live ones first, then nearest future
             // Actually DB query handles time order.
             setSessions(data);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateRoadmapSlug } from '../../../services/database';
+import { DatabaseService } from '../../../services/database';
 import { Lock } from 'lucide-react';
 
 interface TasksSectionProps {
@@ -29,12 +29,12 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
         }
 
         if (currentRoadmap) {
-            const roadmapSlug = generateRoadmapSlug(currentRoadmap?.title || '');
+            const roadmapSlug = DatabaseService.generateRoadmapSlug(currentRoadmap?.title || '');
             navigate(`/student/roadmap/${roadmapSlug}?week=${weekNumber || 1}`);
         } else if (enrolledRoadmaps?.length > 0) {
             // Fallback: use first available roadmap
             const firstRoadmap = enrolledRoadmaps[0];
-            const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+            const roadmapSlug = DatabaseService.generateRoadmapSlug(firstRoadmap.title || '');
             navigate(`/student/roadmap/${roadmapSlug}?week=${weekNumber || 1}`);
         } else {
             // No roadmaps available, stay on dashboard
@@ -128,8 +128,8 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
                                     key={task.id}
                                     onClick={() => handleTaskClick(task.week_number || 2)}
                                     className={`relative rounded-lg p-4 border transition-all duration-200 cursor-pointer ${isLocked
-                                            ? `opacity-75 ${isDarkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-100 border-gray-200'}`
-                                            : `hover:shadow-lg transform hover:scale-[1.02] ${isDarkMode ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30 hover:border-green-700' : 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300'}`
+                                        ? `opacity-75 ${isDarkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-100 border-gray-200'}`
+                                        : `hover:shadow-lg transform hover:scale-[1.02] ${isDarkMode ? 'bg-green-900/20 border-green-800 hover:bg-green-900/30 hover:border-green-700' : 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300'}`
                                         }`}>
 
                                     {isLocked && (
