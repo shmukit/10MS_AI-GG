@@ -30,15 +30,15 @@ const RouteLoader = () => (
 // Simplified Protected Route Component - No role checking
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
-  
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
-  
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -101,27 +101,27 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<LoginPage />} />
-            
+
             {/* Student Routes - All authenticated users can access */}
-            <Route 
-              path="/student/*" 
+            <Route
+              path="/student/*"
               element={
                 <ProtectedRoute>
                   <StudentRoutes />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Mentor Routes - Hidden but accessible to all authenticated users */}
-            <Route 
-              path="/mentor/*" 
+            <Route
+              path="/mentor/*"
               element={
                 <ProtectedRoute>
                   <MentorRoutes />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Default Route */}
             <Route path="/" element={<AppRoutes />} />
             <Route path="*" element={<Navigate to="/" replace />} />
