@@ -370,7 +370,15 @@ export const recordCardInteraction = async (
             await awardPracticeXP(studentId, batchId);
         }
 
-        // 2. TODO: Store the detailed interaction in a dedicated table `student_card_interactions`
+        // 2. Process Spaced Repetition
+        try {
+            const { processCardReview } = await import('./spacedRepetitionService');
+            await processCardReview(studentId, cardId, !!isCorrect);
+        } catch (srError) {
+            console.error('Error processing spaced repetition:', srError);
+        }
+
+        // 3. TODO: Store the detailed interaction in a dedicated table `student_card_interactions`
         // for spaced repetition algorithms later.
 
         return true;

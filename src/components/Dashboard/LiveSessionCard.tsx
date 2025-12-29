@@ -7,9 +7,40 @@ interface LiveSessionCardProps {
     session: LiveSession;
     isMentor?: boolean; // If true, show mentor controls (edit/delete)
     onDelete?: () => void;
+    currentLevel?: number;
 }
 
-export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMentor, onDelete }) => {
+export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMentor, onDelete, currentLevel }) => {
+
+    const getRecommendationStatus = () => {
+        if (!currentLevel || !session.target_audience) return null;
+
+        try {
+            const audience = typeof session.target_audience === 'string'
+                ? JSON.parse(session.target_audience)
+                : session.target_audience;
+
+            // Check if object has min_level / max_level
+            if (audience.min_level) {
+                if (currentLevel >= audience.min_level && (!audience.max_level || currentLevel <= audience.max_level)) {
+                    return 'recommended';
+                }
+                if (currentLevel < audience.min_level) {
+                    return 'advanced';
+                }
+            }
+            // Fallback for simple array "modules": [1, 2]
+            if (audience.modules && Array.isArray(audience.modules)) {
+                if (audience.modules.includes(currentLevel)) return 'recommended';
+                if (Math.min(...audience.modules) > currentLevel) return 'advanced';
+            }
+        } catch (e) {
+            return null;
+        }
+        return null;
+    };
+
+    const recommendation = getRecommendationStatus();
 
 
     const startTime = new Date(session.start_time);
@@ -48,7 +79,20 @@ export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMen
                             </span>
                         )}
                     </div>
-                    <h4 className="font-bold text-gray-900">{session.title}</h4>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h4 className="font-bold text-gray-900">{session.title}</h4>
+                        {recommendation === 'recommended' && (
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                                Recommended for you
+                            </span>
+                        )}
+                        {recommendation === 'advanced' && (
+                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Advanced
+                            </span>
+                        )}
+                    </div>
                 </div>
                 {isMentor && (
                     <button onClick={handleDelete} className="text-gray-400 hover:text-red-500 rounded p-1 hover:bg-red-50">

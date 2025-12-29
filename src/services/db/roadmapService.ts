@@ -198,8 +198,17 @@ export const getCurrentWeekTasks = async (userId: string, roadmapId?: string): P
             targetRoadmapId = batch.roadmap_id;
         }
 
-        // Get current week (you might want to calculate this based on enrollment date)
-        const currentWeek = 1; // For now, hardcoded to week 1
+        // Calculate current week dynamically using TaRL logic
+        // If not found (e.g., roadmap just started), default to 1.
+        let currentWeek = 1;
+        try {
+            const { getCurrentLevel } = await import('./tarlService');
+            currentWeek = await getCurrentLevel(userId, targetRoadmapId);
+            console.log('🎯 TaRL Calculated Current Level:', currentWeek);
+        } catch (e) {
+            console.error('Error calculating TaRL level, defaulting to 1:', e);
+        }
+
         console.log('📅 Current week:', currentWeek);
 
         // Get roadmap weeks

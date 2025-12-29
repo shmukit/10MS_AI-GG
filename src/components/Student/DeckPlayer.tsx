@@ -12,9 +12,10 @@ interface DeckPlayerProps {
     batchId: string;
     onClose: () => void;
     onComplete?: () => void;
+    initialCards?: PracticeCard[]; // For review mode
 }
 
-export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batchId, onClose, onComplete }) => {
+export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batchId, onClose, onComplete, initialCards }) => {
     const { user } = useAuthContext();
     const [cards, setCards] = useState<PracticeCard[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,12 +25,16 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
 
     useEffect(() => {
         loadCards();
-    }, [deckId]);
+    }, [deckId, initialCards]); // Reload if deckId or initialCards changes
 
     const loadCards = async () => {
         setLoading(true);
-        const deckCards = await getDeckCards(deckId);
-        setCards(deckCards);
+        if (initialCards && initialCards.length > 0) {
+            setCards(initialCards);
+        } else {
+            const deckCards = await getDeckCards(deckId);
+            setCards(deckCards);
+        }
         setLoading(false);
     };
 

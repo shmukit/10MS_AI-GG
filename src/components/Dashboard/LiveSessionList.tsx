@@ -8,9 +8,10 @@ interface LiveSessionListProps {
     batchId: string;
     isMentor?: boolean;
     refreshTrigger?: number; // A simple counter to trigger Refetch
+    currentLevel?: number;
 }
 
-export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMentor = false, refreshTrigger }) => {
+export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMentor = false, refreshTrigger, currentLevel }) => {
     const [sessions, setSessions] = useState<LiveSession[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -68,6 +69,7 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
                             session={session}
                             isMentor={isMentor}
                             onDelete={fetchSessions}
+                            currentLevel={currentLevel}
                         />
                     ))}
                 </div>

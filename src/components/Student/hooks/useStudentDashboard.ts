@@ -135,6 +135,18 @@ export const useStudentDashboard = () => {
                     console.error('Error fetching gamification stats:', e);
                 }
             }
+
+            // Fetch TaRL Level
+            const currentRoadmapId = roadmapId || data?.enrolledRoadmaps?.[0]?.id;
+            if (currentRoadmapId) {
+                try {
+                    const { getCurrentLevel } = await import('../../../services/db/tarlService');
+                    const level = await getCurrentLevel(userId, currentRoadmapId);
+                    setDashboardData((prev: any) => ({ ...prev, currentLevel: level }));
+                } catch (e) {
+                    console.error('Error fetching TaRL level:', e);
+                }
+            }
         } catch (err) {
             setError('Failed to load dashboard data');
         } finally {

@@ -116,6 +116,7 @@ export const StudentDashboard: React.FC = () => {
                 upcomingTasks={dashboardData.upcomingTasks}
                 currentRoadmap={getCurrentRoadmap()}
                 enrolledRoadmaps={dashboardData.enrolledRoadmaps}
+                currentLevel={dashboardData.currentLevel || 1}
               />
             </div>
 
@@ -144,6 +145,7 @@ export const StudentDashboard: React.FC = () => {
                 }`}>
                 <LiveSessionList
                   batchId={selectedBatch}
+                  currentLevel={dashboardData?.currentLevel}
                 />
               </div>
 
