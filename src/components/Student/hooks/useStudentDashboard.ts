@@ -121,6 +121,20 @@ export const useStudentDashboard = () => {
             if (roadmapId) {
                 setSelectedRoadmap(roadmapId);
             }
+
+            // Fetch Gamification Stats
+            if (data?.batch?.id) {
+                try {
+                    // Import dynamically or assume imported. Dynamic import to avoid cycles if any.
+                    const { getStudentStats } = await import('../../../services/db/gamificationService');
+                    const stats = await getStudentStats(userId, data.batch.id);
+                    if (stats) {
+                        setDashboardData((prev: any) => ({ ...prev, gamificationStats: stats }));
+                    }
+                } catch (e) {
+                    console.error('Error fetching gamification stats:', e);
+                }
+            }
         } catch (err) {
             setError('Failed to load dashboard data');
         } finally {

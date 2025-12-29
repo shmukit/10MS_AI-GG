@@ -10,6 +10,11 @@ interface DashboardHeaderProps {
     setShowRoadmapDropdown: (show: boolean) => void;
     handleRoadmapChange: (id: string) => void;
     selectedRoadmapId: string;
+    gamificationStats?: {
+        totalXP: number;
+        rank: number;
+        batchId: string;
+    };
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -20,16 +25,33 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     showRoadmapDropdown,
     setShowRoadmapDropdown,
     handleRoadmapChange,
-    selectedRoadmapId
+    selectedRoadmapId,
+    gamificationStats
 }) => {
     return (
-        <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
-            <div className="flex-1">
-                <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Hello, {displayName}
-                </h2>
-                <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI-Enabled Group Guidance Program</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl font-bold text-gray-600">
+                    {displayName.charAt(0)}
+                </div>
+                <div className="flex-1">
+                    <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        Hello, {displayName}
+                    </h2>
+                    <div className="flex items-center gap-2">
+                        <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            AI-Enabled Group Guidance Program
+                        </p>
+                        {gamificationStats && (
+                            <div className={`flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-bold border ${isDarkMode ? 'bg-blue-900/30 border-blue-800 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700'
+                                }`}>
+                                <span>{gamificationStats.totalXP} XP</span>
+                                <span>•</span>
+                                <span>Rank #{gamificationStats.rank}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Roadmap Selection Dropdown */}

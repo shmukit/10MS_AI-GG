@@ -46,6 +46,23 @@ export const updateTaskProgress = async (
             return false;
         }
 
+        // Award XP if completed
+        if (status === 'completed') {
+            const { data: assignments } = await supabase
+                .from('student_batch_assignments')
+                .select('batch_id')
+                .eq('student_id', userId)
+                .eq('status', 'active');
+
+            if (assignments && assignments.length > 0) {
+                const { awardTaskCompletionXP } = await import('./gamificationService');
+                // Award for each active batch (usually just one)
+                for (const assignment of (assignments as any[])) {
+                    await awardTaskCompletionXP(userId, assignment.batch_id);
+                }
+            }
+        }
+
         return true;
     } catch (error) {
         console.error('Error in updateTaskProgress:', error);

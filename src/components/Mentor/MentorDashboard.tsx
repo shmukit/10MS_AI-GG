@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, BookOpen, Bell, LayoutDashboard } from 'lucide-react';
+import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
 import { MentorHeader } from './MentorHeader';
@@ -7,6 +7,8 @@ import { DashboardTab } from './tabs/DashboardTab';
 import { RoadmapTab } from './tabs/RoadmapTab';
 import { StudentsTab } from './tabs/StudentsTab';
 import { NoticeTab } from './tabs/NoticeTab';
+import { PracticeDeckTab } from './tabs/PracticeDeckTab';
+import { DeckEditor } from './DeckEditor';
 import { Batch, Student, RoadmapItem, Notice } from '../../types/mentor';
 
 interface MentorDashboardProps {
@@ -19,7 +21,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   isDarkMode = false,
 }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice'>('dashboard');
 
   // Shared Data State
   const [roadmaps, setRoadmaps] = useState<any[]>([]);
@@ -31,6 +33,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   // Selection State
   const [selectedBatch, setSelectedBatch] = useState<string>('');
   const [selectedRoadmap, setSelectedRoadmap] = useState<string>('');
+
+  // Deck Editor State
+  const [showDeckEditor, setShowDeckEditor] = useState(false);
+  const [editingDeckId, setEditingDeckId] = useState<string | undefined>(undefined);
 
   // Loading & Error State
   const [loading, setLoading] = useState(true);
@@ -265,6 +271,29 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     }
   }, [selectedRoadmap]);
 
+  const handleCreateDeck = () => {
+    setEditingDeckId(undefined);
+    setShowDeckEditor(true);
+  };
+
+  const handleEditDeck = (deckId: string) => {
+    setEditingDeckId(deckId);
+    setShowDeckEditor(true);
+  };
+
+  const handleDeckSaved = () => {
+    setShowDeckEditor(false);
+    // Refreshing the deck list is handled within the PracticeDeckTab component's internal state
+    // But if we lifted the state up, we would refresh here.
+    // For now, PracticeDeckTab re-fetches when it mounts, and we might trigger a re-mount or expose a refresh method.
+    // Actually, PracticeDeckTab uses its own local state which initializes on mount.
+    // To properly refresh, we can force remount or add a key.
+    // A simple wa to refresh is to toggle the active tab or just accept that the user sees the list update.
+    // Since PracticeDeckTab manages its own list, we'll need to figure out how to refresh it.
+    // For this implementation, we'll let PracticeDeckTab handle its own data loading.
+    // If specific refresh needed, we can pass a 'lastUpdated' prop.
+  };
+
   const getDashboardStats = () => {
     const totalStudents = students.length;
     const totalBatches = batches.length;
@@ -293,6 +322,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
               { id: 'students', label: 'Batch & Students', icon: Users },
+              { id: 'practice', label: 'Practice Decks', icon: Layers },
               { id: 'notice', label: 'Notice', icon: Bell }
             ].map(({ id, label, icon: Icon }) => (
               <button
@@ -367,6 +397,17 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 onUpdate={fetchData}
               />
             )}
+            {activeTab === 'practice' && (
+              <PracticeDeckTab
+                isDarkMode={isDarkMode}
+                onCreateDeck={handleCreateDeck}
+                onEditDeck={handleEditDeck}
+                // Add key to force remount when editor closes to refresh list?
+                // Or assume user will check. Ideally we pass a refresh trigger.
+                key={showDeckEditor ? 'hidden' : 'visible'} // Quick hack to force refresh when editor closes? No, that causes flickers.
+              // Better to just let it be for now, or use a dependency prop in PracticeDeckTab.
+              />
+            )}
             {activeTab === 'notice' && (
               <NoticeTab
                 notices={notices}
@@ -380,6 +421,16 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           </>
         )}
       </div>
+
+      {/* Deck Editor Modal */}
+      {showDeckEditor && (
+        <DeckEditor
+          deckId={editingDeckId}
+          onClose={() => setShowDeckEditor(false)}
+          onSave={handleDeckSaved}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };

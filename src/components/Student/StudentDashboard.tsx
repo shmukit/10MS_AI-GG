@@ -9,6 +9,10 @@ import { NavigationCards } from './dashboard/NavigationCards';
 import { TasksSection } from './dashboard/TasksSection';
 import { StreaksSection } from './dashboard/StreaksSection';
 import { MentorsSection } from './dashboard/MentorsSection';
+import { PracticeDeckList } from './PracticeDeckList';
+import { Layers } from 'lucide-react';
+
+import { Leaderboard } from '../Dashboard/Leaderboard';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -80,6 +84,7 @@ export const StudentDashboard: React.FC = () => {
                 setShowRoadmapDropdown={setShowRoadmapDropdown}
                 handleRoadmapChange={handleRoadmapChange}
                 selectedRoadmapId={selectedRoadmap}
+                gamificationStats={dashboardData?.gamificationStats}
               />
 
               {/* Navigation Cards */}
@@ -89,6 +94,20 @@ export const StudentDashboard: React.FC = () => {
                 enrolledRoadmaps={dashboardData.enrolledRoadmaps}
                 batch={getCurrentBatch()}
               />
+
+              {/* Practice & Micro-learning Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Layers className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                  <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Practice & Micro-learning
+                  </h2>
+                </div>
+                <div className={`rounded-xl p-6 border shadow-professional transition-all duration-200 hover:shadow-professional-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                  }`}>
+                  <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatch} />
+                </div>
+              </div>
 
               {/* This Week's Tasks and Upcoming */}
               <TasksSection
@@ -107,6 +126,9 @@ export const StudentDashboard: React.FC = () => {
                 isDarkMode={isDarkMode}
                 streaks={getWeeklyStreaks()}
               />
+
+              {/* Leaderboard */}
+              <Leaderboard batchId={selectedBatch} isDarkMode={isDarkMode} />
 
               {/* Notice Board */}
               <NoticeBoard

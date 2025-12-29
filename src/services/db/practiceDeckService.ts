@@ -356,15 +356,23 @@ export const getStudentDeckProgress = async (_studentId: string, _deckId: string
 export const recordCardInteraction = async (
     studentId: string,
     cardId: string,
+    batchId: string,
     isCorrect?: boolean
 ): Promise<boolean> => {
     try {
-        // TODO: Implement when student_card_interactions table is created
-        // This will be used for:
-        // - Tracking which cards student has seen
-        // - Recording quiz answers
-        // - Implementing spaced repetition
-        console.log('Card interaction recorded (stub):', { studentId, cardId, isCorrect });
+        console.log('Card interaction recorded:', { studentId, cardId, isCorrect });
+
+        // 1. If correct, award XP
+        if (isCorrect && batchId) {
+            // Import dynamically to avoid circular dependencies if any (though services should be fine)
+            // But we can import at top level. Let's assume top level import.
+            const { awardPracticeXP } = await import('./gamificationService');
+            await awardPracticeXP(studentId, batchId);
+        }
+
+        // 2. TODO: Store the detailed interaction in a dedicated table `student_card_interactions`
+        // for spaced repetition algorithms later.
+
         return true;
     } catch (error) {
         console.error('Error in recordCardInteraction:', error);
