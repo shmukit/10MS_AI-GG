@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Video, Calendar, Clock, Users, Trash2 } from 'lucide-react';
-import { LiveSession, liveSessionService } from '../../services/liveSessionService';
+import { LiveSession, deleteSession } from '../../services/liveSessionService';
 
 interface LiveSessionCardProps {
     session: LiveSession;
@@ -51,7 +51,7 @@ export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMen
     const handleDelete = async () => {
         if (confirm('Are you sure you want to cancel this session?')) {
             try {
-                await liveSessionService.deleteSession(session.id);
+                await deleteSession(session.id);
                 if (onDelete) onDelete();
             } catch (error) {
                 console.error('Failed to delete session', error);

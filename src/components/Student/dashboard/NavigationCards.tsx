@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map, Users } from 'lucide-react';
-import { generateRoadmapSlug, generateBatchSlug } from '../../../services/database';
+import { DatabaseService } from '../../../services/database';
 
 interface NavigationCardsProps {
     isDarkMode: boolean;
@@ -23,12 +23,12 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
             <div
                 onClick={() => {
                     if (currentRoadmap) {
-                        const roadmapSlug = generateRoadmapSlug(currentRoadmap?.title || '');
+                        const roadmapSlug = DatabaseService.generateRoadmapSlug(currentRoadmap?.title || '');
                         navigate(`/student/roadmap/${roadmapSlug}`);
                     } else if (enrolledRoadmaps?.length > 0) {
                         // Fallback: use first available roadmap
                         const firstRoadmap = enrolledRoadmaps[0];
-                        const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                        const roadmapSlug = DatabaseService.generateRoadmapSlug(firstRoadmap.title || '');
                         navigate(`/student/roadmap/${roadmapSlug}`);
                     } else {
                         // No roadmaps available, stay on dashboard
@@ -54,15 +54,15 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
                 onClick={() => {
                     // Navigate to community with roadmap context
                     if (currentRoadmap) {
-                        const roadmapSlug = generateRoadmapSlug(currentRoadmap?.title || '');
+                        const roadmapSlug = DatabaseService.generateRoadmapSlug(currentRoadmap?.title || '');
                         navigate(`/student/community/${roadmapSlug}`);
                     } else if (enrolledRoadmaps?.length > 0) {
                         // Fallback: use first available roadmap
                         const firstRoadmap = enrolledRoadmaps[0];
-                        const roadmapSlug = generateRoadmapSlug(firstRoadmap.title || '');
+                        const roadmapSlug = DatabaseService.generateRoadmapSlug(firstRoadmap.title || '');
                         navigate(`/student/community/${roadmapSlug}`);
                     } else if (batch) {
-                        const batchSlug = generateBatchSlug(batch.name);
+                        const batchSlug = DatabaseService.generateBatchSlug(batch.name);
                         navigate(`/student/community/${batchSlug}`);
                     } else {
                         // No roadmaps or batches available, stay on dashboard

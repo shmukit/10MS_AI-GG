@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../lib';
-import { usePostHog } from 'posthog-js/react';
+import { posthog } from '../../lib/posthog';
 
 export const LoginPage: React.FC = () => {
   const { signIn, signUp, loading, error, user } = useAuthContext();
   const navigate = useNavigate();
-  const posthog = usePostHog();
+  // const posthog = usePostHog();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,12 +35,12 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (isLogin) {
         posthog?.capture('login_attempt', { email: formData.email });
         const result = await signIn(formData.email, formData.password);
-        
+
         if (result.success) {
           posthog?.capture('login_success', { email: formData.email });
           posthog?.identify(formData.email, { email: formData.email });
@@ -50,7 +50,7 @@ export const LoginPage: React.FC = () => {
       } else {
         posthog?.capture('signup_attempt', { email: formData.email, name: formData.name });
         const result = await signUp(formData.email, formData.password, formData.name);
-        
+
         if (result.success) {
           posthog?.capture('signup_success', { email: formData.email, name: formData.name });
           posthog?.identify(formData.email, { email: formData.email, name: formData.name });
@@ -62,8 +62,8 @@ export const LoginPage: React.FC = () => {
         }
       }
     } catch (error) {
-      posthog?.capture('auth_error', { 
-        action: isLogin ? 'login' : 'signup', 
+      posthog?.capture('auth_error', {
+        action: isLogin ? 'login' : 'signup',
         email: formData.email,
         error: error instanceof Error ? error.message : 'Unknown error'
       });

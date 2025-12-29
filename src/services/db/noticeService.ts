@@ -31,7 +31,7 @@ export const createNotice = async (noticeData: Partial<Notice>): Promise<Notice 
     try {
         const { data, error } = await supabase
             .from('notices')
-            .insert([noticeData])
+            .insert(noticeData as any)
             .select()
             .single();
 

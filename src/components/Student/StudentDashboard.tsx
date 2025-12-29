@@ -12,11 +12,11 @@ import { MentorsSection } from './dashboard/MentorsSection';
 import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
 import { Leaderboard } from '../Dashboard/Leaderboard';
-import { usePostHog } from 'posthog-js/react';
+import { posthog } from '../../lib/posthog';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const posthog = usePostHog();
+  // const posthog = usePostHog(); // Removed to use singleton directly
 
   const {
     loading,
