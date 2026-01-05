@@ -126,6 +126,95 @@ export const getStudentBatch = async (userId: string): Promise<Batch | null> => 
     }
 };
 
+export const getStudentBatchForRoadmap = async (userId: string, roadmapIdentifier: string): Promise<Batch | null> => {
+    try {
+        console.log('Fetching batch for user:', userId, 'and roadmap:', roadmapIdentifier);
+
+        // First, check if input is a UUID (roadmap_id) or a slug
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(roadmapIdentifier);
+
+        // If it's a slug, we need to find the UUID first
+        let roadmapId = roadmapIdentifier;
+
+        if (!isUUID) {
+            console.log('Identifier is a slug, looking up roadmap ID...');
+            const { data: roadmap, error: roadmapError } = await supabase
+                .from('roadmaps')
+                .select('id')
+                .eq('slug', roadmapIdentifier) // Assuming slug column exists, or we might need to match title/generate slug match
+                .maybeSingle(); // Use maybeSingle to avoid errors
+
+            if (roadmap) {
+                roadmapId = (roadmap as any).id;
+            } else {
+                // If no direct slug match, we might need other lookup strategies, 
+                // but for now let's try to query batches directly with joins if possible OR 
+                // rely on the calling code to pass the ID.
+                // Given the existing code uses `getRoadmapBySlug` earlier, the caller might already have the ID.
+                // However, to be safe, let's assume we proceed to query assignments and filter by roadmap relationship.
+                console.log('Coult not resolve slug directly, will try filtering assignments by roadmap details');
+            }
+        }
+
+        // Query student_batch_assignments joined with batch and roadmap
+        const { data: assignments, error: assignmentError } = await supabase
+            .from('student_batch_assignments')
+            .select(`
+                batch_id,
+                batches!inner (
+                    *,
+                    roadmaps!inner (
+                        id,
+                        slug
+                    )
+                )
+            `)
+            .eq('student_id', userId)
+            .eq('status', 'active');
+
+        if (assignmentError) {
+            console.error('Error fetching assignments:', assignmentError);
+            return null;
+        }
+
+        if (!assignments || assignments.length === 0) {
+            return null;
+        }
+
+        // Filter for the matching roadmap
+        // We cast to any because the nested join types can be tricky to infer automatically
+        const validAssignment = assignments.find((a: any) => {
+            const batch = a.batches;
+            const roadmap = batch?.roadmaps;
+
+            if (!roadmap) return false;
+
+            // Match by ID
+            if (roadmap.id === roadmapIdentifier) return true;
+
+            // Match by slug (if identifier is slug)
+            // Note: The 'roadmaps' table in schema provided earlier doesn't show a 'slug' column explicitly in the interface,
+            // but usually it exists. If not, we fallback to ID matching or assume identifier is ID.
+            if (!isUUID && roadmap.slug === roadmapIdentifier) return true;
+
+            return false;
+        });
+
+        if (validAssignment) {
+            console.log('✅ Found specific batch for roadmap:', (validAssignment as any).batches.name);
+            // Return the batch object (sanitize it to remove the nested roadmap if needed by Batch type)
+            const { roadmaps, ...batchData } = (validAssignment as any).batches;
+            return batchData as Batch;
+        }
+
+        return null;
+
+    } catch (error) {
+        console.error('Error in getStudentBatchForRoadmap:', error);
+        return null;
+    }
+};
+
 export const assignUserToAvailableBatch = async (userId: string): Promise<Batch | null> => {
     try {
         console.log('Attempting to assign user to available batch:', userId);
