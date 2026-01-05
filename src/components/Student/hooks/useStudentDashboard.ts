@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/useAuth';
+import { supabase } from '../../../lib/supabase';
 import { DatabaseService } from '../../../services/database';
 
 export const useStudentDashboard = () => {
@@ -81,6 +82,28 @@ export const useStudentDashboard = () => {
             console.log('📊 Dashboard data received:', data);
 
             setDashboardData(data);
+
+            // Sync Auth Metadata with DB Profile to prevent name flickering
+            // The flicker happens because initial render uses Auth metadata (stale) 
+            // and then switches to DB data (fresh). By syncing them, they will be the same.
+            if (data?.userData?.first_name) {
+                const dbName = data.userData.first_name;
+                const authName = user?.user_metadata?.first_name || user?.user_metadata?.full_name;
+
+                if (dbName && dbName !== authName) {
+                    console.log(`🔄 Syncing Auth metadata: ${authName} -> ${dbName}`);
+                    // We don't await this to avoid blocking the UI
+                    supabase.auth.updateUser({
+                        data: {
+                            first_name: dbName,
+                            full_name: dbName + (data?.userData?.last_name ? ` ${data.userData.last_name}` : '')
+                        }
+                    }).then(({ error }) => {
+                        if (error) console.error('Error syncing auth metadata:', error);
+                        else console.log('✅ Auth metadata synced');
+                    });
+                }
+            }
 
             // Set initial selections if not already set
             if (!selectedRoadmap && data?.roadmap?.id) {
