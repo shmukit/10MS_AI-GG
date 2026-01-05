@@ -59,6 +59,10 @@ export class DatabaseService {
   static assignUserToExistingBatch = BatchService.assignUserToExistingBatch;
   static generateBatchSlug = BatchService.generateBatchSlug;
   static getBatchBySlug = BatchService.getBatchBySlug;
+  static getStudentBatchForRoadmap = BatchService.getStudentBatchForRoadmap;
+
+  // Mentor management
+  static getMentors = MentorService.getMentors;
 
   // Roadmap management
   static getStudentRoadmap = RoadmapService.getStudentRoadmap;

@@ -39,7 +39,7 @@ export const getStudentRoadmap = async (userId: string): Promise<Roadmap | null>
     }
 };
 
-export const getEnrolledRoadmaps = async (userId: string): Promise<Roadmap[]> => {
+export const getEnrolledRoadmaps = async (userId: string): Promise<(Roadmap & { slug: string })[]> => {
     try {
         console.log('🔍 getEnrolledRoadmaps called for user:', userId);
 
@@ -115,8 +115,14 @@ export const getEnrolledRoadmaps = async (userId: string): Promise<Roadmap[]> =>
             console.log('🏢 Company user - roadmaps sorted for priority:', roadmaps.map((r: any) => r.title));
         }
 
-        console.log('✅ Returning real roadmaps:', roadmaps);
-        return roadmaps;
+        // Generate slugs for all roadmaps
+        const roadmapsWithSlugs = roadmaps.map((map: any) => ({
+            ...map,
+            slug: generateRoadmapSlug(map.title)
+        }));
+
+        console.log('✅ Returning real roadmaps with slugs:', roadmapsWithSlugs);
+        return roadmapsWithSlugs;
     } catch (error) {
         console.error('❌ Error in getEnrolledRoadmaps:', error);
         return [];

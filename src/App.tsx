@@ -1,9 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
 // import { PostHogProvider } from 'posthog-js/react';
 import { posthog } from './lib/posthog';
+import { PageTransition } from './components/ui/MotionPrimitives';
 
 // Critical components (loaded immediately for first paint)
 import { LoginPage } from './components/Auth/LoginPage';
@@ -50,12 +52,12 @@ const StudentRoutes = () => {
   return (
     <Suspense fallback={<RouteLoader />}>
       <Routes>
-        <Route path="/dashboard" element={<StudentDashboard />} />
-        <Route path="/roadmap" element={<RoadmapInterface onBack={() => window.history.back()} />} />
-        <Route path="/roadmap/:roadmapSlug" element={<RoadmapInterface onBack={() => window.history.back()} />} />
-        <Route path="/profile" element={<StudentProfile />} />
-        <Route path="/community" element={<StudentCommunity />} />
-        <Route path="/community/:roadmapSlug" element={<StudentCommunity />} />
+        <Route path="/dashboard" element={<PageTransition><StudentDashboard /></PageTransition>} />
+        <Route path="/roadmap" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
+        <Route path="/roadmap/:roadmapSlug" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><StudentProfile /></PageTransition>} />
+        <Route path="/community" element={<PageTransition><StudentCommunity /></PageTransition>} />
+        <Route path="/community/:roadmapSlug" element={<PageTransition><StudentCommunity /></PageTransition>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>
@@ -67,12 +69,12 @@ const MentorRoutes = () => {
   return (
     <Suspense fallback={<RouteLoader />}>
       <Routes>
-        <Route path="/dashboard" element={<MentorDashboard />} />
-        <Route path="/roadmaps" element={<MentorRoadmaps />} />
-        <Route path="/students" element={<MentorStudents />} />
-        <Route path="/notices" element={<MentorNotices />} />
-        <Route path="/settings" element={<MentorSettings />} />
-        <Route path="/profile" element={<StudentProfile />} />
+        <Route path="/dashboard" element={<PageTransition><MentorDashboard /></PageTransition>} />
+        <Route path="/roadmaps" element={<PageTransition><MentorRoadmaps /></PageTransition>} />
+        <Route path="/students" element={<PageTransition><MentorStudents /></PageTransition>} />
+        <Route path="/notices" element={<PageTransition><MentorNotices /></PageTransition>} />
+        <Route path="/settings" element={<PageTransition><MentorSettings /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><StudentProfile /></PageTransition>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>
@@ -97,41 +99,51 @@ const AppRoutes = () => {
   return <Navigate to="/student/dashboard" replace />;
 };
 
+const AnimatedAppContent = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
+        <Route path="/signup" element={<PageTransition><LoginPage /></PageTransition>} />
+
+        {/* Student Routes - All authenticated users can access */}
+        <Route
+          path="/student/*"
+          element={
+            <ProtectedRoute>
+              <StudentRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Mentor Routes - Hidden but accessible to all authenticated users */}
+        <Route
+          path="/mentor/*"
+          element={
+            <ProtectedRoute>
+              <MentorRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default Route */}
+        <Route path="/" element={<AppRoutes />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   return (
     // <PostHogProvider client={posthog}> // Removed provider
     <AuthProvider>
       <ThemeProvider>
         <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<LoginPage />} />
-
-            {/* Student Routes - All authenticated users can access */}
-            <Route
-              path="/student/*"
-              element={
-                <ProtectedRoute>
-                  <StudentRoutes />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Mentor Routes - Hidden but accessible to all authenticated users */}
-            <Route
-              path="/mentor/*"
-              element={
-                <ProtectedRoute>
-                  <MentorRoutes />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Default Route */}
-            <Route path="/" element={<AppRoutes />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AnimatedAppContent />
         </Router>
       </ThemeProvider>
     </AuthProvider>

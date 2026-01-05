@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Users, MessageCircle, ExternalLink, AlertCircle, Calendar, MapPin, Mail, Check } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Users, AlertCircle, Mail, Check } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Batch, User } from '../../services/database';
 import { StudentHeader } from './StudentHeader';
 import { useTheme } from '../../lib/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { RoadmapDropdown } from './dashboard/RoadmapDropdown';
 
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
@@ -18,13 +19,24 @@ export const StudentCommunity: React.FC = () => {
   const [mentors, setMentors] = useState<User[]>([]);
   const [students, setStudents] = useState<(User & { profile?: any; progress?: any })[]>([]);
   const [userData, setUserData] = useState<any>(null);
+  const [enrolledRoadmaps, setEnrolledRoadmaps] = useState<any[]>([]);
+  const [showRoadmapDropdown, setShowRoadmapDropdown] = useState(false);
+  const [currentRoadmap, setCurrentRoadmap] = useState<any>(null);
   const [sortBy, setSortBy] = useState<'name' | 'progress'>('name');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Log the roadmap slug for debugging
   console.log('🔍 Community page - Roadmap slug from URL:', roadmapSlug);
 
-
+  const getUserDisplayName = () => {
+    // Use userData if available, otherwise fall back to useAuth user
+    return userData?.userData?.first_name ||
+      userData?.profile?.first_name ||
+      user?.user_metadata?.first_name ||
+      user?.user_metadata?.full_name ||
+      user?.email?.split('@')[0] ||
+      'Student';
+  };
 
   // Email copy functionality
   const copyEmailToClipboard = async (email: string) => {
@@ -42,91 +54,115 @@ export const StudentCommunity: React.FC = () => {
   useEffect(() => {
     const fetchCommunityData = async () => {
       if (!user?.id) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         console.log('Fetching community data for user:', databaseUserId);
-        
+
         // First, get the roadmap by slug if provided
         let roadmapData = null;
         if (roadmapSlug) {
           console.log('🔍 Looking for roadmap with slug:', roadmapSlug);
-          const { getRoadmapBySlug } = await import('../../services/database');
-          roadmapData = await getRoadmapBySlug(roadmapSlug);
+          // Correct usage from imported DatabaseService class
+          roadmapData = await DatabaseService.getRoadmapBySlug(roadmapSlug);
           console.log('📊 Roadmap data from slug:', roadmapData);
-          
+          setCurrentRoadmap(roadmapData);
+
+          // Also fetch all enrolled roadmaps to populate the dropdown
+          try {
+            // getEnrolledRoadmaps now returns objects WITH slugs
+            const userEnrolled = await DatabaseService.getEnrolledRoadmaps(databaseUserId || user.id);
+            setEnrolledRoadmaps(userEnrolled);
+          } catch (e) {
+            console.error('Failed to fetch enrolled roadmaps:', e);
+          }
+
           if (!roadmapData) {
             setError(`Roadmap "${roadmapSlug}" not found. Please check the URL or contact support.`);
             setLoading(false);
             return;
           }
         }
-        
+
         // Get the batch associated with this roadmap
         let batchData = null;
         if (roadmapData) {
-          console.log('🔍 Looking for batch associated with roadmap:', roadmapData.id);
-          const { data: roadmapBatch, error: batchError } = await supabase
-            .from('batches')
-            .select('*')
-            .eq('roadmap_id', roadmapData.id)
-            .eq('status', 'active')
-            .single();
-            
-          if (roadmapBatch) {
-            console.log('✅ Found roadmap-specific batch:', roadmapBatch.name);
-            batchData = roadmapBatch;
+          console.log('🔍 Looking for assigned batch for roadmap:', roadmapData.title);
+          // Use the secure method that checks for explicit assignment
+          // We use databaseUserId (the public profile ID) or fallback to user.id if not ready yet
+          const userIdToCheck = databaseUserId || user.id;
+          const assignedBatch = await DatabaseService.getStudentBatchForRoadmap(userIdToCheck, roadmapData.id);
+
+          if (assignedBatch) {
+            console.log('✅ Found user assignment for batch:', assignedBatch.name);
+            batchData = assignedBatch;
           } else {
-            console.log('❌ No batch found for roadmap:', roadmapData.title);
-            setError(`No active batch found for the "${roadmapData.title}" roadmap. Please contact your administrator.`);
-            setLoading(false);
-            return;
+            console.log('❌ No specific batch assignment found for roadmap:', roadmapData.title);
+            // Fallback attempt: if no assignment, check if there's exactly one active batch for this roadmap
+            // This maintains backward compatibility for cases where implicit assignment was relied upon
+            // BUT we only do this if single() won't crash - actually we can try maybeSingle()
+
+            console.log('⚠️ Attempting fallback to find any active batch...');
+            const { data: fallbackBatch, error: fallbackError } = await supabase
+              .from('batches')
+              .select('*')
+              .eq('roadmap_id', roadmapData.id)
+              .eq('status', 'active')
+              .maybeSingle();
+
+            if (fallbackBatch) {
+              console.log('⚠️ Found fallback batch (implicit assignment):', (fallbackBatch as any).name);
+              batchData = fallbackBatch;
+            } else {
+              console.error('❌ Fallback failed:', fallbackError);
+              setError(`No active batch assignment found for the "${roadmapData.title}" roadmap. Please contact your administrator.`);
+              setLoading(false);
+              return;
+            }
           }
         }
-        
+
         if (!batchData) {
           setError(`No batch found for the "${roadmapSlug}" roadmap. Please contact your administrator.`);
           setLoading(false);
           return;
         }
-        
+
         console.log('Batch data found:', batchData);
         setBatch(batchData);
-        
+
         // Get students in this batch
-        const studentsData = await DatabaseService.getStudentsByBatch(batchData.id, databaseUserId);
-        console.log('📊 Students data fetched:', studentsData);
-        console.log('🔍 Batch ID used for student fetch:', batchData.id);
-        console.log('🔍 Roadmap ID from batch:', batchData.roadmap_id);
-        console.log('🔍 Roadmap title:', roadmapData?.title);
-        
-        // Debug: Check what's in the students data
-        if (studentsData && studentsData.length > 0) {
-          console.log('🔍 First student details:', {
-            id: studentsData[0].id,
-            name: `${studentsData[0].first_name} ${studentsData[0].last_name}`,
-            email: studentsData[0].email,
-            role: studentsData[0].role
-          });
+        if (batchData) {
+          const studentsData = await DatabaseService.getStudentsByBatch(batchData.id, databaseUserId || undefined);
+          console.log('📊 Students data fetched:', studentsData);
+
+          // Debug: Check what's in the students data
+          if (studentsData && studentsData.length > 0) {
+            console.log('🔍 First student details:', {
+              id: studentsData[0].id,
+              name: `${studentsData[0].first_name} ${studentsData[0].last_name}`,
+              email: studentsData[0].email,
+              role: studentsData[0].role
+            });
+          }
+
+          setStudents(studentsData);
+
+          // Get mentors for this batch
+          const mentorsData = await DatabaseService.getMentors(batchData.id);
+          console.log('👥 Mentors data fetched:', mentorsData);
+
+          setMentors(mentorsData);
         }
-        
-        setStudents(studentsData);
-        
-        // Get mentors for this batch
-        const mentorsData = await DatabaseService.getMentors(batchData.id);
-        console.log('👥 Mentors data fetched:', mentorsData);
-        console.log('🔍 Batch ID used for mentor fetch:', batchData.id);
-        
-        setMentors(mentorsData);
-        
+
         // Set user data (just basic info, no dashboard fallbacks)
         setUserData({
           userData: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' },
           profile: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' }
         });
-        
+
       } catch (err) {
         console.error('Error fetching community data:', err);
         setError('Failed to load community data');
@@ -141,8 +177,8 @@ export const StudentCommunity: React.FC = () => {
   if (loading) {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-        <StudentHeader 
-          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+        <StudentHeader
+          userName={getUserDisplayName()}
           userRole="student"
           pageTitle="Community"
         />
@@ -161,8 +197,8 @@ export const StudentCommunity: React.FC = () => {
   if (error) {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-        <StudentHeader 
-          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
+        <StudentHeader
+          userName={getUserDisplayName()}
           userRole="student"
           pageTitle="Community"
         />
@@ -174,14 +210,14 @@ export const StudentCommunity: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
-          
+
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-yellow-600" />
               <div>
                 <h3 className="text-yellow-800 font-medium">No Batch Assignment</h3>
                 <p className="text-yellow-600 text-sm">
-                  You haven't been assigned to a batch yet. Please contact your administrator.
+                  {error.includes("No active batch") ? error : "You haven't been assigned to a batch yet. Please contact your administrator."}
                 </p>
               </div>
             </div>
@@ -193,29 +229,38 @@ export const StudentCommunity: React.FC = () => {
 
   // Sort students based on selection
   const sortedStudents = [...students].sort((a, b) => {
-    console.log('Sorting students:', { sortBy, a: a.first_name, b: b.first_name });
     if (sortBy === 'name') {
       return (a.first_name || '').localeCompare(b.first_name || '');
     } else {
       // Sort by progress percentage (highest first)
       const aProgress = a.progress?.progress_percentage || 0;
       const bProgress = b.progress?.progress_percentage || 0;
-      console.log('Progress comparison:', { a: a.first_name, aProgress, b: b.first_name, bProgress });
       return bProgress - aProgress;
     }
   });
 
-  console.log('Original students:', students);
-  console.log('Sorted students:', sortedStudents);
+
+  const handleRoadmapChange = (roadmapId: string) => {
+    // Find the roadmap slug from the ID
+    const selectedMap = enrolledRoadmaps.find(r => r.id === roadmapId);
+    if (selectedMap) {
+      setShowRoadmapDropdown(false);
+      // Navigate to the community page for this roadmap
+      // Prefer strict slug from backend, but fallback to generating it if missing
+      const slug = selectedMap.slug || DatabaseService.generateRoadmapSlug(selectedMap.title);
+      console.log('🔄 Switching to roadmap:', selectedMap.title, 'Slug:', slug);
+      navigate(`/student/community/${slug}`);
+    }
+  };
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-              <StudentHeader 
-          userName={userData?.userData?.first_name || userData?.profile?.first_name || 'Student'}
-          userRole="student"
-          pageTitle="Community"
-        />
-      
+      <StudentHeader
+        userName={getUserDisplayName()}
+        userRole="student"
+        pageTitle="Community"
+      />
+
       <div className="max-w-6xl mx-auto px-6 py-8">
         <button
           onClick={() => navigate('/student/dashboard')}
@@ -224,39 +269,54 @@ export const StudentCommunity: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </button>
-        
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Student Community</h1>
-        
+
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Student Community</h1>
+
+          {/* Roadmap Dropdown */}
+          {currentRoadmap && (
+            <RoadmapDropdown
+              isDarkMode={isDarkMode}
+              enrolledRoadmaps={enrolledRoadmaps}
+              currentRoadmap={currentRoadmap}
+              showDropdown={showRoadmapDropdown}
+              setShowDropdown={setShowRoadmapDropdown}
+              handleRoadmapChange={handleRoadmapChange}
+              selectedRoadmapId={currentRoadmap.id}
+            />
+          )}
+        </div>
+
         {/* Batch Information */}
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+        <div className={`rounded-lg p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
           <div className="flex items-center gap-3 mb-4">
             <Users className="w-8 h-8 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               {batch?.name || 'Loading...'}
             </h2>
           </div>
-          
+
           {/* Top section with students count and mentor info */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-700">Students: {students.length} members</span>
+                <Users className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Students: {students.length} members</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl">👨‍🎓</span>
-                <span className="text-gray-700">
+                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                   Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name} ${mentors[0]?.last_name}, Senior BI Executive` : 'Uttam Deb, Senior BI Executive'}
                 </span>
               </div>
             </div>
-            
+
             {/* Communication CTAs at top right */}
             <div className="flex gap-3">
               {batch?.whatsapp_link && (
-                <a 
-                  href={batch.whatsapp_link} 
-                  target="_blank" 
+                <a
+                  href={batch.whatsapp_link}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 >
@@ -265,9 +325,9 @@ export const StudentCommunity: React.FC = () => {
                 </a>
               )}
               {batch?.discord_link && (
-                <a 
-                  href={batch.discord_link} 
-                  target="_blank" 
+                <a
+                  href={batch.discord_link}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                 >
@@ -276,7 +336,7 @@ export const StudentCommunity: React.FC = () => {
                 </a>
               )}
               {batch?.emergency_contact && (
-                <a 
+                <a
                   href={`tel:${batch.emergency_contact}`}
                   className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                 >
@@ -294,31 +354,34 @@ export const StudentCommunity: React.FC = () => {
         </div>
 
         {/* Group Members */}
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+        <div className={`rounded-lg p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-900">Group Members</h3>
+            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Group Members</h3>
             <div className="flex items-center gap-3">
-              <button className="p-2 text-gray-600 hover:text-gray-800">
+              <button className={`p-2 hover:text-gray-800 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                 </svg>
               </button>
-              <select 
-                value={sortBy} 
+              <select
+                value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'progress')}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 border rounded-lg px-3 py-2"
+                className={`flex items-center gap-2 border rounded-lg px-3 py-2 ${isDarkMode
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-200 text-gray-600 hover:text-gray-800'
+                  }`}
               >
                 <option value="name">Sort by Name</option>
                 <option value="progress">Sort by Progress</option>
               </select>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             {/* Real Group Members */}
             {sortedStudents.length > 0 ? (
               sortedStudents.map((member, index) => (
-                <div key={member.id} className="bg-gray-50 rounded-lg p-4">
+                <div key={member.id} className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
@@ -326,21 +389,21 @@ export const StudentCommunity: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">
+                          <h4 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                             {member.first_name} {member.last_name}
                           </h4>
                           {/* Display profile information if available */}
                           {member.profile && (
-                            <div className="text-xs text-gray-500 space-y-1">
+                            <div className={`text-xs space-y-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                               <p>{member.profile.degree} {member.profile.subject} • {member.profile.year} Year</p>
                               <p>{member.profile.institute}</p>
                             </div>
                           )}
                         </div>
                         {/* Email copy button */}
-                        <button 
+                        <button
                           onClick={() => copyEmailToClipboard(member.email)}
-                          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                          className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
                           title="Copy email to clipboard"
                         >
                           <Mail className="w-4 h-4" />
@@ -350,21 +413,21 @@ export const StudentCommunity: React.FC = () => {
                     <div className="text-right">
                       {member.progress ? (
                         <>
-                          <p className="text-xs text-gray-600">
+                          <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                             Week {member.progress.current_week}/6
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                             {Math.round(member.progress.progress_percentage || 0)}% Complete
                           </p>
-                          <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                          <div className={`w-20 rounded-full h-2 mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${Math.round(member.progress.progress_percentage || 0)}%` }}
                             ></div>
                           </div>
                         </>
                       ) : (
-                        <p className="text-xs text-gray-600">
+                        <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           Enrolled
                         </p>
                       )}
@@ -438,8 +501,8 @@ export const StudentCommunity: React.FC = () => {
                       <p className="text-sm font-medium text-gray-900">{member.progress}</p>
                       <p className="text-xs text-gray-600">{member.completion}% Complete</p>
                       <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full" 
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
                           style={{ width: `${member.completion}%` }}
                         ></div>
                       </div>
@@ -451,14 +514,13 @@ export const StudentCommunity: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-          toast.type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-red-500 text-white'
-        }`}>
+        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${toast.type === 'success'
+          ? 'bg-green-500 text-white'
+          : 'bg-red-500 text-white'
+          }`}>
           <div className="flex items-center gap-2">
             {toast.type === 'success' ? (
               <Check className="w-5 h-5" />
