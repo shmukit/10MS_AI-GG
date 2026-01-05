@@ -11,7 +11,7 @@ import {
 } from '../../types/models';
 import { getUserById } from './userService';
 import { getStudentProfile } from './studentService';
-import { getStudentBatch } from './batchService';
+import { getStudentBatch, getStudentBatchForRoadmap, getAnyActiveBatchForRoadmap } from './batchService';
 import {
     getStudentRoadmap,
     getEnrolledRoadmaps,
@@ -57,14 +57,42 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         // await this.cleanupDuplicateProfiles(userId);
 
         // Fetching dashboard data components
-        const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
+        const [profile, defaultBatch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
             getStudentProfile(userId),
-            getStudentBatch(userId),
+            getStudentBatch(userId), // Keep this as fallback/default
             getStudentRoadmap(userId),
             getEnrolledRoadmaps(userId),
             getStudentProgress(userId),
             getUserById(userId)
         ]);
+
+        // Determine the actual batch to use
+        let batch = defaultBatch;
+        if (selectedRoadmapId) {
+            let specificBatch = await getStudentBatchForRoadmap(userId, selectedRoadmapId);
+
+            if (!specificBatch) {
+                // Fallback: If user isn't assigned, get ANY active batch for this roadmap
+                // so the dashboard (leaderboard etc) shows relevant data
+                specificBatch = await getAnyActiveBatchForRoadmap(selectedRoadmapId);
+            }
+
+            if (specificBatch) {
+                batch = specificBatch;
+                console.log(`🎯 Using batch for roadmap ${selectedRoadmapId}: ${batch.name}`);
+            }
+        } else if (roadmap?.id) {
+            // If no selected roadmap but we have a current default roadmap
+            let specificBatch = await getStudentBatchForRoadmap(userId, roadmap.id);
+
+            if (!specificBatch) {
+                specificBatch = await getAnyActiveBatchForRoadmap(roadmap.id);
+            }
+
+            if (specificBatch) {
+                batch = specificBatch;
+            }
+        }
 
         // Dashboard data components fetched
         console.log('📊 Dashboard data components fetched');

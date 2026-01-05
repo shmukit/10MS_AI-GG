@@ -8,6 +8,7 @@ import { DashboardHeader } from './dashboard/DashboardHeader';
 import { NavigationCards } from './dashboard/NavigationCards';
 import { TasksSection } from './dashboard/TasksSection';
 import { StreaksSection } from './dashboard/StreaksSection';
+import { GamificationStatsCard } from './dashboard/GamificationStatsCard';
 import { MentorsSection } from './dashboard/MentorsSection';
 import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
@@ -223,6 +224,16 @@ export const StudentDashboard: React.FC = () => {
               <StreaksSection
                 isDarkMode={isDarkMode}
                 streaks={getWeeklyStreaks()}
+              />
+
+              {/* Gamification Stats Card - New Position */}
+              <GamificationStatsCard
+                stats={dashboardData.gamificationStats ? {
+                  totalXP: dashboardData.gamificationStats.totalXP,
+                  rank: dashboardData.gamificationStats.rank,
+                  batchId: dashboardData.gamificationStats.batchId || ''
+                } : undefined}
+                isDarkMode={isDarkMode}
               />
 
               {/* Leaderboard */}

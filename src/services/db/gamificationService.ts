@@ -22,6 +22,7 @@ export interface LeaderboardEntry {
     studentId: string;
     studentName: string;
     xpPoints: number;
+    progress?: number;
     profilePicture?: string;
 }
 
@@ -116,19 +117,22 @@ export const getLeaderboard = async (
     try {
         console.log(`📊 Fetching ${timeframe} leaderboard for batch ${batchId}`);
 
+        // Only fetch students who have some progress or XP
         let query = supabase
             .from('student_batch_assignments')
             .select(`
-        student_id,
-        xp_points,
-        users!inner(
-          first_name,
-          last_name,
-          profile_picture_url
-        )
-      `)
+                student_id,
+                xp_points,
+                progress_percentage,
+                users!inner(
+                  first_name,
+                  last_name,
+                  profile_picture_url
+                )
+            `)
             .eq('batch_id', batchId)
             .eq('status', 'active')
+            .order('progress_percentage', { ascending: false })
             .order('xp_points', { ascending: false })
             .limit(limit);
 
@@ -148,6 +152,7 @@ export const getLeaderboard = async (
             studentId: entry.student_id,
             studentName: `${entry.users.first_name} ${entry.users.last_name}`,
             xpPoints: entry.xp_points || 0,
+            progress: entry.progress_percentage || 0,
             profilePicture: entry.users.profile_picture_url || undefined,
         }));
 
@@ -172,8 +177,21 @@ export const getStudentStats = async (
             .single();
 
         if (assignmentError) {
-            console.error('Error fetching student assignment:', assignmentError);
-            return null;
+            // If assignment doesn't exist, return default 0 stats instead of null
+            // so the UI can still display the card with 0 progress
+            const { count: totalStudents } = await supabase
+                .from('student_batch_assignments')
+                .select('*', { count: 'exact', head: true })
+                .eq('batch_id', batchId)
+                .eq('status', 'active');
+
+            return {
+                studentId,
+                batchId,
+                totalXP: 0,
+                rank: 0, // 0 indicates unranked
+                totalStudents: totalStudents || 0,
+            };
         }
 
         const studentXP = (assignment as any)?.xp_points || 0;
@@ -202,7 +220,13 @@ export const getStudentStats = async (
         };
     } catch (error) {
         console.error('Error in getStudentStats:', error);
-        return null;
+        return {
+            studentId,
+            batchId,
+            totalXP: 0,
+            rank: 0,
+            totalStudents: 0
+        };
     }
 };
 
