@@ -13,6 +13,8 @@ import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
 import { Leaderboard } from '../Dashboard/Leaderboard';
 import { posthog } from '../../lib/posthog';
+import { MotionDiv, STAGGER_CHILDREN_VARIANTS, FADE_IN_VARIANTS, HoverLift } from '../ui/MotionPrimitives';
+import { Skeleton } from '../ui/Skeleton';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -111,19 +113,42 @@ export const StudentDashboard: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Loading dashboard...
-              </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Header Skeleton */}
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-64" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Skeleton className="h-32 rounded-xl" />
+                  <Skeleton className="h-32 rounded-xl" />
+                  <Skeleton className="h-32 rounded-xl" />
+                  <Skeleton className="h-32 rounded-xl" />
+                </div>
+              </div>
+
+              {/* Practice Skeleton */}
+              <Skeleton className="h-64 rounded-xl" />
+
+              {/* Tasks Skeleton */}
+              <Skeleton className="h-48 rounded-xl" />
+            </div>
+
+            <div className="space-y-6">
+              {/* Right Column Skeletons */}
+              <Skeleton className="h-40 rounded-xl" />
+              <Skeleton className="h-64 rounded-xl" />
+              <Skeleton className="h-48 rounded-xl" />
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+          <MotionDiv
+            className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
                 <span className="text-red-600 text-sm">!</span>
@@ -133,12 +158,17 @@ export const StudentDashboard: React.FC = () => {
                 <p className="text-red-600 text-sm">{error}</p>
               </div>
             </div>
-          </div>
+          </MotionDiv>
         )}
 
         {/* Dashboard Content */}
         {!loading && !error && dashboardData && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+          <MotionDiv
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            variants={STAGGER_CHILDREN_VARIANTS}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
               {/* Welcome Section with Roadmap Selection */}
@@ -172,7 +202,7 @@ export const StudentDashboard: React.FC = () => {
                 </div>
                 <div className={`rounded-xl p-6 border shadow-professional transition-all duration-200 hover:shadow-professional-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                   }`}>
-                  <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatch} />
+                  <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatch} roadmapId={selectedRoadmap} />
                 </div>
               </div>
 
@@ -219,7 +249,7 @@ export const StudentDashboard: React.FC = () => {
               {/* Mentors */}
               <MentorsSection isDarkMode={isDarkMode} />
             </div>
-          </div>
+          </MotionDiv>
         )}
       </div>
     </div>

@@ -113,7 +113,7 @@ export const useStudentDashboard = () => {
 
                 setSelectedRoadmap(preferredRoadmap.id);
             }
-            if (!selectedBatch && data?.batch?.id) {
+            if (data?.batch?.id) {
                 setSelectedBatch(data.batch.id);
             }
 

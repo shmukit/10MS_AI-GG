@@ -3,6 +3,7 @@ import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
 import { MentorHeader } from './MentorHeader';
+import { Skeleton } from '../ui/Skeleton';
 import { DashboardTab } from './tabs/DashboardTab';
 import { RoadmapTab } from './tabs/RoadmapTab';
 import { StudentsTab } from './tabs/StudentsTab';
@@ -344,9 +345,17 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         {loading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading data...</p>
+          <div className="space-y-8">
+            {/* Stats Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Skeleton className="h-32 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+            </div>
+
+            {/* Content Skeleton */}
+            <Skeleton className="h-96 rounded-xl w-full" />
           </div>
         )}
 

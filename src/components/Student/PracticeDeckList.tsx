@@ -10,9 +10,10 @@ type PracticeDeck = Database['public']['Tables']['practice_decks']['Row'];
 interface PracticeDeckListProps {
     isDarkMode: boolean;
     batchId: string;
+    roadmapId?: string;
 }
 
-export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, batchId }) => {
+export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, batchId, roadmapId }) => {
     const { user } = useAuthContext();
     const [decks, setDecks] = useState<PracticeDeck[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,17 +21,13 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
     const [dueCards, setDueCards] = useState<any[]>([]);
     const [isReviewMode, setIsReviewMode] = useState(false);
 
-    useEffect(() => {
-        loadDecks();
-    }, [user]);
-
     const loadDecks = async () => {
         if (!user?.id) return;
 
         setLoading(true);
         try {
             // Load Decks
-            const availableDecks = await getAvailableDecks(user.id);
+            const availableDecks = await getAvailableDecks(user.id, roadmapId);
             setDecks(availableDecks);
 
             // Load Due Cards for Spaced Repetition
@@ -43,6 +40,10 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadDecks();
+    }, [user, roadmapId]);
 
     const handleDeckComplete = () => {
         // Refresh decks or update progress? 
