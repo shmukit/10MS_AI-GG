@@ -26,35 +26,10 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Split vendor libraries
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            return 'vendor';
-          }
-          
-          // Split our own components
-          if (id.includes('components/Mentor')) {
-            return 'mentor';
-          }
-          if (id.includes('components/Student')) {
-            return 'student';
-          }
-          if (id.includes('components/Roadmap')) {
-            return 'roadmap';
-          }
-        },
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+          ui: ['lucide-react', 'clsx', 'tailwind-merge']
+        }
       },
     },
   },
