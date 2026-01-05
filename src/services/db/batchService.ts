@@ -215,6 +215,49 @@ export const getStudentBatchForRoadmap = async (userId: string, roadmapIdentifie
     }
 };
 
+export const getAnyActiveBatchForRoadmap = async (roadmapIdentifier: string): Promise<Batch | null> => {
+    try {
+        console.log('Fetching any active batch for roadmap:', roadmapIdentifier);
+
+        // Resolve roadmap ID if slug
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(roadmapIdentifier);
+        let roadmapId = roadmapIdentifier;
+
+        if (!isUUID) {
+            const { data: roadmap } = await supabase
+                .from('roadmaps')
+                .select('id')
+                .eq('slug', roadmapIdentifier)
+                .maybeSingle();
+            if (roadmap) roadmapId = (roadmap as any).id;
+        }
+
+        // Find the most recent active batch for this roadmap
+        const { data: batches, error } = await supabase
+            .from('batches')
+            .select('*')
+            .eq('roadmap_id', roadmapId)
+            .eq('status', 'active')
+            .order('start_date', { ascending: false })
+            .limit(1);
+
+        if (error) {
+            console.error('Error fetching generic batch:', error);
+            return null;
+        }
+
+        if (batches && batches.length > 0) {
+            console.log('✅ Found generic batch for roadmap:', (batches[0] as any).name);
+            return batches[0] as Batch;
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Error in getAnyActiveBatchForRoadmap:', error);
+        return null;
+    }
+};
+
 export const assignUserToAvailableBatch = async (userId: string): Promise<Batch | null> => {
     try {
         console.log('Attempting to assign user to available batch:', userId);

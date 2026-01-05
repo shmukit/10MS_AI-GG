@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/useAuth';
+import { supabase } from '../../../lib/supabase';
 import { DatabaseService } from '../../../services/database';
 
 export const useStudentDashboard = () => {
@@ -82,36 +83,34 @@ export const useStudentDashboard = () => {
 
             setDashboardData(data);
 
-            // Set initial selections if not already set
-            if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
-                // For company users, prioritize Augmedix/AI/ML roadmaps over Python
-                const isCompanyUser = user?.email?.includes('@10minuteschool.com') || user?.email?.includes('@lightcastlepartners.com');
+            // Sync Auth Metadata with DB Profile to prevent name flickering
+            // The flicker happens because initial render uses Auth metadata (stale) 
+            // and then switches to DB data (fresh). By syncing them, they will be the same.
+            if (data?.userData?.first_name) {
+                const dbName = data.userData.first_name;
+                const authName = user?.user_metadata?.first_name || user?.user_metadata?.full_name;
 
-                let preferredRoadmap = data.enrolledRoadmaps[0]; // Default to first
-
-                if (isCompanyUser && data.enrolledRoadmaps.length > 1) {
-                    // Look for Augmedix, AI, or ML roadmaps first
-                    const augmedixRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        r.title?.toLowerCase().includes('augmedix') ||
-                        r.description?.toLowerCase().includes('augmedix')
-                    );
-
-                    const aiMlRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        r.title?.toLowerCase().includes('ai') ||
-                        r.title?.toLowerCase().includes('ml') ||
-                        r.title?.toLowerCase().includes('machine learning')
-                    );
-
-                    // Avoid Python roadmaps for company users
-                    const nonPythonRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        !r.title?.toLowerCase().includes('python')
-                    );
-
-                    // Priority order: Augmedix > AI/ML > Non-Python > First available
-                    preferredRoadmap = augmedixRoadmap || aiMlRoadmap || nonPythonRoadmap || data.enrolledRoadmaps[0];
+                if (dbName && dbName !== authName) {
+                    console.log(`🔄 Syncing Auth metadata: ${authName} -> ${dbName}`);
+                    // We don't await this to avoid blocking the UI
+                    supabase.auth.updateUser({
+                        data: {
+                            first_name: dbName,
+                            full_name: dbName + (data?.userData?.last_name ? ` ${data.userData.last_name}` : '')
+                        }
+                    }).then(({ error }) => {
+                        if (error) console.error('Error syncing auth metadata:', error);
+                        else console.log('✅ Auth metadata synced');
+                    });
                 }
+            }
 
-                setSelectedRoadmap(preferredRoadmap.id);
+            // Set initial selections if not already set
+            if (!selectedRoadmap && data?.roadmap?.id) {
+                setSelectedRoadmap(data.roadmap.id);
+            } else if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
+                // Fallback to first if somehow roadmap is missing
+                setSelectedRoadmap(data.enrolledRoadmaps[0].id);
             }
             if (data?.batch?.id) {
                 setSelectedBatch(data.batch.id);

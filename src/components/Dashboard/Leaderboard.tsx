@@ -67,7 +67,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
                 {/* Timeframe toggle could go here */}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
                 {entries.map((entry) => (
                     <div
                         key={entry.studentId}
@@ -93,10 +93,22 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
                             <p className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                 {entry.studentName}
                             </p>
+                            {/* Progress Bar */}
+                            <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
+                                <div
+                                    className="h-full bg-blue-500 rounded-full"
+                                    style={{ width: `${entry.progress || 0}%` }}
+                                ></div>
+                            </div>
                         </div>
 
-                        <div className={`text-sm font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                            {entry.xpPoints} XP
+                        <div className="flex flex-col items-end">
+                            <div className={`text-sm font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                {entry.xpPoints} XP
+                            </div>
+                            <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {Math.round(entry.progress || 0)}%
+                            </div>
                         </div>
                     </div>
                 ))}
