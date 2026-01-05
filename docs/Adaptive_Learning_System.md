@@ -86,11 +86,43 @@ Review intervals expand exponentially for known concepts (SM-2 Algorithm).
 
 ## 4. Algorithms
 
-### 4.1 SM-2 (Simplified)
-```typescript
-Interval[n] = Interval[n-1] * EaseFactor
-EaseFactor = EaseFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
-```
+### 4.1 SM-2 (Detailed Implementation)
+
+The algorithm uses a combination of **Hardcoded Rules** for the first two steps and a **Math Multiplier** for all subsequent steps.
+
+#### 1. The Multiplier ("Ease Factor")
+Every card starts with a "Easiness Factor" (EF) of **2.5**.
+Every time a student answers "Easy" (Quality 5), the system **adds 0.1** to this multiplier. This represents that because the concept effectively "stuck," the system can wait even longer next time.
+
+#### 2. The Step-by-Step Calculation (Example)
+Here is the math running for consecutive "Easy" answers:
+
+**Attempt 1 (First Practice)**
+*   **Rule**: If it's the first time (`repetition = 0`), the interval is **always 1 day**.
+*   **Multiplier Update**: `2.5 + 0.1` = **2.6**
+*   **Result**: Review tomorrow.
+
+**Attempt 2**
+*   **Rule**: If it's the second time (`repetition = 1`), the interval is **always 6 days**.
+*   **Multiplier Update**: `2.6 + 0.1` = **2.7**
+*   **Result**: Review in 6 days.
+
+**Attempt 3**
+*   **Rule**: No more hard rules. Now we do `Previous Interval × Multiplier`.
+*   **Math**: `6 days × 2.7` = **16.2 days** (rounded to 16).
+*   **Multiplier Update**: `2.7 + 0.1` = **2.8**
+*   **Result**: Review in ~2 weeks.
+
+**Attempt 4**
+*   **Math**: `16 days × 2.8` = **44.8 days** (rounded to 45).
+*   **Multiplier Update**: `2.8 + 0.1` = **2.9**
+*   **Result**: Review in ~1.5 months.
+
+**Attempt 5**
+*   **Math**: `45 days × 2.9` = **130.5 days**.
+*   **Result**: Review in ~4 months. 
+
+> The "secret" is that the interval is the result of the previous interval multiplied by an ever-increasing easiness factor.
 
 ### 4.2 Sequential Unlocking (TaRL)
 ```typescript
