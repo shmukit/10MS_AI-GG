@@ -157,10 +157,13 @@ export const StudentCommunity: React.FC = () => {
           setMentors(mentorsData);
         }
 
-        // Set user data (just basic info, no dashboard fallbacks)
+        // Fetch real user profile for consistent display name
+        const userProfile = await DatabaseService.getStudentProfile(databaseUserId || user.id);
+        const userInfo = await DatabaseService.getUserById(databaseUserId || user.id);
+
         setUserData({
-          userData: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' },
-          profile: { first_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student' }
+          userData: userInfo,
+          profile: userProfile
         });
 
       } catch (err) {

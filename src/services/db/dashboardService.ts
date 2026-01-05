@@ -11,7 +11,7 @@ import {
 } from '../../types/models';
 import { getUserById } from './userService';
 import { getStudentProfile } from './studentService';
-import { getStudentBatch } from './batchService';
+import { getStudentBatch, getStudentBatchForRoadmap, getAnyActiveBatchForRoadmap } from './batchService';
 import {
     getStudentRoadmap,
     getEnrolledRoadmaps,
@@ -57,14 +57,67 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         // await this.cleanupDuplicateProfiles(userId);
 
         // Fetching dashboard data components
-        const [profile, batch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
+        const [profile, defaultBatch, roadmap, enrolledRoadmaps, progress, userData] = await Promise.all([
             getStudentProfile(userId),
-            getStudentBatch(userId),
+            getStudentBatch(userId), // Keep this as fallback/default
             getStudentRoadmap(userId),
             getEnrolledRoadmaps(userId),
             getStudentProgress(userId),
             getUserById(userId)
         ]);
+
+        // Determine the actual batch to use
+        // Determine effective roadmap (prioritize company-specific logic if no selection)
+        let effectiveRoadmapId = selectedRoadmapId;
+        let effectiveRoadmap = roadmap;
+
+        if (!effectiveRoadmapId && enrolledRoadmaps.length > 0) {
+            // Apply prioritization logic (moved from client-side)
+            if (isCompanyUser && enrolledRoadmaps.length > 1) {
+                const augmedixRoadmap = enrolledRoadmaps.find(r =>
+                    r.title?.toLowerCase().includes('augmedix') ||
+                    r.description?.toLowerCase().includes('augmedix')
+                );
+
+                const aiMlRoadmap = enrolledRoadmaps.find(r =>
+                    r.title?.toLowerCase().includes('ai') ||
+                    r.title?.toLowerCase().includes('ml') ||
+                    r.title?.toLowerCase().includes('machine learning')
+                );
+
+                const nonPythonRoadmap = enrolledRoadmaps.find(r =>
+                    !r.title?.toLowerCase().includes('python')
+                );
+
+                const preferredRoadmap = augmedixRoadmap || aiMlRoadmap || nonPythonRoadmap || enrolledRoadmaps[0];
+
+                effectiveRoadmapId = preferredRoadmap.id;
+                effectiveRoadmap = preferredRoadmap;
+                console.log(`🎯 Auto-selected prioritized roadmap: ${preferredRoadmap.title}`);
+            } else {
+                // Default to the first enrolled roadmap or the 'current' one if exists
+                effectiveRoadmapId = roadmap?.id || enrolledRoadmaps[0].id;
+                if (!roadmap) effectiveRoadmap = enrolledRoadmaps[0];
+            }
+        }
+
+        // Determine the actual batch to use
+        let batch = defaultBatch;
+
+        // Use the determined effective roadmap ID
+        if (effectiveRoadmapId) {
+            let specificBatch = await getStudentBatchForRoadmap(userId, effectiveRoadmapId);
+
+            if (!specificBatch) {
+                // Fallback: If user isn't assigned, get ANY active batch for this roadmap
+                specificBatch = await getAnyActiveBatchForRoadmap(effectiveRoadmapId);
+            }
+
+            if (specificBatch) {
+                batch = specificBatch;
+                console.log(`🎯 Using batch for roadmap ${effectiveRoadmapId}: ${batch.name}`);
+            }
+        }
 
         // Dashboard data components fetched
         console.log('📊 Dashboard data components fetched');
@@ -87,30 +140,30 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         let notices: Notice[] = [];
         let mentors: User[] = [];
 
-        if (selectedRoadmapId) {
+        if (effectiveRoadmapId) {
             // If a specific roadmap is selected, get data for that roadmap
             // Getting roadmap-specific data
 
-            // Get the roadmap to find its associated batch
-            const { data: roadmapData, error: roadmapError } = await supabase
-                .from('roadmaps')
-                .select('*')
-                .eq('id', selectedRoadmapId)
-                .single();
-
-            if (roadmapError) {
-                console.error('Error fetching roadmap:', roadmapError);
+            // Get the roadmap to find its associated batch (if we don't have it in effectiveRoadmap fully)
+            // We can use effectiveRoadmap directly if it matches
+            let targetRoadmap = effectiveRoadmap;
+            if (!targetRoadmap || targetRoadmap.id !== effectiveRoadmapId) {
+                const { data: roadmapData } = await supabase
+                    .from('roadmaps')
+                    .select('*')
+                    .eq('id', effectiveRoadmapId)
+                    .single();
+                if (roadmapData) targetRoadmap = roadmapData as unknown as Roadmap;
             }
 
-            if (roadmapData) {
-                const roadmap = roadmapData as unknown as Roadmap;
-                console.log('📊 Found roadmap:', roadmap.title);
+            if (targetRoadmap) {
+                console.log('📊 Found roadmap:', targetRoadmap.title);
 
                 // Find batches associated with this roadmap
                 const { data: roadmapBatches, error: batchError } = await supabase
                     .from('batches')
                     .select('*')
-                    .eq('roadmap_id', selectedRoadmapId);
+                    .eq('roadmap_id', effectiveRoadmapId);
 
                 if (batchError) {
                     console.error('Error fetching roadmap batches:', batchError);
@@ -151,8 +204,8 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         let finalNotices = notices;
         if (!notices || notices.length === 0) {
             let roadmapTitle = 'Learning Cohort';
-            if (selectedRoadmapId && roadmap) {
-                roadmapTitle = roadmap.title;
+            if (effectiveRoadmap) {
+                roadmapTitle = effectiveRoadmap.title;
             }
 
             finalNotices = [
@@ -178,9 +231,9 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         // Calculate week streaks based on actual progress
         let weekStreaks: { week: number; status: 'done' | 'current' | 'incomplete'; completion: number }[] = [];
 
-        if (roadmap) {
+        if (effectiveRoadmap) {
             // Use roadmap data if available
-            weekStreaks = Array.from({ length: roadmap.total_weeks }, (_, i) => {
+            weekStreaks = Array.from({ length: effectiveRoadmap.total_weeks }, (_, i) => {
                 const weekNumber = i + 1;
 
                 // Get completed tasks for this week
@@ -215,15 +268,15 @@ export const getDashboardData = async (userId: string, selectedRoadmapId?: strin
         }
 
         // Get current week tasks and upcoming tasks
-        console.log('🔄 Fetching tasks for roadmapId:', selectedRoadmapId);
+        console.log('🔄 Fetching tasks for roadmapId:', effectiveRoadmapId);
         const [currentWeekTasks, upcomingTasks] = await Promise.all([
-            getCurrentWeekTasks(userId, selectedRoadmapId),
-            getUpcomingTasks(userId, selectedRoadmapId)
+            getCurrentWeekTasks(userId, effectiveRoadmapId),
+            getUpcomingTasks(userId, effectiveRoadmapId)
         ]);
         const dashboardData = {
             profile,
             batch,
-            roadmap,
+            roadmap: effectiveRoadmap,
             enrolledRoadmaps,
             progress,
             notices: finalNotices,
