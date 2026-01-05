@@ -83,35 +83,11 @@ export const useStudentDashboard = () => {
             setDashboardData(data);
 
             // Set initial selections if not already set
-            if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
-                // For company users, prioritize Augmedix/AI/ML roadmaps over Python
-                const isCompanyUser = user?.email?.includes('@10minuteschool.com') || user?.email?.includes('@lightcastlepartners.com');
-
-                let preferredRoadmap = data.enrolledRoadmaps[0]; // Default to first
-
-                if (isCompanyUser && data.enrolledRoadmaps.length > 1) {
-                    // Look for Augmedix, AI, or ML roadmaps first
-                    const augmedixRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        r.title?.toLowerCase().includes('augmedix') ||
-                        r.description?.toLowerCase().includes('augmedix')
-                    );
-
-                    const aiMlRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        r.title?.toLowerCase().includes('ai') ||
-                        r.title?.toLowerCase().includes('ml') ||
-                        r.title?.toLowerCase().includes('machine learning')
-                    );
-
-                    // Avoid Python roadmaps for company users
-                    const nonPythonRoadmap = data.enrolledRoadmaps.find((r: any) =>
-                        !r.title?.toLowerCase().includes('python')
-                    );
-
-                    // Priority order: Augmedix > AI/ML > Non-Python > First available
-                    preferredRoadmap = augmedixRoadmap || aiMlRoadmap || nonPythonRoadmap || data.enrolledRoadmaps[0];
-                }
-
-                setSelectedRoadmap(preferredRoadmap.id);
+            if (!selectedRoadmap && data?.roadmap?.id) {
+                setSelectedRoadmap(data.roadmap.id);
+            } else if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
+                // Fallback to first if somehow roadmap is missing
+                setSelectedRoadmap(data.enrolledRoadmaps[0].id);
             }
             if (data?.batch?.id) {
                 setSelectedBatch(data.batch.id);
