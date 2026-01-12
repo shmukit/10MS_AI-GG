@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
+// import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
 import { useTheme } from '../../lib/ThemeContext';
 import { StudentHeader } from './StudentHeader';
 import { LiveSessionList } from '../Dashboard/LiveSessionList';
@@ -196,12 +196,17 @@ export const StudentDashboard: React.FC = () => {
               {/* Practice & Micro-learning Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-bold text-foreground">
+                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-500/10' : 'bg-blue-100'}`}>
+                    <Layers className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Practice & Micro-learning
                   </h2>
                 </div>
-                <Card className="p-6 shadow-professional hover:shadow-professional-lg transition-all duration-200">
+                <Card className={`p-6 transition-all duration-300 ${isDarkMode
+                  ? 'bg-gray-800 border-gray-700 shadow-xl'
+                  : 'bg-white shadow-professional hover:shadow-professional-lg'
+                  }`}>
                   <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
                 </Card>
               </div>
@@ -238,19 +243,24 @@ export const StudentDashboard: React.FC = () => {
               {/* Leaderboard */}
               <Leaderboard batchId={selectedBatchId} isDarkMode={isDarkMode} />
 
-              <div className="hidden md:block">
+              {/* NoticeBoard removed from web view as it's now in the header dropdown */}
+              {/* <div className="hidden md:block">
                 <NoticeBoard
                   isDarkMode={isDarkMode}
                   notices={dashboardData?.notices || []}
                   onMarkAsRead={markNoticeAsRead}
                 />
-              </div>
+              </div> */}
 
               {/* Live Sessions */}
-              <Card className="p-6 shadow-professional hover:shadow-professional-lg transition-all duration-200">
+              <Card className={`p-6 transition-all duration-300 ${isDarkMode
+                ? 'bg-gray-800 border-gray-700 shadow-xl'
+                : 'bg-white shadow-professional hover:shadow-professional-lg'
+                }`}>
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}
+                  isDarkMode={isDarkMode}
                 />
               </Card>
 

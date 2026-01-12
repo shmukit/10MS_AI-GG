@@ -280,9 +280,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
               <span className="font-medium text-xs md:text-base">Back to Dashboard</span>
             </button>
 
-            <h1 className={`hidden md:block text-2xl font-bold transition-colors duration-200 truncate ml-4 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {roadmap.title}
-            </h1>
+            {/* Removed duplicate title here as it's now in StudentHeader */}
           </div>
         </div>
       </div>

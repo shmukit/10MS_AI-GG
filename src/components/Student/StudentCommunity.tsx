@@ -294,7 +294,7 @@ export const StudentCommunity: React.FC = () => {
         </button>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h1 className="text-lg md:text-3xl font-bold text-gray-900 dark:text-white">Student Community</h1>
+          {/* Duplicate title removed */}
 
           {/* Roadmap Dropdown */}
           {currentRoadmap && (

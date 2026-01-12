@@ -227,7 +227,7 @@ export const StudentProfile: React.FC = () => {
             Back to Dashboard
           </button>
 
-          <h1 className={`text-3xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Profile</h1>
+          {/* Duplicate title removed */}
         </div>
 
         <div className={`rounded-lg p-8 shadow-sm transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'

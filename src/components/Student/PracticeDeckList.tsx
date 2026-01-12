@@ -85,25 +85,29 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 {/* Due for Review Section */}
                 {dueCards.length > 0 && (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                            <Clock className="w-5 h-5 text-orange-500" />
+                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-foreground'}`}>
+                            <Clock className={`w-5 h-5 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`} />
                             Due for Review
                         </h3>
                         <div
                             onClick={startReview}
-                            className="group relative rounded-xl border border-orange-200 dark:border-orange-500/30 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-r from-orange-500/10 to-red-500/10"
+                            className={`group relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${isDarkMode
+                                ? 'bg-gradient-to-r from-orange-900/20 to-red-900/20 border-orange-500/30'
+                                : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 shadow-sm'
+                                }`}
                         >
-                            <div className="p-6 flex items-center justify-between">
-                                <div>
-                                    <h4 className="text-xl font-bold mb-2 text-foreground">
+                            <div className="p-6 md:p-8 flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <h4 className={`text-xl md:text-2xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         Daily Review Session
                                     </h4>
-                                    <p className="text-sm text-muted-foreground">
-                                        You have <span className="font-bold text-orange-500">{dueCards.length} cards</span> scheduled for review today based on your past performance.
+                                    <p className={`text-sm md:text-base ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
+                                        You have <span className={`font-bold ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>{dueCards.length} cards</span> scheduled for review.
                                     </p>
                                 </div>
-                                <div className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                    <Play className="w-6 h-6 ml-1 fill-white" />
+                                <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ${isDarkMode ? 'bg-orange-500 text-white shadow-orange-500/20' : 'bg-orange-600 text-white shadow-orange-600/20'
+                                    }`}>
+                                    <Play className="w-6 h-6 md:w-8 md:h-8 ml-1 fill-white" />
                                 </div>
                             </div>
                         </div>
@@ -123,43 +127,65 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                             <div
                                 key={deck.id}
                                 onClick={() => setSelectedDeck(deck)}
-                                className="group relative rounded-xl border border-border bg-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                                className={`group relative rounded-2xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden cursor-pointer ${isDarkMode
+                                    ? 'bg-gray-700/50 border-gray-600 hover:border-blue-500/50 hover:bg-gray-700/70'
+                                    : 'bg-white border-gray-100 hover:border-blue-200 shadow-sm'
+                                    }`}
                             >
                                 {/* Cover Image or Fallback */}
-                                <div className="h-32 md:h-48 w-full relative overflow-hidden bg-muted">
+                                <div className="h-40 md:h-48 w-full relative overflow-hidden">
                                     {deck.cover_image ? (
-                                        <img
-                                            src={deck.cover_image}
-                                            alt={deck.title}
-                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                        />
+                                        <div className="relative h-full w-full">
+                                            <img
+                                                src={deck.cover_image}
+                                                alt={deck.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                            <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-gray-900/80 via-transparent' : 'from-black/40 via-transparent'} to-transparent`} />
+                                        </div>
                                     ) : (
-                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20`}>
-                                            <Book className="w-8 h-8 md:w-12 md:h-12 text-blue-500/50" />
+                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br transition-all duration-500 ${isDarkMode
+                                            ? 'from-blue-900/40 to-purple-900/40 group-hover:from-blue-800/60 group-hover:to-purple-800/60'
+                                            : 'from-blue-50 to-purple-50 group-hover:from-blue-100 group-hover:to-purple-100'
+                                            }`}>
+                                            <Book className={`w-12 h-12 transition-transform duration-500 group-hover:scale-110 ${isDarkMode ? 'text-blue-400/50' : 'text-blue-500/50'}`} />
                                         </div>
                                     )}
 
                                     {/* Play Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 backdrop-blur-[2px]">
-                                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[2px]">
+                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-300">
                                             <Play className="w-6 h-6 md:w-8 md:h-8 text-white ml-1 fill-white" />
                                         </div>
+                                    </div>
+
+                                    {/* Category Tag (Optional) */}
+                                    <div className="absolute top-3 left-3">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border ${isDarkMode
+                                            ? 'bg-blue-500/20 text-blue-300 border-blue-400/30'
+                                            : 'bg-blue-600/10 text-blue-600 border-blue-200'
+                                            }`}>
+                                            Practice
+                                        </span>
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-4 md:p-5">
-                                    <h3 className="text-base md:text-lg font-bold mb-1 md:mb-2 line-clamp-1 group-hover:text-primary transition-colors text-foreground">
+                                <div className="p-5 md:p-6">
+                                    <h3 className={`text-base md:text-lg font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'
+                                        }`}>
                                         {deck.title}
                                     </h3>
 
                                     {deck.description && (
-                                        <p className="text-xs md:text-sm line-clamp-2 mb-3 md:mb-4 text-muted-foreground">
+                                        <p className={`text-xs md:text-sm line-clamp-2 mb-4 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                            }`}>
                                             {deck.description}
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between text-[10px] md:text-xs mt-auto pt-3 md:pt-4 border-t border-dashed border-border">
+                                    <div className={`flex items-center justify-between text-[10px] md:text-xs mt-auto pt-4 border-t border-dashed ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+                                        }`}>
                                         <div className="flex items-center gap-1 md:gap-1.5 text-muted-foreground">
                                             <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>~5 mins</span>
