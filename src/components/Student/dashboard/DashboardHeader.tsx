@@ -4,12 +4,12 @@ import { RoadmapDropdown } from './RoadmapDropdown';
 interface DashboardHeaderProps {
     displayName: string;
     isDarkMode: boolean;
-    enrolledRoadmaps: any[];
-    currentRoadmap: any;
+    enrolledBatches: any[];
+    currentBatch: any;
     showRoadmapDropdown: boolean;
     setShowRoadmapDropdown: (show: boolean) => void;
-    handleRoadmapChange: (id: string) => void;
-    selectedRoadmapId: string;
+    handleBatchChange: (id: string) => void;
+    selectedBatchId: string;
     gamificationStats?: {
         totalXP: number;
         rank: number;
@@ -20,12 +20,12 @@ interface DashboardHeaderProps {
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     displayName,
     isDarkMode,
-    enrolledRoadmaps,
-    currentRoadmap,
+    enrolledBatches,
+    currentBatch,
     showRoadmapDropdown,
     setShowRoadmapDropdown,
-    handleRoadmapChange,
-    selectedRoadmapId,
+    handleBatchChange,
+    selectedBatchId,
     gamificationStats
 }) => {
     return (
@@ -48,12 +48,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {/* Roadmap Selection Dropdown */}
                 <RoadmapDropdown
                     isDarkMode={isDarkMode}
-                    enrolledRoadmaps={enrolledRoadmaps}
-                    currentRoadmap={currentRoadmap}
+                    enrolledBatches={enrolledBatches}
+                    currentBatch={currentBatch}
                     showDropdown={showRoadmapDropdown}
                     setShowDropdown={setShowRoadmapDropdown}
-                    handleRoadmapChange={handleRoadmapChange}
-                    selectedRoadmapId={selectedRoadmapId}
+                    handleBatchChange={handleBatchChange}
+                    selectedBatchId={selectedBatchId}
                 />
             </div>
         </div>

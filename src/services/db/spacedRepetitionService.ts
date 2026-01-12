@@ -140,6 +140,11 @@ export const getDueCards = async (studentId: string, limit = 20) => {
             .limit(limit);
 
         if (error) {
+            // PGRST205: relation does not exist (table missing)
+            if (error.code === 'PGRST205') {
+                console.warn('⚠️ Spaced repetition table missing. Feature disabled.');
+                return [];
+            }
             console.error('Error fetching due cards:', error);
             return [];
         }

@@ -26,11 +26,10 @@ export const StudentDashboard: React.FC = () => {
     error,
     dashboardData,
     showRoadmapDropdown,
-    selectedRoadmap,
-    selectedBatch,
+    selectedBatchId,
     getUserDisplayName,
     setShowRoadmapDropdown,
-    handleRoadmapChange,
+    handleBatchChange,
     getCurrentRoadmap,
     getCurrentBatch,
     getWeeklyStreaks,
@@ -43,8 +42,8 @@ export const StudentDashboard: React.FC = () => {
     if (user?.id) {
       posthog?.capture('student_dashboard_view', {
         user_id: user.id,
-        batch_id: selectedBatch,
-        roadmap_id: selectedRoadmap
+        batch_id: selectedBatchId,
+        roadmap_id: getCurrentRoadmap()?.id
       });
 
       // Track DAU (Daily Active User)
@@ -53,7 +52,7 @@ export const StudentDashboard: React.FC = () => {
         user_id: user.id
       });
     }
-  }, [user?.id, posthog, selectedBatch, selectedRoadmap]);
+  }, [user?.id, posthog, selectedBatchId, dashboardData?.roadmap]);
 
   // Check for week completion and track it
   useEffect(() => {
@@ -65,14 +64,14 @@ export const StudentDashboard: React.FC = () => {
         posthog?.capture('week_completed', {
           user_id: user.id,
           week_number: currentWeek.week_number,
-          roadmap_id: selectedRoadmap,
-          batch_id: selectedBatch,
+          roadmap_id: getCurrentRoadmap()?.id,
+          batch_id: selectedBatchId,
           completed_at: new Date().toISOString(),
           completion_percentage: currentWeek.completion_percentage || 100
         });
       }
     }
-  }, [dashboardData, user?.id, selectedRoadmap, selectedBatch]);
+  }, [dashboardData, user?.id, selectedBatchId]);
 
   // Check for overdue tasks
   useEffect(() => {
@@ -94,13 +93,13 @@ export const StudentDashboard: React.FC = () => {
             deadline: task.deadline,
             days_overdue: Math.ceil((currentDate.getTime() - new Date(task.deadline).getTime()) / (1000 * 60 * 60 * 24))
           })),
-          roadmap_id: selectedRoadmap,
-          batch_id: selectedBatch,
+          roadmap_id: getCurrentRoadmap()?.id,
+          batch_id: selectedBatchId,
           detected_at: new Date().toISOString()
         });
       }
     }
-  }, [dashboardData, user?.id, selectedRoadmap, selectedBatch]);
+  }, [dashboardData, user?.id, selectedBatchId]);
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
@@ -176,12 +175,12 @@ export const StudentDashboard: React.FC = () => {
               <DashboardHeader
                 displayName={getUserDisplayName()}
                 isDarkMode={isDarkMode}
-                enrolledRoadmaps={dashboardData.enrolledRoadmaps}
-                currentRoadmap={getCurrentRoadmap()}
+                enrolledBatches={dashboardData.enrolledBatches}
+                currentBatch={getCurrentBatch()}
                 showRoadmapDropdown={showRoadmapDropdown}
                 setShowRoadmapDropdown={setShowRoadmapDropdown}
-                handleRoadmapChange={handleRoadmapChange}
-                selectedRoadmapId={selectedRoadmap}
+                handleBatchChange={handleBatchChange}
+                selectedBatchId={selectedBatchId}
                 gamificationStats={dashboardData?.gamificationStats}
               />
 
@@ -189,7 +188,7 @@ export const StudentDashboard: React.FC = () => {
               <NavigationCards
                 isDarkMode={isDarkMode}
                 currentRoadmap={getCurrentRoadmap()}
-                enrolledRoadmaps={dashboardData.enrolledRoadmaps}
+                enrolledRoadmaps={dashboardData.enrolledBatches?.map((b: any) => b.roadmap) || []}
                 batch={getCurrentBatch()}
               />
 
@@ -203,7 +202,7 @@ export const StudentDashboard: React.FC = () => {
                 </div>
                 <div className={`rounded-xl p-6 border shadow-professional transition-all duration-200 hover:shadow-professional-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                   }`}>
-                  <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatch} roadmapId={selectedRoadmap} />
+                  <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
                 </div>
               </div>
 
@@ -213,7 +212,7 @@ export const StudentDashboard: React.FC = () => {
                 currentWeekTasks={dashboardData.currentWeekTasks}
                 upcomingTasks={dashboardData.upcomingTasks}
                 currentRoadmap={getCurrentRoadmap()}
-                enrolledRoadmaps={dashboardData.enrolledRoadmaps}
+                enrolledRoadmaps={dashboardData.enrolledBatches?.map((b: any) => b.roadmap) || []}
                 currentLevel={dashboardData.currentLevel || 1}
               />
             </div>
@@ -237,7 +236,7 @@ export const StudentDashboard: React.FC = () => {
               />
 
               {/* Leaderboard */}
-              <Leaderboard batchId={selectedBatch} isDarkMode={isDarkMode} />
+              <Leaderboard batchId={selectedBatchId} isDarkMode={isDarkMode} />
 
               {/* Notice Board */}
               <NoticeBoard
@@ -252,7 +251,7 @@ export const StudentDashboard: React.FC = () => {
                 : 'bg-white border-gray-200 hover:border-gray-300'
                 }`}>
                 <LiveSessionList
-                  batchId={selectedBatch}
+                  batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}
                 />
               </div>

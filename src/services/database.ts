@@ -60,6 +60,7 @@ export class DatabaseService {
   static generateBatchSlug = BatchService.generateBatchSlug;
   static getBatchBySlug = BatchService.getBatchBySlug;
   static getStudentBatchForRoadmap = BatchService.getStudentBatchForRoadmap;
+  static getEnrolledBatches = BatchService.getEnrolledBatches;
 
   // Mentor management
   static getMentors = MentorService.getMentors;
