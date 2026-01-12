@@ -50,7 +50,7 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
             >
                 <Map className="w-4 h-4" />
                 <span className="text-sm font-medium">
-                    {currentBatch?.name || 'Select Batch'}
+                    {currentBatch?.name || currentBatch?.title || 'Select Batch'}
                 </span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
             </Button>

@@ -9,12 +9,14 @@ interface StudentHeaderProps {
   userName?: string;
   userRole?: string;
   pageTitle?: string;
+  actions?: React.ReactNode;
 }
 
 export const StudentHeader: React.FC<StudentHeaderProps> = ({
   userName = 'Student',
   userRole = 'student',
-  pageTitle
+  pageTitle,
+  actions
 }) => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   return (
@@ -49,7 +51,8 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-3">
+              {actions}
               <NotificationDropdown />
             </div>
             <div className="hidden md:flex items-center gap-2">

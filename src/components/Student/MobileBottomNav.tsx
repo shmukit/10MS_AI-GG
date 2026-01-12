@@ -62,15 +62,36 @@ export const MobileBottomNav: React.FC = () => {
     }, []);
 
     const handleBatchSwitch = async (batchId: string) => {
-        navigate(`/student/dashboard?batchId=${batchId}`);
         setIsBatchesOpen(false);
+
+        // Check if we are currently on the roadmap page
+        const isRoadmapPage = location.pathname.startsWith('/student/roadmap');
+
+        if (isRoadmapPage && user?.id) {
+            // Stay on roadmap page but switch to the new roadmap
+            import('../../services/database').then(async ({ DatabaseService }) => {
+                const data = await DatabaseService.getDashboardData(user.id, { batchId });
+                if (data?.roadmap) {
+                    const slug = DatabaseService.generateRoadmapSlug(data.roadmap.title);
+                    navigate(`/student/roadmap/${slug}`);
+                } else {
+                    navigate(`/student/dashboard?batchId=${batchId}`);
+                }
+            });
+        } else {
+            // Default behavior: go to dashboard
+            navigate(`/student/dashboard?batchId=${batchId}`);
+        }
+
         // Refresh local data to update other links
         if (user?.id) {
             import('../../services/database').then(async ({ DatabaseService }) => {
                 const data = await DatabaseService.getDashboardData(user.id, { batchId });
-                if (data?.batch && data.roadmap) {
+                if (data?.batch) {
                     setCurrentBatch(data.batch);
-                    setRoadmapSlug(DatabaseService.generateRoadmapSlug(data.roadmap.title));
+                    if (data.roadmap) {
+                        setRoadmapSlug(DatabaseService.generateRoadmapSlug(data.roadmap.title));
+                    }
                 }
             });
         }
