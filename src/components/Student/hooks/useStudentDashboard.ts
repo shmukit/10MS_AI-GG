@@ -11,8 +11,7 @@ export const useStudentDashboard = () => {
     const [dashboardData, setDashboardData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [showRoadmapDropdown, setShowRoadmapDropdown] = useState(false);
-    const [selectedRoadmap, setSelectedRoadmap] = useState<string>('');
-    const [selectedBatch, setSelectedBatch] = useState<string>('');
+    const [selectedBatchId, setSelectedBatchId] = useState<string>('');
 
     // Helper function to get user display name with fallbacks
     const getUserDisplayName = () => {
@@ -39,46 +38,41 @@ export const useStudentDashboard = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showRoadmapDropdown]);
 
-    // Handle roadmap selection change
-    const handleRoadmapChange = (roadmapId: string) => {
-        setSelectedRoadmap(roadmapId);
+    // Handle batch selection change
+    const handleBatchChange = (batchId: string) => {
+        setSelectedBatchId(batchId);
         setShowRoadmapDropdown(false);
-        // Refresh dashboard data with new roadmap
+        // Refresh dashboard data with new batch
         if (user?.id) {
-            fetchDashboardData(user.id, roadmapId);
-            // Also refresh tasks for the new roadmap
-            refreshTasksForRoadmap(roadmapId);
+            fetchDashboardData(user.id, batchId);
         }
     };
 
     // Refresh tasks for the selected roadmap
+    // (This is now handled inside fetchDashboardData or via derived state mostly,
+    // but if we need explicit refresh, we can get roadmapId from dashboardData)
     const refreshTasksForRoadmap = async (roadmapId: string) => {
         if (!user?.id) return;
-
         try {
             const [currentTasks, upcomingTasks] = await Promise.all([
                 DatabaseService.getCurrentWeekTasks(user.id, roadmapId),
                 DatabaseService.getUpcomingTasks(user.id, roadmapId)
             ]);
-
-            // Update dashboard data with new tasks
             setDashboardData((prev: any) => ({
                 ...prev,
                 currentWeekTasks: currentTasks,
                 upcomingTasks: upcomingTasks
             }));
-        } catch (error) {
-            // Silently handle error - could show user notification in production
-        }
+        } catch (error) { }
     };
 
     // Fetch dashboard data
-    const fetchDashboardData = async (userId: string, roadmapId?: string) => {
+    const fetchDashboardData = async (userId: string, batchId?: string) => {
         try {
             setLoading(true);
             setError(null);
-            console.log('🔍 Fetching dashboard data for user ID:', userId);
-            const data = await DatabaseService.getDashboardData(userId, roadmapId);
+            console.log('🔍 Fetching dashboard data for user ID:', userId, 'batch:', batchId);
+            const data = await DatabaseService.getDashboardData(userId, { batchId });
             console.log('📊 Dashboard data received:', data);
 
             setDashboardData(data);
@@ -106,20 +100,16 @@ export const useStudentDashboard = () => {
             }
 
             // Set initial selections if not already set
-            if (!selectedRoadmap && data?.roadmap?.id) {
-                setSelectedRoadmap(data.roadmap.id);
-            } else if (!selectedRoadmap && data?.enrolledRoadmaps?.length > 0) {
-                // Fallback to first if somehow roadmap is missing
-                setSelectedRoadmap(data.enrolledRoadmaps[0].id);
-            }
-            if (data?.batch?.id) {
-                setSelectedBatch(data.batch.id);
+            if (!selectedBatchId && data?.batch?.id) {
+                setSelectedBatchId(data.batch.id);
             }
 
-            // If roadmapId is provided, update the selected roadmap
-            if (roadmapId) {
-                setSelectedRoadmap(roadmapId);
+            // If batchId is provided, update the selected batch
+            if (batchId) {
+                setSelectedBatchId(batchId);
             }
+
+            // (Roadmap logic removed in favor of batch logic)
 
             // Fetch Gamification Stats
             if (data?.batch?.id) {
@@ -136,7 +126,7 @@ export const useStudentDashboard = () => {
             }
 
             // Fetch TaRL Level
-            const currentRoadmapId = roadmapId || data?.enrolledRoadmaps?.[0]?.id;
+            const currentRoadmapId = data?.roadmap?.id;
             if (currentRoadmapId) {
                 try {
                     const { getCurrentLevel } = await import('../../../services/db/tarlService');
@@ -164,11 +154,9 @@ export const useStudentDashboard = () => {
         fetchDashboardData(user.id);
     }, [user?.id, authLoading]);
 
-    // Get current roadmap data
+    // Get current roadmap data (derived from batch)
     const getCurrentRoadmap = () => {
-        if (!dashboardData?.enrolledRoadmaps) return null;
-        const roadmap = dashboardData.enrolledRoadmaps.find((r: any) => r.id === selectedRoadmap) || dashboardData.enrolledRoadmaps[0];
-        return roadmap;
+        return dashboardData?.roadmap;
     };
 
     // Get current batch data
@@ -225,12 +213,11 @@ export const useStudentDashboard = () => {
         error,
         dashboardData,
         showRoadmapDropdown,
-        selectedRoadmap,
-        selectedBatch,
+        selectedBatchId,
         user,
         getUserDisplayName,
         setShowRoadmapDropdown,
-        handleRoadmapChange,
+        handleBatchChange,
         getCurrentRoadmap,
         getCurrentBatch,
         getWeeklyStreaks,

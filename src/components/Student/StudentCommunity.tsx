@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Users, AlertCircle, Mail, Check } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Batch, User } from '../../services/database';
@@ -11,6 +11,8 @@ import { RoadmapDropdown } from './dashboard/RoadmapDropdown';
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
   const { roadmapSlug } = useParams();
+  const [searchParams] = useSearchParams();
+  const batchIdParam = searchParams.get('batch_id');
   const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -19,7 +21,7 @@ export const StudentCommunity: React.FC = () => {
   const [mentors, setMentors] = useState<User[]>([]);
   const [students, setStudents] = useState<(User & { profile?: any; progress?: any })[]>([]);
   const [userData, setUserData] = useState<any>(null);
-  const [enrolledRoadmaps, setEnrolledRoadmaps] = useState<any[]>([]);
+  const [enrolledBatches, setEnrolledBatches] = useState<any[]>([]);
   const [showRoadmapDropdown, setShowRoadmapDropdown] = useState(false);
   const [currentRoadmap, setCurrentRoadmap] = useState<any>(null);
   const [sortBy, setSortBy] = useState<'name' | 'progress'>('name');
@@ -70,13 +72,12 @@ export const StudentCommunity: React.FC = () => {
           console.log('📊 Roadmap data from slug:', roadmapData);
           setCurrentRoadmap(roadmapData);
 
-          // Also fetch all enrolled roadmaps to populate the dropdown
+          // Also fetch all enrolled batches to populate the dropdown
           try {
-            // getEnrolledRoadmaps now returns objects WITH slugs
-            const userEnrolled = await DatabaseService.getEnrolledRoadmaps(databaseUserId || user.id);
-            setEnrolledRoadmaps(userEnrolled);
+            const userEnrolled = await DatabaseService.getEnrolledBatches(databaseUserId || user.id);
+            setEnrolledBatches(userEnrolled);
           } catch (e) {
-            console.error('Failed to fetch enrolled roadmaps:', e);
+            console.error('Failed to fetch enrolled batches:', e);
           }
 
           if (!roadmapData) {
@@ -88,7 +89,26 @@ export const StudentCommunity: React.FC = () => {
 
         // Get the batch associated with this roadmap
         let batchData = null;
-        if (roadmapData) {
+
+        // 1. If we have a specific batch_id in the URL, try that first
+        if (batchIdParam) {
+          console.log('🎯 using specific batch_id from URL:', batchIdParam);
+          const { data: specificBatch, error: specificBatchError } = await supabase
+            .from('batches')
+            .select('*')
+            .eq('id', batchIdParam)
+            .single();
+
+          if (specificBatch) {
+            console.log('✅ Found specific batch from URL:', (specificBatch as any).name);
+            batchData = specificBatch;
+          } else {
+            console.warn('❌ Specific batch not found:', specificBatchError);
+          }
+        }
+
+        // 2. If no specific batch found yet (or no param), try to find assignment via roadmap
+        if (!batchData && roadmapData) {
           console.log('🔍 Looking for assigned batch for roadmap:', roadmapData.title);
           // Use the secure method that checks for explicit assignment
           // We use databaseUserId (the public profile ID) or fallback to user.id if not ready yet
@@ -110,11 +130,12 @@ export const StudentCommunity: React.FC = () => {
               .select('*')
               .eq('roadmap_id', roadmapData.id)
               .eq('status', 'active')
-              .maybeSingle();
+              .order('start_date', { ascending: false })
+              .limit(1);
 
-            if (fallbackBatch) {
-              console.log('⚠️ Found fallback batch (implicit assignment):', (fallbackBatch as any).name);
-              batchData = fallbackBatch;
+            if (fallbackBatch && fallbackBatch.length > 0) {
+              console.log('⚠️ Found fallback batch (implicit assignment):', (fallbackBatch[0] as any).name);
+              batchData = fallbackBatch[0];
             } else {
               console.error('❌ Fallback failed:', fallbackError);
               setError(`No active batch assignment found for the "${roadmapData.title}" roadmap. Please contact your administrator.`);
@@ -175,7 +196,7 @@ export const StudentCommunity: React.FC = () => {
     };
 
     fetchCommunityData();
-  }, [user?.id, roadmapSlug]);
+  }, [user?.id, roadmapSlug, batchIdParam]);
 
   if (loading) {
     return (
@@ -243,16 +264,15 @@ export const StudentCommunity: React.FC = () => {
   });
 
 
-  const handleRoadmapChange = (roadmapId: string) => {
-    // Find the roadmap slug from the ID
-    const selectedMap = enrolledRoadmaps.find(r => r.id === roadmapId);
-    if (selectedMap) {
+  const handleBatchChange = (batchId: string) => {
+    // Find the batch
+    const selectedBatch = enrolledBatches.find(b => b.id === batchId);
+    if (selectedBatch && selectedBatch.roadmap) {
       setShowRoadmapDropdown(false);
       // Navigate to the community page for this roadmap
-      // Prefer strict slug from backend, but fallback to generating it if missing
-      const slug = selectedMap.slug || DatabaseService.generateRoadmapSlug(selectedMap.title);
-      console.log('🔄 Switching to roadmap:', selectedMap.title, 'Slug:', slug);
-      navigate(`/student/community/${slug}`);
+      const slug = selectedBatch.roadmap.slug || DatabaseService.generateRoadmapSlug(selectedBatch.roadmap.title);
+      console.log('🔄 Switching to batch roadmap:', selectedBatch.roadmap.title, 'Slug:', slug, 'BatchId:', batchId);
+      navigate(`/student/community/${slug}?batch_id=${batchId}`);
     }
   };
 
@@ -280,12 +300,12 @@ export const StudentCommunity: React.FC = () => {
           {currentRoadmap && (
             <RoadmapDropdown
               isDarkMode={isDarkMode}
-              enrolledRoadmaps={enrolledRoadmaps}
-              currentRoadmap={currentRoadmap}
+              enrolledBatches={enrolledBatches}
+              currentBatch={batch}
               showDropdown={showRoadmapDropdown}
               setShowDropdown={setShowRoadmapDropdown}
-              handleRoadmapChange={handleRoadmapChange}
-              selectedRoadmapId={currentRoadmap.id}
+              handleBatchChange={handleBatchChange}
+              selectedBatchId={batch?.id || ''}
             />
           )}
         </div>

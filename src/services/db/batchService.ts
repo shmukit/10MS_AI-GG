@@ -544,3 +544,51 @@ export const assignUserToExistingBatch = async (userId: string, batchId: string)
         return false;
     }
 };
+
+export const getEnrolledBatches = async (userId: string): Promise<(Batch & { roadmap: any })[]> => {
+    try {
+        console.log('Fetching enrolled batches for user:', userId);
+
+        const { data: assignments, error: assignmentError } = await supabase
+            .from('student_batch_assignments')
+            .select(`
+                batch_id,
+                batches!inner (
+                    *,
+                    roadmaps!inner (*)
+                )
+            `)
+            .eq('student_id', userId)
+            .eq('status', 'active')
+            .order('enrollment_date', { ascending: false });
+
+        if (assignmentError) {
+            console.error('Error fetching enrolled batches:', assignmentError);
+            return [];
+        }
+
+        if (!assignments || assignments.length === 0) {
+            return [];
+        }
+
+        // Transform results
+        const result = assignments.map((a: any) => {
+            const batch = a.batches;
+            const roadmap = batch?.roadmaps;
+            // Remove roadmap from batch object to match Batch type if needed, 
+            // but here we keep it as an explicit property
+            const { roadmaps, ...batchData } = batch;
+            return {
+                ...batchData,
+                roadmap: roadmap
+            };
+        });
+
+        console.log(`✅ Found ${result.length} enrolled batches`);
+        return result;
+
+    } catch (error) {
+        console.error('Error in getEnrolledBatches:', error);
+        return [];
+    }
+};

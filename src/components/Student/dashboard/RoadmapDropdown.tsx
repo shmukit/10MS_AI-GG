@@ -3,22 +3,22 @@ import { Map, ChevronDown } from 'lucide-react';
 
 interface RoadmapDropdownProps {
     isDarkMode: boolean;
-    enrolledRoadmaps: any[];
-    currentRoadmap: any;
+    enrolledBatches: any[];
+    currentBatch: any;
     showDropdown: boolean;
     setShowDropdown: (show: boolean) => void;
-    handleRoadmapChange: (id: string) => void;
-    selectedRoadmapId: string;
+    handleBatchChange: (id: string) => void;
+    selectedBatchId: string;
 }
 
 export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
     isDarkMode,
-    enrolledRoadmaps,
-    currentRoadmap,
+    enrolledBatches,
+    currentBatch,
     showDropdown,
     setShowDropdown,
-    handleRoadmapChange,
-    selectedRoadmapId
+    handleBatchChange,
+    selectedBatchId
 }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +38,7 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
         };
     }, [showDropdown, setShowDropdown]);
 
-    if (!enrolledRoadmaps || enrolledRoadmaps.length <= 1) return null;
+    if (!enrolledBatches || enrolledBatches.length <= 1) return null;
 
     return (
         <div className="relative roadmap-dropdown-container" ref={dropdownRef}>
@@ -51,7 +51,7 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
             >
                 <Map className="w-4 h-4" />
                 <span className="text-sm font-medium">
-                    {currentRoadmap?.title || 'Select Roadmap'}
+                    {currentBatch?.name || 'Select Batch'}
                 </span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
@@ -63,16 +63,16 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
                     : 'bg-white border-gray-200'
                     }`}>
                     <div className="py-2">
-                        {enrolledRoadmaps.map((roadmap: any) => (
+                        {enrolledBatches.map((batch: any) => (
                             <button
-                                key={roadmap.id}
-                                onClick={() => handleRoadmapChange(roadmap.id)}
+                                key={batch.id}
+                                onClick={() => handleBatchChange(batch.id)}
                                 className={`w-full text-left px-4 py-2 text-sm transition-all duration-200 ${isDarkMode
                                     ? 'hover:bg-gray-700 text-gray-300 hover:text-white hover:bg-opacity-80'
                                     : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900 hover:bg-opacity-80'
-                                    } ${selectedRoadmapId === roadmap.id ? (isDarkMode ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-50 text-blue-700') : ''}`}
+                                    } ${selectedBatchId === batch.id ? (isDarkMode ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-50 text-blue-700') : ''}`}
                             >
-                                {roadmap.title}
+                                {batch.name}
                             </button>
                         ))}
                     </div>
