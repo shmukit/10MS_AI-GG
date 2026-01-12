@@ -31,9 +31,10 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
             setDecks(availableDecks);
 
             // Load Due Cards for Spaced Repetition
-            const { getDueCards } = await import('../../services/db/spacedRepetitionService');
-            const cards = await getDueCards(user.id);
-            setDueCards(cards || []);
+            // Feature disabled until tables are created
+            // const { getDueCards } = await import('../../services/db/spacedRepetitionService');
+            // const cards = await getDueCards(user.id);
+            setDueCards([]);
         } catch (e) {
             console.error('Error loading practice data:', e);
         } finally {

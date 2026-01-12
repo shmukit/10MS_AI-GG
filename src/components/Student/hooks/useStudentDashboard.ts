@@ -69,11 +69,18 @@ export const useStudentDashboard = () => {
     // Fetch dashboard data
     const fetchDashboardData = async (userId: string, batchId?: string) => {
         try {
-            setLoading(true);
+            // Only set full loading state if we don't have data yet
+            if (!dashboardData) {
+                setLoading(true);
+            } else {
+                // Otherwise indicate we are switching/refreshing but keep UI mounted
+                // We can expose this state if we want to show a spinner
+            }
+
             setError(null);
-            console.log('🔍 Fetching dashboard data for user ID:', userId, 'batch:', batchId);
+            // console.log('🔍 Fetching dashboard data for user ID:', userId, 'batch:', batchId);
             const data = await DatabaseService.getDashboardData(userId, { batchId });
-            console.log('📊 Dashboard data received:', data);
+            // console.log('📊 Dashboard data received:', data);
 
             setDashboardData(data);
 
@@ -105,6 +112,7 @@ export const useStudentDashboard = () => {
             }
 
             // If batchId is provided, update the selected batch
+            // This is critical for the dropdown to reflect the change immediately
             if (batchId) {
                 setSelectedBatchId(batchId);
             }

@@ -36,20 +36,12 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
 }> => {
     try {
         // Check cache first (but bypass cache for company users during debugging)
-        const userInfo = await getUserById(userId);
-        const isCompanyUser = userInfo?.email?.includes('@10minuteschool.com') || userInfo?.email?.includes('@lightcastlepartners.com');
-
         const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, userId, options?.batchId || 'default');
 
-        // Temporarily bypass cache for company users to ensure fresh data
-        if (!isCompanyUser) {
-            const cachedData = cache.get(cacheKey);
-            if (cachedData) {
-                console.log('🎯 Returning cached data for non-company user');
-                return cachedData as any;
-            }
-        } else {
-            console.log('🏢 Bypassing cache for company user to ensure fresh data');
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {
+            console.log('🎯 Returning cached data');
+            return cachedData as any;
         }
 
         // Fetching dashboard data components
@@ -61,6 +53,8 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
             getStudentProgress(userId),
             getUserById(userId)
         ]);
+
+        const isCompanyUser = userData?.email?.includes('@10minuteschool.com') || userData?.email?.includes('@lightcastlepartners.com');
 
         // Determine effective batch and roadmap
         let batch: (Batch & { roadmap?: any }) | null = null;
@@ -124,13 +118,7 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         }
 
         // Dashboard data components fetched
-        console.log('📊 Dashboard data components fetched');
-        console.log('👤 Profile:', profile);
-        console.log('📦 Batch:', batch);
-        console.log('🗺️  Roadmap:', roadmap);
-        console.log('📚 Enrolled Batches:', enrolledBatches);
-        console.log('📈 Progress:', progress);
-        console.log('👤 User Data:', userData);
+        // console.log('📊 Dashboard data components fetched');
 
         // Debug: Check if any component is null
         if (!profile) console.log('⚠️  Profile is null');
@@ -146,11 +134,9 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
 
         if (batch) {
             // Get data for specific batch
-            console.log('📊 Getting data for batch:', batch.name);
+            // console.log('📊 Getting data for batch:', batch.name);
             notices = await getNotices(batch.id);
             mentors = await getMentors(batch.id);
-            console.log('📝 Batch notices:', notices.length);
-            console.log('👥 Batch mentors:', mentors.length);
         }
         // (Removed complex roadmap-based batch searching logic in favor of direct batch selection)
 
