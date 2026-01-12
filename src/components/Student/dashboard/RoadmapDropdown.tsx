@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Map, ChevronDown } from 'lucide-react';
+import { Button } from '../../ui/Button';
 
 interface RoadmapDropdownProps {
     isDarkMode: boolean;
@@ -42,19 +43,17 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
 
     return (
         <div className="relative roadmap-dropdown-container" ref={dropdownRef}>
-            <button
+            <Button
+                variant="outline"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 hover:shadow-md ${isDarkMode
-                    ? 'bg-gray-800 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                    }`}
+                className="gap-2"
             >
                 <Map className="w-4 h-4" />
                 <span className="text-sm font-medium">
                     {currentBatch?.name || 'Select Batch'}
                 </span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
-            </button>
+            </Button>
 
             {/* Roadmap Dropdown */}
             {showDropdown && (
@@ -64,16 +63,14 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
                     }`}>
                     <div className="py-2">
                         {enrolledBatches.map((batch: any) => (
-                            <button
+                            <Button
                                 key={batch.id}
+                                variant="ghost"
                                 onClick={() => handleBatchChange(batch.id)}
-                                className={`w-full text-left px-4 py-2 text-sm transition-all duration-200 ${isDarkMode
-                                    ? 'hover:bg-gray-700 text-gray-300 hover:text-white hover:bg-opacity-80'
-                                    : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900 hover:bg-opacity-80'
-                                    } ${selectedBatchId === batch.id ? (isDarkMode ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-50 text-blue-700') : ''}`}
+                                className={`w-full justify-start font-normal ${selectedBatchId === batch.id ? (isDarkMode ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-50 text-blue-700') : ''}`}
                             >
                                 {batch.name}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>

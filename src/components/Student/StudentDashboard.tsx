@@ -13,6 +13,7 @@ import { MentorsSection } from './dashboard/MentorsSection';
 import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
 import { Leaderboard } from '../Dashboard/Leaderboard';
+import { Card } from '../ui/Card';
 import { posthog } from '../../lib/posthog';
 import { MotionDiv, STAGGER_CHILDREN_VARIANTS, FADE_IN_VARIANTS, HoverLift } from '../ui/MotionPrimitives';
 import { Skeleton } from '../ui/Skeleton';
@@ -200,10 +201,9 @@ export const StudentDashboard: React.FC = () => {
                     Practice & Micro-learning
                   </h2>
                 </div>
-                <div className={`rounded-xl p-6 border shadow-professional transition-all duration-200 hover:shadow-professional-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                  }`}>
+                <Card className="p-6 shadow-professional hover:shadow-professional-lg transition-all duration-200">
                   <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
-                </div>
+                </Card>
               </div>
 
               {/* This Week's Tasks and Upcoming */}
@@ -246,15 +246,12 @@ export const StudentDashboard: React.FC = () => {
               />
 
               {/* Live Sessions */}
-              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${isDarkMode
-                ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                : 'bg-white border-gray-200 hover:border-gray-300'
-                }`}>
+              <Card className="p-6 shadow-professional hover:shadow-professional-lg transition-all duration-200">
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}
                 />
-              </div>
+              </Card>
 
               {/* Mentors */}
               <MentorsSection isDarkMode={isDarkMode} />
