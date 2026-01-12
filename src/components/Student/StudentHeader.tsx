@@ -44,8 +44,8 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-notices'))}
                 className={`p-1.5 sm:p-2 rounded-lg transition-colors duration-200 ${isDarkMode
-                  ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                  ? 'bg-[var(--accent-soft)] text-[var(--primary-accent)] hover:bg-[var(--accent-soft)]/20'
+                  : 'bg-[var(--accent-soft)] text-[var(--primary-accent)] hover:bg-[var(--accent-soft)]/20 shadow-sm'
                   }`}
               >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />

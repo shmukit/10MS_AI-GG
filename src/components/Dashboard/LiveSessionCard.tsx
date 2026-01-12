@@ -64,8 +64,8 @@ export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMen
     return (
         <div className={`border rounded-xl p-4 flex flex-col gap-3 transition-all ${isLive
             ? (isDarkMode
-                ? 'bg-blue-900/20 border-blue-800 shadow-lg ring-1 ring-blue-700/50'
-                : 'bg-blue-50 border-blue-200 shadow-md ring-1 ring-blue-300')
+                ? 'bg-[var(--accent-soft)] border-[var(--primary-accent)] shadow-lg ring-1 ring-[var(--primary-accent)]/50'
+                : 'bg-[var(--accent-soft)] border-[var(--primary-accent)] shadow-md ring-1 ring-[var(--primary-accent)]/30')
             : (isDarkMode
                 ? 'bg-gray-700/50 border-gray-600 hover:bg-gray-700/70 hover:border-gray-500'
                 : 'bg-white border-gray-100 hover:shadow-sm')
@@ -156,7 +156,7 @@ export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMen
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`flex items-center justify-center gap-2 w-full py-2 rounded-lg font-medium transition-all ${isLive
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                            ? 'bg-[var(--primary-accent)] text-white hover:bg-[var(--accent-hover)] shadow-md'
                             : (isDarkMode
                                 ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200')

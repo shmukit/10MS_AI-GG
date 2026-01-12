@@ -1,0 +1,32 @@
+/* Default Theme (Blue) */
+:root,
+[data-color-theme="default"] {
+    --primary-accent: #2563eb;
+    --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --accent-soft: rgba(37, 99, 235, 0.1);
+    --accent-hover: #1d4ed8;
+}
+
+/* Cherryblossoms Theme */
+[data-color-theme='cherryblossoms'] {
+    --primary-accent: #BB377D;
+    --primary-gradient: linear-gradient(135deg, #FBD3E9 0%, #BB377D 100%);
+    --accent-soft: #FBD3E920;
+    --accent-hover: #a32f6d;
+}
+
+/* Shroom Haze Theme */
+[data-color-theme='shroomhaze'] {
+    --primary-accent: #5C258D;
+    --primary-gradient: linear-gradient(135deg, #5C258D 0%, #4389A2 100%);
+    --accent-soft: #4389A215;
+    --accent-hover: #4d1f76;
+}
+
+/* Flare Theme */
+[data-color-theme='flare'] {
+    --primary-accent: #f12711;
+    --primary-gradient: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
+    --accent-soft: #f5af1915;
+    --accent-hover: #d1220f;
+}

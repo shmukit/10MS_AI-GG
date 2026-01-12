@@ -118,7 +118,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 <div className="space-y-4">
                     {dueCards.length > 0 && (
                         <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                            <Book className="w-5 h-5 text-blue-500" />
+                            <Book className="w-5 h-5 text-[var(--primary-accent)]" />
                             All Decks
                         </h3>
                     )}
@@ -128,8 +128,8 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                 key={deck.id}
                                 onClick={() => setSelectedDeck(deck)}
                                 className={`group relative rounded-2xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden cursor-pointer ${isDarkMode
-                                    ? 'bg-gray-700/50 border-gray-600 hover:border-blue-500/50 hover:bg-gray-700/70'
-                                    : 'bg-white border-gray-100 hover:border-blue-200 shadow-sm'
+                                    ? 'bg-gray-700/50 border-gray-600 hover:border-[var(--primary-accent)]/50 hover:bg-gray-700/70'
+                                    : 'bg-white border-gray-100 hover:border-[var(--primary-accent)]/20 shadow-sm'
                                     }`}
                             >
                                 {/* Cover Image or Fallback */}
@@ -145,10 +145,10 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                         </div>
                                     ) : (
                                         <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br transition-all duration-500 ${isDarkMode
-                                            ? 'from-blue-900/40 to-purple-900/40 group-hover:from-blue-800/60 group-hover:to-purple-800/60'
-                                            : 'from-blue-50 to-purple-50 group-hover:from-blue-100 group-hover:to-purple-100'
+                                            ? 'from-[var(--primary-accent)]/20 to-purple-900/40 group-hover:from-[var(--primary-accent)]/40 group-hover:to-purple-800/60'
+                                            : 'from-[var(--accent-soft)] to-purple-50 group-hover:from-[var(--accent-soft)]/20 group-hover:to-purple-100'
                                             }`}>
-                                            <Book className={`w-12 h-12 transition-transform duration-500 group-hover:scale-110 ${isDarkMode ? 'text-blue-400/50' : 'text-blue-500/50'}`} />
+                                            <Book className={`w-12 h-12 transition-transform duration-500 group-hover:scale-110 text-[var(--primary-accent)]/50`} />
                                         </div>
                                     )}
 
@@ -162,8 +162,8 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                     {/* Category Tag (Optional) */}
                                     <div className="absolute top-3 left-3">
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border ${isDarkMode
-                                            ? 'bg-blue-500/20 text-blue-300 border-blue-400/30'
-                                            : 'bg-blue-600/10 text-blue-600 border-blue-200'
+                                            ? 'bg-[var(--primary-accent)]/20 text-[var(--primary-accent)] border-[var(--primary-accent)]/30'
+                                            : 'bg-[var(--primary-accent)]/10 text-[var(--primary-accent)] border-[var(--primary-accent)]/20'
                                             }`}>
                                             Practice
                                         </span>
@@ -172,7 +172,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
 
                                 {/* Content */}
                                 <div className="p-5 md:p-6">
-                                    <h3 className={`text-base md:text-lg font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'
+                                    <h3 className={`text-base md:text-lg font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? 'text-white' : 'text-gray-900'
                                         }`}>
                                         {deck.title}
                                     </h3>
@@ -190,7 +190,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                             <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>~5 mins</span>
                                         </div>
-                                        <div className="flex items-center gap-1 md:gap-1.5 text-blue-500">
+                                        <div className="flex items-center gap-1 md:gap-1.5 opacity-80">
                                             <Trophy className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>Earn XP</span>
                                         </div>

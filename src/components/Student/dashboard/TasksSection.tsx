@@ -46,15 +46,12 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
     return (
         <div className="space-y-6">
             {/* This Week's Tasks */}
-            <div className={`rounded-xl p-4 md:p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${isDarkMode
-                ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                : 'bg-white border-gray-200 hover:border-gray-300'
-                }`}>
+            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
                 <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                     <h3 className={`text-base md:text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Current Level Tasks (Week {currentLevel})
                     </h3>
-                    <span className={`text-[10px] md:text-xs px-2 py-0.5 md:py-1 rounded-full border ${isDarkMode ? 'bg-blue-900/20 text-blue-300 border-blue-800' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
+                    <span className={`text-[10px] md:text-xs px-2 py-0.5 md:py-1 rounded-full border ${isDarkMode ? 'bg-[var(--primary-accent)]/20 text-white border-[var(--primary-accent)]/30' : 'bg-[var(--primary-accent)]/10 text-gray-900 border-[var(--primary-accent)]/20'}`}>
                         Active
                     </span>
                 </div>
@@ -82,8 +79,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
                                     </p>
                                 )}
                                 <div className="flex items-center gap-3">
-                                    <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-200'
-                                        }`}>
+                                    <span className={`text-xs px-3 py-2 rounded-full font-medium transition-colors duration-200 ${isDarkMode ? 'bg-[var(--primary-accent)]/30 text-white border border-[var(--primary-accent)]/30' : 'bg-[var(--primary-accent)]/10 text-gray-900 border border-[var(--primary-accent)]/20'}`}>
                                         {task.task_type}
                                     </span>
                                     {task.estimated_hours && (
@@ -109,10 +105,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
             </div>
 
             {/* Upcoming Tasks */}
-            <div className={`rounded-xl p-4 md:p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${isDarkMode
-                ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                : 'bg-white border-gray-200 hover:border-gray-300'
-                }`}>
+            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
                 <div className="flex justify-between items-center mb-3 md:mb-4">
                     <h3 className={`text-base md:text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Upcoming</h3>
                     <span className={`text-xs md:text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Next Steps</span>
@@ -161,7 +154,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
                                     )}
 
                                     <div className={`flex items-center gap-2 mt-2 ${isLocked ? 'opacity-50' : ''}`}>
-                                        <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+                                        <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${isDarkMode ? 'bg-[var(--primary-accent)]/30 text-white' : 'bg-[var(--primary-accent)]/10 text-gray-900'
                                             }`}>
                                             {task.task_type}
                                         </span>

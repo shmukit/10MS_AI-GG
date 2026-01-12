@@ -51,7 +51,7 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
                 <h3 className={`font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                    <CalendarIcon className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                    <CalendarIcon className="w-5 h-5 text-[var(--primary-accent)]" />
                     Upcoming Sessions
                 </h3>
                 {/* If we had a "view all" link, it would go here */}

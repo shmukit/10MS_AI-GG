@@ -220,8 +220,7 @@ export const StudentProfile: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/student/dashboard')}
-            className={`flex items-center gap-2 transition-colors duration-200 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
-              }`}
+            className={`flex items-center gap-2 transition-colors duration-200 text-[var(--primary-accent)] hover:opacity-80`}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -310,7 +309,7 @@ export const StudentProfile: React.FC = () => {
                   setSaveSuccess(false);
                   setIsEditing(true);
                 }}
-                className="flex items-center gap-2 bg-blue-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="flex items-center gap-2 bg-[var(--primary-accent)] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-[var(--accent-hover)] transition-colors text-sm"
               >
                 <Edit3 className="w-4 h-4" />
                 Edit Profile
@@ -332,7 +331,7 @@ export const StudentProfile: React.FC = () => {
                         type="text"
                         value={editForm.first_name}
                         onChange={(e) => handleInputChange('first_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         placeholder="First Name"
                       />
@@ -340,7 +339,7 @@ export const StudentProfile: React.FC = () => {
                         type="text"
                         value={editForm.last_name}
                         onChange={(e) => handleInputChange('last_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         placeholder="Last Name"
                       />
@@ -374,14 +373,14 @@ export const StudentProfile: React.FC = () => {
                         type="text"
                         value={editForm.degree}
                         onChange={(e) => handleInputChange('degree', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)]"
                         placeholder="Degree"
                       />
                       <input
                         type="text"
                         value={editForm.subject}
                         onChange={(e) => handleInputChange('subject', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)]"
                         placeholder="Subject"
                       />
                     </div>
@@ -402,7 +401,7 @@ export const StudentProfile: React.FC = () => {
                       type="text"
                       value={editForm.institute}
                       onChange={(e) => handleInputChange('institute', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       placeholder="Institute"
                     />
@@ -448,7 +447,7 @@ export const StudentProfile: React.FC = () => {
                     <select
                       value={editForm.year}
                       onChange={(e) => handleInputChange('year', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                         }`}
                     >
                       <option value="1st">1st Year</option>

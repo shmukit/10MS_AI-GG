@@ -44,8 +44,8 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           } cursor-not-allowed`;
       case 'active':
         return `${baseStyles} ${isDarkMode
-          ? 'bg-gray-800 border-blue-400 text-white shadow-lg hover:shadow-xl border-opacity-80'
-          : 'bg-white border-blue-500 text-gray-900 shadow-lg hover:shadow-xl border-opacity-80'
+          ? 'bg-gray-800 border-[var(--primary-accent)] text-white shadow-lg hover:shadow-xl border-opacity-80'
+          : 'bg-white border-[var(--primary-accent)] text-gray-900 shadow-lg hover:shadow-xl border-opacity-80'
           }`;
       case 'completed':
         return `${baseStyles} ${isDarkMode
@@ -62,7 +62,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
       case 'locked':
         return <Lock className={`w-5 h-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />;
       case 'active':
-        return <Zap className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />;
+        return <Zap className="w-5 h-5 text-[var(--primary-accent)]" />;
       case 'completed':
         return (
           <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${isDarkMode
@@ -95,10 +95,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           <h3 className="text-lg font-bold leading-tight">{node.title}</h3>
         </div>
         {node.status === 'active' && (
-          <span className={`text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 ${isDarkMode
-            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
-            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
-            }`}>
+          <span className="text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 bg-[var(--primary-gradient)] text-white shadow-sm">
             🔄 In Progress
           </span>
         )}
@@ -129,13 +126,13 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
             <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
               {node.completionStats.completedStudents}/{node.completionStats.totalStudents} completed
             </span>
-            <span className="text-sm font-medium text-blue-500">
+            <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
               {Math.round(node.completionStats.completionPercentage)}%
             </span>
           </div>
           <div className={`w-full rounded-full h-2 mt-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
             <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className="bg-[var(--primary-accent)] h-2 rounded-full transition-all duration-300"
               style={{ width: `${node.completionStats.completionPercentage}%` }}
             />
           </div>
@@ -151,7 +148,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
           </div>
           <div className={`w-full rounded-full h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
             <div
-              className={`h-2 rounded-full transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'}`}
+              className="h-2 rounded-full transition-all duration-500 bg-[var(--primary-gradient)]"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -167,7 +164,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, isAlter
         <div className="flex items-center gap-2">
           <span>{totalTasks} tasks</span>
           {node.status !== 'locked' && (
-            <span className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+            <span className="font-medium transition-colors duration-200">
               View Details <span className="inline-block transform transition-transform group-hover:translate-x-1">→</span>
             </span>
           )}

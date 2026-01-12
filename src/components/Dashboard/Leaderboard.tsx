@@ -58,7 +58,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
     }
 
     return (
-        <div className={`rounded-xl p-6 border shadow-sm transition-all duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <div className="rounded-xl p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <Trophy className={`w-5 h-5 ${isDarkMode ? 'text-yellow-500' : 'text-yellow-600'}`} />
@@ -71,7 +71,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
                 {entries.map((entry) => (
                     <div
                         key={entry.studentId}
-                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-50'
+                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-gray-800/40' : 'bg-white/40'
                             }`}
                     >
                         <div className="w-8 flex justify-center">
@@ -96,14 +96,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
                             {/* Progress Bar */}
                             <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
                                 <div
-                                    className="h-full bg-blue-500 rounded-full"
+                                    className="h-full bg-[var(--primary-accent)] rounded-full"
                                     style={{ width: `${entry.progress || 0}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="flex flex-col items-end">
-                            <div className={`text-sm font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                            <div className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                 {entry.xpPoints} XP
                             </div>
                             <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>

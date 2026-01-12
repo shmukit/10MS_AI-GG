@@ -26,7 +26,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ completed, total, isDa
 
         <div className={`w-full rounded-full h-2 md:h-3 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
           <div
-            className="bg-gradient-to-r from-blue-500 to-green-500 h-2 md:h-3 rounded-full transition-all duration-500 ease-out"
+            className="bg-gradient-to-r from-[var(--primary-accent)] to-green-500 h-2 md:h-3 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${percentage}%` }}
           />
         </div>
