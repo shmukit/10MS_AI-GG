@@ -8,7 +8,7 @@ export const MentorsSection: React.FC<MentorsSectionProps> = ({
     isDarkMode
 }) => {
     return (
-        <div className="rounded-xl p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
+        <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
             <h3 className={`font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Mentors</h3>
 
             <div className="space-y-3">

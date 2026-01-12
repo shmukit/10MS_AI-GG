@@ -10,7 +10,7 @@ export const StreaksSection: React.FC<StreaksSectionProps> = ({
     streaks
 }) => {
     return (
-        <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
+        <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <h3 className={`text-sm md:text-base font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Week Streaks</h3>
                 <div className={`flex items-center flex-wrap gap-3 md:gap-4 text-[10px] md:text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

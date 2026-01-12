@@ -46,7 +46,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
     return (
         <div className="space-y-6">
             {/* This Week's Tasks */}
-            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
+            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
                 <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                     <h3 className={`text-base md:text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Current Level Tasks (Week {currentLevel})
@@ -105,7 +105,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
             </div>
 
             {/* Upcoming Tasks */}
-            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
+            <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
                 <div className="flex justify-between items-center mb-3 md:mb-4">
                     <h3 className={`text-base md:text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Upcoming</h3>
                     <span className={`text-xs md:text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Next Steps</span>

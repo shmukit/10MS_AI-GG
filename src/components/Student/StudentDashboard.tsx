@@ -203,7 +203,7 @@ export const StudentDashboard: React.FC = () => {
                     Practice & Micro-learning
                   </h2>
                 </div>
-                <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md`}>
+                <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-none shadow-sm hover:shadow-md`}>
                   <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
                 </Card>
               </div>
@@ -250,7 +250,7 @@ export const StudentDashboard: React.FC = () => {
               </div> */}
 
               {/* Live Sessions */}
-              <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md`}>
+              <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-none shadow-sm hover:shadow-md`}>
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}

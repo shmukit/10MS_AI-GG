@@ -58,7 +58,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ batchId, isDarkMode })
     }
 
     return (
-        <div className="rounded-xl p-6 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
+        <div className="rounded-xl p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <Trophy className={`w-5 h-5 ${isDarkMode ? 'text-yellow-500' : 'text-yellow-600'}`} />
