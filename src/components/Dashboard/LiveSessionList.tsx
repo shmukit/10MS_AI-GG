@@ -57,9 +57,9 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
             </div>
 
             {sessions.length === 0 ? (
-                <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <p className="text-sm text-gray-500">No upcoming sessions scheduled.</p>
-                    {isMentor && <p className="text-xs text-gray-400 mt-1">Click "Schedule Class" to add one.</p>}
+                <div className="text-center py-6 bg-muted/20 rounded-xl border border-dashed border-border">
+                    <p className="text-sm text-muted-foreground">No upcoming sessions scheduled.</p>
+                    {isMentor && <p className="text-xs text-muted-foreground mt-1">Click "Schedule Class" to add one.</p>}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -67,12 +67,12 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
 
     if (decks.length === 0 && dueCards.length === 0) {
         return (
-            <div className={`text-center py-12 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <Book className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="text-center py-12 rounded-xl border border-border bg-card">
+                <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2 text-foreground">
                     No practice decks yet
                 </h3>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className="text-sm text-muted-foreground">
                     Check back later for new practice materials.
                 </p>
             </div>
@@ -85,21 +85,20 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 {/* Due for Review Section */}
                 {dueCards.length > 0 && (
                     <div className="space-y-4">
-                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
                             <Clock className="w-5 h-5 text-orange-500" />
                             Due for Review
                         </h3>
                         <div
                             onClick={startReview}
-                            className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-r from-orange-500/10 to-red-500/10 ${isDarkMode ? 'border-orange-500/30' : 'border-orange-200'
-                                }`}
+                            className="group relative rounded-xl border border-orange-200 dark:border-orange-500/30 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-r from-orange-500/10 to-red-500/10"
                         >
                             <div className="p-6 flex items-center justify-between">
                                 <div>
-                                    <h4 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                    <h4 className="text-xl font-bold mb-2 text-foreground">
                                         Daily Review Session
                                     </h4>
-                                    <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                    <p className="text-sm text-muted-foreground">
                                         You have <span className="font-bold text-orange-500">{dueCards.length} cards</span> scheduled for review today based on your past performance.
                                     </p>
                                 </div>
@@ -114,7 +113,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 {/* Available Decks */}
                 <div className="space-y-4">
                     {dueCards.length > 0 && (
-                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
                             <Book className="w-5 h-5 text-blue-500" />
                             All Decks
                         </h3>
@@ -124,11 +123,10 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                             <div
                                 key={deck.id}
                                 onClick={() => setSelectedDeck(deck)}
-                                className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                                    }`}
+                                className="group relative rounded-xl border border-border bg-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                             >
                                 {/* Cover Image or Fallback */}
-                                <div className="h-48 w-full relative overflow-hidden bg-gray-900">
+                                <div className="h-48 w-full relative overflow-hidden bg-muted">
                                     {deck.cover_image ? (
                                         <img
                                             src={deck.cover_image}
@@ -151,24 +149,22 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
 
                                 {/* Content */}
                                 <div className="p-5">
-                                    <h3 className={`text-lg font-bold mb-2 line-clamp-1 group-hover:text-blue-500 transition-colors ${isDarkMode ? 'text-white' : 'text-gray-900'
-                                        }`}>
+                                    <h3 className="text-lg font-bold mb-2 line-clamp-1 group-hover:text-primary transition-colors text-foreground">
                                         {deck.title}
                                     </h3>
 
                                     {deck.description && (
-                                        <p className={`text-sm line-clamp-2 mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                                            }`}>
+                                        <p className="text-sm line-clamp-2 mb-4 text-muted-foreground">
                                             {deck.description}
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs mt-auto pt-4 border-t border-dashed border-gray-700/50">
-                                        <div className={`flex items-center gap-1.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                    <div className="flex items-center justify-between text-xs mt-auto pt-4 border-t border-dashed border-border">
+                                        <div className="flex items-center gap-1.5 text-muted-foreground">
                                             <Clock className="w-3.5 h-3.5" />
                                             <span>~5 mins</span>
                                         </div>
-                                        <div className={`flex items-center gap-1.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                        <div className="flex items-center gap-1.5 text-blue-500">
                                             <Trophy className="w-3.5 h-3.5" />
                                             <span>Earn XP</span>
                                         </div>

@@ -104,7 +104,7 @@ export const StudentDashboard: React.FC = () => {
   }, [dashboardData, user?.id, selectedBatchId]);
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+    <div className="min-h-screen transition-colors duration-200 bg-background">
       <StudentHeader
         userName={getUserDisplayName()}
         userRole="student"
@@ -147,17 +147,17 @@ export const StudentDashboard: React.FC = () => {
         {/* Error State */}
         {error && (
           <MotionDiv
-            className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8"
+            className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-sm">!</span>
+              <div className="w-6 h-6 bg-destructive/20 rounded-full flex items-center justify-center">
+                <span className="text-destructive text-sm">!</span>
               </div>
               <div>
-                <h3 className="text-red-800 font-medium">Error Loading Dashboard</h3>
-                <p className="text-red-600 text-sm">{error}</p>
+                <h3 className="text-destructive font-medium">Error Loading Dashboard</h3>
+                <p className="text-destructive/80 text-sm">{error}</p>
               </div>
             </div>
           </MotionDiv>
@@ -197,8 +197,8 @@ export const StudentDashboard: React.FC = () => {
               {/* Practice & Micro-learning Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Layers className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                  <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <Layers className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-bold text-foreground">
                     Practice & Micro-learning
                   </h2>
                 </div>
