@@ -55,6 +55,12 @@ export const MobileBottomNav: React.FC = () => {
         }
     }, [user?.id]);
 
+    React.useEffect(() => {
+        const handleToggleNotices = () => setIsNoticesOpen(prev => !prev);
+        window.addEventListener('toggle-mobile-notices', handleToggleNotices);
+        return () => window.removeEventListener('toggle-mobile-notices', handleToggleNotices);
+    }, []);
+
     const handleBatchSwitch = async (batchId: string) => {
         navigate(`/student/dashboard?batchId=${batchId}`);
         setIsBatchesOpen(false);
@@ -90,6 +96,12 @@ export const MobileBottomNav: React.FC = () => {
             isActive: location.pathname.startsWith('/student/roadmap')
         },
         {
+            label: 'Batches',
+            icon: Layers,
+            onClick: () => setIsBatchesOpen(!isBatchesOpen),
+            isActive: isBatchesOpen
+        },
+        {
             label: 'Community',
             icon: Users,
             onClick: () => {
@@ -100,12 +112,6 @@ export const MobileBottomNav: React.FC = () => {
                 }
             },
             isActive: location.pathname.startsWith('/student/community')
-        },
-        {
-            label: 'Notices',
-            icon: Bell,
-            onClick: () => setIsNoticesOpen(!isNoticesOpen),
-            isActive: isNoticesOpen
         },
         {
             label: 'Menu',
@@ -184,19 +190,7 @@ export const MobileBottomNav: React.FC = () => {
                                 </button>
                             </div>
                             <div className="p-4 space-y-2">
-                                <h4 className="text-sm font-medium text-muted-foreground px-4 uppercase tracking-wider mb-2">Navigation</h4>
-                                <Button
-                                    variant="ghost"
-                                    className="w-full justify-start text-foreground"
-                                    onClick={() => {
-                                        setIsBatchesOpen(true);
-                                        setIsMenuOpen(false);
-                                    }}
-                                >
-                                    <Layers className="w-4 h-4 mr-3" />
-                                    Switch Batch
-                                </Button>
-                                <h4 className="text-sm font-medium text-muted-foreground px-4 uppercase tracking-wider mt-4 mb-2">Account</h4>
+                                <h4 className="text-sm font-medium text-muted-foreground px-4 uppercase tracking-wider mb-2">Account</h4>
                                 <Button
                                     variant="ghost"
                                     className="w-full justify-start text-foreground"

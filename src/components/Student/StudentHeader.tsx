@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Bell } from 'lucide-react';
 import { ProfileDropdown } from '../Profile/ProfileDropdown';
 import { useTheme } from '../../lib/ThemeContext';
 import { SheSTEMLogo } from '../Logo/SheSTEMLogo';
@@ -36,15 +36,24 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
               <span className={`text-xs sm:text-sm font-semibold truncate max-w-[80px] sm:max-w-none ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{userName}</span>
             </div>
             <button
-              onClick={toggleDarkMode}
+              onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-notices'))}
               className={`p-1.5 sm:p-2 rounded-lg transition-colors duration-200 ${isDarkMode
-                ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                 }`}
             >
-              {isDarkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               <ProfileDropdown
                 userName={userName}
                 userRole={userRole}
