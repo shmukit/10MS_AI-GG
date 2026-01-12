@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
+// import { NoticeBoard } from '../NoticeBoard/NoticeBoard';
 import { useTheme } from '../../lib/ThemeContext';
 import { StudentHeader } from './StudentHeader';
 import { LiveSessionList } from '../Dashboard/LiveSessionList';
@@ -13,6 +13,7 @@ import { MentorsSection } from './dashboard/MentorsSection';
 import { PracticeDeckList } from './PracticeDeckList';
 import { Layers } from 'lucide-react';
 import { Leaderboard } from '../Dashboard/Leaderboard';
+import { Card } from '../ui/Card';
 import { posthog } from '../../lib/posthog';
 import { MotionDiv, STAGGER_CHILDREN_VARIANTS, FADE_IN_VARIANTS, HoverLift } from '../ui/MotionPrimitives';
 import { Skeleton } from '../ui/Skeleton';
@@ -102,7 +103,7 @@ export const StudentDashboard: React.FC = () => {
   }, [dashboardData, user?.id, selectedBatchId]);
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+    <div className="min-h-screen transition-colors duration-200 bg-background">
       <StudentHeader
         userName={getUserDisplayName()}
         userRole="student"
@@ -110,7 +111,7 @@ export const StudentDashboard: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8 pb-20 md:pb-8">
         {/* Loading State */}
         {loading && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -145,17 +146,17 @@ export const StudentDashboard: React.FC = () => {
         {/* Error State */}
         {error && (
           <MotionDiv
-            className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8"
+            className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-sm">!</span>
+              <div className="w-6 h-6 bg-destructive/20 rounded-full flex items-center justify-center">
+                <span className="text-destructive text-sm">!</span>
               </div>
               <div>
-                <h3 className="text-red-800 font-medium">Error Loading Dashboard</h3>
-                <p className="text-red-600 text-sm">{error}</p>
+                <h3 className="text-destructive font-medium">Error Loading Dashboard</h3>
+                <p className="text-destructive/80 text-sm">{error}</p>
               </div>
             </div>
           </MotionDiv>
@@ -195,15 +196,16 @@ export const StudentDashboard: React.FC = () => {
               {/* Practice & Micro-learning Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Layers className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                  <div className="p-2 rounded-lg bg-[var(--accent-soft)]">
+                    <Layers className="w-5 h-5 text-[var(--primary-accent)]" />
+                  </div>
                   <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Practice & Micro-learning
                   </h2>
                 </div>
-                <div className={`rounded-xl p-6 border shadow-professional transition-all duration-200 hover:shadow-professional-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                  }`}>
+                <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md`}>
                   <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
-                </div>
+                </Card>
               </div>
 
               {/* This Week's Tasks and Upcoming */}
@@ -238,23 +240,23 @@ export const StudentDashboard: React.FC = () => {
               {/* Leaderboard */}
               <Leaderboard batchId={selectedBatchId} isDarkMode={isDarkMode} />
 
-              {/* Notice Board */}
-              <NoticeBoard
-                isDarkMode={isDarkMode}
-                notices={dashboardData?.notices || []}
-                onMarkAsRead={markNoticeAsRead}
-              />
+              {/* NoticeBoard removed from web view as it's now in the header dropdown */}
+              {/* <div className="hidden md:block">
+                <NoticeBoard
+                  isDarkMode={isDarkMode}
+                  notices={dashboardData?.notices || []}
+                  onMarkAsRead={markNoticeAsRead}
+                />
+              </div> */}
 
               {/* Live Sessions */}
-              <div className={`rounded-xl p-6 shadow-professional border transition-all duration-200 hover:shadow-professional-lg ${isDarkMode
-                ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                : 'bg-white border-gray-200 hover:border-gray-300'
-                }`}>
+              <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md`}>
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}
+                  isDarkMode={isDarkMode}
                 />
-              </div>
+              </Card>
 
               {/* Mentors */}
               <MentorsSection isDarkMode={isDarkMode} />

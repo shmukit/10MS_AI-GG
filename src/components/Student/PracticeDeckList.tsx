@@ -67,12 +67,12 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
 
     if (decks.length === 0 && dueCards.length === 0) {
         return (
-            <div className={`text-center py-12 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <Book className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="text-center py-12 rounded-xl border border-border bg-card">
+                <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2 text-foreground">
                     No practice decks yet
                 </h3>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className="text-sm text-muted-foreground">
                     Check back later for new practice materials.
                 </p>
             </div>
@@ -85,26 +85,29 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 {/* Due for Review Section */}
                 {dueCards.length > 0 && (
                     <div className="space-y-4">
-                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            <Clock className="w-5 h-5 text-orange-500" />
+                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-foreground'}`}>
+                            <Clock className={`w-5 h-5 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`} />
                             Due for Review
                         </h3>
                         <div
                             onClick={startReview}
-                            className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-r from-orange-500/10 to-red-500/10 ${isDarkMode ? 'border-orange-500/30' : 'border-orange-200'
+                            className={`group relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${isDarkMode
+                                ? 'bg-gradient-to-r from-orange-900/20 to-red-900/20 border-orange-500/30'
+                                : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 shadow-sm'
                                 }`}
                         >
-                            <div className="p-6 flex items-center justify-between">
-                                <div>
-                                    <h4 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            <div className="p-6 md:p-8 flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <h4 className={`text-xl md:text-2xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         Daily Review Session
                                     </h4>
-                                    <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                        You have <span className="font-bold text-orange-500">{dueCards.length} cards</span> scheduled for review today based on your past performance.
+                                    <p className={`text-sm md:text-base ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
+                                        You have <span className={`font-bold ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>{dueCards.length} cards</span> scheduled for review.
                                     </p>
                                 </div>
-                                <div className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                    <Play className="w-6 h-6 ml-1 fill-white" />
+                                <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ${isDarkMode ? 'bg-orange-500 text-white shadow-orange-500/20' : 'bg-orange-600 text-white shadow-orange-600/20'
+                                    }`}>
+                                    <Play className="w-6 h-6 md:w-8 md:h-8 ml-1 fill-white" />
                                 </div>
                             </div>
                         </div>
@@ -114,62 +117,81 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                 {/* Available Decks */}
                 <div className="space-y-4">
                     {dueCards.length > 0 && (
-                        <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            <Book className="w-5 h-5 text-blue-500" />
+                        <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                            <Book className="w-5 h-5 text-[var(--primary-accent)]" />
                             All Decks
                         </h3>
                     )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {decks.map(deck => (
                             <div
                                 key={deck.id}
                                 onClick={() => setSelectedDeck(deck)}
-                                className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                                className={`group relative rounded-2xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden cursor-pointer ${isDarkMode
+                                    ? 'bg-gray-700/50 border-gray-600 hover:border-[var(--primary-accent)]/50 hover:bg-gray-700/70'
+                                    : 'bg-white border-gray-100 hover:border-[var(--primary-accent)]/20 shadow-sm'
                                     }`}
                             >
                                 {/* Cover Image or Fallback */}
-                                <div className="h-48 w-full relative overflow-hidden bg-gray-900">
+                                <div className="h-40 md:h-48 w-full relative overflow-hidden">
                                     {deck.cover_image ? (
-                                        <img
-                                            src={deck.cover_image}
-                                            alt={deck.title}
-                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                        />
+                                        <div className="relative h-full w-full">
+                                            <img
+                                                src={deck.cover_image}
+                                                alt={deck.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                            <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-gray-900/80 via-transparent' : 'from-black/40 via-transparent'} to-transparent`} />
+                                        </div>
                                     ) : (
-                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20`}>
-                                            <Book className="w-12 h-12 text-blue-500/50" />
+                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br transition-all duration-500 ${isDarkMode
+                                            ? 'from-[var(--primary-accent)]/20 to-purple-900/40 group-hover:from-[var(--primary-accent)]/40 group-hover:to-purple-800/60'
+                                            : 'from-[var(--accent-soft)] to-purple-50 group-hover:from-[var(--accent-soft)]/20 group-hover:to-purple-100'
+                                            }`}>
+                                            <Book className={`w-12 h-12 transition-transform duration-500 group-hover:scale-110 text-[var(--primary-accent)]/50`} />
                                         </div>
                                     )}
 
                                     {/* Play Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 backdrop-blur-[2px]">
-                                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
-                                            <Play className="w-8 h-8 text-white ml-1 fill-white" />
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[2px]">
+                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/30 shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-300">
+                                            <Play className="w-6 h-6 md:w-8 md:h-8 text-white ml-1 fill-white" />
                                         </div>
+                                    </div>
+
+                                    {/* Category Tag (Optional) */}
+                                    <div className="absolute top-3 left-3">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border ${isDarkMode
+                                            ? 'bg-[var(--primary-accent)]/20 text-[var(--primary-accent)] border-[var(--primary-accent)]/30'
+                                            : 'bg-[var(--primary-accent)]/10 text-[var(--primary-accent)] border-[var(--primary-accent)]/20'
+                                            }`}>
+                                            Practice
+                                        </span>
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-5">
-                                    <h3 className={`text-lg font-bold mb-2 line-clamp-1 group-hover:text-blue-500 transition-colors ${isDarkMode ? 'text-white' : 'text-gray-900'
+                                <div className="p-5 md:p-6">
+                                    <h3 className={`text-base md:text-lg font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? 'text-white' : 'text-gray-900'
                                         }`}>
                                         {deck.title}
                                     </h3>
 
                                     {deck.description && (
-                                        <p className={`text-sm line-clamp-2 mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                        <p className={`text-xs md:text-sm line-clamp-2 mb-4 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
                                             }`}>
                                             {deck.description}
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs mt-auto pt-4 border-t border-dashed border-gray-700/50">
-                                        <div className={`flex items-center gap-1.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                            <Clock className="w-3.5 h-3.5" />
+                                    <div className={`flex items-center justify-between text-[10px] md:text-xs mt-auto pt-4 border-t border-dashed ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+                                        }`}>
+                                        <div className="flex items-center gap-1 md:gap-1.5 text-muted-foreground">
+                                            <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>~5 mins</span>
                                         </div>
-                                        <div className={`flex items-center gap-1.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                            <Trophy className="w-3.5 h-3.5" />
+                                        <div className="flex items-center gap-1 md:gap-1.5 opacity-80">
+                                            <Trophy className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>Earn XP</span>
                                         </div>
                                     </div>

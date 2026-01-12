@@ -284,17 +284,17 @@ export const StudentCommunity: React.FC = () => {
         pageTitle="Community"
       />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8 pb-32 md:pb-8">
         <button
           onClick={() => navigate('/student/dashboard')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors text-xs sm:text-base"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Back to Dashboard
         </button>
 
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Student Community</h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          {/* Duplicate title removed */}
 
           {/* Roadmap Dropdown */}
           {currentRoadmap && (
@@ -311,40 +311,40 @@ export const StudentCommunity: React.FC = () => {
         </div>
 
         {/* Batch Information */}
-        <div className={`rounded-lg p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
+        <div className={`rounded-xl p-4 md:p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
           <div className="flex items-center gap-3 mb-4">
-            <Users className="w-8 h-8 text-blue-600" />
-            <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+            <h2 className={`text-lg md:text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               {batch?.name || 'Loading...'}
             </h2>
           </div>
 
           {/* Top section with students count and mentor info */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:flex sm:items-center gap-3 md:gap-6">
               <div className="flex items-center gap-2">
-                <Users className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Students: {students.length} members</span>
+                <Users className={`w-4 h-4 md:w-5 md:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Students: {students.length}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">👨‍🎓</span>
-                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
-                  Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name} ${mentors[0]?.last_name}, Senior BI Executive` : 'Uttam Deb, Senior BI Executive'}
+                <span className="text-xl md:text-2xl">👨‍🎓</span>
+                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name}` : 'Uttam Deb'}
                 </span>
               </div>
             </div>
 
-            {/* Communication CTAs at top right */}
-            <div className="flex gap-3">
+            {/* Communication CTAs */}
+            <div className="flex flex-wrap gap-2 md:gap-3">
               {batch?.whatsapp_link && (
                 <a
                   href={batch.whatsapp_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex items-center gap-2 bg-green-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-xs md:text-sm"
                 >
                   <span>📱</span>
-                  WhatsApp
+                  <span className="hidden sm:inline">WhatsApp</span>
                 </a>
               )}
               {batch?.discord_link && (
@@ -352,10 +352,10 @@ export const StudentCommunity: React.FC = () => {
                   href={batch.discord_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                  className="flex items-center gap-2 bg-purple-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm"
                 >
                   <span>💬</span>
-                  Discord
+                  <span className="hidden sm:inline">Discord</span>
                 </a>
               )}
               {batch?.emergency_contact && (
@@ -403,54 +403,56 @@ export const StudentCommunity: React.FC = () => {
           <div className="space-y-4">
             {/* Real Group Members */}
             {sortedStudents.length > 0 ? (
-              sortedStudents.map((member, index) => (
-                <div key={member.id} className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
+              sortedStudents.map((member, memberIndex) => (
+                <div key={member.id} className={`rounded-xl p-3 md:p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base">
                         {member.first_name?.[0] || 'S'}{member.last_name?.[0] || ''}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <h4 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <h4 className={`font-semibold text-sm md:text-base truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                             {member.first_name} {member.last_name}
                           </h4>
                           {/* Display profile information if available */}
                           {member.profile && (
-                            <div className={`text-xs space-y-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                              <p>{member.profile.degree} {member.profile.subject} • {member.profile.year} Year</p>
-                              <p>{member.profile.institute}</p>
+                            <div className={`text-[10px] md:text-xs space-y-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                              <p className="truncate">{member.profile.degree} • {member.profile.year} Year</p>
+                              <p className="truncate">{member.profile.institute}</p>
                             </div>
                           )}
                         </div>
                         {/* Email copy button */}
                         <button
                           onClick={() => copyEmailToClipboard(member.email)}
-                          className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
+                          className={`p-1.5 md:p-2 rounded-lg transition-colors flex-shrink-0 ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
                           title="Copy email to clipboard"
                         >
-                          <Mail className="w-4 h-4" />
+                          <Mail className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 sm:gap-0 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-gray-600">
                       {member.progress ? (
                         <>
-                          <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <p className={`text-[10px] md:text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                             Week {member.progress.current_week}/6
                           </p>
-                          <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {Math.round(member.progress.progress_percentage || 0)}% Complete
-                          </p>
-                          <div className={`w-20 rounded-full h-2 mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: `${Math.round(member.progress.progress_percentage || 0)}%` }}
-                            ></div>
+                          <div className="flex flex-col sm:items-end">
+                            <p className={`text-[10px] md:text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {Math.round(member.progress.progress_percentage || 0)}% Complete
+                            </p>
+                            <div className={`w-16 md:w-20 rounded-full h-1.5 mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                              <div
+                                className="bg-blue-600 h-1.5 rounded-full"
+                                style={{ width: `${Math.round(member.progress.progress_percentage || 0)}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </>
                       ) : (
-                        <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`text-[10px] md:text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           Enrolled
                         </p>
                       )}

@@ -48,16 +48,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Student Routes Component
+import { StudentLayout } from './components/Layout/StudentLayout';
+
 const StudentRoutes = () => {
   return (
     <Suspense fallback={<RouteLoader />}>
       <Routes>
-        <Route path="/dashboard" element={<PageTransition><StudentDashboard /></PageTransition>} />
-        <Route path="/roadmap" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
-        <Route path="/roadmap/:roadmapSlug" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
-        <Route path="/profile" element={<PageTransition><StudentProfile /></PageTransition>} />
-        <Route path="/community" element={<PageTransition><StudentCommunity /></PageTransition>} />
-        <Route path="/community/:roadmapSlug" element={<PageTransition><StudentCommunity /></PageTransition>} />
+        <Route element={<StudentLayout />}>
+          <Route path="/dashboard" element={<PageTransition><StudentDashboard /></PageTransition>} />
+          <Route path="/roadmap" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
+          <Route path="/roadmap/:roadmapSlug" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition><StudentProfile /></PageTransition>} />
+          <Route path="/community" element={<PageTransition><StudentCommunity /></PageTransition>} />
+          <Route path="/community/:roadmapSlug" element={<PageTransition><StudentCommunity /></PageTransition>} />
+        </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>

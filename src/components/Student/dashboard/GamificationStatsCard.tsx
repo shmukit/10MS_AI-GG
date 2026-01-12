@@ -14,8 +14,7 @@ export const GamificationStatsCard: React.FC<GamificationStatsCardProps> = ({ st
     if (!stats) return null;
 
     return (
-        <div className={`rounded-xl p-6 border shadow-sm transition-all duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+        <div className="rounded-xl p-4 transition-all duration-200 bg-[var(--accent-soft)] border-[var(--primary-accent)]/10 shadow-sm hover:shadow-md">
             <div className="flex items-center gap-2 mb-4">
                 <Trophy className={`w-5 h-5 ${isDarkMode ? 'text-yellow-500' : 'text-yellow-600'}`} />
                 <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Your Progress</h3>
@@ -23,7 +22,7 @@ export const GamificationStatsCard: React.FC<GamificationStatsCardProps> = ({ st
 
             <div className="flex items-center justify-between gap-4">
                 {/* Rank */}
-                <div className={`flex items-center gap-3 p-3 rounded-lg flex-1 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'
+                <div className={`flex items-center gap-3 p-3 rounded-lg flex-1 ${isDarkMode ? 'bg-black/20' : 'bg-white/40'
                     }`}>
                     <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-50 text-amber-600'
                         }`}>
@@ -40,9 +39,9 @@ export const GamificationStatsCard: React.FC<GamificationStatsCardProps> = ({ st
                 </div>
 
                 {/* XP */}
-                <div className={`flex items-center gap-3 p-3 rounded-lg flex-1 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'
+                <div className={`flex items-center gap-3 p-3 rounded-lg flex-1 ${isDarkMode ? 'bg-black/20' : 'bg-white/40'
                     }`}>
-                    <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600'
+                    <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-[var(--accent-soft)] text-[var(--primary-accent)]' : 'bg-[var(--accent-soft)] text-[var(--primary-accent)]'
                         }`}>
                         <Zap className="w-5 h-5" />
                     </div>
