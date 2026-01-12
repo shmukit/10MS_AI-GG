@@ -17,6 +17,7 @@ import { Card } from '../ui/Card';
 import { posthog } from '../../lib/posthog';
 import { MotionDiv, STAGGER_CHILDREN_VARIANTS, FADE_IN_VARIANTS, HoverLift } from '../ui/MotionPrimitives';
 import { Skeleton } from '../ui/Skeleton';
+import { MobileBottomNav } from './MobileBottomNav';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -111,7 +112,7 @@ export const StudentDashboard: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8 pb-20 md:pb-8">
         {/* Loading State */}
         {loading && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -259,6 +260,13 @@ export const StudentDashboard: React.FC = () => {
           </MotionDiv>
         )}
       </div>
+
+      <MobileBottomNav
+        currentBatchName={getCurrentBatch()?.name}
+        onRoadmapClick={() => setShowRoadmapDropdown(!showRoadmapDropdown)}
+        userName={getUserDisplayName()}
+        userEmail={user?.email}
+      />
     </div>
   );
 };
