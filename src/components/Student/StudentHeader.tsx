@@ -21,39 +21,39 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <SheSTEMLogo className="flex-shrink-0" />
+            <SheSTEMLogo className="flex-shrink-0 scale-90 sm:scale-100 origin-left" />
             {pageTitle && (
-              <span className={`hidden sm:inline text-lg text-gray-500 transition-colors duration-200 truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                • {pageTitle}
+              <span className={`text-[13px] sm:text-lg font-medium text-gray-400 transition-colors duration-200 truncate flex items-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <span className="hidden xs:inline mx-1.5 opacity-30">•</span>
+                {pageTitle}
               </span>
             )}
           </div>
 
-          <div className="hidden md:flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <div className="hidden xs:flex flex-col items-end mr-1">
+              <span className={`text-[10px] sm:text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Hello,</span>
+              <span className={`text-xs sm:text-sm font-semibold truncate max-w-[80px] sm:max-w-none ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{userName}</span>
+            </div>
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+              className={`p-1.5 sm:p-2 rounded-lg transition-colors duration-200 ${isDarkMode
                 ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDarkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
             </button>
-            <ProfileDropdown
-              userName={userName}
-              userRole={userRole}
-            />
+            <div className="hidden md:block">
+              <ProfileDropdown
+                userName={userName}
+                userRole={userRole}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Show page title on mobile as a second row */}
-        {pageTitle && (
-          <div className="sm:hidden mt-2 pt-2 border-t border-gray-200/50">
-            <span className={`text-sm text-gray-500 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {pageTitle}
-            </span>
-          </div>
-        )}
+
       </div>
     </div>
   );

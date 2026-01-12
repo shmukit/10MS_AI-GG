@@ -17,7 +17,6 @@ import { Card } from '../ui/Card';
 import { posthog } from '../../lib/posthog';
 import { MotionDiv, STAGGER_CHILDREN_VARIANTS, FADE_IN_VARIANTS, HoverLift } from '../ui/MotionPrimitives';
 import { Skeleton } from '../ui/Skeleton';
-import { MobileBottomNav } from './MobileBottomNav';
 
 export const StudentDashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -239,12 +238,13 @@ export const StudentDashboard: React.FC = () => {
               {/* Leaderboard */}
               <Leaderboard batchId={selectedBatchId} isDarkMode={isDarkMode} />
 
-              {/* Notice Board */}
-              <NoticeBoard
-                isDarkMode={isDarkMode}
-                notices={dashboardData?.notices || []}
-                onMarkAsRead={markNoticeAsRead}
-              />
+              <div className="hidden md:block">
+                <NoticeBoard
+                  isDarkMode={isDarkMode}
+                  notices={dashboardData?.notices || []}
+                  onMarkAsRead={markNoticeAsRead}
+                />
+              </div>
 
               {/* Live Sessions */}
               <Card className="p-6 shadow-professional hover:shadow-professional-lg transition-all duration-200">
@@ -260,13 +260,6 @@ export const StudentDashboard: React.FC = () => {
           </MotionDiv>
         )}
       </div>
-
-      <MobileBottomNav
-        currentBatchName={getCurrentBatch()?.name}
-        onRoadmapClick={() => setShowRoadmapDropdown(!showRoadmapDropdown)}
-        userName={getUserDisplayName()}
-        userEmail={user?.email}
-      />
     </div>
   );
 };

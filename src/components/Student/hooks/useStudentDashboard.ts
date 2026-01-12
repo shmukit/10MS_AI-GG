@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../lib/useAuth';
 import { supabase } from '../../../lib/supabase';
 import { DatabaseService } from '../../../services/database';
 
 export const useStudentDashboard = () => {
     const { user, loading: authLoading } = useAuth();
+    const location = useLocation();
 
     // State
     const [loading, setLoading] = useState(true);
@@ -159,8 +161,12 @@ export const useStudentDashboard = () => {
             return;
         }
 
-        fetchDashboardData(user.id);
-    }, [user?.id, authLoading]);
+        // Check for batchId in URL
+        const params = new URLSearchParams(location.search);
+        const batchIdFromUrl = params.get('batchId');
+
+        fetchDashboardData(user.id, batchIdFromUrl || undefined);
+    }, [user?.id, authLoading, location.search]);
 
     // Get current roadmap data (derived from batch)
     const getCurrentRoadmap = () => {

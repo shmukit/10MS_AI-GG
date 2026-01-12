@@ -19,7 +19,7 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
     const navigate = useNavigate();
 
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="hidden md:grid grid-cols-2 gap-4">
             <div
                 onClick={() => {
                     if (currentRoadmap) {

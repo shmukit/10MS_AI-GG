@@ -264,23 +264,23 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         pageTitle={roadmap.title}
       />
 
-      {/* Breadcrumb */}
-      <div className={`border-b min-h-16 transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+      {/* Breadcrumb / Back button */}
+      <div className={`border-b min-h-12 md:min-h-16 transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 md:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={onBack}
-              className={`flex items-center gap-2 transition-colors ${effectiveDarkMode
+              className={`flex items-center gap-1.5 md:gap-2 transition-colors ${effectiveDarkMode
                 ? 'text-gray-400 hover:text-white'
                 : 'text-gray-600 hover:text-gray-900'
                 }`}
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-medium text-sm sm:text-base">Back to Dashboard</span>
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="font-medium text-xs md:text-base">Back to Dashboard</span>
             </button>
 
-            <h1 className={`text-lg sm:text-2xl font-bold transition-colors duration-200 truncate ml-4 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`hidden md:block text-2xl font-bold transition-colors duration-200 truncate ml-4 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>
               {roadmap.title}
             </h1>
           </div>

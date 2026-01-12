@@ -118,7 +118,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                             All Decks
                         </h3>
                     )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {decks.map(deck => (
                             <div
                                 key={deck.id}
@@ -126,7 +126,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                 className="group relative rounded-xl border border-border bg-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                             >
                                 {/* Cover Image or Fallback */}
-                                <div className="h-48 w-full relative overflow-hidden bg-muted">
+                                <div className="h-32 md:h-48 w-full relative overflow-hidden bg-muted">
                                     {deck.cover_image ? (
                                         <img
                                             src={deck.cover_image}
@@ -135,37 +135,37 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ isDarkMode, 
                                         />
                                     ) : (
                                         <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20`}>
-                                            <Book className="w-12 h-12 text-blue-500/50" />
+                                            <Book className="w-8 h-8 md:w-12 md:h-12 text-blue-500/50" />
                                         </div>
                                     )}
 
                                     {/* Play Overlay */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 backdrop-blur-[2px]">
-                                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
-                                            <Play className="w-8 h-8 text-white ml-1 fill-white" />
+                                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
+                                            <Play className="w-6 h-6 md:w-8 md:h-8 text-white ml-1 fill-white" />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-5">
-                                    <h3 className="text-lg font-bold mb-2 line-clamp-1 group-hover:text-primary transition-colors text-foreground">
+                                <div className="p-4 md:p-5">
+                                    <h3 className="text-base md:text-lg font-bold mb-1 md:mb-2 line-clamp-1 group-hover:text-primary transition-colors text-foreground">
                                         {deck.title}
                                     </h3>
 
                                     {deck.description && (
-                                        <p className="text-sm line-clamp-2 mb-4 text-muted-foreground">
+                                        <p className="text-xs md:text-sm line-clamp-2 mb-3 md:mb-4 text-muted-foreground">
                                             {deck.description}
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs mt-auto pt-4 border-t border-dashed border-border">
-                                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                                            <Clock className="w-3.5 h-3.5" />
+                                    <div className="flex items-center justify-between text-[10px] md:text-xs mt-auto pt-3 md:pt-4 border-t border-dashed border-border">
+                                        <div className="flex items-center gap-1 md:gap-1.5 text-muted-foreground">
+                                            <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>~5 mins</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-blue-500">
-                                            <Trophy className="w-3.5 h-3.5" />
+                                        <div className="flex items-center gap-1 md:gap-1.5 text-blue-500">
+                                            <Trophy className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                             <span>Earn XP</span>
                                         </div>
                                     </div>
