@@ -8,7 +8,7 @@ import { useAuthContext } from '../../lib';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const MobileBottomNav: React.FC = () => {
-    const { isDarkMode, toggleDarkMode } = useTheme();
+    const { isDarkMode, toggleDarkMode, colorTheme, setColorTheme } = useTheme();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isBatchesOpen, setIsBatchesOpen] = useState(false);
     const { user, signOut } = useAuthContext();
@@ -231,6 +231,40 @@ export const MobileBottomNav: React.FC = () => {
                                     {isDarkMode ? <Sun className="w-4 h-4 mr-3" /> : <Moon className="w-4 h-4 mr-3" />}
                                     {isDarkMode ? "Light Mode" : "Dark Mode"}
                                 </Button>
+
+                                {/* Color Theme Specific Section */}
+                                <div className="mt-4 pt-4 border-t border-border">
+                                    <h4 className="text-sm font-medium text-muted-foreground px-4 uppercase tracking-wider mb-3">Color Theme</h4>
+                                    <div className="flex items-center gap-4 px-4">
+                                        {[
+                                            { id: 'default', gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', label: 'Default' },
+                                            { id: 'cherryblossoms', gradient: 'linear-gradient(135deg, #FBD3E9 0%, #BB377D 100%)', label: 'Cherry' },
+                                            { id: 'shroomhaze', gradient: 'linear-gradient(135deg, #5C258D 0%, #4389A2 100%)', label: 'Shroom' },
+                                            { id: 'flare', gradient: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)', label: 'Flare' }
+                                        ].map((t) => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => {
+                                                    setColorTheme(t.id as any);
+                                                }}
+                                                className={cn(
+                                                    "w-10 h-10 rounded-full border-2 transition-all duration-300 relative",
+                                                    colorTheme === t.id
+                                                        ? "border-primary scale-110 shadow-lg ring-4 ring-primary/20"
+                                                        : "border-border hover:border-muted-foreground"
+                                                )}
+                                                style={{ background: t.gradient }}
+                                                title={t.label}
+                                            >
+                                                {colorTheme === t.id && (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-2 h-2 bg-white rounded-full shadow-sm" />
+                                                    </div>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                             <div className="p-4 border-t mt-auto border-border bg-background pb-safe">
                                 <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>

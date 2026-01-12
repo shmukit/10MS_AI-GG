@@ -116,21 +116,27 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   {[
-                    { id: 'default', color: '#2563eb', label: 'Default' },
-                    { id: 'cherryblossoms', color: '#BB377D', label: 'Cherry' },
-                    { id: 'shroomhaze', color: '#5C258D', label: 'Shroom' },
-                    { id: 'flare', color: '#f12711', label: 'Flare' }
+                    { id: 'default', gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', label: 'Default' },
+                    { id: 'cherryblossoms', gradient: 'linear-gradient(135deg, #FBD3E9 0%, #BB377D 100%)', label: 'Cherry' },
+                    { id: 'shroomhaze', gradient: 'linear-gradient(135deg, #5C258D 0%, #4389A2 100%)', label: 'Shroom' },
+                    { id: 'flare', gradient: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)', label: 'Flare' }
                   ].map((t) => (
                     <button
                       key={t.id}
                       onClick={() => setColorTheme(t.id as any)}
-                      className={`w-6 h-6 rounded-full border-2 transition-all duration-200 ${colorTheme === t.id
-                        ? 'border-blue-500 scale-110 shadow-sm'
-                        : 'border-transparent hover:scale-105'
+                      className={`w-7 h-7 rounded-full border-2 transition-all duration-300 relative ${colorTheme === t.id
+                        ? 'border-blue-500 scale-110 shadow-md ring-2 ring-blue-500/20'
+                        : isDarkMode ? 'border-gray-700 hover:border-gray-500' : 'border-gray-200 hover:border-gray-300'
                         }`}
-                      style={{ backgroundColor: t.color }}
+                      style={{ background: t.gradient }}
                       title={t.label}
-                    />
+                    >
+                      {colorTheme === t.id && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm" />
+                        </div>
+                      )}
+                    </button>
                   ))}
                 </div>
               </div>
