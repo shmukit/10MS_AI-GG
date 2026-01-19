@@ -72,7 +72,7 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
                 }}
                 className="rounded-xl p-4 text-center transition-all duration-200 group hover:shadow-lg transform hover:scale-[1.02] bg-[var(--accent-soft)] shadow-sm"
             >
-                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-all duration-200 bg-[var(--primary-gradient)] group-hover:opacity-90`}>
+                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-all duration-200 bg-[image:var(--primary-gradient)] group-hover:opacity-90`}>
                     <Users className="w-6 h-6 text-white" />
                 </div>
                 <span className={`text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Community</span>
