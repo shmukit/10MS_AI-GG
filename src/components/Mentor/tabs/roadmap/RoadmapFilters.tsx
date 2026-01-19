@@ -73,9 +73,10 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
                             setTypeFilter('');
                         }}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                            ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                            ? 'bg-white hover:bg-gray-100 !text-black border-none'
                             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                             }`}
+                        style={isDarkMode ? { backgroundColor: '#ffffff', color: '#000000' } : {}}
                     >
                         Clear Filters
                     </button>

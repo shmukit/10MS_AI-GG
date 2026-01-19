@@ -38,41 +38,28 @@ export const BatchInfo: React.FC<BatchInfoProps> = ({
                 </div>
                 <div className="space-y-3">
                     {selectedBatchData.whatsappLink && (
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-green-500" />
-                                <a href={selectedBatchData.whatsappLink} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 text-sm">
-                                    WhatsApp Group
-                                </a>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setEditingBatchData(selectedBatchData);
-                                    setIsEditingBatch(true);
-                                }}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                                    ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                                    }`}
-                            >
-                                <Edit2 className="w-4 h-4" />
-                                Edit
-                            </button>
+                        <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-green-500" />
+                            <a href={selectedBatchData.whatsappLink} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 text-sm">
+                                WhatsApp Group
+                            </a>
                         </div>
                     )}
-                    <button
-                        onClick={() => {
-                            setEditingBatchData(selectedBatchData);
-                            setIsEditingBatch(true);
-                        }}
-                        className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                            ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                            : 'bg-orange-500 hover:bg-orange-600 text-white'
-                            }`}
-                    >
-                        <Edit2 className="w-4 h-4" />
-                        Edit Batch Details
-                    </button>
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => {
+                                setEditingBatchData(selectedBatchData);
+                                setIsEditingBatch(true);
+                            }}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${isDarkMode
+                                ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                                : 'bg-orange-500 hover:bg-orange-600 text-white'
+                                }`}
+                        >
+                            <Edit2 className="w-4 h-4" />
+                            Edit Batch Details
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

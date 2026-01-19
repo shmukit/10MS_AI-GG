@@ -21,6 +21,9 @@ const MentorStudents = lazy(() => import('./components/Mentor/MentorStudents').t
 const MentorNotices = lazy(() => import('./components/Mentor/MentorNotices').then(module => ({ default: module.MentorNotices })));
 const MentorSettings = lazy(() => import('./components/Mentor/MentorSettings').then(module => ({ default: module.MentorSettings })));
 const RoadmapInterface = lazy(() => import('./components/Roadmap/RoadmapInterface').then(module => ({ default: module.RoadmapInterface })));
+const AdminLayout = lazy(() => import('./components/Admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
+const AdminDashboard = lazy(() => import('./components/Admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
+const AdminSettings = lazy(() => import('./components/Admin/AdminSettings').then(module => ({ default: module.AdminSettings })));
 
 // Loading component for lazy-loaded routes
 const RouteLoader = () => (
@@ -86,6 +89,22 @@ const MentorRoutes = () => {
   );
 };
 
+// Admin Routes Component
+const AdminRoutes = () => {
+  return (
+    <Suspense fallback={<RouteLoader />}>
+      <AdminLayout>
+        <Routes>
+          <Route path="/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="/users" element={<PageTransition><AdminDashboard /></PageTransition>} /> {/* Reusing Dashboard for MVP as it has UserList */}
+          <Route path="/settings" element={<PageTransition><AdminSettings /></PageTransition>} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AdminLayout>
+    </Suspense>
+  );
+};
+
 // Simplified App Routes - All users go to student dashboard
 const AppRoutes = () => {
   const { user, loading } = useAuthContext();
@@ -147,6 +166,16 @@ const AnimatedAppContent = () => {
           element={
             <ProtectedRoute>
               <MentorRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute>
+              <AdminRoutes />
             </ProtectedRoute>
           }
         />

@@ -152,6 +152,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
                     setIsSchedulingSession(false);
                     setRefreshSessionsTrigger(prev => prev + 1);
                 }}
+                isDarkMode={isDarkMode}
             />
         </div>
     );
