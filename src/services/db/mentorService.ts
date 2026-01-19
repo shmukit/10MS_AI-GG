@@ -10,14 +10,28 @@ export const getMentors = async (batchId?: string): Promise<User[]> => {
             .eq('is_active', true);
 
         if (batchId) {
-            const { data: batch } = await supabase
-                .from('batches')
+            const { data: batchMentors, error: bmError } = await supabase
+                .from('batch_mentors')
                 .select('mentor_id')
-                .eq('id', batchId)
-                .single();
+                .eq('batch_id', batchId);
 
-            if (batch && (batch as any).mentor_id) {
-                query = query.eq('id', (batch as any).mentor_id);
+            if (!bmError && batchMentors && batchMentors.length > 0) {
+                const mentorIds = (batchMentors as any[]).map(bm => bm.mentor_id);
+                query = query.in('id', mentorIds);
+            } else {
+                // Fallback to old mentor_id column if junction table is empty
+                const { data: batch } = await supabase
+                    .from('batches')
+                    .select('mentor_id')
+                    .eq('id', batchId)
+                    .single();
+
+                if (batch && (batch as any).mentor_id) {
+                    query = query.eq('id', (batch as any).mentor_id);
+                } else if (batchMentors && batchMentors.length === 0) {
+                    // If no mentors found in either, return empty
+                    return [];
+                }
             }
         }
 
@@ -66,11 +80,11 @@ export const createMentorProfile = async (userId: string, batchId?: string): Pro
             .from('mentor_profiles')
             .insert({
                 user_id: userId,
-                specialization: 'Python Programming',
-                experience_years: 3,
+                expertise_areas: ['Python Programming'],
+                years_of_experience: 3,
                 bio: 'Experienced Python developer and educator',
-                batch_id: batchId,
-                is_active: true,
+                organization: '10 Minute School',
+                designation: 'Mentor',
             } as unknown as never)
             .select()
             .single();
@@ -81,11 +95,11 @@ export const createMentorProfile = async (userId: string, batchId?: string): Pro
             return {
                 id: 'mock-mentor-' + userId,
                 user_id: userId,
-                specialization: 'Python Programming',
-                experience_years: 3,
+                expertise_areas: ['Python Programming'],
+                years_of_experience: 3,
                 bio: 'Experienced Python developer and educator',
-                batch_id: batchId,
-                is_active: true,
+                organization: '10 Minute School',
+                designation: 'Mentor',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };

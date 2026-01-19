@@ -9,6 +9,7 @@ import { PageTransition } from './components/ui/MotionPrimitives';
 
 // Critical components (loaded immediately for first paint)
 import { LoginPage } from './components/Auth/LoginPage';
+import { MarketingPage } from './components/Marketing/MarketingPage';
 
 // Lazy load non-critical components
 const StudentDashboard = lazy(() => import('./components/Student/StudentDashboard').then(module => ({ default: module.StudentDashboard })));
@@ -103,6 +104,22 @@ const AppRoutes = () => {
   return <Navigate to="/student/dashboard" replace />;
 };
 
+// Public Default Route - No redirection to login
+const PublicDefaultRoute = () => {
+  const { user, loading } = useAuthContext();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  // If user is logged in, redirect to dashboard. Otherwise show marketing page.
+  if (user) {
+    return <Navigate to="/student/dashboard" replace />;
+  }
+
+  return <MarketingPage />;
+};
+
 const AnimatedAppContent = () => {
   const location = useLocation();
 
@@ -110,6 +127,7 @@ const AnimatedAppContent = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
+        <Route path="/" element={<PublicDefaultRoute />} />
         <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><LoginPage /></PageTransition>} />
 
@@ -134,7 +152,6 @@ const AnimatedAppContent = () => {
         />
 
         {/* Default Route */}
-        <Route path="/" element={<AppRoutes />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

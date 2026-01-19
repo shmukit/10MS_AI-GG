@@ -11,12 +11,11 @@ export default defineConfig({
     postcss: './config/postcss.config.js',
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-    exclude: ['lucide-react'],
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react'],
   },
   server: {
-    host: '0.0.0.0',
-    port: 5173,
+    host: 'localhost',
+    port: 5174,
     strictPort: true,
   },
   build: {

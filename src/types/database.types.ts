@@ -60,6 +60,23 @@ export interface Database {
           updated_at?: string
         }
       }
+      batch_mentors: {
+        Row: {
+          batch_id: string
+          mentor_id: string
+          created_at: string
+        }
+        Insert: {
+          batch_id: string
+          mentor_id: string
+          created_at?: string
+        }
+        Update: {
+          batch_id?: string
+          mentor_id?: string
+          created_at?: string
+        }
+      }
       mentor_profiles: {
         Row: {
           id: string
