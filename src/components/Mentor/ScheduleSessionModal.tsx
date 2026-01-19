@@ -8,10 +8,11 @@ interface ScheduleSessionModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSessionCreated: () => void;
-    batchId?: string; // Optional: pre-fill batch if creating from a context
+    batchId?: string;
+    isDarkMode?: boolean;
 }
 
-export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOpen, onClose, onSessionCreated, batchId }) => {
+export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOpen, onClose, onSessionCreated, batchId, isDarkMode = false }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
@@ -19,11 +20,10 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
     const [duration, setDuration] = useState(60);
     const [meetingLink, setMeetingLink] = useState('');
     const [sessionType, setSessionType] = useState<'clinic' | 'anchor' | 'workshop' | 'office_hours'>('clinic');
-    const [selectedLevels, setSelectedLevels] = useState<string[]>([]); // For TaRL targeting
+    const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [mentorId, setMentorId] = useState<string | null>(null);
 
-    // Available levels for targeting (Mock for now, could come from DB constants)
     const availableLevels = ['Module 1', 'Module 2', 'Module 3', 'Advanced'];
 
     useEffect(() => {
@@ -41,14 +41,13 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
             return;
         }
 
-        // Combine date and time
         const startDateTime = new Date(`${date}T${time}`);
 
         setLoading(true);
         try {
             await createSession({
                 mentor_id: mentorId,
-                batch_id: batchId || null, // If explicit batch context is missing, might be global or need selection (skipping global selection for now)
+                batch_id: batchId || null,
                 title,
                 description,
                 start_time: startDateTime.toISOString(),
@@ -91,10 +90,10 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
-                <div className="flex justify-between items-center p-6 border-b">
-                    <h2 className="text-xl font-bold text-gray-800">Schedule Live Session</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <div className={`rounded-xl shadow-xl w-full max-w-lg overflow-y-auto max-h-[90vh] transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`flex justify-between items-center p-6 border-b transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <h2 className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Schedule Live Session</h2>
+                    <button onClick={onClose} className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}>
                         <X className="w-6 h-6" />
                     </button>
                 </div>
@@ -102,25 +101,25 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {/* Title */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Session Title</label>
+                        <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Session Title</label>
                         <input
                             type="text"
                             required
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                             placeholder="e.g., Module 2 Deep Dive"
                         />
                     </div>
 
-                    {/* Type & Levels (TaRL) */}
+                    {/* Type & Levels */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Session Type</label>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Session Type</label>
                             <select
                                 value={sessionType}
                                 onChange={(e) => setSessionType(e.target.value as any)}
-                                className="w-full p-2 border rounded-lg outline-none bg-white"
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                             >
                                 <option value="clinic">Clinic (Level Specific)</option>
                                 <option value="workshop">Workshop (General)</option>
@@ -131,7 +130,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <label className={`block text-sm font-medium mb-2 flex items-center gap-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                             <Users className="w-4 h-4" /> Target Audience (Levels)
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -142,7 +141,9 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                                     onClick={() => toggleLevel(level)}
                                     className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${selectedLevels.includes(level)
                                         ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        : isDarkMode
+                                            ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                         }`}
                                 >
                                     {level}
@@ -155,34 +156,34 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                     {/* Date & Time */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1"><Calendar className="inline w-4 h-4 mr-1" /> Date</label>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}><Calendar className="inline w-4 h-4 mr-1" /> Date</label>
                             <input
                                 type="date"
                                 required
                                 value={date}
                                 onChange={e => setDate(e.target.value)}
-                                className="w-full p-2 border rounded-lg outline-none"
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1"><Clock className="inline w-4 h-4 mr-1" /> Time</label>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}><Clock className="inline w-4 h-4 mr-1" /> Time</label>
                             <input
                                 type="time"
                                 required
                                 value={time}
                                 onChange={e => setTime(e.target.value)}
-                                className="w-full p-2 border rounded-lg outline-none"
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                             />
                         </div>
                     </div>
 
                     {/* Duration */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                        <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Duration (minutes)</label>
                         <select
                             value={duration}
                             onChange={e => setDuration(Number(e.target.value))}
-                            className="w-full p-2 border rounded-lg outline-none bg-white"
+                            className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                         >
                             <option value={30}>30 minutes</option>
                             <option value={45}>45 minutes</option>
@@ -194,34 +195,34 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
 
                     {/* Meeting Link */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"><Video className="inline w-4 h-4 mr-1" /> Meeting Link</label>
+                        <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}><Video className="inline w-4 h-4 mr-1" /> Meeting Link</label>
                         <input
                             type="url"
                             required
                             value={meetingLink}
                             onChange={e => setMeetingLink(e.target.value)}
                             placeholder="https://zoom.us/j/..."
-                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                         />
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                        <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description (Optional)</label>
                         <textarea
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                             rows={3}
                         />
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+                    <div className={`flex justify-end gap-3 pt-4 border-t mt-4 transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            className={`px-4 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
                         >
                             Cancel
                         </button>

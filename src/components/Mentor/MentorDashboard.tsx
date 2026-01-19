@@ -317,8 +317,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
       {/* Navigation Tabs */}
       <div className={`border-b h-16 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex space-x-8">
+        <div className="max-w-6xl mx-auto px-6 h-full overflow-x-auto custom-scrollbar">
+          <div className="flex space-x-8 h-full items-center min-w-max">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
@@ -330,9 +330,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 key={id}
                 onClick={() => setActiveTab(id as any)}
                 className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${activeTab === id
-                  ? 'border-blue-500 text-blue-600'
-                  : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`
+                  ? isDarkMode ? 'border-blue-400 text-blue-400' : 'border-blue-500 text-blue-600'
+                  : `border-transparent ${isDarkMode ? 'text-gray-100 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`
                   }`}
+                style={isDarkMode && activeTab !== id ? { color: '#f3f4f6' } : {}}
               >
                 <Icon className="w-4 h-4" />
                 {label}
