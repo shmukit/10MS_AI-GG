@@ -6,7 +6,11 @@ import './styles/themes.css';
 import { initPostHog } from './lib/posthog';
 
 // Initialize PostHog
-initPostHog();
+try {
+  initPostHog();
+} catch (error) {
+  console.warn('PostHog initialization failed (likely blocked by client):', error);
+}
 
 
 createRoot(document.getElementById('root')!).render(

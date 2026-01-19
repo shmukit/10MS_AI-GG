@@ -22,6 +22,7 @@ import * as LiveSessionService from './liveSessionService';
 import * as SpacedRepetitionService from './db/spacedRepetitionService';
 import * as PracticeDeckService from './db/practiceDeckService';
 import * as GamificationService from './db/gamificationService';
+import * as MarketingService from './db/marketingService';
 
 // Re-export types
 export type {
@@ -109,4 +110,7 @@ export class DatabaseService {
   static initializeGamificationProfile = GamificationService.initializeGamificationProfile;
   static getLeaderboard = GamificationService.getLeaderboard;
   static getStudentGamificationProfile = GamificationService.getStudentGamificationProfile;
+
+  // Marketing
+  static getMarketingData = MarketingService.getMarketingData;
 }
