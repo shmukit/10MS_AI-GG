@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { AddUserModal } from './AddUserModal';
-import { Search, Filter, MoreVertical, Shield, User, GraduationCap, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Filter, MoreVertical, Shield, User, GraduationCap, CheckCircle, XCircle, Trash2, Power } from 'lucide-react';
 
 interface UserData {
     id: string;
@@ -20,6 +20,21 @@ export const UserList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'mentor' | 'admin'>('all');
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (activeMenuId && !(event.target as Element).closest('.action-menu-container')) {
+                setActiveMenuId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activeMenuId]);
 
     const fetchUsers = async () => {
         try {
@@ -53,9 +68,38 @@ export const UserList: React.FC = () => {
         fetchUsers();
     }, [roleFilter, searchTerm]);
 
-    const handleRoleChange = async (userId: string, newRole: string) => {
-        // Placeholder for role update logic
-        console.log('Update role', userId, newRole);
+    const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
+        try {
+            const { error } = await supabase
+                .from('users')
+                .update({ is_active: !currentStatus } as unknown as never)
+                .eq('id', userId);
+
+            if (error) throw error;
+            setUsers(users.map(u => u.id === userId ? { ...u, is_active: !currentStatus } : u));
+            setActiveMenuId(null);
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update status');
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+        try {
+            const { error } = await supabase
+                .from('users')
+                .delete()
+                .eq('id', userId);
+
+            if (error) throw error;
+            setUsers(users.filter(u => u.id !== userId));
+            setActiveMenuId(null);
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Failed to delete user');
+        }
     };
 
     const roleIcons = {
@@ -149,10 +193,35 @@ export const UserList: React.FC = () => {
                                     <td className="py-3 px-4 text-gray-500">
                                         {new Date(user.created_at).toLocaleDateString()}
                                     </td>
-                                    <td className="py-3 px-4 text-right">
-                                        <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500">
+                                    <td className="py-3 px-4 text-right relative action-menu-container">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setActiveMenuId(activeMenuId === user.id ? null : user.id);
+                                            }}
+                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 transition-colors"
+                                        >
                                             <MoreVertical className="w-4 h-4" />
                                         </button>
+
+                                        {activeMenuId === user.id && (
+                                            <div className="absolute right-8 top-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-[100] text-left">
+                                                <button
+                                                    onClick={() => handleToggleStatus(user.id, user.is_active)}
+                                                    className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                >
+                                                    <Power className={`w-4 h-4 ${user.is_active ? 'text-red-500' : 'text-green-500'}`} />
+                                                    {user.is_active ? 'Deactivate User' : 'Activate User'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    Delete User
+                                                </button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
