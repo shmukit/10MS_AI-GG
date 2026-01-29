@@ -70,14 +70,25 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                     .select('id, name, roadmap_id')
                     .eq('status', 'active'); // Only active batches
 
-                if (batchesData) setBatches(batchesData);
+                if (batchesData) {
+                    setBatches(batchesData);
+
+                    // Pre-select based on batchId prop if available
+                    if (batchId) {
+                        const matchedBatch = (batchesData as Batch[]).find(b => b.id === batchId);
+                        if (matchedBatch) {
+                            setSelectedRoadmapId(matchedBatch.roadmap_id);
+                            setSelectedBatchId(batchId);
+                        }
+                    }
+                }
 
             } catch (error) {
                 console.error('Error fetching selection data:', error);
             }
         };
 
-        if (isOpen && !batchId) { // Only fetch if we need to select (global mode)
+        if (isOpen) {
             fetchData();
         }
     }, [isOpen, batchId]);
@@ -89,10 +100,10 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
             return;
         }
 
-        const finalBatchId = batchId || selectedBatchId;
+        const finalBatchId = selectedBatchId;
 
-        // If not in a specific batch context, require batch selection
-        if (!batchId && !finalBatchId) {
+        // Require batch selection
+        if (!finalBatchId) {
             alert('Please select a batch for this session.');
             return;
         }
@@ -134,8 +145,10 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
         setMeetingLink('');
         setSessionType('clinic');
         setSelectedLevels([]);
-        setSelectedRoadmapId('');
-        setSelectedBatchId('');
+        if (!batchId) {
+            setSelectedRoadmapId('');
+            setSelectedBatchId('');
+        }
     };
 
     const toggleLevel = (level: string) => {
@@ -158,47 +171,45 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
 
-                    {/* Roadmap & Batch Selection (Only if batchId not provided) */}
-                    {!batchId && (
-                        <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
-                            <div>
-                                <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                    <BookOpen className="inline w-4 h-4 mr-1" /> Roadmap
-                                </label>
-                                <select
-                                    value={selectedRoadmapId}
-                                    onChange={(e) => {
-                                        setSelectedRoadmapId(e.target.value);
-                                        setSelectedBatchId(''); // Reset batch when roadmap changes
-                                    }}
-                                    className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                                >
-                                    <option value="">Select Roadmap</option>
-                                    {roadmaps.map(roadmap => (
-                                        <option key={roadmap.id} value={roadmap.id}>{roadmap.title}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                    <UsersIcon className="inline w-4 h-4 mr-1" /> Batch
-                                </label>
-                                <select
-                                    value={selectedBatchId}
-                                    onChange={(e) => setSelectedBatchId(e.target.value)}
-                                    disabled={!selectedRoadmapId}
-                                    className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white disabled:opacity-50' : 'bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400'}`}
-                                >
-                                    <option value="">Select Batch</option>
-                                    {batches
-                                        .filter(b => b.roadmap_id === selectedRoadmapId)
-                                        .map(batch => (
-                                            <option key={batch.id} value={batch.id}>{batch.name}</option>
-                                        ))}
-                                </select>
-                            </div>
+                    {/* Roadmap & Batch Selection */}
+                    <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
+                        <div>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <BookOpen className="inline w-4 h-4 mr-1" /> Roadmap
+                            </label>
+                            <select
+                                value={selectedRoadmapId}
+                                onChange={(e) => {
+                                    setSelectedRoadmapId(e.target.value);
+                                    setSelectedBatchId(''); // Reset batch when roadmap changes
+                                }}
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                            >
+                                <option value="">Select Roadmap</option>
+                                {roadmaps.map(roadmap => (
+                                    <option key={roadmap.id} value={roadmap.id}>{roadmap.title}</option>
+                                ))}
+                            </select>
                         </div>
-                    )}
+                        <div>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <UsersIcon className="inline w-4 h-4 mr-1" /> Batch
+                            </label>
+                            <select
+                                value={selectedBatchId}
+                                onChange={(e) => setSelectedBatchId(e.target.value)}
+                                disabled={!selectedRoadmapId}
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white disabled:opacity-50' : 'bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400'}`}
+                            >
+                                <option value="">Select Batch</option>
+                                {batches
+                                    .filter(b => b.roadmap_id === selectedRoadmapId)
+                                    .map(batch => (
+                                        <option key={batch.id} value={batch.id}>{batch.name}</option>
+                                    ))}
+                            </select>
+                        </div>
+                    </div>
 
                     {/* Title */}
                     <div>
