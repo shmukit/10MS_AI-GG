@@ -51,8 +51,13 @@ export const MarketingPage: React.FC = () => {
         fetchData();
     }, []);
 
-    const ongoingRoadmaps = data?.roadmaps || [];
-    const expiredRoadmaps = data?.roadmaps.filter(r => r.batches.some(b => b.status === 'completed')) || [];
+    const ongoingRoadmaps = data?.roadmaps.filter(r =>
+        r.batches.length === 0 || r.batches.some(b => b.status === 'active')
+    ) || [];
+
+    const expiredRoadmaps = data?.roadmaps.filter(r =>
+        r.batches.some(b => b.status === 'completed') && !r.batches.some(b => b.status === 'active')
+    ) || [];
 
     const displayRoadmaps = activeTab === 'ongoing' ? ongoingRoadmaps : expiredRoadmaps;
 

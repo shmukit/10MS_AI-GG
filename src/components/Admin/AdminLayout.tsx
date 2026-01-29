@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AdminHeader } from './AdminHeader';
 import { useAuth } from '../../lib/useAuth';
-import { Users, LayoutDashboard, Settings, X } from 'lucide-react';
+import { Users, LayoutDashboard, Settings, X, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface AdminLayoutProps {
@@ -21,6 +21,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const navItems = [
         { icon: LayoutDashboard, label: 'Overview', path: '/admin/dashboard' },
         { icon: Users, label: 'User Management', path: '/admin/users' },
+        { icon: Shield, label: 'Capabilities', path: '/admin/capabilities' },
         { icon: Settings, label: 'Settings', path: '/admin/settings' },
     ];
 
