@@ -92,6 +92,11 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
     };
 
     const handleAddBatch = async () => {
+        if (!newBatch.startDate) {
+            alert('Start Date is required');
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('batches')
