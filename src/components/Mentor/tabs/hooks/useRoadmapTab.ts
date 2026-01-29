@@ -81,16 +81,35 @@ export const useRoadmapTab = ({
                 .eq('week_number', newTask.weekNumber)
                 .single() as { data: any; error: any };
 
-            if (weekError) {
-                console.error('Error finding week:', weekError);
-                alert(`Week ${newTask.weekNumber} not found. Please add the week first.`);
-                return;
+            let weekId = weekData?.id;
+
+            if (weekError || !weekData) {
+                console.log(`Week ${newTask.weekNumber} not found, creating it automatically...`);
+                // Create the week if it doesn't exist
+                const { data: newWeek, error: createWeekError } = await supabase
+                    .from('roadmap_weeks')
+                    .insert([{
+                        roadmap_id: selectedRoadmap,
+                        week_number: newTask.weekNumber,
+                        title: `Week ${newTask.weekNumber}`,
+                        description: `Week ${newTask.weekNumber} Content`,
+                        domain: newTask.domain || 'General'
+                    }] as unknown as never)
+                    .select('id')
+                    .single() as { data: any; error: any };
+
+                if (createWeekError) {
+                    console.error('Error creating week:', createWeekError);
+                    alert(`Failed to create Week ${newTask.weekNumber}. Please try again.`);
+                    return;
+                }
+                weekId = newWeek.id;
             }
 
             const { data, error } = await supabase
                 .from('roadmap_tasks')
                 .insert([{
-                    week_id: weekData.id,
+                    week_id: weekId,
                     task_name: newTask.taskName,
                     task_details: newTask.taskDetails,
                     task_type: newTask.taskType.toLowerCase(),

@@ -100,7 +100,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                     whatsapp_link: newBatch.whatsappLink,
                     discord_link: newBatch.discordLink,
                     emergency_contact: newBatch.emergencyContact,
-                    created_by: user?.id
+                    mentor_id: user?.id
                 }] as unknown as never)
                 .select()
                 .single() as { data: any; error: any };
@@ -133,6 +133,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                     whatsapp_link: editingBatchData.whatsappLink,
                     discord_link: editingBatchData.discordLink,
                     emergency_contact: editingBatchData.emergencyContact,
+                    status: editingBatchData.status,
                     updated_at: new Date().toISOString()
                 } as unknown as never)
                 .eq('id', editingBatchData.id);

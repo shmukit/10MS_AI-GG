@@ -20,6 +20,7 @@ export interface Batch {
     discordLink: string;
     emergencyContact: string;
     createdDate: string;
+    status?: 'active' | 'completed' | 'cancelled';
 }
 
 export interface Student {

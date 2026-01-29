@@ -89,7 +89,7 @@ export const getMarketingData = async (): Promise<MarketingPageData> => {
 
         return {
             roadmaps: roadmapMarketingData,
-            mentors: mentorMarketingData
+            mentors: mentorMarketingData.filter(m => m.roadmaps.length > 0)
         };
     } catch (error) {
         console.error('Error fetching marketing data:', error);

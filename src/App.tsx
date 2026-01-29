@@ -24,6 +24,7 @@ const RoadmapInterface = lazy(() => import('./components/Roadmap/RoadmapInterfac
 const AdminLayout = lazy(() => import('./components/Admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
 const AdminDashboard = lazy(() => import('./components/Admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 const AdminSettings = lazy(() => import('./components/Admin/AdminSettings').then(module => ({ default: module.AdminSettings })));
+const CapabilitiesTable = lazy(() => import('./components/Admin/CapabilitiesTable').then(module => ({ default: module.CapabilitiesTable })));
 
 // Loading component for lazy-loaded routes
 const RouteLoader = () => (
@@ -97,6 +98,7 @@ const AdminRoutes = () => {
         <Routes>
           <Route path="/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
           <Route path="/users" element={<PageTransition><AdminDashboard /></PageTransition>} /> {/* Reusing Dashboard for MVP as it has UserList */}
+          <Route path="/capabilities" element={<PageTransition><CapabilitiesTable /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><AdminSettings /></PageTransition>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
