@@ -82,6 +82,20 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                         <>
                             <div>
                                 <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    Start Date
+                                </label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={batchData.startDate || ''}
+                                    onChange={(e) => setBatchData({ ...batchData, startDate: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                                        }`}
+                                />
+                            </div>
+
+                            <div>
+                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                     WhatsApp Group Link
                                 </label>
                                 <input

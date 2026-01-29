@@ -8,16 +8,54 @@ interface AddUserModalProps {
     onSuccess: () => void;
 }
 
+interface ExistingUser {
+    id: string;
+    role: 'student' | 'mentor' | 'admin';
+    first_name: string;
+    last_name: string;
+}
+
 export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [existingUser, setExistingUser] = useState<ExistingUser | null>(null);
     const [formData, setFormData] = useState({
         email: '',
         firstName: '',
         lastName: '',
         role: 'mentor' as 'mentor' | 'admin',
-        password: '' // Temporary password field for manual creation
+        password: ''
     });
+
+    const checkEmail = async (email: string) => {
+        if (!email || !email.includes('@')) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, role, first_name, last_name')
+                .eq('email', email)
+                .single();
+
+            const user = data as unknown as ExistingUser;
+
+            if (user) {
+                setExistingUser(user);
+                if (user.role === formData.role) {
+                    setError(`User already exists as a ${user.role}.`);
+                } else {
+                    setError(null);
+                }
+            } else {
+                setExistingUser(null);
+                setError(null);
+            }
+        } catch (err) {
+            // User not found is good
+            setExistingUser(null);
+            setError(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,30 +63,40 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
         setError(null);
 
         try {
-            // 1. Sign up user via Supabase Auth
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        first_name: formData.firstName,
-                        last_name: formData.lastName,
-                        role: formData.role
+            if (existingUser) {
+                // Update existing user role
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ role: formData.role } as unknown as never)
+                    .eq('id', existingUser.id);
+
+                if (updateError) throw updateError;
+
+                alert(`User role updated to ${formData.role} successfully!`);
+            } else {
+                // Create new user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: formData.email,
+                    password: formData.password,
+                    options: {
+                        data: {
+                            first_name: formData.firstName,
+                            last_name: formData.lastName,
+                            role: formData.role
+                        }
                     }
-                }
-            });
+                });
 
-            if (authError) throw authError;
+                if (authError) throw authError;
 
-            // Note: The 'users' table trigger should automatically handle entry creation
-            // based on the auth.users entry if properly configured.
-            // If not, we might need a direct insert here, but assuming trigger exists.
+                // Explicitly check/insert if trigger doesn't fire immediately (safety net)
+                // For now, trusting the trigger or auth flow.
+            }
 
-            // Wait a brief moment for trigger to propagate if needed or just close
             onSuccess();
         } catch (err: any) {
-            console.error('Error creating user:', err);
-            setError(err.message || 'Failed to create user');
+            console.error('Error creating/updating user:', err);
+            setError(err.message || 'Failed to process request');
         } finally {
             setLoading(false);
         }
@@ -73,6 +121,19 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                         </div>
                     )}
 
+                    {existingUser && (
+                        <div className={`p-3 text-sm rounded-lg border ${existingUser.role === formData.role ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                            User exists: <strong>{existingUser.first_name} {existingUser.last_name}</strong>
+                            <br />
+                            Current Role: <span className="capitalize font-bold">{existingUser.role}</span>
+                            {existingUser.role !== formData.role && (
+                                <div className="mt-1 text-xs">
+                                    Clicking "Update Role" will change their role to <strong>{formData.role}</strong>.
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
@@ -81,7 +142,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                                 required
                                 value={formData.firstName}
                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50"
+                                disabled={!!existingUser}
                             />
                         </div>
                         <div>
@@ -91,7 +153,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                                 required
                                 value={formData.lastName}
                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50"
+                                disabled={!!existingUser}
                             />
                         </div>
                     </div>
@@ -103,21 +166,24 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                             required
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onBlur={() => checkEmail(formData.email)}
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password</label>
-                        <input
-                            type="text"
-                            required
-                            minLength={6}
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                    </div>
+                    {!existingUser && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password</label>
+                            <input
+                                type="text"
+                                required={!existingUser}
+                                minLength={6}
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
@@ -128,6 +194,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                         >
                             <option value="mentor">Mentor</option>
                             <option value="admin">Admin</option>
+                            <option value="student">Student</option>
                         </select>
                     </div>
 
@@ -141,11 +208,11 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                            disabled={loading || (existingUser ? existingUser.role === formData.role : false)}
+                            className={`flex-1 px-4 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 ${existingUser && existingUser.role === formData.role ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                         >
                             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                            Create User
+                            {existingUser ? 'Update Role' : 'Create User'}
                         </button>
                     </div>
                 </form>

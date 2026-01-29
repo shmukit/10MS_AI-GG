@@ -25,7 +25,8 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         roadmapName: '',
         whatsappLink: '',
         discordLink: '',
-        emergencyContact: ''
+        emergencyContact: '',
+        startDate: ''
     });
 
     const [newStudent, setNewStudent] = useState({
@@ -100,7 +101,8 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                     whatsapp_link: newBatch.whatsappLink,
                     discord_link: newBatch.discordLink,
                     emergency_contact: newBatch.emergencyContact,
-                    mentor_id: user?.id
+                    mentor_id: user?.id,
+                    start_date: newBatch.startDate
                 }] as unknown as never)
                 .select()
                 .single() as { data: any; error: any };
@@ -114,7 +116,8 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                 roadmapName: '',
                 whatsappLink: '',
                 discordLink: '',
-                emergencyContact: ''
+                emergencyContact: '',
+                startDate: ''
             });
             onUpdate();
         } catch (error) {

@@ -45,7 +45,7 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                     content: newNotice.content,
                     tag: newNotice.tag,
                     scheduled_date: newNotice.scheduledDate,
-                    scheduled_time: newNotice.scheduledTime,
+                    scheduled_time: newNotice.scheduledTime || null,
                     is_published: newNotice.isPublished,
                     author_id: user?.id,
                     batch_id: selectedBatch || null // Associate with selected batch or global
