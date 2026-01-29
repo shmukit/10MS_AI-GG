@@ -36,17 +36,32 @@ const RouteLoader = () => (
   </div>
 );
 
-// Simplified Protected Route Component - No role checking
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuthContext();
+// Role-protected Route Component
+const ProtectedRouteWithRole = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
+  const { user, loading, userRole, roleLoading } = useAuthContext();
 
-  if (loading) {
+  if (loading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
     console.log('🔄 ProtectedRoute: No user, redirecting to login');
     return <Navigate to="/login" replace />;
+  }
+
+  // If user has a role but it's not in the allowed list, redirect to their allowed dashboard
+  if (userRole && !allowedRoles.includes(userRole)) {
+    console.log(`⛔ Access denied for role: ${userRole}. Allowed: ${allowedRoles.join(', ')}`);
+    // Redirect students to student dashboard
+    if (userRole === 'student') {
+      return <Navigate to="/student/dashboard" replace />;
+    }
+    // Redirect mentors to mentor dashboard (if trying to access admin)
+    if (userRole === 'mentor') {
+      return <Navigate to="/mentor/dashboard" replace />;
+    }
+    // Default fallback
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -127,14 +142,16 @@ const AppRoutes = () => {
 
 // Public Default Route - No redirection to login
 const PublicDefaultRoute = () => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, userRole } = useAuthContext();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // If user is logged in, redirect to dashboard. Otherwise show marketing page.
+  // If user is logged in, redirect based on role
   if (user) {
+    if (userRole === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (userRole === 'mentor') return <Navigate to="/mentor/dashboard" replace />;
     return <Navigate to="/student/dashboard" replace />;
   }
 
@@ -156,9 +173,9 @@ const AnimatedAppContent = () => {
         <Route
           path="/student/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRouteWithRole allowedRoles={['student', 'mentor', 'admin']}>
               <StudentRoutes />
-            </ProtectedRoute>
+            </ProtectedRouteWithRole>
           }
         />
 
@@ -166,9 +183,9 @@ const AnimatedAppContent = () => {
         <Route
           path="/mentor/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRouteWithRole allowedRoles={['mentor', 'admin']}>
               <MentorRoutes />
-            </ProtectedRoute>
+            </ProtectedRouteWithRole>
           }
         />
 
@@ -176,9 +193,9 @@ const AnimatedAppContent = () => {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRouteWithRole allowedRoles={['admin']}>
               <AdminRoutes />
-            </ProtectedRoute>
+            </ProtectedRouteWithRole>
           }
         />
 

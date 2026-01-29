@@ -9,7 +9,7 @@ interface UseStudentsTabProps {
 }
 
 export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps) => {
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
     const [isAddingBatch, setIsAddingBatch] = useState(false);
     const [isEditingBatch, setIsEditingBatch] = useState(false);
     const [isAddingStudent, setIsAddingStudent] = useState(false);
@@ -92,6 +92,17 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
     };
 
     const handleAddBatch = async () => {
+        // Enforce Role-Based Access Control
+        if (userRole !== 'admin' && userRole !== 'mentor') {
+            alert('Unauthorized: Only Admins and Mentors can create batches.');
+            return;
+        }
+
+        if (!newBatch.startDate) {
+            alert('Start Date is required');
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('batches')
@@ -312,6 +323,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         handleUpdateBatch,
         handleAddStudent,
         handleAssignStudents,
-        handleDeleteStudent
+        handleDeleteStudent,
+        userRole
     };
 };

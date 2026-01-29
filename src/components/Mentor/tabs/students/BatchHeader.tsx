@@ -11,6 +11,7 @@ interface BatchHeaderProps {
     setIsAddingStudent: (isAdding: boolean) => void;
     setIsAssigningStudents: (isAssigning: boolean) => void;
     loadAvailableStudents: () => Promise<void>;
+    userRole?: string | null;
 }
 
 export const BatchHeader: React.FC<BatchHeaderProps> = ({
@@ -21,7 +22,8 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
     setIsAddingBatch,
     setIsAddingStudent,
     setIsAssigningStudents,
-    loadAvailableStudents
+    loadAvailableStudents,
+    userRole
 }) => {
     return (
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -43,13 +45,15 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                 </select>
             </div>
             <div className="flex gap-2 flex-wrap">
-                <button
-                    onClick={() => setIsAddingBatch(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                >
-                    <Plus className="w-4 h-4" />
-                    New Batch
-                </button>
+                {(userRole === 'admin' || userRole === 'mentor') && (
+                    <button
+                        onClick={() => setIsAddingBatch(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                        <Plus className="w-4 h-4" />
+                        New Batch
+                    </button>
+                )}
                 {selectedBatch && (
                     <>
                         <button

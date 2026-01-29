@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Video, Users } from 'lucide-react';
+import { X, Calendar, Clock, Video, Users, BookOpen, Users as UsersIcon } from 'lucide-react';
 import { createSession } from '../../services/liveSessionService';
 import { DatabaseService } from '../../services/database';
+import { supabase } from '../../lib/supabase';
 
 interface ScheduleSessionModalProps {
     isOpen: boolean;
@@ -10,6 +11,23 @@ interface ScheduleSessionModalProps {
     onSessionCreated: () => void;
     batchId?: string;
     isDarkMode?: boolean;
+}
+
+interface Roadmap {
+    id: string;
+    title: string;
+}
+
+interface Batch {
+    id: string;
+    name: string;
+    roadmap_id: string;
+}
+
+interface RoadmapWeek {
+    id: string;
+    week_number: number;
+    title: string;
 }
 
 export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOpen, onClose, onSessionCreated, batchId, isDarkMode = false }) => {
@@ -20,11 +38,16 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
     const [duration, setDuration] = useState(60);
     const [meetingLink, setMeetingLink] = useState('');
     const [sessionType, setSessionType] = useState<'clinic' | 'anchor' | 'workshop' | 'office_hours'>('clinic');
-    const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+    const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [mentorId, setMentorId] = useState<string | null>(null);
 
-    const availableLevels = ['Module 1', 'Module 2', 'Module 3', 'Advanced'];
+    // New State for Selection
+    const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+    const [batches, setBatches] = useState<Batch[]>([]);
+    const [weeks, setWeeks] = useState<RoadmapWeek[]>([]);
+    const [selectedRoadmapId, setSelectedRoadmapId] = useState<string>('');
+    const [selectedBatchId, setSelectedBatchId] = useState<string>(batchId || '');
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -34,10 +57,83 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
         fetchUser();
     }, []);
 
+    // Fetch Roadmaps and Batches
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch active roadmaps
+                const { data: roadmapsData } = await supabase
+                    .from('roadmaps')
+                    .select('id, title')
+                    .eq('is_active', true);
+
+                if (roadmapsData) setRoadmaps(roadmapsData);
+
+                // Fetch active batches
+                const { data: batchesData } = await supabase
+                    .from('batches')
+                    .select('id, name, roadmap_id')
+                    .eq('status', 'active'); // Only active batches
+
+                if (batchesData) {
+                    setBatches(batchesData);
+
+                    // Pre-select based on batchId prop if available
+                    if (batchId) {
+                        const matchedBatch = (batchesData as Batch[]).find(b => b.id === batchId);
+                        if (matchedBatch) {
+                            setSelectedRoadmapId(matchedBatch.roadmap_id);
+                            setSelectedBatchId(batchId);
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching selection data:', error);
+            }
+        };
+
+        if (isOpen) {
+            fetchData();
+        }
+    }, [isOpen, batchId]);
+
+    // Fetch Weeks when Roadmap changes
+    useEffect(() => {
+        const fetchWeeks = async () => {
+            if (!selectedRoadmapId) {
+                setWeeks([]);
+                return;
+            }
+
+            try {
+                const { data: weeksData } = await supabase
+                    .from('roadmap_weeks')
+                    .select('id, week_number, title')
+                    .eq('roadmap_id', selectedRoadmapId)
+                    .order('week_number');
+
+                if (weeksData) setWeeks(weeksData);
+            } catch (error) {
+                console.error('Error fetching weeks:', error);
+            }
+        };
+
+        fetchWeeks();
+    }, [selectedRoadmapId]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!mentorId) {
             alert('You must be logged in');
+            return;
+        }
+
+        const finalBatchId = selectedBatchId;
+
+        // Require batch selection
+        if (!finalBatchId) {
+            alert('Please select a batch for this session.');
             return;
         }
 
@@ -47,7 +143,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
         try {
             await createSession({
                 mentor_id: mentorId,
-                batch_id: batchId || null,
+                batch_id: finalBatchId,
                 title,
                 description,
                 start_time: startDateTime.toISOString(),
@@ -55,7 +151,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                 meeting_link: meetingLink,
                 platform: meetingLink.includes('zoom') ? 'zoom' : meetingLink.includes('meet') ? 'meet' : 'other',
                 session_type: sessionType,
-                target_audience: selectedLevels.length > 0 ? selectedLevels : ['all']
+                target_audience: selectedWeeks.length > 0 ? selectedWeeks : ['all']
             });
 
             onSessionCreated();
@@ -77,12 +173,16 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
         setDuration(60);
         setMeetingLink('');
         setSessionType('clinic');
-        setSelectedLevels([]);
+        setSelectedWeeks([]);
+        if (!batchId) {
+            setSelectedRoadmapId('');
+            setSelectedBatchId('');
+        }
     };
 
-    const toggleLevel = (level: string) => {
-        setSelectedLevels(prev =>
-            prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]
+    const toggleWeek = (weekTitle: string) => {
+        setSelectedWeeks(prev =>
+            prev.includes(weekTitle) ? prev.filter(w => w !== weekTitle) : [...prev, weekTitle]
         );
     };
 
@@ -99,6 +199,47 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+                    {/* Roadmap & Batch Selection */}
+                    <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
+                        <div>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <BookOpen className="inline w-4 h-4 mr-1" /> Roadmap
+                            </label>
+                            <select
+                                value={selectedRoadmapId}
+                                onChange={(e) => {
+                                    setSelectedRoadmapId(e.target.value);
+                                    setSelectedBatchId(''); // Reset batch when roadmap changes
+                                }}
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                            >
+                                <option value="">Select Roadmap</option>
+                                {roadmaps.map(roadmap => (
+                                    <option key={roadmap.id} value={roadmap.id}>{roadmap.title}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <UsersIcon className="inline w-4 h-4 mr-1" /> Batch
+                            </label>
+                            <select
+                                value={selectedBatchId}
+                                onChange={(e) => setSelectedBatchId(e.target.value)}
+                                disabled={!selectedRoadmapId}
+                                className={`w-full p-2 border rounded-lg outline-none transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white disabled:opacity-50' : 'bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400'}`}
+                            >
+                                <option value="">Select Batch</option>
+                                {batches
+                                    .filter(b => b.roadmap_id === selectedRoadmapId)
+                                    .map(batch => (
+                                        <option key={batch.id} value={batch.id}>{batch.name}</option>
+                                    ))}
+                            </select>
+                        </div>
+                    </div>
+
                     {/* Title */}
                     <div>
                         <label className={`block text-sm font-medium mb-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Session Title</label>
@@ -131,25 +272,30 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
 
                     <div>
                         <label className={`block text-sm font-medium mb-2 flex items-center gap-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                            <Users className="w-4 h-4" /> Target Audience (Levels)
+                            <Users className="w-4 h-4" /> Weekly Modules (Topics)
                         </label>
                         <div className="flex flex-wrap gap-2">
-                            {availableLevels.map(level => (
-                                <button
-                                    key={level}
-                                    type="button"
-                                    onClick={() => toggleLevel(level)}
-                                    className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${selectedLevels.includes(level)
-                                        ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                        : isDarkMode
-                                            ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    {level}
-                                </button>
-                            ))}
-                            {selectedLevels.length === 0 && <span className="text-xs text-gray-400 self-center">(Defaults to All)</span>}
+                            {weeks.length > 0 ? (
+                                weeks.map(week => (
+                                    <button
+                                        key={week.id}
+                                        type="button"
+                                        onClick={() => toggleWeek(`Week ${week.week_number}: ${week.title}`)}
+                                        className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors text-left ${selectedWeeks.includes(`Week ${week.week_number}: ${week.title}`)
+                                            ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                            : isDarkMode
+                                                ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        Week {week.week_number}: {week.title}
+                                    </button>
+                                ))
+                            ) : (
+                                <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {selectedRoadmapId ? 'No weeks found for this roadmap.' : 'Select a roadmap to see topics.'}
+                                </span>
+                            )}
                         </div>
                     </div>
 

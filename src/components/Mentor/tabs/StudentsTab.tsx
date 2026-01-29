@@ -44,7 +44,8 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         handleUpdateBatch,
         handleAddStudent,
         handleAssignStudents,
-        handleDeleteStudent
+        handleDeleteStudent,
+        userRole
     } = useStudentsTab({ selectedBatch, onUpdate });
 
     const selectedBatchData = batches.find(b => b.id === selectedBatch);
@@ -61,6 +62,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 setIsAddingStudent={setIsAddingStudent}
                 setIsAssigningStudents={setIsAssigningStudents}
                 loadAvailableStudents={loadAvailableStudents}
+                userRole={userRole}
             />
 
             <BatchInfo
