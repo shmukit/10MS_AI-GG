@@ -76,7 +76,7 @@ export const useRoadmapTab = ({
 
             const { data: weekData, error: weekError } = await supabase
                 .from('roadmap_weeks')
-                .select('id')
+                .select('id, domain')
                 .eq('roadmap_id', selectedRoadmap)
                 .eq('week_number', newTask.weekNumber)
                 .single() as { data: any; error: any };
@@ -106,6 +106,18 @@ export const useRoadmapTab = ({
                 weekId = newWeek.id;
             }
 
+            if (weekData && weekData.domain !== newTask.domain && newTask.domain) {
+                console.log(`Updating domain for Week ${newTask.weekNumber} to ${newTask.domain}`);
+                const { error: updateWeekError } = await supabase
+                    .from('roadmap_weeks')
+                    .update({ domain: newTask.domain } as unknown as never)
+                    .eq('id', weekId);
+
+                if (updateWeekError) {
+                    console.error('Error updating week domain:', updateWeekError);
+                }
+            }
+
             const { data, error } = await supabase
                 .from('roadmap_tasks')
                 .insert([{
@@ -127,7 +139,7 @@ export const useRoadmapTab = ({
                 const newItem: RoadmapItem = {
                     id: data.id,
                     weekNumber: newTask.weekNumber,
-                    domain: 'General',
+                    domain: newTask.domain || 'General',
                     taskType: data.task_type,
                     taskName: data.task_name,
                     taskDetails: data.task_details,
@@ -136,7 +148,14 @@ export const useRoadmapTab = ({
                     meetingTime: data.meeting_time
                 };
 
-                setRoadmapData([...roadmapData, { ...newItem, domain: newTask.domain }]);
+                // Update domain for all tasks in this week in the local state
+                const updatedRoadmapData = roadmapData.map(t =>
+                    t.weekNumber === newTask.weekNumber
+                        ? { ...t, domain: newTask.domain || t.domain }
+                        : t
+                );
+
+                setRoadmapData([...updatedRoadmapData, newItem]);
                 setIsAddingTask(false);
                 setNewTask({
                     weekNumber: 1,
@@ -159,6 +178,28 @@ export const useRoadmapTab = ({
         if (!editingTask || !editingTaskData) return;
 
         try {
+            if (editingTaskData.domain) {
+                // Find the week ID for this task
+                // We don't have week_id in RoadmapItem, but we have weekNumber. 
+                // We need to fetch the week_id or rely on the backend to know which week it is.
+                // Best approach: fetch the task to get the week_id, or better, query roadmap_weeks directly using roadmap_id and weekNumber.
+
+                // Optimized: We know the weekNumber from editingTaskData.
+                const { data: weekData } = await supabase
+                    .from('roadmap_weeks')
+                    .select('id, domain')
+                    .eq('roadmap_id', selectedRoadmap)
+                    .eq('week_number', editingTaskData.weekNumber)
+                    .single() as { data: any; error: any };
+
+                if (weekData && weekData.domain !== editingTaskData.domain) {
+                    await supabase
+                        .from('roadmap_weeks')
+                        .update({ domain: editingTaskData.domain } as unknown as never)
+                        .eq('id', weekData.id);
+                }
+            }
+
             const { error } = await supabase
                 .from('roadmap_tasks')
                 .update({
@@ -175,11 +216,23 @@ export const useRoadmapTab = ({
 
             if (error) throw error;
 
-            setRoadmapData(roadmapData.map(task =>
-                task.id === editingTask ? { ...task, ...editingTaskData } : task
-            ));
+            // Update local state - update domain for ALL tasks in this week
+            setRoadmapData(roadmapData.map(task => {
+                if (task.weekNumber === editingTaskData.weekNumber) {
+                    // For the specific task being edited, update everything. 
+                    // For other tasks in the same week, only update the domain.
+                    if (task.id === editingTask) {
+                        return { ...task, ...editingTaskData };
+                    } else {
+                        return { ...task, domain: editingTaskData.domain };
+                    }
+                }
+                return task;
+            }));
+
             setEditingTask(null);
             setEditingTaskData(null);
+            alert('Task updated successfully!');
         } catch (error) {
             console.error('Error updating task:', error);
             alert('Failed to update task');
