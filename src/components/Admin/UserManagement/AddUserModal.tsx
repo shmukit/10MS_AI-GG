@@ -75,17 +75,14 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 alert(`User role updated to ${formData.role} successfully!`);
             } else {
                 // Create new user
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: formData.email,
-                    password: formData.password,
-                    options: {
-                        data: {
-                            first_name: formData.firstName,
-                            last_name: formData.lastName,
-                            role: formData.role
-                        }
-                    }
-                });
+                // Create new user via Secure RPC (Prevents session hijacking & 500 errors)
+                const { data: authData, error: authError } = await supabase.rpc('create_new_user', {
+                    p_email: formData.email,
+                    p_password: formData.password,
+                    p_first_name: formData.firstName,
+                    p_last_name: formData.lastName,
+                    p_role: formData.role
+                } as any);
 
                 if (authError) throw authError;
 

@@ -679,7 +679,16 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_new_user: {
+        Args: {
+          p_email: string
+          p_password: string
+          p_first_name: string
+          p_last_name: string
+          p_role: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
