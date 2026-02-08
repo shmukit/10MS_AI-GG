@@ -82,7 +82,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         const weekTasks = (tasksData || []).map((task: any) => ({
           id: task.id,
           weekNumber: week.week_number,
-          domain: week.domain || '',
+          domain: task.domain || '',
           taskType: task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1) as any,
           taskName: task.task_name,
           taskDetails: task.task_details || '',
