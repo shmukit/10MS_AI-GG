@@ -160,9 +160,44 @@ export const useRoadmapTab = ({
         if (!editingTask || !editingTaskData) return;
 
         try {
+            // First, get the correct week_id for the selected week number
+            const { data: weekData, error: weekError } = await supabase
+                .from('roadmap_weeks')
+                .select('id, domain')
+                .eq('roadmap_id', selectedRoadmap)
+                .eq('week_number', editingTaskData.weekNumber)
+                .single() as { data: any; error: any };
+
+            let weekId = weekData?.id;
+
+            // If the week doesn't exist, create it
+            if (weekError || !weekData) {
+                console.log(`Week ${editingTaskData.weekNumber} not found, creating it automatically...`);
+                const { data: newWeek, error: createWeekError } = await supabase
+                    .from('roadmap_weeks')
+                    .insert([{
+                        roadmap_id: selectedRoadmap,
+                        week_number: editingTaskData.weekNumber,
+                        title: `Week ${editingTaskData.weekNumber}`,
+                        description: `Week ${editingTaskData.weekNumber} Content`,
+                        domain: editingTaskData.domain || 'General'
+                    }] as unknown as never)
+                    .select('id')
+                    .single() as { data: any; error: any };
+
+                if (createWeekError) {
+                    console.error('Error creating week:', createWeekError);
+                    alert(`Failed to create Week ${editingTaskData.weekNumber}. Please try again.`);
+                    return;
+                }
+                weekId = newWeek.id;
+            }
+
+            // Now update the task with the correct week_id
             const { error } = await supabase
                 .from('roadmap_tasks')
                 .update({
+                    week_id: weekId,
                     task_name: editingTaskData.taskName,
                     task_details: editingTaskData.taskDetails,
                     task_type: editingTaskData.taskType.toLowerCase(),
