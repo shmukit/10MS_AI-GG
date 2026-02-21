@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, RefreshCw } from 'lucide-react';
 import { Batch } from '../../../../types/mentor';
 
 interface BatchHeaderProps {
@@ -11,6 +11,8 @@ interface BatchHeaderProps {
     setIsAddingStudent: (isAdding: boolean) => void;
     setIsAssigningStudents: (isAssigning: boolean) => void;
     loadAvailableStudents: () => Promise<void>;
+    onSyncProgress?: () => Promise<void>;
+    isSyncingProgress?: boolean;
     userRole?: string | null;
 }
 
@@ -23,6 +25,8 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
     setIsAddingStudent,
     setIsAssigningStudents,
     loadAvailableStudents,
+    onSyncProgress,
+    isSyncingProgress,
     userRole
 }) => {
     return (
@@ -73,6 +77,22 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                             <Users className="w-4 h-4" />
                             Assign Students
                         </button>
+                        {onSyncProgress && (
+                            <button
+                                onClick={onSyncProgress}
+                                disabled={isSyncingProgress}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isSyncingProgress
+                                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                                    : isDarkMode
+                                        ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                    }`}
+                                title="Sync progress from completed tasks - fixes stale 0% display"
+                            >
+                                <RefreshCw className={`w-4 h-4 ${isSyncingProgress ? 'animate-spin' : ''}`} />
+                                {isSyncingProgress ? 'Syncing...' : 'Sync Progress'}
+                            </button>
+                        )}
                     </>
                 )}
             </div>

@@ -46,7 +46,7 @@ export const updateTaskProgress = async (
             return false;
         }
 
-        // Award XP if completed
+        // Award XP and sync progress if completed
         if (status === 'completed') {
             const { data: assignments } = await supabase
                 .from('student_batch_assignments')
@@ -61,6 +61,11 @@ export const updateTaskProgress = async (
                     await awardTaskCompletionXP(userId, assignment.batch_id);
                 }
             }
+
+            // Sync progress to student_profiles and student_batch_assignments
+            // so mentor/admin dashboard shows updated progress
+            const { ProgressSyncService } = await import('../progressSync');
+            await ProgressSyncService.syncStudentProgress(userId);
         }
 
         return true;
@@ -102,6 +107,11 @@ export const markWeekAsComplete = async (
 
             console.log('✅ Successfully marked task as completed:', task.id);
         }
+
+        // Sync progress to student_profiles and student_batch_assignments
+        // so mentor/admin dashboard shows updated progress
+        const { ProgressSyncService } = await import('../progressSync');
+        await ProgressSyncService.syncStudentProgress(userId);
 
         console.log('🎉 All tasks for week marked as completed successfully');
         return true;
