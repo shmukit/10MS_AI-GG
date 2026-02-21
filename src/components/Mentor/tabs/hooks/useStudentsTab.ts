@@ -18,6 +18,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     const [availableStudents, setAvailableStudents] = useState<any[]>([]);
     const [showPassword, setShowPassword] = useState(false);
+    const [isSyncingProgress, setIsSyncingProgress] = useState(false);
 
     const [newBatch, setNewBatch] = useState({
         name: '',
@@ -306,6 +307,27 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         }
     };
 
+    const handleSyncProgress = async () => {
+        if (!selectedBatch) return;
+        setIsSyncingProgress(true);
+        try {
+            const { ProgressSyncService } = await import('../../../../services/progressSync');
+            const result = await ProgressSyncService.syncBatchProgress(selectedBatch);
+            onUpdate();
+            if (result.success) {
+                alert(`Progress synced for ${result.syncedStudents} students.`);
+            } else if (result.errors.length > 0) {
+                console.error('Sync errors:', result.errors);
+                alert(`Synced ${result.syncedStudents} students. Some errors: ${result.errors.slice(0, 2).join(', ')}`);
+            }
+        } catch (error) {
+            console.error('Error syncing progress:', error);
+            alert('Failed to sync progress. Please try again.');
+        } finally {
+            setIsSyncingProgress(false);
+        }
+    };
+
     return {
         isAddingBatch, setIsAddingBatch,
         isEditingBatch, setIsEditingBatch,
@@ -324,6 +346,8 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         handleAddStudent,
         handleAssignStudents,
         handleDeleteStudent,
+        handleSyncProgress,
+        isSyncingProgress,
         userRole
     };
 };

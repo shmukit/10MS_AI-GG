@@ -45,6 +45,8 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         handleAddStudent,
         handleAssignStudents,
         handleDeleteStudent,
+        handleSyncProgress,
+        isSyncingProgress,
         userRole
     } = useStudentsTab({ selectedBatch, onUpdate });
 
@@ -62,6 +64,8 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 setIsAddingStudent={setIsAddingStudent}
                 setIsAssigningStudents={setIsAssigningStudents}
                 loadAvailableStudents={loadAvailableStudents}
+                onSyncProgress={handleSyncProgress}
+                isSyncingProgress={isSyncingProgress}
                 userRole={userRole}
             />
 
