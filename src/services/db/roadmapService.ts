@@ -149,13 +149,19 @@ export const getRoadmapWeeks = async (roadmapId: string): Promise<RoadmapWeek[]>
     }
 };
 
-export const getRoadmapTasks = async (weekId: string): Promise<RoadmapTask[]> => {
+export const getRoadmapTasks = async (weekId: string, batchId?: string): Promise<RoadmapTask[]> => {
     try {
-        const { data, error } = await supabase
+        console.log(`🔍 Fetching tasks for week ${weekId}${batchId ? ` and batch ${batchId}` : ''}`);
+
+        let query = supabase
             .from('roadmap_tasks')
-            .select('*')
-            .eq('week_id', weekId)
-            .order('created_at');
+            .select(`
+                *,
+                batch_task_deadlines!left(deadline, batch_id)
+            `)
+            .eq('week_id', weekId);
+
+        const { data, error } = await query.order('created_at');
 
         if (error) {
             console.error('Error fetching roadmap tasks:', error);
@@ -163,21 +169,36 @@ export const getRoadmapTasks = async (weekId: string): Promise<RoadmapTask[]> =>
         }
 
         // Transform database field names to frontend field names
-        const transformedTasks = (data || []).map((task: any) => ({
-            id: task.id,
-            week_id: task.week_id,
-            task_name: task.task_name,
-            task_details: task.task_details,
-            task_type: task.task_type,
-            relevant_links: task.relevant_links,
-            deadline: task.deadline,
-            estimated_hours: task.estimated_hours,
-            points: task.points,
-            is_required: task.is_required,
-            created_at: task.created_at,
-            meeting_time: task.meeting_time,
-            is_active: task.is_active
-        }));
+        const transformedTasks = (data || []).map((task: any) => {
+            // Check for batch-specific deadline
+            let finalDeadline = task.deadline;
+
+            if (batchId && task.batch_task_deadlines) {
+                const deadlines = Array.isArray(task.batch_task_deadlines) ?
+                    task.batch_task_deadlines : [task.batch_task_deadlines];
+
+                const batchSpecific = deadlines.find((d: any) => d.batch_id === batchId);
+                if (batchSpecific?.deadline) {
+                    finalDeadline = batchSpecific.deadline;
+                }
+            }
+
+            return {
+                id: task.id,
+                week_id: task.week_id,
+                task_name: task.task_name,
+                task_details: task.task_details,
+                task_type: task.task_type,
+                relevant_links: task.relevant_links,
+                deadline: finalDeadline,
+                estimated_hours: task.estimated_hours,
+                points: task.points,
+                is_required: task.is_required,
+                created_at: task.created_at,
+                meeting_time: task.meeting_time,
+                is_active: task.is_active
+            };
+        });
 
         return transformedTasks;
     } catch (error) {
@@ -230,7 +251,8 @@ export const getCurrentWeekTasks = async (userId: string, roadmapId?: string): P
         }
 
         // Get tasks for current week
-        const tasks = await getRoadmapTasks(currentWeekData.id);
+        const batch = await getStudentBatch(userId);
+        const tasks = await getRoadmapTasks(currentWeekData.id, batch?.id);
         console.log('📝 Tasks for current week:', tasks);
 
         // Filter to only required tasks
@@ -269,10 +291,11 @@ export const getUpcomingTasks = async (userId: string, roadmapId?: string): Prom
         // Get tasks for next few weeks (weeks 2-4)
         const upcomingTasks: RoadmapTask[] = [];
 
+        const batch = await getStudentBatch(userId);
         for (let weekNum = 2; weekNum <= 4; weekNum++) {
             const weekData = weeks.find(w => w.week_number === weekNum);
             if (weekData) {
-                const weekTasks = await getRoadmapTasks(weekData.id);
+                const weekTasks = await getRoadmapTasks(weekData.id, batch?.id);
                 console.log(`📝 Tasks for week ${weekNum}:`, weekTasks);
 
                 // Add week number to each task for display

@@ -10,6 +10,7 @@ interface UseRoadmapTabProps {
     setRoadmapData: React.Dispatch<React.SetStateAction<RoadmapItem[]>>;
     selectedRoadmap: string;
     setSelectedRoadmap: (id: string) => void;
+    selectedBatch?: string;
 }
 
 export const useRoadmapTab = ({
@@ -18,7 +19,8 @@ export const useRoadmapTab = ({
     roadmapData,
     setRoadmapData,
     selectedRoadmap,
-    setSelectedRoadmap
+    setSelectedRoadmap,
+    selectedBatch
 }: UseRoadmapTabProps) => {
     const [weekFilter, setWeekFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
@@ -106,8 +108,7 @@ export const useRoadmapTab = ({
                 weekId = newWeek.id;
             }
 
-            const { data, error } = await supabase
-                .from('roadmap_tasks')
+            const { data, error } = await (supabase.from('roadmap_tasks') as any)
                 .insert([{
                     week_id: weekId,
                     task_name: newTask.taskName,
@@ -118,9 +119,9 @@ export const useRoadmapTab = ({
                     meeting_time: newTask.meetingTime || null,
                     is_active: true,
                     domain: newTask.domain || 'General'
-                }] as unknown as never)
+                }])
                 .select()
-                .single() as { data: any; error: any };
+                .single();
 
             if (error) throw error;
 
@@ -193,9 +194,26 @@ export const useRoadmapTab = ({
                 weekId = newWeek.id;
             }
 
+            // Handle batch-specific deadline if a batch is selected
+            if (selectedBatch) {
+                console.log(`Saving batch-specific deadline for batch ${selectedBatch} and task ${editingTask}`);
+                const { error: batchDeadlineError } = await (supabase
+                    .from('batch_task_deadlines') as any)
+                    .upsert({
+                        batch_id: selectedBatch,
+                        task_id: editingTask,
+                        deadline: editingTaskData.deadline || null
+                    }, {
+                        onConflict: 'batch_id,task_id'
+                    });
+
+                if (batchDeadlineError) {
+                    console.error('Error saving batch-specific deadline:', batchDeadlineError);
+                }
+            }
+
             // Now update the task with the correct week_id
-            const { error } = await supabase
-                .from('roadmap_tasks')
+            const { error } = await (supabase.from('roadmap_tasks') as any)
                 .update({
                     week_id: weekId,
                     task_name: editingTaskData.taskName,
@@ -205,10 +223,10 @@ export const useRoadmapTab = ({
                     deadline: editingTaskData.deadline || null,
                     meeting_time: editingTaskData.meetingTime || null,
                     domain: editingTaskData.domain
-                } as unknown as never)
+                })
                 .eq('id', editingTask)
                 .select()
-                .single() as { data: any; error: any };
+                .single();
 
             if (error) throw error;
 

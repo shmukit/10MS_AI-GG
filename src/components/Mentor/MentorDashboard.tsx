@@ -394,6 +394,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 selectedRoadmap={selectedRoadmap}
                 setSelectedRoadmap={setSelectedRoadmap}
                 isDarkMode={isDarkMode}
+                selectedBatch={selectedBatch}
               />
             )}
             {activeTab === 'students' && (

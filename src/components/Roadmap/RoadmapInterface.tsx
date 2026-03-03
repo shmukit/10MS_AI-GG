@@ -190,12 +190,26 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
           const weekIds = weeksData.map(week => week.id);
           const { data: allTasks, error: tasksError } = await supabase
             .from('roadmap_tasks')
-            .select('*')
+            .select(`
+              *,
+              batch_task_deadlines!left(deadline, batch_id)
+            `)
             .in('week_id', weekIds)
             .order('created_at');
 
           if (!tasksError && allTasks) {
-            setTasks(allTasks);
+            // Apply batch-specific deadlines
+            const transformedTasks = allTasks.map((task: any) => {
+              let finalDeadline = task.deadline;
+              if (batchId && task.batch_task_deadlines) {
+                const deadlines = Array.isArray(task.batch_task_deadlines) ?
+                  task.batch_task_deadlines : [task.batch_task_deadlines];
+                const batchSpecific = deadlines.find((d: any) => d.batch_id === batchId);
+                if (batchSpecific?.deadline) finalDeadline = batchSpecific.deadline;
+              }
+              return { ...task, deadline: finalDeadline };
+            });
+            setTasks(transformedTasks);
           } else {
             console.error('Error fetching tasks:', tasksError);
             setTasks([]);
