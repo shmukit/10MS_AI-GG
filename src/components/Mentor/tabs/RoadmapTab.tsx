@@ -16,6 +16,7 @@ interface RoadmapTabProps {
     selectedRoadmap: string;
     setSelectedRoadmap: (id: string) => void;
     isDarkMode: boolean;
+    selectedBatch?: string;
 }
 
 export const RoadmapTab: React.FC<RoadmapTabProps> = ({
@@ -25,7 +26,8 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
     setRoadmapData,
     selectedRoadmap,
     setSelectedRoadmap,
-    isDarkMode
+    isDarkMode,
+    selectedBatch
 }) => {
     const {
         weekFilter, setWeekFilter,
@@ -55,7 +57,8 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
         roadmapData,
         setRoadmapData,
         selectedRoadmap,
-        setSelectedRoadmap
+        setSelectedRoadmap,
+        selectedBatch
     });
 
     return (
