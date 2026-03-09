@@ -82,7 +82,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={studentData.password}
-                                onChange={(e) => setStudentData({ ...studentData, password: e.target.value })}
+                                readOnly
                                 className={`w-full px-3 py-2 pr-20 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                                     }`}
                             />

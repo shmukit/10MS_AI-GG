@@ -172,6 +172,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         }
 
         try {
+            const studentPassword = 'NeverStopLearning!';
             const { data: existingUser, error: checkError } = await supabase
                 .from('users')
                 .select('id, email')
@@ -180,43 +181,30 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
 
             if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
-            let userId: string;
+            const firstName = newStudent.name.split(' ')[0] || newStudent.name;
+            const lastName = newStudent.name.split(' ').slice(1).join(' ') || '';
+            const preferredUserId = existingUser?.id || crypto.randomUUID();
 
-            if (existingUser) {
-                userId = existingUser.id;
-                const { error: updateError } = await supabase
-                    .from('users')
-                    .update({
-                        role: 'student',
-                        first_name: newStudent.name.split(' ')[0] || newStudent.name,
-                        last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
-                        is_active: true,
-                        email_verified: true
-                    } as unknown as never)
-                    .eq('id', userId);
+            // IMPORTANT:
+            // Supabase login uses auth.users, not public.users.password_hash.
+            // This RPC ensures the student exists in BOTH auth.users and public.users
+            // and sets the password consistently.
+            const { data: upsertData, error: upsertError } = await supabase.rpc('upsert_student_user', {
+                p_user_id: preferredUserId,
+                p_email: newStudent.email,
+                p_password: studentPassword,
+                p_first_name: firstName,
+                p_last_name: lastName,
+                p_phone: newStudent.phone || null
+            } as any);
 
-                if (updateError) throw updateError;
-            } else {
-                userId = crypto.randomUUID();
-                const { error: userInsertError } = await supabase
-                    .from('users')
-                    .insert([{
-                        id: userId,
-                        email: newStudent.email,
-                        password_hash: `$2a$10$${newStudent.password}`,
-                        role: 'student',
-                        first_name: newStudent.name.split(' ')[0] || newStudent.name,
-                        last_name: newStudent.name.split(' ').slice(1).join(' ') || '',
-                        is_active: true,
-                        email_verified: true
-                    }] as unknown as never);
+            if (upsertError) throw upsertError;
 
-                if (userInsertError) throw userInsertError;
-            }
+            const userId: string = (upsertData as any)?.id || preferredUserId;
 
             const { error: profileError } = await supabase
                 .from('student_profiles')
-                .insert([{
+                .upsert([{
                     user_id: userId,
                     institute: newStudent.institute,
                     year: newStudent.year,
@@ -225,18 +213,18 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                     completed_weeks: 0,
                     progress_percentage: 0,
                     enrollment_date: new Date().toISOString()
-                }] as unknown as never);
+                }] as unknown as never, { onConflict: 'user_id' });
 
             if (profileError) throw profileError;
 
             const { error: assignmentError } = await supabase
                 .from('student_batch_assignments')
-                .insert([{
+                .upsert([{
                     student_id: userId,
                     batch_id: selectedBatch,
                     status: 'active',
                     enrollment_date: new Date().toISOString().split('T')[0]
-                }] as unknown as never);
+                }] as unknown as never, { onConflict: 'student_id,batch_id' });
 
             if (assignmentError) throw assignmentError;
 
@@ -245,7 +233,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                 name: '',
                 email: '',
                 phone: '',
-                password: 'NeverStopLearning!',
+                password: studentPassword,
                 institute: '',
                 year: '1st Year',
                 subject: '',
