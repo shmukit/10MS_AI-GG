@@ -26,9 +26,9 @@ export const generateRoadmapData = (
       );
       
       if (completedTasks.length === weekTasks.length && weekTasks.length > 0) {
-        status = 'completed';
+        status = 'completed'; // Mark as completed when all tasks are done
       } else if (completedTasks.length > 0) {
-        status = 'active';
+        status = 'active'; // Active if there's some progress but not all tasks done
       } else if (index === 0) {
         // First week is active if no progress yet
         status = 'active';

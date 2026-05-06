@@ -1,16 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  root: '.',
+  publicDir: 'public',
+  css: {
+    postcss: './config/postcss.config.js',
+  },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-    exclude: ['lucide-react'],
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react'],
   },
   server: {
-    host: '0.0.0.0',
-    port: 5173,
+    host: 'localhost',
+    port: 5174,
     strictPort: true,
   },
   build: {
@@ -20,35 +25,10 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Split vendor libraries
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            return 'vendor';
-          }
-          
-          // Split our own components
-          if (id.includes('components/Mentor')) {
-            return 'mentor';
-          }
-          if (id.includes('components/Student')) {
-            return 'student';
-          }
-          if (id.includes('components/Roadmap')) {
-            return 'roadmap';
-          }
-        },
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+          ui: ['lucide-react', 'clsx', 'tailwind-merge']
+        }
       },
     },
   },

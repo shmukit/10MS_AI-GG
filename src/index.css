@@ -26,29 +26,33 @@
 }
 
 .dark {
-  --background: #0a0a0a;
+  --background: #0f172a;
   --foreground: #ededed;
-  --card: #171717;
+  --card: #1e293b;
   --card-foreground: #ededed;
-  --popover: #171717;
+  --popover: #1e293b;
   --popover-foreground: #ededed;
   --primary: #3b82f6;
   --primary-foreground: #171717;
-  --secondary: #262626;
+  --secondary: #1e293b;
   --secondary-foreground: #ededed;
-  --muted: #262626;
-  --muted-foreground: #a3a3a3;
-  --accent: #262626;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
   --accent-foreground: #ededed;
   --destructive: #7f1d1d;
   --destructive-foreground: #ededed;
-  --border: #262626;
-  --input: #262626;
+  --border: #1e293b;
+  --input: #1e293b;
   --ring: #3b82f6;
 }
 
 * {
   border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -58,12 +62,12 @@ body {
 
 /* Dark mode specific styles */
 .dark body {
-  background-color: #0a0a0a;
+  background-color: #0f172a;
   color: #ededed;
 }
 
 .dark .bg-white {
-  background-color: #171717;
+  background-color: #1e293b;
 }
 
 .dark .text-gray-900 {
@@ -96,6 +100,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -107,6 +112,7 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -118,6 +124,7 @@ body {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

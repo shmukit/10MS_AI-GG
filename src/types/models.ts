@@ -1,0 +1,126 @@
+// Types for database entities
+export interface User {
+    id: string;
+    email: string;
+    role: 'student' | 'mentor' | 'admin';
+    first_name: string;
+    last_name: string;
+    profile_picture_url?: string;
+    phone?: string;
+    is_active: boolean;
+    email_verified: boolean;
+    created_at: string;
+    updated_at: string;
+    mentor_profiles?: MentorProfile[];
+}
+
+export interface StudentProfile {
+    id: string;
+    user_id: string;
+    institute: string;
+    year: string;
+    subject: string;
+    degree: string;
+    batch_id?: string;
+    completed_weeks: number;
+    progress_percentage: number;
+    enrollment_date: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MentorProfile {
+    id: string;
+    user_id: string;
+    organization: string;
+    designation: string;
+    expertise_areas: string[];
+    bio?: string;
+    years_of_experience?: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Batch {
+    id: string;
+    name: string;
+    roadmap_id?: string;
+    mentor_id?: string;
+    max_students: number;
+    current_students: number;
+    start_date: string;
+    end_date?: string;
+    whatsapp_link?: string;
+    discord_link?: string;
+    emergency_contact?: string;
+    status: 'active' | 'completed' | 'cancelled';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Roadmap {
+    id: string;
+    title: string;
+    description?: string;
+    total_weeks: number;
+    difficulty_level: 'beginner' | 'intermediate' | 'advanced';
+    category: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface RoadmapWeek {
+    id: string;
+    roadmap_id: string;
+    week_number: number;
+    title: string;
+    description?: string;
+    domain: string;
+    created_at: string;
+}
+
+export interface RoadmapTask {
+    id: string;
+    week_id: string;
+    task_name: string;
+    task_details?: string;
+    task_type: 'watch' | 'read' | 'project' | 'attend' | 'mcq' | 'written';
+    relevant_links?: string[];
+    deadline?: string;
+    estimated_hours?: number;
+    points: number;
+    is_required: boolean;
+    created_at: string;
+    week_number?: number;
+    meeting_time?: string;
+    is_active?: boolean;
+}
+
+export interface StudentProgress {
+    id: string;
+    student_id: string;
+    task_id: string;
+    status: 'not_started' | 'in_progress' | 'completed' | 'overdue';
+    completed_at?: string;
+    score?: number;
+    feedback?: string;
+    submitted_files?: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Notice {
+    id: string;
+    title: string;
+    content: string;
+    author_id: string;
+    batch_id?: string;
+    tag?: string;
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+    scheduled_date?: string;
+    scheduled_time?: string;
+    is_published: boolean;
+    created_at: string;
+    updated_at: string;
+}

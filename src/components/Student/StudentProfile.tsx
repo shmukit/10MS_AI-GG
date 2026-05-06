@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService } from '../../services/database';
+import { supabase } from '../../lib/supabase';
 import { StudentHeader } from './StudentHeader';
+import { CertificateCard } from './Certificates/CertificateCard';
 import { useTheme } from '../../lib/ThemeContext';
 
 // Add skeleton loading component at the top
@@ -34,16 +36,19 @@ const ProfileSkeleton = () => (
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const { profileSlug } = useParams();
-  const { user } = useAuth();
+  const { user, databaseUserId } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [profileData, setProfileData] = useState<{
     profile: any;
     userData: any;
     [key: string]: any;
   } | null>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [editForm, setEditForm] = useState<{
     first_name: string;
     last_name: string;
@@ -62,15 +67,19 @@ export const StudentProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!user?.id) return;
-      
+      if (!user?.id || !databaseUserId) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         console.log('🔍 Profile: Auth user object:', user);
         console.log('🆔 Profile: User ID:', user?.id);
         console.log('📧 Profile: User email:', user?.email);
         console.log('📋 Profile: User metadata:', user?.user_metadata);
-        const data = await DatabaseService.getDashboardData(user.id);
+        
+        const data = await DatabaseService.getDashboardData(databaseUserId);
         console.log('📊 Profile: Dashboard data received:', data);
         setProfileData(data);
         // Initialize edit form with current data
@@ -84,13 +93,28 @@ export const StudentProfile: React.FC = () => {
         });
       } catch (err) {
         console.error('Error fetching profile data:', err);
+      }
+      
+      // Fetch Certificates safely in its own block
+      try {
+        const { data: certData, error: certError } = await supabase
+          .from('student_certificates')
+          .select('*')
+          .eq('student_id', databaseUserId)
+          .order('issued_at', { ascending: false });
+        
+        if (!certError && certData) {
+          setCertificates(certData);
+        }
+      } catch (err) {
+        console.error('Error fetching certificates:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfileData();
-  }, [user?.id, user?.email]);
+  }, [user?.id, user?.email, databaseUserId]);
 
   const handleInputChange = (field: string, value: string) => {
     setEditForm(prev => ({
@@ -101,12 +125,16 @@ export const StudentProfile: React.FC = () => {
 
   const handleSave = async () => {
     if (!user?.id) return;
-    
+
     setIsSaving(true);
-    
+    setSaveError(null);
+    setSaveSuccess(false);
+
     try {
       console.log('🔄 Starting to save profile updates...');
-      
+      console.log('👤 User ID being used:', databaseUserId);
+      console.log('📧 User email:', user.email);
+
       // Update user data
       const userUpdates = {
         first_name: editForm.first_name,
@@ -124,38 +152,54 @@ export const StudentProfile: React.FC = () => {
       };
 
       console.log('📝 Profile updates to save:', { userUpdates, profileUpdates });
-      
-      // Make API calls to update both user and profile
-      console.log('📝 Profile updates to save:', { userUpdates, profileUpdates });
-      
+
       // Update user data
-      const userUpdateSuccess = await DatabaseService.updateUser(user.id, userUpdates);
+      console.log('🔄 Updating user data...');
+      if (!databaseUserId) return;
+      const userUpdateSuccess = await DatabaseService.updateUser(databaseUserId, userUpdates);
       if (!userUpdateSuccess) {
         console.error('❌ Failed to update user data');
+        setSaveError('Failed to update user information. Please try again.');
         return;
       }
-      
+      console.log('✅ User data updated successfully');
+
       // Update profile data
-      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(user.id, profileUpdates);
+      console.log('🔄 Updating student profile...');
+      if (!databaseUserId) return;
+      const profileUpdateSuccess = await DatabaseService.updateStudentProfile(databaseUserId, profileUpdates);
       if (!profileUpdateSuccess) {
         console.error('❌ Failed to update student profile');
+        setSaveError('Failed to update profile information. Please try again.');
         return;
       }
-      
-      // Update local state after successful API calls
-      setProfileData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          userData: { ...prev.userData, ...userUpdates },
-          profile: { ...prev.profile, ...profileUpdates }
-        };
+      console.log('✅ Student profile updated successfully');
+
+      // Refresh profile data from server to ensure we have the latest data
+      console.log('🔄 Refreshing profile data from server...');
+      if (!databaseUserId) return;
+      const refreshedData = await DatabaseService.getDashboardData(databaseUserId);
+      setProfileData(refreshedData);
+
+      // Update edit form with refreshed data
+      setEditForm({
+        first_name: refreshedData?.userData?.first_name || '',
+        last_name: refreshedData?.userData?.last_name || '',
+        degree: refreshedData?.profile?.degree || '',
+        subject: refreshedData?.profile?.subject || '',
+        year: refreshedData?.profile?.year || '',
+        institute: refreshedData?.profile?.institute || ''
       });
 
       setIsEditing(false);
-      console.log('✅ Profile updated successfully via API');
+      setSaveSuccess(true);
+      console.log('✅ Profile updated successfully via API and data refreshed');
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       console.error('❌ Error saving profile:', error);
+      setSaveError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -180,84 +224,92 @@ export const StudentProfile: React.FC = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      <StudentHeader 
+      <StudentHeader
         userName={
-          profileData?.userData?.first_name || 
-          profileData?.profile?.first_name || 
+          profileData?.userData?.first_name ||
+          profileData?.profile?.first_name ||
           user?.user_metadata?.first_name ||
-          user?.user_metadata?.full_name || 
-          user?.email?.split('@')[0] || 
+          user?.user_metadata?.full_name ||
+          user?.email?.split('@')[0] ||
           'Student'
         }
         userRole="student"
         pageTitle="Profile"
       />
-      
+
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/student/dashboard')}
-            className={`flex items-center gap-2 transition-colors duration-200 ${
-              isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
-            }`}
+            className={`flex items-center gap-2 transition-colors duration-200 text-[var(--primary-accent)] hover:opacity-80`}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
-          
-          <h1 className={`text-3xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Profile</h1>
+
+          {/* Duplicate title removed */}
         </div>
-        
-        <div className={`rounded-lg p-8 shadow-sm transition-colors duration-200 ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'
-        }`}>
+
+        <div className={`rounded-lg p-8 shadow-sm transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+          {/* Success/Error Messages */}
+          {saveSuccess && (
+            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              ✅ Profile updated successfully!
+            </div>
+          )}
+          {saveError && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              ❌ {saveError}
+            </div>
+          )}
+
           {/* Profile Header */}
-          <div className="flex items-start justify-between mb-8">
-            <div className="flex items-center gap-6">
-              <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors duration-200 ${
-                isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-              }`}>
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className={`w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold transition-colors duration-200 flex-shrink-0 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                }`}>
                 {
-                  profileData?.userData?.first_name?.[0] || 
-                  profileData?.profile?.first_name?.[0] || 
+                  profileData?.userData?.first_name?.[0] ||
+                  profileData?.profile?.first_name?.[0] ||
                   user?.user_metadata?.first_name?.[0] ||
-                  user?.user_metadata?.full_name?.[0] || 
-                  user?.email?.[0] || 
+                  user?.user_metadata?.full_name?.[0] ||
+                  user?.email?.[0] ||
                   'S'
                 }
               </div>
-              <div>
-                <h2 className={`text-3xl font-bold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              <div className="min-w-0">
+                <h2 className={`text-xl md:text-3xl font-bold mb-1 md:mb-2 transition-colors duration-200 truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {
-                    profileData?.userData?.first_name || 
-                    profileData?.profile?.first_name || 
+                    profileData?.userData?.first_name ||
+                    profileData?.profile?.first_name ||
                     user?.user_metadata?.first_name ||
-                    user?.user_metadata?.full_name || 
-                    user?.email?.split('@')[0] || 
+                    user?.user_metadata?.full_name ||
+                    user?.email?.split('@')[0] ||
                     'Student'
                   }
                 </h2>
-                <p className={`text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'Computer Science'} • {profileData?.profile?.year || '3rd'} Year
+                <p className={`text-sm md:text-lg transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'CS'} • {profileData?.profile?.year || '3rd'} Year
                 </p>
-                <p className={`transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{profileData?.profile?.institute || 'University'}</p>
+                <p className={`text-xs md:text-base transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>{profileData?.profile?.institute || 'University'}</p>
               </div>
             </div>
             {isEditing ? (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-green-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {isSaving ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
                       Saving...
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" />
+                      <Save className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       Save
                     </>
                   )}
@@ -265,21 +317,20 @@ export const StudentProfile: React.FC = () => {
                 <button
                   onClick={handleCancel}
                   disabled={isSaving}
-                  className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-gray-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   Cancel
                 </button>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={() => {
-                  console.log('🖊️ Edit Profile button clicked!');
-                  console.log('📊 Current profile data:', profileData);
-                  console.log('📝 Current edit form:', editForm);
+                  setSaveError(null);
+                  setSaveSuccess(false);
                   setIsEditing(true);
                 }}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 bg-[var(--primary-accent)] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-[var(--accent-hover)] transition-colors text-sm"
               >
                 <Edit3 className="w-4 h-4" />
                 Edit Profile
@@ -301,40 +352,38 @@ export const StudentProfile: React.FC = () => {
                         type="text"
                         value={editForm.first_name}
                         onChange={(e) => handleInputChange('first_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                          }`}
                         placeholder="First Name"
                       />
                       <input
                         type="text"
                         value={editForm.last_name}
                         onChange={(e) => handleInputChange('last_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                          }`}
                         placeholder="Last Name"
                       />
                     </div>
                   ) : (
                     <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {
-                        profileData?.userData?.first_name || 
+                        profileData?.userData?.first_name ||
                         user?.user_metadata?.first_name ||
-                        user?.user_metadata?.full_name?.split(' ')[0] || 
-                        user?.email?.split('@')[0] || 
+                        user?.user_metadata?.full_name?.split(' ')[0] ||
+                        user?.email?.split('@')[0] ||
                         'Student'
                       } {
-                        profileData?.userData?.last_name || 
+                        profileData?.userData?.last_name ||
                         user?.user_metadata?.last_name ||
-                        user?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || 
+                        user?.user_metadata?.full_name?.split(' ').slice(1).join(' ') ||
                         ''
                       }
                     </p>
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
@@ -345,14 +394,14 @@ export const StudentProfile: React.FC = () => {
                         type="text"
                         value={editForm.degree}
                         onChange={(e) => handleInputChange('degree', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)]"
                         placeholder="Degree"
                       />
                       <input
                         type="text"
                         value={editForm.subject}
                         onChange={(e) => handleInputChange('subject', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)]"
                         placeholder="Subject"
                       />
                     </div>
@@ -363,21 +412,20 @@ export const StudentProfile: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-500">Academic Institute</p>
                   {isEditing ? (
-                                          <input
-                        type="text"
-                        value={editForm.institute}
-                        onChange={(e) => handleInputChange('institute', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    <input
+                      type="text"
+                      value={editForm.institute}
+                      onChange={(e) => handleInputChange('institute', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                         }`}
-                        placeholder="Institute"
-                      />
+                      placeholder="Institute"
+                    />
                   ) : (
                     <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{profileData?.profile?.institute || 'University'}</p>
                   )}
@@ -396,15 +444,13 @@ export const StudentProfile: React.FC = () => {
                       <input
                         type="email"
                         value={user?.email || ''}
-                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${
-                          isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
-                        }`}
+                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
+                          }`}
                         placeholder="Email"
                         disabled
                       />
-                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${
-                        isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
-                      }`}>
+                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
+                        }`}>
                         Read-only
                       </div>
                     </div>
@@ -413,7 +459,7 @@ export const StudentProfile: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
@@ -422,9 +468,8 @@ export const StudentProfile: React.FC = () => {
                     <select
                       value={editForm.year}
                       onChange={(e) => handleInputChange('year', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
-                        isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)] transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                     >
                       <option value="1st">1st Year</option>
                       <option value="2nd">2nd Year</option>
@@ -437,7 +482,7 @@ export const StudentProfile: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
@@ -447,21 +492,19 @@ export const StudentProfile: React.FC = () => {
                       <input
                         type="date"
                         value={profileData?.profile?.enrollment_date ? new Date(profileData.profile.enrollment_date).toISOString().split('T')[0] : ''}
-                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${
-                          isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
-                        }`}
+                        className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed transition-colors duration-200 ${isDarkMode ? 'bg-gray-600 border-gray-500 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'
+                          }`}
                         disabled
                       />
-                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${
-                        isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
-                      }`}>
+                      <div className={`absolute right-2 top-2 text-xs px-2 py-1 rounded transition-colors duration-200 ${isDarkMode ? 'text-gray-400 bg-gray-700' : 'text-gray-500 bg-gray-100'
+                        }`}>
                         Read-only
                       </div>
                     </div>
                   ) : (
                     <p className={`font-medium transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {profileData?.profile?.enrollment_date ? 
-                        new Date(profileData.profile.enrollment_date).toLocaleDateString() : 
+                      {profileData?.profile?.enrollment_date ?
+                        new Date(profileData.profile.enrollment_date).toLocaleDateString() :
                         'Not specified'
                       }
                     </p>
@@ -471,6 +514,20 @@ export const StudentProfile: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Certificates Section */}
+        {certificates.length > 0 && (
+          <div className={`mt-8 rounded-lg p-8 shadow-sm transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              My Certificates & Achievements
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {certificates.map(cert => (
+                <CertificateCard key={cert.id} certificate={cert} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
