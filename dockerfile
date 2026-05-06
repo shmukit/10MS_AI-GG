@@ -26,7 +26,11 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-RUN aws ssm get-parameters --output text --region ap-southeast-1 --names prod-tenms-ai-gg --with-decryption --query Parameters[0].Value > .env
+RUN if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then \
+    aws ssm get-parameters --output text --region ap-southeast-1 --names prod-tenms-ai-gg --with-decryption --query Parameters[0].Value > .env; \
+    else \
+    echo "Skipping AWS SSM fetch: AWS credentials not provided. Using local .env if available."; \
+    fi
 
 # Build the app
 RUN npm run build
