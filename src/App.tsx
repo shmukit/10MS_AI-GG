@@ -25,6 +25,7 @@ const AdminLayout = lazy(() => import('./components/Admin/AdminLayout').then(mod
 const AdminDashboard = lazy(() => import('./components/Admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 const AdminSettings = lazy(() => import('./components/Admin/AdminSettings').then(module => ({ default: module.AdminSettings })));
 const CapabilitiesTable = lazy(() => import('./components/Admin/CapabilitiesTable').then(module => ({ default: module.CapabilitiesTable })));
+const PublicCertificatePage = lazy(() => import('./components/Public/PublicCertificatePage').then(module => ({ default: module.PublicCertificatePage })));
 
 // Loading component for lazy-loaded routes
 const RouteLoader = () => (
@@ -168,6 +169,7 @@ const AnimatedAppContent = () => {
         <Route path="/" element={<PublicDefaultRoute />} />
         <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><LoginPage /></PageTransition>} />
+        <Route path="/certificate/:id" element={<PageTransition><Suspense fallback={<RouteLoader />}><PublicCertificatePage /></Suspense></PageTransition>} />
 
         {/* Student Routes - All authenticated users can access */}
         <Route

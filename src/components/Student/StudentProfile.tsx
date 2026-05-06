@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService } from '../../services/database';
+import { supabase } from '../../lib/supabase';
 import { StudentHeader } from './StudentHeader';
+import { CertificateCard } from './Certificates/CertificateCard';
 import { useTheme } from '../../lib/ThemeContext';
 
 // Add skeleton loading component at the top
@@ -41,6 +43,7 @@ export const StudentProfile: React.FC = () => {
     userData: any;
     [key: string]: any;
   } | null>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +67,10 @@ export const StudentProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !databaseUserId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -72,7 +78,7 @@ export const StudentProfile: React.FC = () => {
         console.log('🆔 Profile: User ID:', user?.id);
         console.log('📧 Profile: User email:', user?.email);
         console.log('📋 Profile: User metadata:', user?.user_metadata);
-        if (!databaseUserId) return;
+        
         const data = await DatabaseService.getDashboardData(databaseUserId);
         console.log('📊 Profile: Dashboard data received:', data);
         setProfileData(data);
@@ -87,13 +93,28 @@ export const StudentProfile: React.FC = () => {
         });
       } catch (err) {
         console.error('Error fetching profile data:', err);
+      }
+      
+      // Fetch Certificates safely in its own block
+      try {
+        const { data: certData, error: certError } = await supabase
+          .from('student_certificates')
+          .select('*')
+          .eq('student_id', databaseUserId)
+          .order('issued_at', { ascending: false });
+        
+        if (!certError && certData) {
+          setCertificates(certData);
+        }
+      } catch (err) {
+        console.error('Error fetching certificates:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfileData();
-  }, [user?.id, user?.email]);
+  }, [user?.id, user?.email, databaseUserId]);
 
   const handleInputChange = (field: string, value: string) => {
     setEditForm(prev => ({
@@ -493,6 +514,20 @@ export const StudentProfile: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Certificates Section */}
+        {certificates.length > 0 && (
+          <div className={`mt-8 rounded-lg p-8 shadow-sm transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              My Certificates & Achievements
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {certificates.map(cert => (
+                <CertificateCard key={cert.id} certificate={cert} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

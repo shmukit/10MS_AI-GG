@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { AddUserModal } from './AddUserModal';
-import { Search, Filter, MoreVertical, Shield, User, GraduationCap, CheckCircle, XCircle, Trash2, Power } from 'lucide-react';
+import { IssueCertificateModal } from '../Certificates/IssueCertificateModal';
+import { ManageCertificatesModal } from '../Certificates/ManageCertificatesModal';
+import { Search, Filter, MoreVertical, Shield, User, GraduationCap, CheckCircle, XCircle, Trash2, Power, Award, FileText } from 'lucide-react';
 
 interface UserData {
     id: string;
@@ -20,7 +22,10 @@ export const UserList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'mentor' | 'admin'>('all');
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+    const [issueCertUser, setIssueCertUser] = useState<UserData | null>(null);
+    const [manageCertUser, setManageCertUser] = useState<UserData | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+    const [certifiedStudents, setCertifiedStudents] = useState<Record<string, any>>({});
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -56,6 +61,29 @@ export const UserList: React.FC = () => {
 
             if (error) throw error;
             setUsers(data || []);
+
+            // Fetch which students have certificates with their details
+            const { data: certData } = await supabase.from('student_certificates').select('student_id, certificate_type, issued_at');
+            
+            // Fetch batch names for students
+            const { data: batchData } = await supabase.from('student_batch_assignments').select('student_id, batches(name)');
+            const batchMap: Record<string, string> = {};
+            if (batchData) {
+                batchData.forEach((b: any) => {
+                    if (b.batches?.name) batchMap[b.student_id] = b.batches.name;
+                });
+            }
+
+            if (certData) {
+                const certMap: Record<string, any> = {};
+                certData.forEach((c: any) => {
+                    certMap[c.student_id] = {
+                        ...c,
+                        batch_name: batchMap[c.student_id] || 'SheSTEM Mentorship Program'
+                    };
+                });
+                setCertifiedStudents(certMap);
+            }
         } catch (err: any) {
             console.error('Error fetching users:', err);
             setError(err.message);
@@ -166,8 +194,22 @@ export const UserList: React.FC = () => {
                                                 {user.first_name?.[0]}{user.last_name?.[0]}
                                             </div>
                                             <div>
-                                                <div className="font-medium text-gray-900 dark:text-white">
+                                                <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
                                                     {user.first_name} {user.last_name}
+                                                    {user.role === 'student' && certifiedStudents[user.id] && (
+                                                        <div className="relative group inline-flex items-center">
+                                                            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 p-1.5 rounded-full shadow-sm cursor-help transition-transform hover:scale-110">
+                                                                <Award className="w-4 h-4" strokeWidth={2.5} />
+                                                            </span>
+                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[250px] bg-gray-900 text-white text-xs rounded py-2 px-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center shadow-lg">
+                                                                <p className="font-semibold mb-1">Certificate Awarded</p>
+                                                                <p className="opacity-90">Course: {certifiedStudents[user.id].batch_name}</p>
+                                                                <p className="opacity-90 mt-0.5">Date: {new Date(certifiedStudents[user.id].issued_at).toLocaleDateString()}</p>
+                                                                {/* Triangle pointer */}
+                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="text-xs text-gray-500">{user.email}</div>
                                             </div>
@@ -213,6 +255,30 @@ export const UserList: React.FC = () => {
                                                     <Power className={`w-4 h-4 ${user.is_active ? 'text-red-500' : 'text-green-500'}`} />
                                                     {user.is_active ? 'Deactivate User' : 'Activate User'}
                                                 </button>
+                                                {user.role === 'student' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                setIssueCertUser(user);
+                                                                setActiveMenuId(null);
+                                                            }}
+                                                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                                                        >
+                                                            <Award className="w-4 h-4 text-blue-500" />
+                                                            Issue Certificate
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                setManageCertUser(user);
+                                                                setActiveMenuId(null);
+                                                            }}
+                                                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                        >
+                                                            <FileText className="w-4 h-4 text-purple-500" />
+                                                            Manage Certificates
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button
                                                     onClick={() => handleDeleteUser(user.id)}
                                                     className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
@@ -241,6 +307,28 @@ export const UserList: React.FC = () => {
                         fetchUsers();
                         setIsAddUserModalOpen(false);
                     }}
+                />
+            )}
+
+            {issueCertUser && (
+                <IssueCertificateModal
+                    student={{
+                        id: issueCertUser.id,
+                        email: issueCertUser.email,
+                        raw_user_meta_data: { full_name: `${issueCertUser.first_name} ${issueCertUser.last_name}`.trim() }
+                    }}
+                    onClose={() => setIssueCertUser(null)}
+                    onSuccess={() => {
+                        setIssueCertUser(null);
+                        alert('Certificate issued successfully!');
+                    }}
+                />
+            )}
+
+            {manageCertUser && (
+                <ManageCertificatesModal
+                    student={manageCertUser}
+                    onClose={() => setManageCertUser(null)}
                 />
             )}
         </div>
