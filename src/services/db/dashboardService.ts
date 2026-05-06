@@ -135,14 +135,14 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         if (batch) {
             // Get data for specific batch
             // console.log('📊 Getting data for batch:', batch.name);
-            notices = await getNotices(batch.id);
+            notices = await getNotices(batch.id, userId);
             mentors = await getMentors(batch.id);
         }
         // (Removed complex roadmap-based batch searching logic in favor of direct batch selection)
 
         // Fallback to batch-specific data if no roadmap-specific data found
         if (notices.length === 0) {
-            notices = await getNotices(batch?.id);
+            notices = await getNotices(batch?.id, userId);
         }
         if (mentors.length === 0) {
             mentors = await getMentors(batch?.id);

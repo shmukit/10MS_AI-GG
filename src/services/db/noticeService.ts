@@ -1,7 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import { Notice } from '../../types/models';
 
-export const getNotices = async (batchId?: string): Promise<Notice[]> => {
+export const getNotices = async (batchId?: string, studentId?: string): Promise<Notice[]> => {
     try {
         let query = supabase
             .from('notices')
@@ -9,8 +9,14 @@ export const getNotices = async (batchId?: string): Promise<Notice[]> => {
             .eq('is_published', true)
             .order('created_at', { ascending: false });
 
-        if (batchId) {
-            query = query.eq('batch_id', batchId);
+        if (batchId && studentId) {
+            query = query.or(`batch_id.eq.${batchId},target_student_id.eq.${studentId}`);
+        } else if (batchId) {
+            query = query.or(`batch_id.eq.${batchId},target_student_id.is.null`);
+        } else if (studentId) {
+            query = query.eq('target_student_id', studentId);
+        } else {
+            query = query.is('target_student_id', null);
         }
 
         const { data, error } = await query;
