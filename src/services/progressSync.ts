@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { calculateProgressMetrics } from '../utils/progressUtils';
 
 export interface ProgressSyncResult {
   success: boolean;
@@ -7,142 +8,44 @@ export interface ProgressSyncResult {
   errors: string[];
 }
 
+interface ProgressWithRoadmap {
+  status: string;
+  roadmap_tasks: {
+    week_id: string;
+    roadmap_weeks: {
+      week_number: number;
+    };
+  } | null;
+}
+
 export class ProgressSyncService {
   /**
    * Synchronize student progress across all data sources
-   * This ensures consistency between student_profiles, student_batch_assignments, and student_progress
    */
   static async syncStudentProgress(userId: string): Promise<ProgressSyncResult> {
     const errors: string[] = [];
-    let updatedWeeks = 0;
-    let updatedPercentage = 0;
 
     try {
       console.log('🔄 Starting progress sync for user:', userId);
 
-      // 1. Get all completed tasks for the user
-      const { data: progressData, error: progressError } = await supabase
-        .from('student_progress')
-        .select(`
-          *,
-          roadmap_tasks (
-            id,
-            task_name,
-            week_id,
-            roadmap_weeks (
-              id,
-              week_number,
-              roadmap_id
-            )
-          )
-        `)
-        .eq('student_id', userId)
-        .eq('status', 'completed');
-
-      if (progressError) {
-        errors.push(`Error fetching progress: ${progressError.message}`);
+      const progressData = await this.fetchUserProgress(userId, errors);
+      if (errors.length > 0 || !progressData) {
         return { success: false, updatedWeeks: 0, updatedPercentage: 0, errors };
       }
 
-      // 2. Group completed tasks by week
-      const weekCompletions: { [weekNumber: number]: { completed: number; total: number } } = {};
-      
-      if (progressData && progressData.length > 0) {
-        // Get all tasks for each week to calculate completion percentage
-        const weekIds = [...new Set(progressData.map(p => p.roadmap_tasks?.week_id).filter(Boolean))];
-        
-        if (weekIds.length > 0) {
-          const { data: allTasks, error: tasksError } = await supabase
-            .from('roadmap_tasks')
-            .select(`
-              id,
-              week_id,
-              roadmap_weeks (
-                week_number
-              )
-            `)
-            .in('week_id', weekIds);
-
-          if (!tasksError && allTasks) {
-            // Count total tasks per week
-            allTasks.forEach(task => {
-              const weekNumber = task.roadmap_weeks?.week_number;
-              if (weekNumber) {
-                if (!weekCompletions[weekNumber]) {
-                  weekCompletions[weekNumber] = { completed: 0, total: 0 };
-                }
-                weekCompletions[weekNumber].total++;
-              }
-            });
-
-            // Count completed tasks per week
-            progressData.forEach(progress => {
-              const weekNumber = progress.roadmap_tasks?.roadmap_weeks?.week_number;
-              if (weekNumber && weekCompletions[weekNumber]) {
-                weekCompletions[weekNumber].completed++;
-              }
-            });
-          }
-        }
+      const allTasks = await this.fetchRelevantTasks(progressData, errors);
+      if (errors.length > 0 || !allTasks) {
+        return { success: false, updatedWeeks: 0, updatedPercentage: 0, errors };
       }
 
-      // 3. Calculate completed weeks (80%+ completion threshold)
-      const completedWeeks = Object.keys(weekCompletions)
-        .map(Number)
-        .filter(weekNumber => {
-          const weekData = weekCompletions[weekNumber];
-          return weekData.total > 0 && (weekData.completed / weekData.total) >= 0.8;
-        })
-        .length;
+      const { completedWeeks, progressPercentage } = calculateProgressMetrics(progressData, allTasks);
 
-      const progressPercentage = Math.min(100, (completedWeeks / 6) * 100); // Assuming 6 weeks total
-
-      console.log('📊 Calculated progress:', {
-        completedWeeks,
-        progressPercentage,
-        weekCompletions
-      });
-
-      // 4. Update student_profiles table
-      const { error: profileError } = await supabase
-        .from('student_profiles')
-        .update({
-          completed_weeks: completedWeeks,
-          progress_percentage: progressPercentage,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        errors.push(`Error updating profile: ${profileError.message}`);
-      } else {
-        console.log('✅ Updated student profile');
-      }
-
-      // 5. Update student_batch_assignments table
-      const { error: assignmentError } = await supabase
-        .from('student_batch_assignments')
-        .update({
-          completed_weeks: completedWeeks,
-          progress_percentage: progressPercentage,
-          updated_at: new Date().toISOString()
-        })
-        .eq('student_id', userId)
-        .eq('status', 'active');
-
-      if (assignmentError) {
-        errors.push(`Error updating batch assignment: ${assignmentError.message}`);
-      } else {
-        console.log('✅ Updated batch assignments');
-      }
-
-      updatedWeeks = completedWeeks;
-      updatedPercentage = progressPercentage;
+      await this.updateProfileAndAssignments(userId, completedWeeks, progressPercentage, errors);
 
       return {
         success: errors.length === 0,
-        updatedWeeks,
-        updatedPercentage,
+        updatedWeeks: completedWeeks,
+        updatedPercentage: progressPercentage,
         errors
       };
 
@@ -153,17 +56,76 @@ export class ProgressSyncService {
     }
   }
 
+  private static async fetchUserProgress(userId: string, errors: string[]): Promise<ProgressWithRoadmap[] | null> {
+    const { data, error } = await supabase
+      .from('student_progress')
+      .select(`
+        status,
+        roadmap_tasks (
+          week_id,
+          roadmap_weeks (
+            week_number
+          )
+        )
+      `)
+      .eq('student_id', userId)
+      .eq('status', 'completed');
+
+    if (error) {
+      errors.push(`Error fetching progress: ${error.message}`);
+      return null;
+    }
+    return (data as unknown) as ProgressWithRoadmap[];
+  }
+
+  private static async fetchRelevantTasks(progressData: ProgressWithRoadmap[], errors: string[]) {
+    const weekIds = [...new Set(progressData.map(p => p.roadmap_tasks?.week_id).filter(Boolean))];
+    if (weekIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from('roadmap_tasks')
+      .select(`
+        id,
+        week_id,
+        roadmap_weeks (
+          week_number
+        )
+      `)
+      .in('week_id', weekIds);
+
+    if (error) {
+      errors.push(`Error fetching tasks: ${error.message}`);
+      return null;
+    }
+    return data;
+  }
+
+  private static async updateProfileAndAssignments(userId: string, weeks: number, percentage: number, errors: string[]) {
+    const updateData = {
+      completed_weeks: weeks,
+      progress_percentage: percentage,
+      updated_at: new Date().toISOString()
+    };
+
+    // Use unknown cast to bypass strict Supabase update types without using 'any'
+    const [profileRes, assignmentRes] = await Promise.all([
+      supabase.from('student_profiles').update(updateData as unknown as never).eq('user_id', userId),
+      supabase.from('student_batch_assignments').update(updateData as unknown as never).eq('student_id', userId).eq('status', 'active')
+    ]);
+
+    if (profileRes.error) errors.push(`Error updating profile: ${profileRes.error.message}`);
+    if (assignmentRes.error) errors.push(`Error updating batch assignment: ${assignmentRes.error.message}`);
+  }
+
   /**
-   * Sync progress for all students in a batch
+   * Sync progress for all students in a batch with parallel execution
    */
   static async syncBatchProgress(batchId: string): Promise<{ success: boolean; syncedStudents: number; errors: string[] }> {
     const errors: string[] = [];
-    let syncedStudents = 0;
-
+    
     try {
       console.log('🔄 Starting batch progress sync for batch:', batchId);
 
-      // Get all students in the batch
       const { data: assignments, error: assignmentError } = await supabase
         .from('student_batch_assignments')
         .select('student_id')
@@ -175,28 +137,22 @@ export class ProgressSyncService {
         return { success: false, syncedStudents: 0, errors };
       }
 
-      if (!assignments || assignments.length === 0) {
-        console.log('ℹ️ No students found in batch');
-        return { success: true, syncedStudents: 0, errors };
-      }
+      if (!assignments || assignments.length === 0) return { success: true, syncedStudents: 0, errors };
 
-      // Sync each student
-      for (const assignment of assignments) {
-        const result = await this.syncStudentProgress(assignment.student_id);
-        if (result.success) {
-          syncedStudents++;
-        } else {
-          errors.push(...result.errors);
-        }
-      }
+      const activeAssignments = assignments as { student_id: string | null }[];
+
+      // Use Promise.all for parallel processing
+      const results = await Promise.all(
+        activeAssignments
+          .filter(a => a.student_id)
+          .map(a => this.syncStudentProgress(a.student_id!))
+      );
+
+      const syncedStudents = results.filter(r => r.success).length;
+      results.forEach(r => !r.success && errors.push(...r.errors));
 
       console.log(`✅ Synced progress for ${syncedStudents}/${assignments.length} students`);
-
-      return {
-        success: errors.length === 0,
-        syncedStudents,
-        errors
-      };
+      return { success: errors.length === 0, syncedStudents, errors };
 
     } catch (error) {
       console.error('❌ Error in syncBatchProgress:', error);
@@ -210,12 +166,10 @@ export class ProgressSyncService {
    */
   static async syncAllProgress(): Promise<{ success: boolean; syncedStudents: number; errors: string[] }> {
     const errors: string[] = [];
-    let syncedStudents = 0;
-
+    
     try {
       console.log('🔄 Starting system-wide progress sync');
 
-      // Get all active students
       const { data: assignments, error: assignmentError } = await supabase
         .from('student_batch_assignments')
         .select('student_id')
@@ -226,28 +180,27 @@ export class ProgressSyncService {
         return { success: false, syncedStudents: 0, errors };
       }
 
-      if (!assignments || assignments.length === 0) {
-        console.log('ℹ️ No active students found');
-        return { success: true, syncedStudents: 0, errors };
+      if (!assignments || assignments.length === 0) return { success: true, syncedStudents: 0, errors };
+
+      const activeAssignments = assignments as { student_id: string | null }[];
+
+      // Process in smaller chunks to avoid overwhelming the database/rate limits
+      const chunkSize = 10;
+      let syncedCount = 0;
+
+      for (let i = 0; i < activeAssignments.length; i += chunkSize) {
+        const chunk = activeAssignments.slice(i, i + chunkSize);
+        const results = await Promise.all(
+          chunk
+            .filter(a => a.student_id)
+            .map(a => this.syncStudentProgress(a.student_id!))
+        );
+        syncedCount += results.filter(r => r.success).length;
+        results.forEach(r => !r.success && errors.push(...r.errors));
       }
 
-      // Sync each student
-      for (const assignment of assignments) {
-        const result = await this.syncStudentProgress(assignment.student_id);
-        if (result.success) {
-          syncedStudents++;
-        } else {
-          errors.push(...result.errors);
-        }
-      }
-
-      console.log(`✅ Synced progress for ${syncedStudents}/${assignments.length} students`);
-
-      return {
-        success: errors.length === 0,
-        syncedStudents,
-        errors
-      };
+      console.log(`✅ Synced progress for ${syncedCount}/${assignments.length} students`);
+      return { success: errors.length === 0, syncedStudents: syncedCount, errors };
 
     } catch (error) {
       console.error('❌ Error in syncAllProgress:', error);
@@ -259,106 +212,53 @@ export class ProgressSyncService {
   /**
    * Get detailed progress report for a student
    */
-  static async getStudentProgressReport(userId: string): Promise<{
-    profile: any;
-    assignments: any[];
-    progress: any[];
-    calculatedWeeks: number;
-    calculatedPercentage: number;
-  } | null> {
+  static async getStudentProgressReport(userId: string) {
     try {
-      // Get profile data
-      const { data: profile, error: profileError } = await supabase
-        .from('student_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      // Get assignment data
-      const { data: assignments, error: assignmentError } = await supabase
-        .from('student_batch_assignments')
-        .select('*')
-        .eq('student_id', userId)
-        .eq('status', 'active');
-
-      // Get progress data
-      const { data: progress, error: progressError } = await supabase
-        .from('student_progress')
-        .select(`
-          *,
+      const [profileRes, assignmentRes, progressRes] = await Promise.all([
+        supabase.from('student_profiles').select('*').eq('user_id', userId).maybeSingle(),
+        supabase.from('student_batch_assignments').select('*').eq('student_id', userId).eq('status', 'active'),
+        supabase.from('student_progress').select(`
+          status,
           roadmap_tasks (
-            id,
-            task_name,
             week_id,
             roadmap_weeks (
               week_number
             )
           )
-        `)
-        .eq('student_id', userId);
+        `).eq('student_id', userId)
+      ]);
 
-      if (profileError || assignmentError || progressError) {
-        console.error('Error fetching progress report:', { profileError, assignmentError, progressError });
+      if (profileRes.error || assignmentRes.error || progressRes.error) {
+        console.error('Error fetching progress report data');
         return null;
       }
 
-      // Calculate actual progress
-      const weekCompletions: { [weekNumber: number]: { completed: number; total: number } } = {};
+      const progressData = (progressRes.data as unknown) as ProgressWithRoadmap[];
+      const weekIds = [...new Set(progressData.map(p => p.roadmap_tasks?.week_id).filter(Boolean))];
       
-      if (progress && progress.length > 0) {
-        const weekIds = [...new Set(progress.map(p => p.roadmap_tasks?.week_id).filter(Boolean))];
-        
-        if (weekIds.length > 0) {
-          const { data: allTasks } = await supabase
-            .from('roadmap_tasks')
-            .select(`
-              id,
-              week_id,
-              roadmap_weeks (
-                week_number
-              )
-            `)
-            .in('week_id', weekIds);
-
-          if (allTasks) {
-            // Count total tasks per week
-            allTasks.forEach(task => {
-              const weekNumber = task.roadmap_weeks?.week_number;
-              if (weekNumber) {
-                if (!weekCompletions[weekNumber]) {
-                  weekCompletions[weekNumber] = { completed: 0, total: 0 };
-                }
-                weekCompletions[weekNumber].total++;
-              }
-            });
-
-            // Count completed tasks per week
-            progress.forEach(p => {
-              const weekNumber = p.roadmap_tasks?.roadmap_weeks?.week_number;
-              if (weekNumber && weekCompletions[weekNumber] && p.status === 'completed') {
-                weekCompletions[weekNumber].completed++;
-              }
-            });
-          }
-        }
+      let allTasks: { roadmap_weeks?: { week_number: number } }[] = [];
+      if (weekIds.length > 0) {
+        const { data } = await supabase
+          .from('roadmap_tasks')
+          .select(`
+            id,
+            week_id,
+            roadmap_weeks (
+              week_number
+            )
+          `)
+          .in('week_id', weekIds);
+        allTasks = data || [];
       }
 
-      const calculatedWeeks = Object.keys(weekCompletions)
-        .map(Number)
-        .filter(weekNumber => {
-          const weekData = weekCompletions[weekNumber];
-          return weekData.total > 0 && (weekData.completed / weekData.total) >= 0.8;
-        })
-        .length;
-
-      const calculatedPercentage = Math.min(100, (calculatedWeeks / 6) * 100);
+      const { completedWeeks, progressPercentage } = calculateProgressMetrics(progressData, allTasks);
 
       return {
-        profile,
-        assignments: assignments || [],
-        progress: progress || [],
-        calculatedWeeks,
-        calculatedPercentage
+        profile: profileRes.data,
+        assignments: assignmentRes.data || [],
+        progress: progressData,
+        calculatedWeeks: completedWeeks,
+        calculatedPercentage: progressPercentage
       };
 
     } catch (error) {
