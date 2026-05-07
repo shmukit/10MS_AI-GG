@@ -22,6 +22,16 @@ export const getStudentProgress = async (userId: string): Promise<StudentProgres
     }
 };
 
+interface ProgressUpsert {
+    student_id: string;
+    task_id: string;
+    status: StudentProgress['status'];
+    score?: number;
+    feedback?: string;
+    completed_at: string | null;
+    updated_at: string;
+}
+
 export const updateTaskProgress = async (
     userId: string,
     taskId: string,
@@ -30,17 +40,19 @@ export const updateTaskProgress = async (
     feedback?: string
 ): Promise<boolean> => {
     try {
+        const upsertData: ProgressUpsert = {
+            student_id: userId,
+            task_id: taskId,
+            status,
+            score,
+            feedback,
+            completed_at: status === 'completed' ? new Date().toISOString() : null,
+            updated_at: new Date().toISOString()
+        };
+
         const { error } = await supabase
             .from('student_progress')
-            .upsert({
-                student_id: userId,
-                task_id: taskId,
-                status,
-                score,
-                feedback,
-                completed_at: status === 'completed' ? new Date().toISOString() : null,
-                updated_at: new Date().toISOString()
-            } as any);
+            .upsert(upsertData as unknown as never);
 
         if (error) {
             console.error('Error updating task progress:', error);
@@ -89,15 +101,17 @@ export const markWeekAsComplete = async (
         if (weekTasks.length === 0) return true;
 
         // Parallelize task completion updates
-        const results = await Promise.all(weekTasks.map(task => 
-            supabase.from('student_progress').upsert({
+        const now = new Date().toISOString();
+        const results = await Promise.all(weekTasks.map(task => {
+            const upsertData: ProgressUpsert = {
                 student_id: userId,
                 task_id: task.id,
                 status: 'completed',
-                completed_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            } as any)
-        ));
+                completed_at: now,
+                updated_at: now
+            };
+            return supabase.from('student_progress').upsert(upsertData as unknown as never);
+        }));
 
         const hasError = results.some(r => r.error);
         if (hasError) {

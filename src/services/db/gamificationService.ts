@@ -35,36 +35,18 @@ export const awardXP = async (
     try {
         console.log(`🎮 Awarding ${points} XP to student ${studentId} for: ${reason}`);
 
-        const { data: assignment, error: fetchError } = await supabase
-            .from('student_batch_assignments')
-            .select('xp_points')
-            .eq('student_id', studentId)
-            .eq('batch_id', batchId)
-            .single();
+        const { error } = await (supabase.rpc as any)('increment_student_xp', {
+            p_student_id: studentId,
+            p_batch_id: batchId,
+            p_points: points
+        });
 
-        if (fetchError) {
-            console.error('Error fetching student assignment:', fetchError);
+        if (error) {
+            console.error('Error awarding XP via RPC:', error);
             return false;
         }
 
-        const currentXP = (assignment as any)?.xp_points || 0;
-        const newXP = currentXP + points;
-
-        const { error: updateError } = await supabase
-            .from('student_batch_assignments')
-            .update({
-                xp_points: newXP,
-                updated_at: new Date().toISOString()
-            } as unknown as never)
-            .eq('student_id', studentId)
-            .eq('batch_id', batchId);
-
-        if (updateError) {
-            console.error('Error updating XP:', updateError);
-            return false;
-        }
-
-        console.log(`✅ XP updated: ${currentXP} → ${newXP}`);
+        console.log(`✅ XP incremented by ${points}`);
         return true;
     } catch (error) {
         console.error('Error in awardXP:', error);

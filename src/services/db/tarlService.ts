@@ -36,6 +36,25 @@ export const calculateStudentLevel = async (
 
         const completedTaskIds = new Set(progressData?.map((p: any) => p.task_id) || []);
 
+        // Fetch all tasks for this roadmap in one go to avoid N+1 queries
+        const weekIds = weeks.map(w => w.id);
+        const { data: allRoadmapTasks, error: tasksError } = await supabase
+            .from('roadmap_tasks')
+            .select('id, week_id, is_required')
+            .in('week_id', weekIds);
+
+        if (tasksError) {
+            console.error('Error fetching roadmap tasks:', tasksError);
+            return { currentLevel: 1, weekStatuses: [] };
+        }
+
+        const tasksByWeek = new Map<string, any[]>();
+        (allRoadmapTasks as any[])?.forEach(task => {
+            const weekTasks = tasksByWeek.get(task.week_id) || [];
+            weekTasks.push(task);
+            tasksByWeek.set(task.week_id, weekTasks);
+        });
+
         // Iterate weeks sequentially
         for (let i = 0; i < weeks.length; i++) {
             const week = weeks[i];
@@ -44,29 +63,18 @@ export const calculateStudentLevel = async (
             // Check previous week completion
             const prevWeekCompleted = isFirstWeek ? true : weekStatuses[i - 1].isCompleted;
 
-            // Fetch tasks for this week (using simple count for performance, ideally joined query)
-            // For now, we fetch tasks to count them. Optimization: Fetch all roadmap tasks in one go.
-            // Let's assume we fetch all tasks for the roadmap to avoid N+1.
-            // But getRoadmapTasks is per week. Let's do per week for now, assuming roads maps aren't huge (12-20 weeks).
-            // Better: use a helper to get completion stats.
-
-            // For MVP: Check if PREVIOUS week is completion to UNLOCK this week.
+            // Unlock logic: previous week must be completed
             const isUnlocked = prevWeekCompleted;
 
-            // Calculate completion for THIS week
-            const { data: weekTasks } = await supabase
-                .from('roadmap_tasks')
-                .select('id, is_required')
-                .eq('week_id', week.id);
-
-            const requiredTasks = weekTasks?.filter((t: any) => t.is_required) || [];
+            // Calculate completion for THIS week using pre-fetched tasks
+            const weekTasks = tasksByWeek.get(week.id) || [];
+            const requiredTasks = weekTasks.filter((t: any) => t.is_required);
             const totalRequired = requiredTasks.length;
 
             let isCompleted = false;
             let percentObj = 0;
 
             if (totalRequired === 0) {
-                // If no tasks, auto-complete? Or manual only? Let's say auto-complete for flow.
                 isCompleted = true;
                 percentObj = 100;
             } else {
@@ -76,7 +84,6 @@ export const calculateStudentLevel = async (
             }
 
             if (isUnlocked && !isCompleted) {
-                // This is the first unlocked but incomplete week -> Current Level
                 currentLevel = week.week_number;
             }
 
