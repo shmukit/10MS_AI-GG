@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import { StudentProgress } from '../../types/models';
 import { getRoadmapTasks } from './roadmapService';
+import { getBatchStudents } from './batchService';
 
 export const getStudentProgress = async (userId: string): Promise<StudentProgress[]> => {
     try {
@@ -14,7 +15,7 @@ export const getStudentProgress = async (userId: string): Promise<StudentProgres
             return [];
         }
 
-        return data || [];
+        return (data as StudentProgress[]) || [];
     } catch (error) {
         console.error('Error in getStudentProgress:', error);
         return [];
@@ -39,7 +40,7 @@ export const updateTaskProgress = async (
                 feedback,
                 completed_at: status === 'completed' ? new Date().toISOString() : null,
                 updated_at: new Date().toISOString()
-            } as unknown as never);
+            } as any);
 
         if (error) {
             console.error('Error updating task progress:', error);
@@ -56,14 +57,16 @@ export const updateTaskProgress = async (
 
             if (assignments && assignments.length > 0) {
                 const { awardTaskCompletionXP } = await import('./gamificationService');
-                // Award for each active batch (usually just one)
-                for (const assignment of (assignments as any[])) {
-                    await awardTaskCompletionXP(userId, assignment.batch_id);
-                }
+                // Parallelize XP awarding and filter out null batch_ids
+                const activeAssignments = assignments as { batch_id: string | null }[];
+                await Promise.all(
+                    activeAssignments
+                        .filter(a => a.batch_id)
+                        .map(a => awardTaskCompletionXP(userId, a.batch_id!))
+                );
             }
 
             // Sync progress to student_profiles and student_batch_assignments
-            // so mentor/admin dashboard shows updated progress
             const { ProgressSyncService } = await import('../progressSync');
             await ProgressSyncService.syncStudentProgress(userId);
         }
@@ -82,34 +85,26 @@ export const markWeekAsComplete = async (
     try {
         console.log('🔄 Starting markWeekAsComplete for user:', userId, 'week:', weekId);
 
-        // First, get all tasks for this week
         const weekTasks = await getRoadmapTasks(weekId);
-        console.log('📋 Found tasks for week:', weekTasks.length, weekTasks);
+        if (weekTasks.length === 0) return true;
 
-        // Mark all tasks as completed for this user
-        for (const task of weekTasks) {
-            console.log('✅ Marking task as completed:', task.id, task.task_name);
+        // Parallelize task completion updates
+        const results = await Promise.all(weekTasks.map(task => 
+            supabase.from('student_progress').upsert({
+                student_id: userId,
+                task_id: task.id,
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            } as any)
+        ));
 
-            const { error } = await supabase
-                .from('student_progress')
-                .upsert({
-                    student_id: userId,
-                    task_id: task.id,
-                    status: 'completed',
-                    completed_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                } as unknown as never);
-
-            if (error) {
-                console.error('❌ Error updating task progress:', error);
-                return false;
-            }
-
-            console.log('✅ Successfully marked task as completed:', task.id);
+        const hasError = results.some(r => r.error);
+        if (hasError) {
+            console.error('❌ Errors updating task progress in markWeekAsComplete');
+            return false;
         }
 
-        // Sync progress to student_profiles and student_batch_assignments
-        // so mentor/admin dashboard shows updated progress
         const { ProgressSyncService } = await import('../progressSync');
         await ProgressSyncService.syncStudentProgress(userId);
 
@@ -135,7 +130,7 @@ export const checkTasksCompletionStatus = async (
             .eq('student_id', userId)
             .in('task_id', weekTasks.map(t => t.id));
 
-        const progressList = (progress as unknown as StudentProgress[]) || [];
+        const progressList = (progress as StudentProgress[]) || [];
         const completedTaskIds = new Set(
             progressList.filter(p => p.status === 'completed').map(p => p.task_id)
         );
@@ -147,251 +142,100 @@ export const checkTasksCompletionStatus = async (
     }
 };
 
-export const getWeekCompletionStats = async (weekId: string, batchId: string): Promise<{
-    totalStudents: number;
-    completedStudents: number;
-    completionPercentage: number;
-    completedStudentNames: string[];
-}> => {
+export const getWeekCompletionStats = async (weekId: string, batchId: string) => {
     try {
-        // Get all students in the batch
-        const { data: batchStudents, error: batchError } = await supabase
-            .from('student_batch_assignments')
-            .select(`
-        student_id,
-        users!inner(first_name, last_name)
-      `)
-            .eq('batch_id', batchId)
-            .eq('status', 'active');
-
-        if (batchError) {
-            console.error('Error fetching batch students:', batchError);
-            return {
-                totalStudents: 0,
-                completedStudents: 0,
-                completionPercentage: 0,
-                completedStudentNames: []
-            };
-        }
-
-        // Cast to expected type since Supabase types might not infer the join correctly
-        type BatchStudent = {
-            student_id: string;
-            users: {
-                first_name: string;
-                last_name: string;
-            }
-        };
-
-        const students = (batchStudents || []) as unknown as BatchStudent[];
-
+        const students = await getBatchStudents(batchId);
         if (students.length === 0) {
-            return {
-                totalStudents: 0,
-                completedStudents: 0,
-                completionPercentage: 0,
-                completedStudentNames: []
-            };
+            return { totalStudents: 0, completedStudents: 0, completionPercentage: 0, completedStudentNames: [] };
         }
 
-        const totalStudents = students.length;
-        const studentIds = students.map(s => s.student_id);
-
-        // Get all tasks for this week
         const weekTasks = await getRoadmapTasks(weekId);
         if (weekTasks.length === 0) {
-            return {
-                totalStudents,
-                completedStudents: 0,
-                completionPercentage: 0,
-                completedStudentNames: []
-            };
+            return { totalStudents: students.length, completedStudents: 0, completionPercentage: 0, completedStudentNames: [] };
         }
 
-        // Get progress for all students in this batch for this week's tasks
-        const { data: progressData, error: progressError } = await supabase
+        const studentIds = students.map(s => s.student_id);
+        const { data: progressData } = await supabase
             .from('student_progress')
-            .select(`
-        student_id,
-        task_id,
-        status
-      `)
+            .select('student_id, task_id, status')
             .in('student_id', studentIds)
             .in('task_id', weekTasks.map(t => t.id));
 
-        if (progressError) {
-            console.error('Error fetching progress data:', progressError);
-            return {
-                totalStudents,
-                completedStudents: 0,
-                completionPercentage: 0,
-                completedStudentNames: []
-            };
-        }
-
-        // Calculate completion for each student
+        const progressList = (progressData as StudentProgress[]) || [];
         const studentCompletion = new Map<string, { completed: number; total: number; name: string }>();
 
-        // Initialize all students
-        students.forEach(student => {
-            studentCompletion.set(student.student_id, {
+        students.forEach(s => {
+            studentCompletion.set(s.student_id, {
                 completed: 0,
                 total: weekTasks.length,
-                name: `${student.users.first_name} ${student.users.last_name}`.trim()
+                name: `${s.users.first_name} ${s.users.last_name}`.trim()
             });
         });
 
-        // Count completed tasks for each student
-        const progressList = (progressData || []) as unknown as StudentProgress[];
-        progressList.forEach(progress => {
-            if (progress.status === 'completed') {
-                const student = studentCompletion.get(progress.student_id);
-                if (student) {
-                    student.completed++;
-                }
+        progressList.forEach(p => {
+            if (p.status === 'completed') {
+                const s = studentCompletion.get(p.student_id);
+                if (s) s.completed++;
             }
         });
 
-        // Find students who completed all tasks
         const completedStudents = Array.from(studentCompletion.values())
-            .filter(student => student.completed === student.total);
-
-
-        const completedStudentNames = completedStudents
-            .map(student => student.name)
-            .sort(); // Sort alphabetically
-
-        const completionPercentage = totalStudents > 0 ? (completedStudents.length / totalStudents) * 100 : 0;
+            .filter(s => s.completed === s.total);
 
         return {
-            totalStudents,
+            totalStudents: students.length,
             completedStudents: completedStudents.length,
-            completionPercentage,
-            completedStudentNames
+            completionPercentage: (completedStudents.length / students.length) * 100,
+            completedStudentNames: completedStudents.map(s => s.name).sort()
         };
     } catch (error) {
         console.error('Error in getWeekCompletionStats:', error);
-        return {
-            totalStudents: 0,
-            completedStudents: 0,
-            completionPercentage: 0,
-            completedStudentNames: []
-        };
+        return { totalStudents: 0, completedStudents: 0, completionPercentage: 0, completedStudentNames: [] };
     }
 };
 
-export const getWeekStudentCompletionDetails = async (weekId: string, batchId: string): Promise<{
-    studentId: string;
-    studentName: string;
-    completedTasks: number;
-    totalTasks: number;
-    completionPercentage: number;
-    completedTaskNames: string[];
-    lastCompletedAt?: string;
-}[]> => {
+export const getWeekStudentCompletionDetails = async (weekId: string, batchId: string) => {
     try {
-        // Get all students in the batch
-        const { data: batchStudents, error: batchError } = await supabase
-            .from('student_batch_assignments')
-            .select(`
-        student_id,
-        users!inner(first_name, last_name)
-      `)
-            .eq('batch_id', batchId)
-            .eq('status', 'active');
-
-        if (batchError) {
-            console.error('Error fetching batch students:', batchError);
-            return [];
-        }
-
-        // Cast to expected type since Supabase types might not infer the join correctly
-        type BatchStudent = {
-            student_id: string;
-            users: {
-                first_name: string;
-                last_name: string;
-            }
-        };
-
-        const students = (batchStudents || []) as unknown as BatchStudent[];
-
-        // Get all tasks for this week
+        const students = await getBatchStudents(batchId);
         const weekTasks = await getRoadmapTasks(weekId);
-        if (weekTasks.length === 0) {
-            return [];
-        }
+        if (students.length === 0 || weekTasks.length === 0) return [];
 
         const studentIds = students.map(s => s.student_id);
         const taskIds = weekTasks.map(t => t.id);
 
-        // Get progress for all students in this batch for this week's tasks
-        const { data: progressData, error: progressError } = await supabase
+        const { data: progressData } = await supabase
             .from('student_progress')
-            .select(`
-        student_id,
-        task_id,
-        status,
-        completed_at
-      `)
+            .select('student_id, task_id, status, completed_at')
             .in('student_id', studentIds)
             .in('task_id', taskIds);
 
-        const progress = (progressData || []) as unknown as StudentProgress[];
+        const progress = (progressData as StudentProgress[]) || [];
 
-        if (progressError) {
-            console.error('Error fetching progress data:', progressError);
-            return [];
-        }
-
-        // Calculate completion for each student
-        const studentDetails = students.map(batchStudent => {
-            const studentId = batchStudent.student_id;
-            const studentName = `${batchStudent.users.first_name} ${batchStudent.users.last_name}`.trim();
-
-            // Get completed tasks for this student
-            const studentProgress = progress.filter(p =>
-                p.student_id === studentId && p.status === 'completed'
-            ) || [];
-
+        const studentDetails = students.map(s => {
+            const studentProgress = progress.filter(p => p.student_id === s.student_id && p.status === 'completed');
             const completedTasks = studentProgress.length;
             const totalTasks = weekTasks.length;
-            const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-
-            // Get completed task names
+            
             const completedTaskNames = studentProgress
-                .map(p => {
-                    const task = weekTasks.find(t => t.id === p.task_id);
-                    return task ? task.task_name : 'Task Completed';
-                }) // Map task IDs to names
+                .map(p => weekTasks.find(t => t.id === p.task_id)?.task_name || 'Task')
                 .sort();
 
-            // Get last completion time
             const lastCompletedAt = studentProgress.length > 0
                 ? Math.max(...studentProgress.map(p => p.completed_at ? new Date(p.completed_at).getTime() : 0))
                 : undefined;
 
             return {
-                studentId,
-                studentName,
+                studentId: s.student_id,
+                studentName: `${s.users.first_name} ${s.users.last_name}`.trim(),
                 completedTasks,
                 totalTasks,
-                completionPercentage,
+                completionPercentage: (completedTasks / totalTasks) * 100,
                 completedTaskNames,
                 lastCompletedAt: lastCompletedAt ? new Date(lastCompletedAt).toISOString() : undefined
             };
         });
 
-        // Sort by completion percentage (highest first), then by last completed time
-        return studentDetails.sort((a, b) => {
-            if (a.completionPercentage !== b.completionPercentage) {
-                return b.completionPercentage - a.completionPercentage;
-            }
-            if (a.lastCompletedAt && b.lastCompletedAt) {
-                return new Date(b.lastCompletedAt).getTime() - new Date(a.lastCompletedAt).getTime();
-            }
-            return 0;
-        });
+        return studentDetails.sort((a, b) => b.completionPercentage - a.completionPercentage);
     } catch (error) {
         console.error('Error in getWeekStudentCompletionDetails:', error);
         return [];
