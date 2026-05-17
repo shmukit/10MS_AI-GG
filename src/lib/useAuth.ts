@@ -67,9 +67,9 @@ export function useAuth() {
       
       // Fetch user role immediately after successful sign in
       if (data.user?.email) {
-        const role = await fetchUserRole(data.user.email)
-        setUserRole(role)
-        console.log('✅ Sign in successful, user role set to:', role)
+        const userData = await fetchUserRole(data.user.email)
+        setUserRole(userData.role)
+        console.log('✅ Sign in successful, user role set to:', userData.role)
       }
       
       return { success: true, data }
@@ -92,11 +92,13 @@ export function useAuth() {
         lastName = nameParts.slice(1).join(' ') || '';
       }
       
-      // Determine user type based on email domain
-      const isCompanyEmail = email.includes('@10minuteschool.com') || email.includes('@lightcastlepartners.com');
-      const userRole = isCompanyEmail ? 'admin' : 'student';
+      // SECURITY: All self-service signups are students.
+      // Admin/Mentor promotion must go through the secure RPC
+      // (create_new_user / upsert_student_user) which requires
+      // an existing admin or mentor caller.
+      const userRole = 'student';
       
-      console.log('🔐 Signing up user:', email, 'Role:', userRole, 'Company:', isCompanyEmail);
+      console.log('🔐 Signing up user:', email, 'Role:', userRole);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -107,8 +109,6 @@ export function useAuth() {
             first_name: firstName,
             last_name: lastName,
             role: userRole,
-            is_company_user: isCompanyEmail,
-            intended_roadmap: isCompanyEmail ? 'augmedix' : 'general'
           }
         }
       })
@@ -117,34 +117,13 @@ export function useAuth() {
         return { success: false, error }
       }
       
-      // For company users, try to connect them to existing data
-      if (data.user && isCompanyEmail) {
-        console.log('🏢 Company user signup detected, checking for existing profile...');
-        
-        // Check if this email already exists in public.users
-        try {
-          const { data: existingUser } = await supabase
-            .from('users')
-            .select('id, role, first_name, last_name')
-            .eq('email', email)
-            .single();
-          
-          if (existingUser) {
-            console.log('✅ Found existing public user profile for:', email);
-            console.log('🔄 User will be connected to existing batch assignments on first login');
-          }
-        } catch (existingUserError) {
-          console.log('ℹ️ No existing public user found - new profile will be created');
-        }
-      }
-      
       // Check if email confirmation is required
       if (data.user && !data.user.email_confirmed_at) {
         return { 
           success: true, 
           data,
           requiresEmailConfirmation: true,
-          message: `Please check your email and click the confirmation link to complete your registration.${isCompanyEmail ? ' You will be automatically assigned to the Augmedix learning program.' : ''}`
+          message: 'Please check your email and click the confirmation link to complete your registration.'
         }
       }
       
@@ -253,8 +232,9 @@ export function useAuth() {
       }
       
       console.log('✅ User data fetched successfully:', data);
-      setDatabaseUserId(data.id)
-      return { role: data?.role || null, id: data?.id || null }
+      const userData = data as any;
+      setDatabaseUserId(userData?.id || null);
+      return { role: userData?.role || null, id: userData?.id || null }
     } catch (err) {
       console.error('❌ Error fetching user data:', err);
       return { role: null, id: null }
