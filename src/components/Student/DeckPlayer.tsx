@@ -3,7 +3,7 @@ import { X, ChevronLeft, ChevronRight, CheckCircle, XCircle } from 'lucide-react
 import { getDeckCards, recordCardInteraction } from '../../services/db/practiceDeckService';
 import { Database } from '../../types/database.types';
 import { useAuthContext } from '../../lib';
-
+import { posthog } from '../../lib/posthog';
 type PracticeCard = Database['public']['Tables']['practice_cards']['Row'];
 
 interface DeckPlayerProps {
@@ -22,6 +22,11 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
     const [loading, setLoading] = useState(true);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
+    
+    // Tracking refs
+    const sessionStartTime = React.useRef(Date.now());
+    const cardStartTime = React.useRef(Date.now());
+    const correctCount = React.useRef(0);
 
     useEffect(() => {
         loadCards();
@@ -29,21 +34,50 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
 
     const loadCards = async () => {
         setLoading(true);
+        let loadedCards = [];
         if (initialCards && initialCards.length > 0) {
-            setCards(initialCards);
+            loadedCards = initialCards;
         } else {
-            const deckCards = await getDeckCards(deckId);
-            setCards(deckCards);
+            loadedCards = await getDeckCards(deckId);
         }
+        setCards(loadedCards);
         setLoading(false);
+        
+        if (loadedCards.length > 0) {
+            sessionStartTime.current = Date.now();
+            cardStartTime.current = Date.now();
+            correctCount.current = 0;
+            posthog?.capture('deck_session_started', {
+                deck_id: deckId,
+                deck_name: deckTitle,
+                total_cards: loadedCards.length,
+                batch_id: batchId
+            });
+        }
     };
 
     const handleNext = useCallback(() => {
+        // Track non-quiz cards when moving next
+        if (cards[currentIndex]?.card_type !== 'quiz') {
+            posthog?.capture('deck_card_viewed', {
+                deck_id: deckId,
+                card_id: cards[currentIndex]?.id,
+                time_spent_ms: Date.now() - cardStartTime.current
+            });
+        }
+
         if (currentIndex < cards.length - 1) {
             setCurrentIndex(prev => prev + 1);
             resetCardState();
+            cardStartTime.current = Date.now();
         } else {
             // End of deck
+            posthog?.capture('deck_session_completed', {
+                deck_id: deckId,
+                cards_reviewed: cards.length,
+                correct_count: correctCount.current,
+                total_time_spent_ms: Date.now() - sessionStartTime.current
+            });
             onComplete?.();
             onClose();
         }
@@ -68,6 +102,15 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
         const card = cards[currentIndex];
         const content = card.content as any;
         const isCorrect = quizSelectedOption === content.correctAnswer;
+
+        if (isCorrect) correctCount.current += 1;
+
+        posthog?.capture('deck_card_answered', {
+            deck_id: deckId,
+            card_id: card.id,
+            outcome: isCorrect ? 'correct' : 'incorrect',
+            time_spent_ms: Date.now() - cardStartTime.current
+        });
 
         // Record interaction
         await recordCardInteraction(user.id, card.id, batchId, isCorrect);

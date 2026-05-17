@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { StudentHeader } from './StudentHeader';
 import { CertificateCard } from './Certificates/CertificateCard';
 import { useTheme } from '../../lib/ThemeContext';
+import { posthog } from '../../lib/posthog';
 
 // Add skeleton loading component at the top
 const ProfileSkeleton = () => (
@@ -110,6 +111,12 @@ export const StudentProfile: React.FC = () => {
         console.error('Error fetching certificates:', err);
       } finally {
         setLoading(false);
+        if (databaseUserId) {
+          posthog?.capture('profile_viewed', {
+            target_user_id: databaseUserId,
+            is_own_profile: true
+          });
+        }
       }
     };
 

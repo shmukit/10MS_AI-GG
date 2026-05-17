@@ -5,6 +5,7 @@ import { DatabaseService } from '../../services/database';
 import { useAuth } from '../../lib/useAuth';
 import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
 import { DiscussionBoard } from '../Discussion/DiscussionBoard';
+import { posthog } from '../../lib/posthog';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
@@ -33,7 +34,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [studentCompletions, setStudentCompletions] = useState<StudentCompletion[]>([]);
   const [loadingCompletions, setLoadingCompletions] = useState(false);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
-  const { user, databaseUserId } = useAuth();
+  const { databaseUserId } = useAuth();
 
   useEffect(() => {
     const newCompletedTasks = node.tasks.map(t => t.completed);
@@ -84,6 +85,13 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         );
 
         if (success) {
+          posthog?.capture('task_completed', {
+            task_id: task.id,
+            task_name: task.title,
+            task_type: task.type,
+            roadmap_id: node.id
+          });
+          
           setCompletedTasks(prev => {
             const newCompleted = [...prev];
             newCompleted[selectedTaskIndex] = true;
@@ -306,7 +314,21 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     {getTaskIcon(task.type)}
                     <span className={`text-sm ${completedTasks[index] ? 'line-through text-gray-500' : isDarkMode ? 'text-white' : 'text-gray-900'}`}>{task.title}</span>
                   </div>
-                  {task.url && <a href={task.url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4 text-gray-400" /></a>}
+                  {task.url && <a 
+                      href={task.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        posthog?.capture('task_started', {
+                          task_id: task.id,
+                          task_name: task.title,
+                          task_type: task.type,
+                          roadmap_id: node.id
+                        });
+                      }}
+                    >
+                      <ExternalLink className="w-4 h-4 text-gray-400" />
+                    </a>}
                 </div>
               ))}
             </div>

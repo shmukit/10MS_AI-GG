@@ -495,3 +495,130 @@ This document provides a comprehensive guide to all PostHog events being tracked
 ---
 
 **This documentation provides a complete framework for PostHog event tracking in the 10MS AI GG application, covering authentication, user interactions, progress tracking, and engagement metrics.**
+
+## Active Learning Events (DeckPlayer)
+
+#### 1. `deck_session_started`
+**Location**: `src/components/Student/DeckPlayer.tsx`
+**Trigger**: When a student starts a flashcard deck session
+**Properties**:
+- `deck_id`: string
+- `deck_title`: string
+- `total_cards`: number
+
+#### 2. `deck_card_viewed`
+**Location**: `src/components/Student/DeckPlayer.tsx`
+**Trigger**: When a student views a specific card
+**Properties**:
+- `deck_id`: string
+- `card_id`: string
+- `card_index`: number
+
+#### 3. `deck_card_answered`
+**Location**: `src/components/Student/DeckPlayer.tsx`
+**Trigger**: When a student submits an answer for a card
+**Properties**:
+- `deck_id`: string
+- `card_id`: string
+- `is_correct`: boolean
+- `time_spent_ms`: number
+
+#### 4. `deck_session_completed`
+**Location**: `src/components/Student/DeckPlayer.tsx`
+**Trigger**: When a student finishes a deck session
+**Properties**:
+- `deck_id`: string
+- `score`: number
+- `total_cards`: number
+- `accuracy`: number
+- `total_time_ms`: number
+
+## Social Learning Events (DiscussionBoard)
+
+#### 1. `discussion_board_viewed`
+**Location**: `src/components/Discussion/DiscussionBoard.tsx`
+**Trigger**: When a user views a discussion board
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+
+#### 2. `discussion_post_created`
+**Location**: `src/components/Discussion/DiscussionBoard.tsx`
+**Trigger**: When a user creates a new discussion post
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+- `has_attachment`: boolean
+
+#### 3. `discussion_reply_created`
+**Location**: `src/components/Discussion/DiscussionThread.tsx`
+**Trigger**: When a user replies to a discussion thread
+**Properties**:
+- `parent_id`: string
+
+## Gamification Events (Certificates/Profile)
+
+#### 1. `profile_viewed`
+**Location**: `src/components/Student/StudentProfile.tsx`
+**Trigger**: When a user views a profile
+**Properties**:
+- `target_user_id`: string
+- `is_own_profile`: boolean
+
+#### 2. `certificate_viewed`
+**Location**: `src/components/Student/Certificates/CertificateCard.tsx`
+**Trigger**: When a user views a certificate
+**Properties**:
+- `certificate_id`: string
+- `course_name`: string
+
+#### 3. `certificate_downloaded`
+**Location**: `src/components/Student/Certificates/CertificateCard.tsx`
+**Trigger**: When a user downloads a certificate
+**Properties**:
+- `certificate_id`: string
+- `course_name`: string
+
+#### 4. `certificate_shared`
+**Location**: `src/components/Student/Certificates/CertificateCard.tsx`
+**Trigger**: When a user shares a certificate
+**Properties**:
+- `certificate_id`: string
+- `course_name`: string
+- `platform`: 'linkedin' | 'link'
+
+## Mentorship Events
+
+#### 1. `mentor_dashboard_viewed`
+**Location**: `src/components/Mentor/MentorDashboard.tsx`
+**Trigger**: When a mentor views their dashboard
+**Properties**: (none)
+
+#### 2. `mentor_session_scheduled`
+**Location**: `src/components/Mentor/ScheduleSessionModal.tsx`
+**Trigger**: When a mentor schedules a live session
+**Properties**:
+- `mentor_id`: string
+- `batch_id`: string
+- `session_type`: string
+- `topic`: string
+
+## Granular Task Engagement Events
+
+#### 1. `task_started`
+**Location**: `src/components/Roadmap/NodeContentPanel.tsx`
+**Trigger**: When a user clicks on an external task link
+**Properties**:
+- `task_id`: string
+- `task_name`: string
+- `task_type`: string
+- `roadmap_id`: string
+
+#### 2. `task_completed`
+**Location**: `src/components/Roadmap/NodeContentPanel.tsx`
+**Trigger**: When a user confirms a task as completed
+**Properties**:
+- `task_id`: string
+- `task_name`: string
+- `task_type`: string
+- `roadmap_id`: string
