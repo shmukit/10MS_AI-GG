@@ -2,6 +2,12 @@
 
 AI-Enabled Group Guidance Program for 10 Minute School
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/CODE_OF_CONDUCT.md)
+[![Contributing Welcome](https://img.shields.io/badge/Contributing-Welcome-orange.svg)](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/CONTRIBUTING.md)
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -194,16 +200,14 @@ npm run build:prod
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests to ensure everything works
-5. Submit a pull request
+We welcome contributions from the community! Whether you are reporting a bug, proposing a new feature, or submitting code changes, please read our [Contributing Guidelines](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/CONTRIBUTING.md) to understand the development setup, coding standards, and pull request process.
+
+Please note that by participating in this project, you agree to abide by our [Code of Conduct](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/CODE_OF_CONDUCT.md).
 
 ## 📄 License
 
-This project is proprietary to 10 Minute School.
+This project is open-source and licensed under the [MIT License](file:///Users/mukit_10ms/Documents/GitHub/10MS_AI-GG/LICENSE).
 
 ## 🆘 Support
 
-For support and questions, please contact the development team.
+For support, feedback, and questions, please reach out to the 10 Minute School open-source team at **tech@10minuteschool.com** or open an issue in this repository.
