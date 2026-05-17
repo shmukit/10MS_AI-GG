@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
 // import { PostHogProvider } from 'posthog-js/react';
-import { posthog } from './lib/posthog';
+// import { posthog } from './lib/posthog';
 import { PageTransition } from './components/ui/MotionPrimitives';
 
 // Critical components (loaded immediately for first paint)
@@ -123,23 +123,23 @@ const AdminRoutes = () => {
   );
 };
 
-// Simplified App Routes - All users go to student dashboard
-const AppRoutes = () => {
-  const { user, loading } = useAuthContext();
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (!user) {
-    console.log('🔄 AppRoutes: No user, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-
-  // All authenticated users go to student dashboard by default
-  console.log('🔄 AppRoutes: User authenticated, redirecting to student dashboard');
-  return <Navigate to="/student/dashboard" replace />;
-};
+// Simplified App Routes - All users go to student dashboard (Unused, replaced by role-based routing)
+// const AppRoutes = () => {
+//   const { user, loading } = useAuthContext();
+// 
+//   if (loading) {
+//     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+//   }
+// 
+//   if (!user) {
+//     console.log('🔄 AppRoutes: No user, redirecting to login');
+//     return <Navigate to="/login" replace />;
+//   }
+// 
+//   // All authenticated users go to student dashboard by default
+//   console.log('🔄 AppRoutes: User authenticated, redirecting to student dashboard');
+//   return <Navigate to="/student/dashboard" replace />;
+// };
 
 // Public Default Route - No redirection to login
 const PublicDefaultRoute = () => {

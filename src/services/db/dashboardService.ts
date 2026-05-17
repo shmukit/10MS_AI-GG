@@ -11,7 +11,7 @@ import {
 } from '../../types/models';
 import { getUserById } from './userService';
 import { getStudentProfile } from './studentService';
-import { getStudentBatch, getStudentBatchForRoadmap, getAnyActiveBatchForRoadmap, getEnrolledBatches } from './batchService';
+import { getStudentBatch, getEnrolledBatches } from './batchService';
 import {
     getStudentRoadmap,
     getCurrentWeekTasks,
@@ -239,7 +239,7 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         cache.set(cacheKey, dashboardData, CACHE_TTL.MEDIUM);
 
         return dashboardData;
-    } catch (error) {
+    } catch {
         // Error in getDashboardData
         return {
             profile: null,

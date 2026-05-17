@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService } from '../../services/database';
@@ -35,9 +35,9 @@ const ProfileSkeleton = () => (
 
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { profileSlug } = useParams();
+
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
   const [profileData, setProfileData] = useState<{
     profile: any;
     userData: any;
