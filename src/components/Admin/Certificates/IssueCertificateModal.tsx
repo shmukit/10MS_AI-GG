@@ -59,7 +59,7 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
 
           try {
             const fileName = `cert_${student.id}_${Date.now()}.png`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
               .from('certificates')
               .upload(fileName, blob, {
                 contentType: 'image/png',

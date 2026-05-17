@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService } from '../../services/database';
@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { StudentHeader } from './StudentHeader';
 import { CertificateCard } from './Certificates/CertificateCard';
 import { useTheme } from '../../lib/ThemeContext';
+import { posthog } from '../../lib/posthog';
 
 // Add skeleton loading component at the top
 const ProfileSkeleton = () => (
@@ -35,9 +36,9 @@ const ProfileSkeleton = () => (
 
 export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { profileSlug } = useParams();
+
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
   const [profileData, setProfileData] = useState<{
     profile: any;
     userData: any;
@@ -110,6 +111,12 @@ export const StudentProfile: React.FC = () => {
         console.error('Error fetching certificates:', err);
       } finally {
         setLoading(false);
+        if (databaseUserId) {
+          posthog?.capture('profile_viewed', {
+            target_user_id: databaseUserId,
+            is_own_profile: true
+          });
+        }
       }
     };
 

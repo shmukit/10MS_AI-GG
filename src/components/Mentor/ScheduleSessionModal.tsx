@@ -4,6 +4,7 @@ import { X, Calendar, Clock, Video, Users, BookOpen, Users as UsersIcon } from '
 import { createSession } from '../../services/liveSessionService';
 import { DatabaseService } from '../../services/database';
 import { supabase } from '../../lib/supabase';
+import { posthog } from '../../lib/posthog';
 
 interface ScheduleSessionModalProps {
     isOpen: boolean;
@@ -152,6 +153,13 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({ isOp
                 platform: meetingLink.includes('zoom') ? 'zoom' : meetingLink.includes('meet') ? 'meet' : 'other',
                 session_type: sessionType,
                 target_audience: selectedWeeks.length > 0 ? selectedWeeks : ['all']
+            });
+            
+            posthog?.capture('mentor_session_scheduled', {
+                mentor_id: mentorId,
+                batch_id: finalBatchId,
+                session_type: sessionType,
+                topic: title
             });
 
             onSessionCreated();

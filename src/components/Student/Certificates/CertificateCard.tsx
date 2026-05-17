@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { posthog } from '../../../lib/posthog';
 
 interface CertificateCardProps {
   certificate: {
@@ -14,15 +15,37 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
   const [copied, setCopied] = useState(false);
   const publicUrl = `${window.location.origin}/certificate/${certificate.id}`;
 
+  useEffect(() => {
+    posthog?.capture('certificate_viewed', {
+      certificate_id: certificate.id,
+      certificate_type: certificate.certificate_type
+    });
+  }, [certificate.id, certificate.certificate_type]);
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicUrl);
     setCopied(true);
+    posthog?.capture('certificate_shared', {
+      certificate_id: certificate.id,
+      platform: 'copy_link'
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShareLinkedIn = () => {
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`;
+    posthog?.capture('certificate_shared', {
+      certificate_id: certificate.id,
+      platform: 'linkedin'
+    });
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownload = () => {
+    posthog?.capture('certificate_downloaded', {
+      certificate_id: certificate.id,
+      certificate_type: certificate.certificate_type
+    });
   };
 
   return (
@@ -67,6 +90,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
             download={`SheSTEM-Certificate-${certificate.id}.png`}
             target="_blank"
             rel="noreferrer"
+            onClick={handleDownload}
             className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg className="mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

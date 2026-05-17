@@ -1,0 +1,32 @@
+title = "10MS AI-GG Secret Scanning"
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  '''\.env\.example''',
+  '''node_modules''',
+  '''package-lock\.json''',
+]
+
+[[rules]]
+id = "supabase-anon-key"
+description = "Supabase Anon Key (JWT)"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["key", "supabase"]
+
+[[rules]]
+id = "supabase-service-role-key"
+description = "Supabase Service Role Key"
+regex = '''sbp_[a-zA-Z0-9]{40,}'''
+tags = ["key", "supabase"]
+
+[[rules]]
+id = "plaintext-password"
+description = "Plaintext password assignments"
+regex = '''(?i)password\s*[:=]\s*['"][^'"]{6,}['"]'''
+tags = ["password"]
+[rules.allowlist]
+paths = [
+  '''\.env\.example''',
+  '''\.gitleaks\.toml''',
+]

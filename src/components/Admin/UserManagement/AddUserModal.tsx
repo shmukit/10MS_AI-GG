@@ -31,7 +31,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
         if (!email || !email.includes('@')) return;
 
         try {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('users')
                 .select('id, role, first_name, last_name')
                 .eq('email', email)
@@ -50,7 +50,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 setExistingUser(null);
                 setError(null);
             }
-        } catch (err) {
+        } catch {
             // User not found is good
             setExistingUser(null);
             setError(null);
@@ -76,7 +76,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
             } else {
                 // Create new user
                 // Create new user via Secure RPC (Prevents session hijacking & 500 errors)
-                const { data: authData, error: authError } = await supabase.rpc('create_new_user', {
+                const { error: authError } = await supabase.rpc('create_new_user', {
                     p_email: formData.email,
                     p_password: formData.password,
                     p_first_name: formData.firstName,

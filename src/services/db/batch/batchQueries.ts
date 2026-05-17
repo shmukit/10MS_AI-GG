@@ -106,7 +106,7 @@ export const getStudentBatchForRoadmap = async (userId: string, roadmapIdentifie
 
         if (!isUUID) {
             console.log('Identifier is a slug, looking up roadmap ID...');
-            const { data: roadmap, error: roadmapError } = await supabase
+            const { data: roadmap } = await supabase
                 .from('roadmaps')
                 .select('id')
                 .eq('slug', roadmapIdentifier) // Assuming slug column exists, or we might need to match title/generate slug match
@@ -153,7 +153,7 @@ export const getStudentBatchForRoadmap = async (userId: string, roadmapIdentifie
             if (!roadmap) return false;
 
             // Match by ID
-            if (roadmap.id === roadmapIdentifier) return true;
+            if (roadmap.id === roadmapId) return true;
 
             // Match by slug (if identifier is slug)
             if (!isUUID && roadmap.slug === roadmapIdentifier) return true;
@@ -164,7 +164,8 @@ export const getStudentBatchForRoadmap = async (userId: string, roadmapIdentifie
         if (validAssignment) {
             console.log('✅ Found specific batch for roadmap:', (validAssignment as any).batches.name);
             // Return the batch object (sanitize it to remove the nested roadmap if needed by Batch type)
-            const { roadmaps, ...batchData } = (validAssignment as any).batches;
+            const batchData = { ...(validAssignment as any).batches };
+            delete batchData.roadmaps;
             return batchData as Batch;
         }
 
@@ -251,7 +252,8 @@ export const getEnrolledBatches = async (userId: string): Promise<(Batch & { roa
             const roadmap = batch?.roadmaps;
             // Remove roadmap from batch object to match Batch type if needed, 
             // but here we keep it as an explicit property
-            const { roadmaps, ...batchData } = batch;
+            const batchData = { ...batch };
+            delete batchData.roadmaps;
             return {
                 ...batchData,
                 roadmap: roadmap

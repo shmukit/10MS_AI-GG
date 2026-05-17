@@ -19,16 +19,15 @@ interface RoadmapInterfaceProps {
   toggleDarkMode?: () => void;
 }
 
-export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false, toggleDarkMode }) => {
+export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false }) => {
   const { roadmapSlug } = useParams();
   const [searchParams] = useSearchParams();
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode: themeDarkMode, toggleDarkMode: themeToggleDarkMode } = useTheme();
+  const { isDarkMode: themeDarkMode } = useTheme();
   // const posthog = usePostHog();
 
   // Use theme context if no props provided
   const effectiveDarkMode = isDarkMode ?? themeDarkMode;
-  const effectiveToggleDarkMode = toggleDarkMode ?? themeToggleDarkMode;
 
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [weeks, setWeeks] = useState<RoadmapWeek[]>([]);

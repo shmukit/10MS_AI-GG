@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { RoadmapDiscussion, discussionService } from '../../services/discussionService';
+import { posthog } from '../../lib/posthog';
 // import { DatabaseService } from '../../services/database';
 // import { formatDistanceToNow } from 'date-fns'; // Ideally used, but avoiding new deps if not present. Using native Intl.RelativeTimeFormat or string manipulation if needed.
 // Actually let's just use simple date formatting for now to match project style.
@@ -35,6 +36,14 @@ export const DiscussionThread: React.FC<DiscussionThreadProps> = ({
                 currentUserId,
                 discussion.id // Parent ID
             );
+            
+            posthog?.capture('discussion_reply_created', {
+                entity_type: discussion.entity_type,
+                entity_id: discussion.entity_id,
+                parent_id: discussion.id,
+                content_length: replyContent.length
+            });
+            
             setReplyContent('');
             setIsReplying(false);
             onRefresh();

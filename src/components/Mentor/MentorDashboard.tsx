@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
+import { posthog } from '../../lib/posthog';
 import { MentorHeader } from './MentorHeader';
 import { Skeleton } from '../ui/Skeleton';
 import { DashboardTab } from './tabs/DashboardTab';
@@ -21,7 +22,7 @@ interface MentorDashboardProps {
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   isDarkMode = false,
 }) => {
-  const { user, databaseUserId } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice'>('dashboard');
 
   // Shared Data State
@@ -263,6 +264,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   // Fetch data on component mount
   useEffect(() => {
     fetchData();
+    posthog?.capture('mentor_dashboard_viewed', {});
   }, []);
 
   // Fetch roadmap tasks when selectedRoadmap changes

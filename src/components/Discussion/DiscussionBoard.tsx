@@ -3,6 +3,7 @@ import { RoadmapDiscussion, discussionService } from '../../services/discussionS
 import { DiscussionThread } from './DiscussionThread';
 import { DatabaseService } from '../../services/database';
 import { useTheme } from '../../lib/ThemeContext';
+import { posthog } from '../../lib/posthog';
 
 interface DiscussionBoardProps {
     entityType: 'roadmap' | 'week' | 'task';
@@ -70,6 +71,11 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
     useEffect(() => {
         fetchUser();
         fetchDiscussions();
+        
+        posthog?.capture('discussion_board_viewed', {
+            entity_type: entityType,
+            entity_id: entityId
+        });
     }, [entityType, entityId]);
 
     const handlePostSubmit = async (e: React.FormEvent) => {
@@ -79,6 +85,13 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
         setIsPosting(true);
         try {
             await discussionService.createPost(entityType, entityId, newPostContent, currentUserId);
+            
+            posthog?.capture('discussion_post_created', {
+                entity_type: entityType,
+                entity_id: entityId,
+                content_length: newPostContent.length
+            });
+            
             setNewPostContent('');
             fetchDiscussions(); // Refresh list
         } catch (error) {
