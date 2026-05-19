@@ -106,10 +106,11 @@ export const MarketingPage: React.FC = () => {
             <section className="pt-32 pb-20 px-4 text-center">
                 <div className="mx-auto" style={{ maxWidth: 1200 }}>
                     <MotionDiv variants={SLIDE_UP_VARIANTS}>
-                        {/* Badge chip */}
+                        {/* Dynamic theme-aware Badge chip */}
                         <span style={{
                             display: 'inline-block', padding: '4px 14px',
-                            background: '#EAFEF2', color: '#086347',
+                            background: isDarkMode ? 'rgba(99,102,241,0.15)' : '#EEF2FF',
+                            color: isDarkMode ? '#A5B4FC' : '#4F46E5',
                             borderRadius: 999, fontSize: 12, fontWeight: 600,
                             fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em',
                             textTransform: 'uppercase', marginBottom: 24,
@@ -119,15 +120,14 @@ export const MarketingPage: React.FC = () => {
 
                         <h1 style={{
                             fontSize: 'clamp(2.25rem, 6vw, 3.5rem)',
-                            fontWeight: 700, lineHeight: 1.1,
+                            fontWeight: 800, lineHeight: 1.2,
                             letterSpacing: '-0.02em',
                             color: textPrimary,
                             fontFamily: 'Inter, sans-serif',
                             marginBottom: 20,
                         }}>
-                            Master Your Career with{' '}
-                            {/* Solid green accent — no gradient text (prohibited) */}
-                            <span style={{ color: '#1CAB55' }}>Expert-led Roadmaps</span>
+                            Master Your Career with<br />
+                            <span style={{ color: '#4F46E5' }}>Expert-led Roadmaps</span>
                         </h1>
 
                         <p style={{ fontSize: 16, color: textMuted, maxWidth: 520, margin: '0 auto 36px', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
@@ -371,8 +371,13 @@ export const MarketingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ── Stats — inverse surface, flat, NO gradient ── */}
-            <section style={{ padding: '80px 16px', background: '#111827' }}>
+            {/* ── Stats — Premium gradient band from production view ── */}
+            <section 
+                style={{ 
+                    padding: '80px 16px', 
+                    background: 'linear-gradient(90deg, #8B5CF6 0%, #2563EB 100%)' 
+                }}
+            >
                 <div className="mx-auto" style={{ maxWidth: 1200 }}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {[
@@ -382,10 +387,10 @@ export const MarketingPage: React.FC = () => {
                             { value: '95%',                            label: 'Success Rate' },
                         ].map(stat => (
                             <div key={stat.label}>
-                                <div style={{ fontSize: 36, fontWeight: 700, color: '#1CAB55', fontFamily: 'Inter, sans-serif' }}>
+                                <div style={{ fontSize: 38, fontWeight: 800, color: '#FFFFFF', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
                                     {stat.value}
                                 </div>
-                                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
+                                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: 500, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
                                     {stat.label}
                                 </div>
                             </div>
