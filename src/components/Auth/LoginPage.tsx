@@ -3,12 +3,22 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../lib';
 import { posthog } from '../../lib/posthog';
-import { MotionDiv, HoverScale, HoverLift, SHAKE_VARIANTS } from '../ui/MotionPrimitives';
+import { MotionDiv, SHAKE_VARIANTS } from '../ui/MotionPrimitives';
+import { AppLogo } from '../Logo/AppLogo';
+
+/**
+ * LoginPage — 10MS Design System compliant.
+ *
+ * Input spec (DESIGN.md §5 Input Fields):
+ *   Default: 1px border #D1D5DB, radius 12px, placeholder #6B7280
+ *   Focus:   2px border #1CAB55, box-shadow 0 0 0 3px rgba(28,171,85,0.10)
+ *   Error:   2px border #DC2626
+ *   Disabled: bg #F3F4F6, border #E5E7EB, text #D1D5DB
+ */
 
 export const LoginPage: React.FC = () => {
   const { signIn, signUp, loading, error, user } = useAuthContext();
   const navigate = useNavigate();
-  // const posthog = usePostHog();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -18,30 +28,20 @@ export const LoginPage: React.FC = () => {
     confirmPassword: ''
   });
 
-  // Redirect if already logged in - All users go to student dashboard
   useEffect(() => {
-    if (user) {
-      navigate('/student/dashboard');
-    }
+    if (user) navigate('/student/dashboard');
   }, [user, navigate]);
 
-  // Track page view
   useEffect(() => {
-    posthog?.capture('$pageview', {
-      page: isLogin ? 'login' : 'signup'
-    });
-  }, [posthog, isLogin]);
-
-
+    posthog?.capture('$pageview', { page: isLogin ? 'login' : 'signup' });
+  }, [isLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (isLogin) {
         posthog?.capture('login_attempt', { email: formData.email });
         const result = await signIn(formData.email, formData.password);
-
         if (result.success) {
           posthog?.capture('login_success', { email: formData.email });
           posthog?.identify(formData.email, { email: formData.email });
@@ -51,167 +51,314 @@ export const LoginPage: React.FC = () => {
       } else {
         posthog?.capture('signup_attempt', { email: formData.email, name: formData.name });
         const result = await signUp(formData.email, formData.password, formData.name);
-
         if (result.success) {
           posthog?.capture('signup_success', { email: formData.email, name: formData.name });
           posthog?.identify(formData.email, { email: formData.email, name: formData.name });
-          if (result.requiresEmailConfirmation) {
-            posthog?.capture('email_confirmation_required', { email: formData.email });
-          }
         } else {
           posthog?.capture('signup_failed', { email: formData.email, error: result.error });
         }
       }
-    } catch (error) {
+    } catch (err) {
       posthog?.capture('auth_error', {
         action: isLogin ? 'login' : 'signup',
         email: formData.email,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: err instanceof Error ? err.message : 'Unknown error'
       });
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // 10MS input style — applied via inline handlers to satisfy focus spec exactly
+  const inputBaseStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: 12,             // 10MS input radius
+    border: '1px solid #D1D5DB', // outline-variant at rest
+    background: 'var(--card)',
+    color: 'var(--c-text, #111827)',
+    fontSize: 13,
+    fontFamily: 'Inter, sans-serif',
+    outline: 'none',
+    transition: 'border-color 150ms, box-shadow 150ms',
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = '#1CAB55';
+    e.currentTarget.style.borderWidth = '2px';
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(28,171,85,0.10)';
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = '#D1D5DB';
+    e.currentTarget.style.borderWidth = '1px';
+    e.currentTarget.style.boxShadow = 'none';
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center transition-colors duration-200 bg-gray-100 dark:bg-zinc-900">
+    <div
+      className="min-h-screen flex items-center justify-center transition-colors duration-200"
+      style={{ background: 'var(--c-surface-subtle, #F3F4F6)' }}
+    >
       <MotionDiv
-        className="max-w-md w-full mx-4 p-8 rounded-xl shadow-lg border transition-colors duration-200 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
+        className="max-w-md w-full mx-4"
         initial="hidden"
         animate="visible"
       >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <HoverLift className="inline-block">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20">
-              <span className="text-white font-bold text-lg">10MS</span>
+        {/* Card — flat by default, border only */}
+        <div
+          style={{
+            background: 'var(--card, #FFFFFF)',
+            border: '1px solid var(--border, #E5E7EB)',
+            borderRadius: 16,
+            padding: '40px 32px',
+          }}
+        >
+          {/* Header — AppLogo + title */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-5">
+              <AppLogo layout="full" />
             </div>
-          </HoverLift>
-          <h1 className="text-2xl font-bold transition-colors duration-200 text-gray-900 dark:text-gray-100">
-            10MS SheSTEM
-          </h1>
-          <p className="text-sm mt-2 transition-colors duration-200 text-gray-600 dark:text-gray-400">
-            {isLogin ? 'Sign in to your account' : 'Create your account'}
-          </p>
-        </div>
+            <h1
+              className="text-xl font-semibold"
+              style={{ color: 'var(--c-text, #111827)', fontFamily: 'Inter, sans-serif' }}
+            >
+              {isLogin ? 'Welcome back' : 'Create your account'}
+            </h1>
+            <p
+              className="text-sm mt-1"
+              style={{ color: '#6B7280', fontFamily: 'Inter, sans-serif' }}
+            >
+              {isLogin
+                ? 'Sign in to continue to AI-GG'
+                : 'Join the SheSTEM learning community'}
+            </p>
+          </div>
 
-        {/* Error Display */}
-        {error && (
-          <MotionDiv
-            className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg"
-            variants={SHAKE_VARIANTS}
-            initial="initial"
-            animate="animate"
-          >
-            {error.message}
-          </MotionDiv>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <MotionDiv delay={0.1}>
-              <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700 dark:text-gray-300">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500"
-                placeholder="Enter your full name"
-                required
-              />
-            </MotionDiv>
-          )}
-
-          <MotionDiv delay={0.15}>
-            <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700 dark:text-gray-300">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500"
-              placeholder="Enter your email"
-              required
-            />
-          </MotionDiv>
-
-          <MotionDiv delay={0.2}>
-            <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700 dark:text-gray-300">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500"
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          {/* Error alert — 10MS alert card spec */}
+          {error && (
+            <MotionDiv
+              className="mb-5"
+              variants={SHAKE_VARIANTS}
+              initial="initial"
+              animate="animate"
+            >
+              <div
+                style={{
+                  padding: '12px 16px',
+                  background: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: 12,
+                  color: '#DC2626',
+                  fontSize: 13,
+                  fontFamily: 'Inter, sans-serif',
+                }}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </MotionDiv>
-
-          {!isLogin && (
-            <MotionDiv delay={0.25}>
-              <label className="block text-sm font-medium mb-2 transition-colors duration-200 text-gray-700 dark:text-gray-300">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500"
-                placeholder="Confirm your password"
-                required
-              />
+                {error.message}
+              </div>
             </MotionDiv>
           )}
 
-          <HoverScale>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name (signup only) */}
+            {!isLogin && (
+              <div>
+                <label
+                  htmlFor="auth-name"
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: '#374151',
+                    marginBottom: 6,
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  Full Name
+                </label>
+                <input
+                  id="auth-name"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  style={inputBaseStyle}
+                  placeholder="Enter your full name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
+            )}
+
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="auth-email"
+                style={{
+                  display: 'block',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: 6,
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Email Address
+              </label>
+              <input
+                id="auth-email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                style={inputBaseStyle}
+                placeholder="Enter your email"
+                required
+                autoComplete="email"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="auth-password"
+                style={{
+                  display: 'block',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: 6,
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  style={{ ...inputBaseStyle, paddingRight: 44 }}
+                  placeholder="Enter your password"
+                  required
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute', right: 14, top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#6B7280', padding: 0,
+                  }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password (signup only) */}
+            {!isLogin && (
+              <div>
+                <label
+                  htmlFor="auth-confirm"
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: '#374151',
+                    marginBottom: 6,
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="auth-confirm"
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  style={inputBaseStyle}
+                  placeholder="Confirm your password"
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
+
+            {/* Submit — 10MS primary button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
+              style={{
+                width: '100%',
+                padding: '14px 28px',
+                borderRadius: 999,              // pill
+                background: loading ? '#E5E7EB' : '#1CAB55',
+                color: loading ? '#D1D5DB' : '#FFFFFF',
+                fontSize: 14,
+                fontWeight: 600,
+                fontFamily: 'Inter, sans-serif',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'background 150ms, transform 180ms, box-shadow 180ms',
+                marginTop: 8,
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.background = '#17994B';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = loading ? '#E5E7EB' : '#1CAB55';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
-              {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
+              {loading ? 'Please wait…' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
-          </HoverScale>
-        </form>
+          </form>
 
-        {/* Toggle Login/Signup */}
-        <MotionDiv className="mt-6 text-center" delay={0.3}>
-          <p className="text-sm transition-colors duration-200 text-gray-600 dark:text-gray-400">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
+          {/* Toggle Login/Signup */}
+          <p
+            className="mt-6 text-center text-sm"
+            style={{ color: '#6B7280', fontFamily: 'Inter, sans-serif' }}
+          >
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}
+            {' '}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="ml-1 text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 font-medium"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: '#149353',           // green-link
+                fontWeight: 600,
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 14,
+                padding: 0,
+              }}
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
           </p>
-        </MotionDiv>
-
-
+        </div>
       </MotionDiv>
     </div>
   );

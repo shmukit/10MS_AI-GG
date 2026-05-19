@@ -2,53 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Fonts ──────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anek+Bangla:wght@400;500;600;700&display=swap');
+
+/* ─── 10MS Design Tokens — Light Mode ───────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #2563eb;
-  --primary-foreground: #fafafa;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --destructive: #ef4444;
-  --destructive-foreground: #fafafa;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #2563eb;
-  --radius: 0.5rem;
+  /* 10MS Color Tokens */
+  --c-primary:              #1CAB55; /* active states, focus rings, progress */
+  --c-primary-deep:         #17994B; /* hover/pressed on primary */
+  --c-primary-container:    #D0FAD0;
+  --c-on-primary:           #FFFFFF;
+  --c-on-primary-container: #086347;
+  --c-green-link:           #149353; /* text links, nav labels */
+  --c-green-cta:            #37C25C; /* filled CTA button surfaces */
+  --c-error:                #DC2626; /* in-app errors, alerts, badges ONLY */
+  --c-alert-surface:        #FEF2F2;
+  --c-header-dark:          #050B14; /* mobile top bar — always dark */
+  --c-surface:              #FFFFFF;
+  --c-surface-subtle:       #F3F4F6;
+  --c-surface-tinted:       #EAFEF2;
+  --c-surface-blue:         #EFF6FF;
+  --c-nav-active-tint:      #EAFEF2;
+  --c-inverse:              #111827;
+  --c-text:                 #111827;
+  --c-text-2:               #374151;
+  --c-text-3:               #6B7280;
+  --c-text-dis:             #D1D5DB;
+  --c-icon-off:             #CDD1D7; /* nav icons inactive ONLY */
+  --c-outline:              #E5E7EB;
+  --c-outline-v:            #D1D5DB;
+
+  /* Tailwind semantic bridge — maps Tailwind vars to 10MS tokens */
+  --background:             #FFFFFF;
+  --foreground:             #111827;
+  --card:                   #FFFFFF;
+  --card-foreground:        #111827;
+  --popover:                #FFFFFF;
+  --popover-foreground:     #111827;
+  --primary:                #1CAB55;
+  --primary-foreground:     #FFFFFF;
+  --secondary:              #F3F4F6;
+  --secondary-foreground:   #111827;
+  --muted:                  #F3F4F6;
+  --muted-foreground:       #6B7280;
+  --accent:                 #EAFEF2;
+  --accent-foreground:      #086347;
+  --destructive:            #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border:                 #E5E7EB;
+  --input:                  #E5E7EB;
+  --ring:                   #1CAB55;
+  --radius:                 0.75rem;
 }
 
+/* ─── 10MS Dark Mode — Derived from inverse-surface vocabulary ─ */
+/* Warm blue-blacks anchored in 10MS token language, not zinc/slate */
 .dark {
-  --background: #0f172a;
-  --foreground: #ededed;
-  --card: #1e293b;
-  --card-foreground: #ededed;
-  --popover: #1e293b;
-  --popover-foreground: #ededed;
-  --primary: #3b82f6;
-  --primary-foreground: #171717;
-  --secondary: #1e293b;
-  --secondary-foreground: #ededed;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #ededed;
-  --destructive: #7f1d1d;
-  --destructive-foreground: #ededed;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #3b82f6;
+  --c-surface:              #161D27;
+  --c-surface-subtle:       #1E2A38;
+  --c-surface-tinted:       #0F2419; /* dark green tint */
+  --c-outline:              #2D3748;
+  --c-text:                 #F9FAFB;
+  --c-text-2:               #D1D5DB;
+  --c-text-3:               #9CA3AF;
+  --c-text-dis:             #4B5563;
+
+  --background:             #0D1117;
+  --foreground:             #F9FAFB;
+  --card:                   #161D27;
+  --card-foreground:        #F9FAFB;
+  --popover:                #161D27;
+  --popover-foreground:     #F9FAFB;
+  --primary:                #1CAB55; /* green is unchanged — works on dark */
+  --primary-foreground:     #FFFFFF;
+  --secondary:              #1E2A38;
+  --secondary-foreground:   #D1D5DB;
+  --muted:                  #1E2A38;
+  --muted-foreground:       #9CA3AF;
+  --accent:                 #0F2419;
+  --accent-foreground:      #1CAB55;
+  --destructive:            #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border:                 #2D3748;
+  --input:                  #2D3748;
+  --ring:                   #1CAB55;
 }
 
-* {
-  border-color: hsl(var(--border));
+/* ─── Base Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 html {
@@ -56,120 +98,76 @@ html {
 }
 
 body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
+  font-family: 'Inter', sans-serif;
+  color: var(--c-text);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark mode specific styles */
-.dark body {
-  background-color: #0f172a;
-  color: #ededed;
+/* Bengali strings use Anek Bangla */
+.lang-bn {
+  font-family: 'Anek Bangla', sans-serif;
 }
 
-.dark .bg-white {
-  background-color: #1e293b;
+/* ─── Focus Ring — 10MS Green ────────────────────────────────── */
+/* Replaces all blue focus rings with 10MS green */
+.focus-ring:focus,
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(28, 171, 85, 0.15);
 }
 
-.dark .text-gray-900 {
-  color: #ededed;
-}
+/* ─── 10MS Elevation Vocabulary ──────────────────────────────── */
+/* Cards are FLAT at rest — border only. Shadow = hover or modal only. */
+.shadow-nav     { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.shadow-hover   { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+.shadow-modal   { box-shadow: 0 8px 40px rgba(0,0,0,0.14); }
+.shadow-tab-bar { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
 
-.dark .text-gray-700 {
-  color: #d4d4d4;
-}
-
-.dark .text-gray-600 {
-  color: #a3a3a3;
-}
-
-.dark .border-gray-200 {
-  border-color: #262626;
-}
-
-.dark .bg-gray-100 {
-  background-color: #262626;
-}
-
-.dark .bg-gray-50 {
-  background-color: #171717;
-}
-
-/* Custom animations */
+/* ─── Animations — Feedback, Not Decoration ──────────────────── */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-.animate-slide-in-left {
-  animation: slide-in-left 0.6s ease-out;
+/* Selection checkmark pop — 10MS card selection spec */
+@keyframes check-pop {
+  from { transform: scale(0.7); }
+  to   { transform: scale(1); }
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.6s ease-out;
-}
+.animate-fade-in       { animation: fade-in 0.4s ease-out; }
+.animate-slide-in-left { animation: slide-in-left 0.4s ease-out; }
+.animate-slide-in-right{ animation: slide-in-right 0.4s ease-out; }
+.animate-scale-in      { animation: scale-in 0.3s ease-out; }
+.animate-check-pop     { animation: check-pop 0.18s ease-out; }
 
-/* Smooth transitions for all interactive elements */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+/* ─── Interactive Element Transitions ────────────────────────── */
+/* Scoped to color/border/shadow/transform only — prevents layout jank */
+button, a, input, select, textarea, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 
-/* Enhanced focus states */
-.focus-ring:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
-
-/* Professional shadows */
-.shadow-professional {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-professional-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ─── Scrollbar — Minimal ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--c-outline); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); }
