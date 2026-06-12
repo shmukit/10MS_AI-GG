@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { USER_PUBLIC_COLUMNS } from '../../lib/userColumns';
 import { User } from '../../types/models';
 
 export const getCurrentUser = async (): Promise<User | null> => {
@@ -8,7 +9,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
 
         const { data, error } = await supabase
             .from('users')
-            .select('*')
+            .select(USER_PUBLIC_COLUMNS)
             .eq('id', user.id)
             .single();
 
@@ -49,7 +50,7 @@ export const getUserById = async (userId: string): Promise<User | null> => {
         console.log('🔍 getUserById called with userId:', userId);
         const { data, error } = await supabase
             .from('users')
-            .select('*')
+            .select(USER_PUBLIC_COLUMNS)
             .eq('id', userId)
             .single();
 
@@ -72,7 +73,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
         console.log('🔍 getUserByEmail called with email:', email);
         const { data, error } = await supabase
             .from('users')
-            .select('*')
+            .select(USER_PUBLIC_COLUMNS)
             .eq('email', email)
             .single();
 
