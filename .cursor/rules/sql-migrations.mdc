@@ -6,20 +6,33 @@ alwaysApply: true
 
 # SQL Migration Policy
 
+## STOP — check before touching any SQL file
+
+Before writing to **any** file under `sql/`, answer this question:
+
+> "Did this file exist before this conversation started, OR has the user said they ran it?"
+
+If **yes** to either → **do not edit it**. Create a new file instead.
+If **no** to both → you may write to it, but only until the user confirms it has been run. After that it becomes immutable.
+
+This rule applies to files you created yourself in the current session. Once the user runs a script, it is history.
+
 ## Never edit scripts that were already run
 
-Do **not** modify SQL files that have been pushed, deployed, or executed in Supabase (e.g. `security_hardening_2026.sql`, `fix_remaining_warnings_2026.sql`).
+Do **not** modify any SQL file that has been pushed, deployed, or executed in Supabase.
 
-Those files are historical records. Changing them does not re-apply changes in production and makes audit history unreliable.
+Those files are historical records. Editing them does not re-apply changes in production and makes audit history unreliable. This includes:
+- Old migration files (e.g. `security_hardening_2026.sql`)
+- New migration files you created earlier in the session that the user has since run
 
 ## Always create a new script
 
 For every new database change:
 
 1. Add a **new** file under `sql/` with a descriptive, dated name.
-   - Example: `sql/20260612_fix_production_users_permissions.sql`
-2. At the top, briefly note what broke and which prior script(s) it fixes.
-3. Make the script **idempotent** where possible (`DROP POLICY IF EXISTS`, `CREATE OR REPLACE`, etc.).
+   - Example: `sql/20260612_fix_rpc_execute_permissions.sql`
+2. At the top, note what broke and which prior script(s) it forward-fixes.
+3. Make the script **idempotent** (`DROP POLICY IF EXISTS`, `CREATE OR REPLACE`, etc.).
 4. Include commented verification queries at the bottom.
 
 ## Naming
@@ -29,5 +42,5 @@ Prefer: `YYYYMMDD_short_description.sql`
 ## Workflow
 
 1. Write the new migration file only.
-2. Tell the user to run it in the Supabase SQL Editor (production/staging as appropriate).
-3. Do not amend or "fix" old migration files — forward-fix with a new migration instead.
+2. Tell the user to run it in the Supabase SQL Editor.
+3. Never amend or patch old files — always forward-fix with a new migration.
