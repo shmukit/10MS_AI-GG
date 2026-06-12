@@ -16,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
                 // Fetch total users
                 const { count: usersCount } = await supabase
                     .from('users')
-                    .select('*', { count: 'exact', head: true });
+                    .select('id', { count: 'exact', head: true });
 
                 // Fetch active batches
                 const { count: batchesCount } = await supabase

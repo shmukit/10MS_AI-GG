@@ -1,0 +1,33 @@
+---
+description: SQL migration conventions — always create new scripts, never edit run history
+globs: sql/**
+alwaysApply: true
+---
+
+# SQL Migration Policy
+
+## Never edit scripts that were already run
+
+Do **not** modify SQL files that have been pushed, deployed, or executed in Supabase (e.g. `security_hardening_2026.sql`, `fix_remaining_warnings_2026.sql`).
+
+Those files are historical records. Changing them does not re-apply changes in production and makes audit history unreliable.
+
+## Always create a new script
+
+For every new database change:
+
+1. Add a **new** file under `sql/` with a descriptive, dated name.
+   - Example: `sql/20260612_fix_production_users_permissions.sql`
+2. At the top, briefly note what broke and which prior script(s) it fixes.
+3. Make the script **idempotent** where possible (`DROP POLICY IF EXISTS`, `CREATE OR REPLACE`, etc.).
+4. Include commented verification queries at the bottom.
+
+## Naming
+
+Prefer: `YYYYMMDD_short_description.sql`
+
+## Workflow
+
+1. Write the new migration file only.
+2. Tell the user to run it in the Supabase SQL Editor (production/staging as appropriate).
+3. Do not amend or "fix" old migration files — forward-fix with a new migration instead.

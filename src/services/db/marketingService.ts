@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { USER_PUBLIC_COLUMNS } from '../../lib/userColumns';
 import { Roadmap, User, Batch } from '../../types/models';
 
 export interface RoadmapMarketingData extends Roadmap {
@@ -46,7 +47,7 @@ export const getMarketingData = async (): Promise<MarketingPageData> => {
         // 4. Fetch all mentor profiles and user details
         const { data: mentorsData, error: mentorsError } = await supabase
             .from('users')
-            .select('*, mentor_profiles(*)')
+            .select(`${USER_PUBLIC_COLUMNS}, mentor_profiles(*)`)
             .eq('role', 'mentor');
 
         if (mentorsError) throw mentorsError;

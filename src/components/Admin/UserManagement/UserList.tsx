@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { USER_PUBLIC_COLUMNS } from '../../../lib/userColumns';
 import { AddUserModal } from './AddUserModal';
 import { IssueCertificateModal } from '../Certificates/IssueCertificateModal';
 import { ManageCertificatesModal } from '../Certificates/ManageCertificatesModal';
@@ -46,7 +47,7 @@ export const UserList: React.FC = () => {
             setLoading(true);
             let query = supabase
                 .from('users')
-                .select('*')
+                .select(USER_PUBLIC_COLUMNS)
                 .order('created_at', { ascending: false });
 
             if (roleFilter !== 'all') {

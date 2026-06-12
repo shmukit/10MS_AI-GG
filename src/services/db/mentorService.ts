@@ -1,11 +1,12 @@
 import { supabase } from '../../lib/supabase';
+import { USER_PUBLIC_COLUMNS } from '../../lib/userColumns';
 import { User } from '../../types/models';
 
 export const getMentors = async (batchId?: string): Promise<User[]> => {
     try {
         let query = supabase
             .from('users')
-            .select('*')
+            .select(USER_PUBLIC_COLUMNS)
             .eq('role', 'mentor')
             .eq('is_active', true);
 
@@ -56,7 +57,7 @@ export const createMentorProfile = async (userId: string, batchId?: string): Pro
         // First, update user role to mentor
         const { error: userUpdateError } = await supabase
             .from('users')
-            .select('*')
+            .select(USER_PUBLIC_COLUMNS)
             .eq('id', userId)
             .single();
 
