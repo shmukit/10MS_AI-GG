@@ -195,7 +195,6 @@ export const StudentDashboard: React.FC = () => {
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}
-                  isDarkMode={isDarkMode}
                 />
               </Card>
 

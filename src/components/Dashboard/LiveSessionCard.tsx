@@ -8,7 +8,6 @@ interface LiveSessionCardProps {
     isMentor?: boolean;
     onDelete?: () => void;
     currentLevel?: number;
-    isDarkMode?: boolean;
 }
 
 export const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, isMentor, onDelete, currentLevel }) => {

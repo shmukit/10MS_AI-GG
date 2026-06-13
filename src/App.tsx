@@ -42,13 +42,18 @@ const RouteLoader = () => (
 const ProtectedRouteWithRole = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
   const { user, loading, userRole, roleLoading } = useAuthContext();
 
-  if (loading || roleLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
     console.log('🔄 ProtectedRoute: No user, redirecting to login');
     return <Navigate to="/login" replace />;
+  }
+
+  // Only block on first role resolution — not on background token refresh
+  if (roleLoading && !userRole) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   // If user has a role but it's not in the allowed list, redirect to their allowed dashboard

@@ -243,23 +243,21 @@ export function useAuth() {
     }
   }
 
-  // Update user role when session changes
+  // Update user role when the signed-in user changes (not on token refresh)
   useEffect(() => {
     if (session?.user?.email) {
-      console.log('🔄 Session changed, fetching role for:', session.user.email);
-      setRoleLoading(true)
+      console.log('🔄 User changed, fetching role for:', session.user.email);
       fetchUserRole(session.user.email).then(userData => {
         console.log('🎭 Setting user role to:', userData.role);
-        setUserRole(userData.role)
-        setRoleLoading(false)
-      })
+        setUserRole(userData.role);
+      });
     } else {
       console.log('🔄 No session, clearing user role');
-      setUserRole(null)
-      setDatabaseUserId(null)
-      setRoleLoading(false)
+      setUserRole(null);
+      setDatabaseUserId(null);
+      setRoleLoading(false);
     }
-  }, [session])
+  }, [session?.user?.id]);
 
   return {
     user,

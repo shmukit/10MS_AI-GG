@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/useAuth';
@@ -18,9 +18,20 @@ interface MentorDashboardProps {
   onProfile?: () => void;
 }
 
+type MentorTab = 'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice';
+
+const MENTOR_TAB_KEY = 'mentor-dashboard-tab';
+const VALID_TABS = new Set<MentorTab>(['dashboard', 'roadmap', 'students', 'notice', 'practice']);
+
+function readStoredTab(): MentorTab {
+  const saved = sessionStorage.getItem(MENTOR_TAB_KEY);
+  return saved && VALID_TABS.has(saved as MentorTab) ? (saved as MentorTab) : 'dashboard';
+}
+
 export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice'>('dashboard');
+  const [activeTab, setActiveTab] = useState<MentorTab>(readStoredTab);
+  const hasLoadedRef = useRef(false);
 
   // Shared Data State
   const [roadmaps, setRoadmaps] = useState<any[]>([]);
@@ -32,6 +43,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
   // Selection State
   const [selectedBatch, setSelectedBatch] = useState<string>('');
   const [selectedRoadmap, setSelectedRoadmap] = useState<string>('');
+  const selectedBatchRef = useRef(selectedBatch);
+  const selectedRoadmapRef = useRef(selectedRoadmap);
+  selectedBatchRef.current = selectedBatch;
+  selectedRoadmapRef.current = selectedRoadmap;
 
   // Deck Editor State
   const [showDeckEditor, setShowDeckEditor] = useState(false);
@@ -100,8 +115,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
     }
   };
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (options?: { showLoader?: boolean }) => {
+    const showLoader = options?.showLoader ?? !hasLoadedRef.current;
+    if (showLoader) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -238,12 +256,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
 
       setRoadmaps(roadmapsData || []);
 
-      if (batchesData && batchesData.length > 0 && !selectedBatch) {
+      if (batchesData && batchesData.length > 0 && !selectedBatchRef.current) {
         setSelectedBatch((batchesData[0] as any).id);
       }
 
       // Set default selected roadmap if available
-      if (roadmapsData && roadmapsData.length > 0 && !selectedRoadmap) {
+      if (roadmapsData && roadmapsData.length > 0 && !selectedRoadmapRef.current) {
         setSelectedRoadmap((roadmapsData[0] as any).id);
         await fetchRoadmapTasks((roadmapsData[0] as any).id);
       }
@@ -255,12 +273,17 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
       setError('Failed to load data from database');
     } finally {
       setLoading(false);
+      hasLoadedRef.current = true;
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
-    fetchData();
+    sessionStorage.setItem(MENTOR_TAB_KEY, activeTab);
+  }, [activeTab]);
+
+  // Fetch data on component mount only
+  useEffect(() => {
+    fetchData({ showLoader: true });
     posthog?.capture('mentor_dashboard_viewed', {});
   }, []);
 
@@ -325,7 +348,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id as any)}
+                onClick={() => setActiveTab(id as MentorTab)}
                 className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${activeTab === id
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -362,7 +385,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
               <strong>Error:</strong> {error}
             </div>
             <button
-              onClick={fetchData}
+              onClick={() => fetchData({ showLoader: true })}
               className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg"
             >
               Retry
@@ -370,58 +393,53 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
           </div>
         )}
 
-        {!loading && !error && (
-          <>
-            {activeTab === 'dashboard' && (
-              <DashboardTab
-                stats={stats}
-                batches={batches}
-                students={students}
-                selectedBatch={selectedBatch}
-              />
-            )}
-            {activeTab === 'roadmap' && (
-              <RoadmapTab
-                roadmaps={roadmaps}
-                setRoadmaps={setRoadmaps}
-                roadmapData={roadmapData}
-                setRoadmapData={setRoadmapData}
-                selectedRoadmap={selectedRoadmap}
-                setSelectedRoadmap={setSelectedRoadmap}
-                selectedBatch={selectedBatch}
-              />
-            )}
-            {activeTab === 'students' && (
-              <StudentsTab
-                students={students}
-                batches={batches}
-                roadmaps={roadmaps}
-                selectedBatch={selectedBatch}
-                setSelectedBatch={setSelectedBatch}
-                onUpdate={fetchData}
-              />
-            )}
-            {activeTab === 'practice' && (
-              <PracticeDeckTab
-                onCreateDeck={handleCreateDeck}
-                onEditDeck={handleEditDeck}
-                // Add key to force remount when editor closes to refresh list?
-                // Or assume user will check. Ideally we pass a refresh trigger.
-                key={showDeckEditor ? 'hidden' : 'visible'} // Quick hack to force refresh when editor closes? No, that causes flickers.
-              // Better to just let it be for now, or use a dependency prop in PracticeDeckTab.
-              />
-            )}
-            {activeTab === 'notice' && (
-              <NoticeTab
-                notices={notices}
-                batches={batches}
-                selectedBatch={selectedBatch}
-                setSelectedBatch={setSelectedBatch}
-                onUpdate={fetchData}
-              />
-            )}
-          </>
-        )}
+        {/* Keep all tabs mounted so form state survives tab / browser switches */}
+        <div className={loading || error ? 'hidden' : undefined}>
+          <div className={activeTab !== 'dashboard' ? 'hidden' : undefined} aria-hidden={activeTab !== 'dashboard'}>
+            <DashboardTab
+              stats={stats}
+              batches={batches}
+              students={students}
+              selectedBatch={selectedBatch}
+            />
+          </div>
+          <div className={activeTab !== 'roadmap' ? 'hidden' : undefined} aria-hidden={activeTab !== 'roadmap'}>
+            <RoadmapTab
+              roadmaps={roadmaps}
+              setRoadmaps={setRoadmaps}
+              roadmapData={roadmapData}
+              setRoadmapData={setRoadmapData}
+              selectedRoadmap={selectedRoadmap}
+              setSelectedRoadmap={setSelectedRoadmap}
+              selectedBatch={selectedBatch}
+            />
+          </div>
+          <div className={activeTab !== 'students' ? 'hidden' : undefined} aria-hidden={activeTab !== 'students'}>
+            <StudentsTab
+              students={students}
+              batches={batches}
+              roadmaps={roadmaps}
+              selectedBatch={selectedBatch}
+              setSelectedBatch={setSelectedBatch}
+              onUpdate={() => fetchData({ showLoader: false })}
+            />
+          </div>
+          <div className={activeTab !== 'practice' ? 'hidden' : undefined} aria-hidden={activeTab !== 'practice'}>
+            <PracticeDeckTab
+              onCreateDeck={handleCreateDeck}
+              onEditDeck={handleEditDeck}
+            />
+          </div>
+          <div className={activeTab !== 'notice' ? 'hidden' : undefined} aria-hidden={activeTab !== 'notice'}>
+            <NoticeTab
+              notices={notices}
+              batches={batches}
+              selectedBatch={selectedBatch}
+              setSelectedBatch={setSelectedBatch}
+              onUpdate={() => fetchData({ showLoader: false })}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Deck Editor Modal */}
