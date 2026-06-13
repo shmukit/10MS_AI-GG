@@ -1,3 +1,4 @@
+import { isPartnerEmail } from '../../config/partnerConfig';
 import { supabase } from '../../lib/supabase';
 import { cache, CACHE_TTL } from '../../lib/cache';
 import { Roadmap, RoadmapWeek, RoadmapTask } from '../../types/models';
@@ -45,7 +46,7 @@ export const getEnrolledRoadmaps = async (userId: string): Promise<(Roadmap & { 
 
         // Get user email to determine if this is a company user
         const userData = await getUserById(userId);
-        const isCompanyUser = userData?.email?.includes('@10minuteschool.com') || userData?.email?.includes('@lightcastlepartners.com');
+        const isCompanyUser = isPartnerEmail(userData?.email);
 
         // Get all batches the user is enrolled in
         console.log('🔍 Querying student_batch_assignments for enrolled roadmaps, user:', userId);

@@ -190,21 +190,21 @@ INSERT INTO roadmaps (title, description, total_weeks, difficulty_level, categor
 
 -- Create a sample admin user (password: admin123)
 INSERT INTO users (email, password_hash, role, first_name, last_name, email_verified) VALUES
-('admin@10ms.com', '$2a$10$example_hash_here', 'admin', 'System', 'Admin', true);
+('admin@example.com', '$2a$10$example_hash_here', 'admin', 'System', 'Admin', true);
 
 -- Create a sample mentor user (password: mentor123)
 INSERT INTO users (email, password_hash, role, first_name, last_name, email_verified) VALUES
-('uttam.deb@10minuteschool.com', '$2a$10$example_hash_here', 'mentor', 'Uttam', 'Deb', true);
+('mentor@example.com', '$2a$10$example_hash_here', 'mentor', 'Sample', 'Mentor', true);
 
 -- Create mentor profile
 INSERT INTO mentor_profiles (user_id, organization, designation, expertise_areas, years_of_experience) VALUES
-((SELECT id FROM users WHERE email = 'uttam.deb@10minuteschool.com'), '10 Minute School', 'Senior BI Executive', ARRAY['Python', 'SQL', 'Data Analysis'], 5);
+((SELECT id FROM users WHERE email = 'mentor@example.com'), '10 Minute School', 'Senior BI Executive', ARRAY['Python', 'SQL', 'Data Analysis'], 5);
 
 -- Create a sample batch
 INSERT INTO batches (name, roadmap_id, mentor_id, start_date, status) VALUES
 ('Python Learning Cohort - Batch 15', 
  (SELECT id FROM roadmaps WHERE title = 'Python Fundamentals'),
- (SELECT id FROM users WHERE email = 'uttam.deb@10minuteschool.com'),
+ (SELECT id FROM users WHERE email = 'mentor@example.com'),
  '2025-01-01', 'active');
 
 -- Create sample roadmap weeks

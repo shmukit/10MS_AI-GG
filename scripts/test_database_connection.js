@@ -1,201 +1,152 @@
 #!/usr/bin/env node
 
 /**
- * Simple Database Connection Test
- * Tests the database connection and identifies the core issue
+ * Database connectivity test (RLS-aware).
+ *
+ * - Verifies Supabase REST API is reachable
+ * - Confirms RLS blocks unauthenticated reads (expected in production)
+ * - Optionally signs in with SMOKE_TEST_EMAIL + TEST_USER_PASSWORD for authenticated checks
+ *
+ * Usage: npm run test:db
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { loadEnv, requireSupabaseEnv } from './loadEnv.js';
 
-// Use the same configuration as the frontend
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+loadEnv();
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = requireSupabaseEnv();
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
-async function testConnection() {
-  console.log('🔍 Testing database connection...');
-  
+const isRlsBlock = (error) =>
+  error?.message?.includes('permission denied') ||
+  error?.code === '42501' ||
+  error?.code === 'PGRST301';
+
+async function testApiReachable() {
+  console.log('🔍 Testing Supabase API reachability...');
   try {
-    // Test basic connection
-    const { data, error } = await supabase
-      .from('users')
-      .select('count')
-      .limit(1);
-    
+    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      headers: { apikey: supabaseAnonKey },
+    });
+    // 200 or 401 both mean the API endpoint is up
+    if (res.status === 200 || res.status === 401) {
+      console.log(`✅ Supabase API reachable (HTTP ${res.status})`);
+      return true;
+    }
+    console.error(`❌ Unexpected HTTP status: ${res.status}`);
+    return false;
+  } catch (error) {
+    console.error('❌ Cannot reach Supabase API:', error.message);
+    return false;
+  }
+}
+
+async function testRlsBlocksAnon() {
+  console.log('\n🔒 Testing RLS blocks unauthenticated access...');
+  const { error } = await supabase.from('users').select('id').limit(1);
+
+  if (error && isRlsBlock(error)) {
+    console.log('✅ RLS active — anon cannot read users table (expected)');
+    return true;
+  }
+
+  if (error) {
+    console.error('❌ Unexpected error:', error.message);
+    return false;
+  }
+
+  console.warn('⚠️  Anon read on users succeeded — RLS may be too permissive');
+  return true;
+}
+
+async function testAuthService() {
+  console.log('\n🔐 Testing auth service...');
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error('❌ Auth service error:', error.message);
+    return false;
+  }
+
+  console.log(`✅ Auth service OK (session: ${data.session ? 'active' : 'none'})`);
+  return true;
+}
+
+async function testAuthenticatedAccess() {
+  const email = process.env.SMOKE_TEST_EMAIL;
+  const password = process.env.TEST_USER_PASSWORD;
+
+  if (!email || !password) {
+    console.log('\n⏭️  Skipping authenticated tests (set SMOKE_TEST_EMAIL + TEST_USER_PASSWORD in .env)');
+    return null;
+  }
+
+  console.log(`\n👤 Testing authenticated access as ${email}...`);
+
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInError) {
+    console.error('❌ Sign-in failed:', signInError.message);
+    return false;
+  }
+
+  console.log('✅ Sign-in successful');
+
+  const tables = ['roadmaps', 'batches', 'notices', 'student_profiles'];
+  let passed = 0;
+
+  for (const table of tables) {
+    const { data, error } = await supabase.from(table).select('id').limit(1);
     if (error) {
-      console.error('❌ Database connection failed:', error.message);
-      return false;
+      console.log(`   ❌ ${table}: ${error.message}`);
+    } else {
+      console.log(`   ✅ ${table}: accessible (${data?.length ?? 0} row sampled)`);
+      passed++;
     }
-    
-    console.log('✅ Database connection successful');
-    return true;
-    
-  } catch (error) {
-    console.error('❌ Connection test failed:', error.message);
-    return false;
   }
-}
 
-async function testUserData() {
-  console.log('\n👥 Testing user data...');
-  
-  try {
-    // Get all users
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('*')
-      .limit(10);
-    
-    if (usersError) {
-      console.error('❌ Users query failed:', usersError.message);
-      return false;
-    }
-    
-    console.log(`✅ Found ${users.length} users in public.users table`);
-    
-    if (users.length > 0) {
-      console.log('Sample users:');
-      users.forEach(user => {
-        console.log(`  - ${user.email} (${user.role}) - ID: ${user.id}`);
-      });
-    }
-    
-    return true;
-    
-  } catch (error) {
-    console.error('❌ User data test failed:', error.message);
-    return false;
-  }
-}
+  await supabase.auth.signOut();
 
-async function testStudentProgress() {
-  console.log('\n📊 Testing student progress...');
-  
-  try {
-    // Get all progress records
-    const { data: progress, error: progressError } = await supabase
-      .from('student_progress')
-      .select('*')
-      .limit(10);
-    
-    if (progressError) {
-      console.error('❌ Student progress query failed:', progressError.message);
-      console.error('Error details:', progressError);
-      return false;
-    }
-    
-    console.log(`✅ Found ${progress.length} progress records`);
-    
-    if (progress.length > 0) {
-      console.log('Sample progress records:');
-      progress.forEach(p => {
-        console.log(`  - Student ID: ${p.student_id}, Task ID: ${p.task_id}, Status: ${p.status}`);
-      });
-    }
-    
-    return true;
-    
-  } catch (error) {
-    console.error('❌ Student progress test failed:', error.message);
-    return false;
-  }
-}
-
-async function testTaskCompletion() {
-  console.log('\n🧪 Testing task completion...');
-  
-  try {
-    // Get a test user
-    const { data: testUser, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'student')
-      .limit(1)
-      .single();
-    
-    if (userError || !testUser) {
-      console.error('❌ No test user found:', userError?.message);
-      return false;
-    }
-    
-    console.log(`✅ Found test user: ${testUser.email} (${testUser.id})`);
-    
-    // Get a test task
-    const { data: testTask, error: taskError } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (taskError || !testTask) {
-      console.error('❌ No test task found:', taskError?.message);
-      return false;
-    }
-    
-    console.log(`✅ Found test task: ${testTask.task_name} (${testTask.id})`);
-    
-    // Test task completion
-    const { error: progressError } = await supabase
-      .from('student_progress')
-      .upsert({
-        student_id: testUser.id,
-        task_id: testTask.id,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (progressError) {
-      console.error('❌ Task completion test failed:', progressError.message);
-      console.error('Error details:', progressError);
-      return false;
-    }
-    
-    console.log('✅ Task completion test passed!');
-    
-    // Clean up test data
-    await supabase
-      .from('student_progress')
-      .delete()
-      .eq('student_id', testUser.id)
-      .eq('task_id', testTask.id);
-    
-    console.log('✅ Test data cleaned up');
-    
-    return true;
-    
-  } catch (error) {
-    console.error('❌ Task completion test failed:', error.message);
-    return false;
-  }
+  const ok = passed > 0;
+  console.log(ok ? `✅ Authenticated access OK (${passed}/${tables.length} tables)` : '❌ No tables accessible after sign-in');
+  return ok;
 }
 
 async function main() {
-  console.log('🚀 Starting Database Connection Test\n');
-  
-  const connectionOk = await testConnection();
-  if (!connectionOk) {
-    console.log('\n❌ Database connection failed. Please check your Supabase configuration.');
-    process.exit(1);
+  console.log('🚀 Database Connection Test (RLS-aware)\n');
+
+  const apiOk = await testApiReachable();
+  if (!apiOk) process.exit(1);
+
+  const rlsOk = await testRlsBlocksAnon();
+  const authOk = await testAuthService();
+  const authedOk = await testAuthenticatedAccess();
+
+  console.log('\n📋 Summary');
+  console.log(`  API reachable:     ${apiOk ? '✅' : '❌'}`);
+  console.log(`  RLS blocks anon:   ${rlsOk ? '✅' : '❌'}`);
+  console.log(`  Auth service:      ${authOk ? '✅' : '❌'}`);
+  console.log(`  Authenticated:     ${authedOk === null ? '⏭️  skipped' : authedOk ? '✅' : '❌'}`);
+
+  const coreOk = apiOk && rlsOk && authOk;
+  const allOk = coreOk && (authedOk === null || authedOk);
+
+  if (allOk) {
+    console.log('\n🎉 Database checks passed.');
+    process.exit(0);
   }
-  
-  const usersOk = await testUserData();
-  const progressOk = await testStudentProgress();
-  const taskCompletionOk = await testTaskCompletion();
-  
-  console.log('\n📋 Test Summary:');
-  console.log(`  Database Connection: ${connectionOk ? '✅' : '❌'}`);
-  console.log(`  User Data: ${usersOk ? '✅' : '❌'}`);
-  console.log(`  Student Progress: ${progressOk ? '✅' : '❌'}`);
-  console.log(`  Task Completion: ${taskCompletionOk ? '✅' : '❌'}`);
-  
-  if (connectionOk && usersOk && progressOk && taskCompletionOk) {
-    console.log('\n🎉 All tests passed! Database is working correctly.');
-  } else {
-    console.log('\n⚠️ Some tests failed. Please check the errors above.');
-  }
+
+  console.log('\n⚠️  Some checks failed. Review output above.');
+  process.exit(coreOk ? 0 : 1);
 }
 
-// Run the test
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

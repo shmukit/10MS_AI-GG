@@ -4,7 +4,8 @@ FROM node:20.19.2 AS builder
 ARG AWS_DEFAULT_REGION
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-RUN echo $AWS_SECRET_ACCESS_KEY
+ARG SSM_PARAM_NAME
+ARG AWS_SSM_REGION=ap-southeast-1
 
 # Set working directory
 WORKDIR /app
@@ -26,10 +27,10 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-RUN if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then \
-    aws ssm get-parameters --output text --region ap-southeast-1 --names prod-tenms-ai-gg --with-decryption --query Parameters[0].Value > .env; \
+RUN if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ] && [ -n "$SSM_PARAM_NAME" ]; then \
+    aws ssm get-parameters --output text --region $AWS_SSM_REGION --names $SSM_PARAM_NAME --with-decryption --query Parameters[0].Value > .env; \
     else \
-    echo "Skipping AWS SSM fetch: AWS credentials not provided. Using local .env if available."; \
+    echo "Skipping AWS SSM fetch: credentials or SSM_PARAM_NAME not provided. Using local .env if available."; \
     fi
 
 # Build the app

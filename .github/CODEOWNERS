@@ -1,0 +1,19 @@
+# Default owners for all files
+* @tenminschool
+
+# Frontend application
+/src/components/ @tenminschool
+/src/lib/ @tenminschool
+
+# Database services and migrations
+/src/services/db/ @tenminschool
+/sql/ @tenminschool
+
+# CI/CD and deployment
+/.github/workflows/ @tenminschool
+/dockerfile @tenminschool
+/docker/ @tenminschool
+
+# Governance and security
+/SECURITY.md @tenminschool
+/.gitleaks.toml @tenminschool

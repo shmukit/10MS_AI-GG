@@ -23,3 +23,21 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+!.env.example
+
+# Build artifacts
+.vite/
+dist/
+
+# Credentials
+*.pem
+service-account*.json
+
+# Archive directories — contain PII/operational data, never commit
+# These folders may exist locally for reference but must not be pushed
+sql/archive/
+scripts/archive/
+
+# Internal design system skill — local maintainer tooling only, not for public repo
+docs/10ms-design-skill/

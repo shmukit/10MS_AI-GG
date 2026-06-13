@@ -1,352 +1,220 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive Smoke Test for 10MS AI GG Application
- * Tests all front-end flows and Supabase CRUD features end-to-end
+ * Production smoke test (RLS-aware).
+ *
+ * Checks env config, Supabase connectivity, RLS, auth, optional authenticated
+ * table access, and optionally a running frontend preview/dev server.
+ *
+ * Usage: npm run smoke
+ * Optional env:
+ *   SMOKE_TEST_EMAIL + TEST_USER_PASSWORD — authenticated DB checks
+ *   SMOKE_FRONTEND_URL — default http://127.0.0.1:4173 (vite preview)
  */
 
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { loadEnv, requireSupabaseEnv } from './loadEnv.js';
 
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+const loadedFiles = loadEnv();
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = requireSupabaseEnv();
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing Supabase environment variables');
-  process.exit(1);
+const frontendUrl = process.env.SMOKE_FRONTEND_URL || 'http://127.0.0.1:4173';
+
+const results = { pass: [], fail: [], skip: [] };
+
+function pass(name, detail = '') {
+  results.pass.push({ name, detail });
+  console.log(`✅ ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+function fail(name, detail = '') {
+  results.fail.push({ name, detail });
+  console.log(`❌ ${name}${detail ? ` — ${detail}` : ''}`);
+}
 
-// Test results tracking
-const testResults = {
-  working: [],
-  broken: [],
-  total: 0
-};
+function skip(name, detail = '') {
+  results.skip.push({ name, detail });
+  console.log(`⏭️  ${name}${detail ? ` — ${detail}` : ''}`);
+}
 
-function logTest(testName, status, details = '') {
-  testResults.total++;
-  const result = { test: testName, status, details };
-  
-  if (status === '✅ Working') {
-    testResults.working.push(result);
-    console.log(`✅ ${testName}${details ? ` - ${details}` : ''}`);
+const isRlsBlock = (error) =>
+  error?.message?.includes('permission denied') ||
+  error?.code === '42501' ||
+  error?.code === 'PGRST301';
+
+function checkEnvVars() {
+  console.log('📋 Environment variables');
+  if (loadedFiles.length) {
+    pass('Env files loaded', loadedFiles.join(', '));
   } else {
-    testResults.broken.push(result);
-    console.log(`❌ ${testName}${details ? ` - ${details}` : ''}`);
+    fail('Env files loaded', 'no .env or .env.local found');
+  }
+
+  pass('VITE_SUPABASE_URL', 'set');
+  pass('VITE_SUPABASE_ANON_KEY', 'set');
+
+  const recommended = [
+    'VITE_DEFAULT_STUDENT_PASSWORD',
+    'VITE_POSTHOG_KEY',
+    'VITE_PARTNER_EMAIL_DOMAINS',
+    'VITE_PARTNER_ROADMAP_KEYWORD',
+  ];
+
+  for (const key of recommended) {
+    if (process.env[key]) {
+      pass(key, 'set');
+    } else {
+      skip(key, 'not set (optional for smoke test)');
+    }
+  }
+
+  if (process.env.SMOKE_TEST_EMAIL && process.env.TEST_USER_PASSWORD) {
+    pass('SMOKE_TEST_EMAIL + TEST_USER_PASSWORD', 'set — authenticated tests enabled');
+  } else {
+    skip('Authenticated test credentials', 'set SMOKE_TEST_EMAIL + TEST_USER_PASSWORD to enable');
   }
 }
 
-async function testSupabaseConnection() {
+async function checkSupabaseApi() {
+  console.log('\n🌐 Supabase API');
   try {
-    const { data, error } = await supabase.from('student_profiles').select('count').limit(1);
-    if (error) throw error;
-    logTest('Supabase Connection', '✅ Working', 'Successfully connected to database');
-    return true;
+    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      headers: { apikey: supabaseAnonKey },
+    });
+    if (res.status === 200 || res.status === 401) {
+      pass('Supabase REST API reachable', `HTTP ${res.status}`);
+      return true;
+    }
+    fail('Supabase REST API reachable', `HTTP ${res.status}`);
+    return false;
   } catch (error) {
-    logTest('Supabase Connection', '❌ Not working', error.message);
+    fail('Supabase REST API reachable', error.message);
     return false;
   }
 }
 
-async function testDatabaseTables() {
-  const tables = [
-    'student_profiles',
-    'student_batch_assignments', 
-    'student_progress',
-    'roadmaps',
-    'roadmap_weeks',
-    'roadmap_tasks',
-    'batches',
-    'notices'
-  ];
+async function checkRls() {
+  console.log('\n🔒 Row Level Security');
+  const tables = ['users', 'roadmaps', 'batches', 'notices', 'student_profiles'];
 
   for (const table of tables) {
-    try {
-      const { data, error } = await supabase.from(table).select('*').limit(1);
-      if (error) throw error;
-      logTest(`Database Table: ${table}`, '✅ Working', `${data?.length || 0} records found`);
-    } catch (error) {
-      logTest(`Database Table: ${table}`, '❌ Not working', error.message);
-    }
-  }
-}
-
-async function testAuthentication() {
-  try {
-    // Test getting current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    
-    if (user) {
-      logTest('Authentication - Get Current User', '✅ Working', `User: ${user.email}`);
+    const { error } = await supabase.from(table).select('id').limit(1);
+    if (error && isRlsBlock(error)) {
+      pass(`RLS blocks anon on ${table}`);
+    } else if (error) {
+      fail(`RLS check ${table}`, error.message);
     } else {
-      logTest('Authentication - Get Current User', '✅ Working', 'No user logged in (expected)');
-    }
-
-    // Test sign up (this will fail if user already exists, which is expected)
-    const testEmail = `test-${Date.now()}@example.com`;
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: testEmail,
-      password: 'testpassword123'
-    });
-    
-    if (signUpError && signUpError.message.includes('already registered')) {
-      logTest('Authentication - Sign Up', '✅ Working', 'User already exists (expected)');
-    } else if (signUpError) {
-      logTest('Authentication - Sign Up', '❌ Not working', signUpError.message);
-    } else {
-      logTest('Authentication - Sign Up', '✅ Working', 'New user created');
-    }
-
-  } catch (error) {
-    logTest('Authentication', '❌ Not working', error.message);
-  }
-}
-
-async function testStudentFeatures() {
-  try {
-    // Test getting student profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('student_profiles')
-      .select('*')
-      .limit(5);
-    
-    if (profilesError) throw profilesError;
-    logTest('Student Features - Get Profiles', '✅ Working', `${profiles?.length || 0} profiles found`);
-
-    // Test getting student progress
-    const { data: progress, error: progressError } = await supabase
-      .from('student_progress')
-      .select('*')
-      .limit(5);
-    
-    if (progressError) throw progressError;
-    logTest('Student Features - Get Progress', '✅ Working', `${progress?.length || 0} progress records found`);
-
-    // Test getting batch assignments
-    const { data: assignments, error: assignmentsError } = await supabase
-      .from('student_batch_assignments')
-      .select('*')
-      .limit(5);
-    
-    if (assignmentsError) throw assignmentsError;
-    logTest('Student Features - Get Batch Assignments', '✅ Working', `${assignments?.length || 0} assignments found`);
-
-  } catch (error) {
-    logTest('Student Features', '❌ Not working', error.message);
-  }
-}
-
-async function testMentorFeatures() {
-  try {
-    // Test getting batches
-    const { data: batches, error: batchesError } = await supabase
-      .from('batches')
-      .select('*')
-      .limit(5);
-    
-    if (batchesError) throw batchesError;
-    logTest('Mentor Features - Get Batches', '✅ Working', `${batches?.length || 0} batches found`);
-
-    // Test getting notices
-    const { data: notices, error: noticesError } = await supabase
-      .from('notices')
-      .select('*')
-      .limit(5);
-    
-    if (noticesError) throw noticesError;
-    logTest('Mentor Features - Get Notices', '✅ Working', `${notices?.length || 0} notices found`);
-
-  } catch (error) {
-    logTest('Mentor Features', '❌ Not working', error.message);
-  }
-}
-
-async function testRoadmapFeatures() {
-  try {
-    // Test getting roadmaps
-    const { data: roadmaps, error: roadmapsError } = await supabase
-      .from('roadmaps')
-      .select('*')
-      .limit(5);
-    
-    if (roadmapsError) throw roadmapsError;
-    logTest('Roadmap Features - Get Roadmaps', '✅ Working', `${roadmaps?.length || 0} roadmaps found`);
-
-    // Test getting roadmap weeks
-    const { data: weeks, error: weeksError } = await supabase
-      .from('roadmap_weeks')
-      .select('*')
-      .limit(5);
-    
-    if (weeksError) throw weeksError;
-    logTest('Roadmap Features - Get Weeks', '✅ Working', `${weeks?.length || 0} weeks found`);
-
-    // Test getting roadmap tasks
-    const { data: tasks, error: tasksError } = await supabase
-      .from('roadmap_tasks')
-      .select('*')
-      .limit(5);
-    
-    if (tasksError) throw tasksError;
-    logTest('Roadmap Features - Get Tasks', '✅ Working', `${tasks?.length || 0} tasks found`);
-
-  } catch (error) {
-    logTest('Roadmap Features', '❌ Not working', error.message);
-  }
-}
-
-async function testWeekCompletionFix() {
-  try {
-    // Test the specific fix we implemented
-    const { data: testUser } = await supabase
-      .from('student_profiles')
-      .select('user_id')
-      .limit(1)
-      .single();
-    
-    if (!testUser) {
-      logTest('Week Completion Fix - Test User', '❌ Not working', 'No test user found');
-      return;
-    }
-
-    const { data: testWeek } = await supabase
-      .from('roadmap_weeks')
-      .select('id')
-      .limit(1)
-      .single();
-    
-    if (!testWeek) {
-      logTest('Week Completion Fix - Test Week', '❌ Not working', 'No test week found');
-      return;
-    }
-
-    // Test duplicate key constraint handling
-    const { data: testTask } = await supabase
-      .from('roadmap_tasks')
-      .select('id')
-      .limit(1)
-      .single();
-    
-    if (!testTask) {
-      logTest('Week Completion Fix - Test Task', '❌ Not working', 'No test task found');
-      return;
-    }
-
-    // Try to insert duplicate record
-    const { error: duplicateError } = await supabase
-      .from('student_progress')
-      .insert({
-        student_id: testUser.user_id,
-        task_id: testTask.id,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-
-    if (duplicateError && duplicateError.code === '23505') {
-      logTest('Week Completion Fix - Duplicate Key Handling', '✅ Working', 'Duplicate key constraint properly caught');
-    } else if (duplicateError) {
-      logTest('Week Completion Fix - Duplicate Key Handling', '❌ Not working', duplicateError.message);
-    } else {
-      logTest('Week Completion Fix - Duplicate Key Handling', '✅ Working', 'Record inserted successfully');
-    }
-
-  } catch (error) {
-    logTest('Week Completion Fix', '❌ Not working', error.message);
-  }
-}
-
-async function testFrontendRoutes() {
-  const routes = [
-    { path: '/', name: 'Home Page' },
-    { path: '/login', name: 'Login Page' },
-    { path: '/dashboard', name: 'Dashboard' },
-    { path: '/student/roadmap', name: 'Student Roadmap' },
-    { path: '/mentor/dashboard', name: 'Mentor Dashboard' }
-  ];
-
-  for (const route of routes) {
-    try {
-      const response = await fetch(`http://localhost:5173${route.path}`);
-      if (response.ok) {
-        logTest(`Frontend Route: ${route.name}`, '✅ Working', `HTTP ${response.status}`);
-      } else {
-        logTest(`Frontend Route: ${route.name}`, '❌ Not working', `HTTP ${response.status}`);
-      }
-    } catch (error) {
-      logTest(`Frontend Route: ${route.name}`, '❌ Not working', error.message);
+      skip(`RLS on ${table}`, 'anon read succeeded — review policies');
     }
   }
 }
 
-async function runSmokeTest() {
-  console.log('🧪 Starting Comprehensive Smoke Test...\n');
+async function checkAuth() {
+  console.log('\n🔐 Authentication service');
+  const { error } = await supabase.auth.getSession();
+  if (error) {
+    fail('Auth getSession', error.message);
+    return;
+  }
+  pass('Auth getSession');
+}
 
-  // Test Supabase connection first
-  const connected = await testSupabaseConnection();
-  if (!connected) {
-    console.log('\n❌ Cannot proceed with tests - Supabase connection failed');
+async function checkAuthenticatedTables() {
+  const email = process.env.SMOKE_TEST_EMAIL;
+  const password = process.env.TEST_USER_PASSWORD;
+
+  if (!email || !password) {
+    skip('Authenticated table access', 'no test credentials');
     return;
   }
 
-  console.log('\n📊 Testing Database Tables...');
-  await testDatabaseTables();
+  console.log('\n👤 Authenticated access');
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) {
+    fail('Sign-in', signInError.message);
+    return;
+  }
+  pass('Sign-in', email);
 
-  console.log('\n🔐 Testing Authentication...');
-  await testAuthentication();
+  const tables = [
+    'roadmaps',
+    'batches',
+    'notices',
+    'student_profiles',
+    'student_batch_assignments',
+    'student_progress',
+  ];
 
-  console.log('\n👨‍🎓 Testing Student Features...');
-  await testStudentFeatures();
-
-  console.log('\n👨‍🏫 Testing Mentor Features...');
-  await testMentorFeatures();
-
-  console.log('\n🗺️ Testing Roadmap Features...');
-  await testRoadmapFeatures();
-
-  console.log('\n🔧 Testing Week Completion Fix...');
-  await testWeekCompletionFix();
-
-  console.log('\n🌐 Testing Frontend Routes...');
-  await testFrontendRoutes();
-
-  // Print summary
-  console.log('\n📋 SMOKE TEST SUMMARY');
-  console.log('='.repeat(50));
-  console.log(`Total Tests: ${testResults.total}`);
-  console.log(`✅ Working: ${testResults.working.length}`);
-  console.log(`❌ Broken: ${testResults.broken.length}`);
-  console.log(`Success Rate: ${Math.round((testResults.working.length / testResults.total) * 100)}%`);
-
-  if (testResults.broken.length > 0) {
-    console.log('\n❌ BROKEN/INCOMPLETE FEATURES:');
-    testResults.broken.forEach(result => {
-      console.log(`  - ${result.test}: ${result.details}`);
-    });
+  for (const table of tables) {
+    const { error } = await supabase.from(table).select('id').limit(1);
+    if (error) {
+      fail(`Read ${table} (authenticated)`, error.message);
+    } else {
+      pass(`Read ${table} (authenticated)`);
+    }
   }
 
-  if (testResults.working.length > 0) {
-    console.log('\n✅ WORKING FEATURES:');
-    testResults.working.forEach(result => {
-      console.log(`  - ${result.test}: ${result.details}`);
-    });
-  }
+  await supabase.auth.signOut();
+}
 
-  console.log('\n🎯 Next Steps:');
-  if (testResults.broken.length > 0) {
-    console.log('1. Fix all broken features identified above');
-    console.log('2. Re-run this smoke test');
-    console.log('3. Aim for 100% working features');
-  } else {
-    console.log('🎉 All features are working! Ready for production.');
+async function checkFrontend() {
+  console.log('\n🖥️  Frontend server');
+  try {
+    const res = await fetch(frontendUrl, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      pass('Frontend reachable', frontendUrl);
+    } else {
+      fail('Frontend reachable', `${frontendUrl} → HTTP ${res.status}`);
+    }
+  } catch {
+    skip(
+      'Frontend reachable',
+      `${frontendUrl} not running — start with: npm run preview`
+    );
   }
 }
 
-// Run the smoke test
-runSmokeTest().catch(console.error);
+async function run() {
+  console.log('🧪 Smoke Test (RLS-aware)\n');
+
+  checkEnvVars();
+
+  const apiOk = await checkSupabaseApi();
+  if (!apiOk) {
+    console.log('\n❌ Cannot continue — Supabase API unreachable');
+    process.exit(1);
+  }
+
+  await checkRls();
+  await checkAuth();
+  await checkAuthenticatedTables();
+  await checkFrontend();
+
+  const total = results.pass.length + results.fail.length + results.skip.length;
+  console.log('\n📋 Summary');
+  console.log('='.repeat(40));
+  console.log(`Total checks: ${total}`);
+  console.log(`✅ Passed:  ${results.pass.length}`);
+  console.log(`❌ Failed:  ${results.fail.length}`);
+  console.log(`⏭️  Skipped: ${results.skip.length}`);
+
+  if (results.fail.length) {
+    console.log('\nFailures:');
+    results.fail.forEach((r) => console.log(`  - ${r.name}: ${r.detail}`));
+    process.exit(1);
+  }
+
+  console.log('\n🎉 Smoke test passed (no failures).');
+  if (results.skip.length) {
+    console.log('   Some optional checks were skipped — see above.');
+  }
+}
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -156,7 +156,7 @@ CREATE TABLE batches (
 ## Testing the Fixes
 
 ### 1. Test User Registration
-- Register a new user with email `mukit@10minuteschool.com`
+- Register a new user with email `student@example.com`
 - Verify the user is automatically assigned a student profile
 - Check that the user is assigned to an available batch
 

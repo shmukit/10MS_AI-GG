@@ -1,3 +1,4 @@
+import { isPartnerEmail, partnerConfig } from '../../config/partnerConfig';
 import { supabase } from '../../lib/supabase';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../../lib/cache';
 import {
@@ -54,7 +55,7 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
             getUserById(userId)
         ]);
 
-        const isCompanyUser = userData?.email?.includes('@10minuteschool.com') || userData?.email?.includes('@lightcastlepartners.com');
+        const isCompanyUser = isPartnerEmail(userData?.email);
 
         // Determine effective batch and roadmap
         let batch: (Batch & { roadmap?: any }) | null = null;
@@ -75,10 +76,13 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
             if (enrolledBatches.length > 0) {
                 // Apply prioritization logic for company users
                 if (isCompanyUser && enrolledBatches.length > 1) {
-                    const augmedixBatch = enrolledBatches.find(b =>
-                        b.name?.toLowerCase().includes('augmedix') ||
-                        b.roadmap?.title?.toLowerCase().includes('augmedix')
-                    );
+                    const keyword = partnerConfig.roadmapKeyword;
+                    const augmedixBatch = keyword
+                        ? enrolledBatches.find(b =>
+                            b.name?.toLowerCase().includes(keyword) ||
+                            b.roadmap?.title?.toLowerCase().includes(keyword)
+                        )
+                        : undefined;
 
                     const aiMlBatch = enrolledBatches.find(b =>
                         b.roadmap?.title?.toLowerCase().includes('ai') ||

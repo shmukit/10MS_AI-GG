@@ -1,7 +1,18 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "10ms-shestem-ai-gg",
+  "description": "AI-enabled group guidance platform for mentors and students, built with React, TypeScript, and Supabase.",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
+  "license": "MIT",
+  "author": "10 Minute School <tech@10minuteschool.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tenminschool/10MS_AI-GG.git"
+  },
+  "homepage": "https://github.com/tenminschool/10MS_AI-GG#readme",
+  "bugs": {
+    "url": "https://github.com/tenminschool/10MS_AI-GG/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +22,8 @@
     "build:prod": "vite build --mode production",
     "build:staging": "vite build --mode staging",
     "deploy:check": "node -e \"console.log('Environment check:', require('./scripts/deployment.config.js').getConfig())\"",
+    "test:db": "node scripts/test_database_connection.js",
+    "smoke": "node scripts/smoke_test.js",
     "start": "vite preview --port 3000 --host 0.0.0.0"
   },
   "dependencies": {

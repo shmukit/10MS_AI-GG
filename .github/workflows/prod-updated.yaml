@@ -7,6 +7,10 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
+  DEPLOY_IMAGE_NAME: tenms-ai-gg
+  SSM_PARAM_NAME: prod-tenms-ai-gg
+  K8S_DEPLOYMENT_NAME: tenms-ai-gg
+  K8S_CONTAINER_NAME: tenms-ai-gg
 
 jobs:
   build-and-deploy:
@@ -42,19 +46,22 @@ jobs:
         if: github.repository == 'tenminschool/10MS_AI-GG'
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
-          SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+          IMAGE_NAME: ${{ env.DEPLOY_IMAGE_NAME }}
+          SSM_PARAM_NAME: ${{ env.SSM_PARAM_NAME }}
           IMAGE_TAG: ${{ steps.vars.outputs.tag }}
         run: |
           echo "Building Docker image..."
-          docker build . --file dockerfile -t $ECR_REGISTRY/tenms-ai-gg:$IMAGE_TAG \
+          docker build . --file dockerfile -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
             --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
             --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            --build-arg AWS_DEFAULT_REGION=${{ env.AWS_REGION }}
+            --build-arg AWS_DEFAULT_REGION=${{ env.AWS_REGION }} \
+            --build-arg SSM_PARAM_NAME=$SSM_PARAM_NAME \
+            --build-arg AWS_SSM_REGION=${{ env.AWS_REGION }}
           
           echo "Pushing Docker image to ECR..."
-          docker push $ECR_REGISTRY/tenms-ai-gg:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
           
-          echo "Image pushed: $ECR_REGISTRY/tenms-ai-gg:$IMAGE_TAG"
+          echo "Image pushed: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -71,12 +78,15 @@ jobs:
         if: github.repository == 'tenminschool/10MS_AI-GG'
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          IMAGE_NAME: ${{ env.DEPLOY_IMAGE_NAME }}
+          DEPLOYMENT_NAME: ${{ env.K8S_DEPLOYMENT_NAME }}
+          CONTAINER_NAME: ${{ env.K8S_CONTAINER_NAME }}
           IMAGE_TAG: ${{ steps.vars.outputs.tag }}
         run: |
           echo "Deploying to AKS cluster..."
-          kubectl set image --record deployment/tenms-ai-gg tenms-ai-gg=$ECR_REGISTRY/tenms-ai-gg:$IMAGE_TAG
+          kubectl set image --record deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
           
           echo "Checking deployment status..."
-          kubectl rollout status deployment/tenms-ai-gg
+          kubectl rollout status deployment/$DEPLOYMENT_NAME
           
           echo "Deployment completed successfully!"
