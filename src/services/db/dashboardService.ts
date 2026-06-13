@@ -184,32 +184,26 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         let weekStreaks: { week: number; status: 'done' | 'current' | 'incomplete'; completion: number }[] = [];
 
         if (effectiveRoadmap) {
-            // Use roadmap data if available
-            weekStreaks = Array.from({ length: effectiveRoadmap.total_weeks }, (_, i) => {
+            const completedWeeks = profile?.completed_weeks || 0;
+            const totalWeeks = effectiveRoadmap.total_weeks;
+
+            weekStreaks = Array.from({ length: totalWeeks }, (_, i) => {
                 const weekNumber = i + 1;
-
-                // Get completed tasks for this week
-                const weekProgress = progress.filter(p => {
-                    // Map task_id to week number (you may need to adjust this logic based on your data structure)
-                    // For now, we'll use a simple calculation
-                    return p.status === 'completed';
-                });
-
-                // Calculate completion percentage for the week
-                const weekCompletion = weekProgress.length > 0 ?
-                    (weekProgress.filter(p => p.status === 'completed').length / weekProgress.length) * 100 : 0;
-
                 let status: 'done' | 'current' | 'incomplete';
 
-                if (weekCompletion >= 80) {
+                if (weekNumber <= completedWeeks) {
                     status = 'done';
-                } else if (weekNumber === Math.ceil((profile?.completed_weeks || 0) + 1)) {
+                } else if (weekNumber === completedWeeks + 1 && completedWeeks < totalWeeks) {
                     status = 'current';
                 } else {
                     status = 'incomplete';
                 }
 
-                return { week: weekNumber, status, completion: weekCompletion };
+                return {
+                    week: weekNumber,
+                    status,
+                    completion: weekNumber <= completedWeeks ? 100 : weekNumber === completedWeeks + 1 ? 50 : 0,
+                };
             });
         } else {
             // Fallback: Create default 6 weeks without status data

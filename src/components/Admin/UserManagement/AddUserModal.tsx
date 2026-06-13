@@ -103,10 +103,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Add New User</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+            <div className="bg-card rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                    <h2 className="text-lg font-semibold text-foreground">Add New User</h2>
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -119,7 +119,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                     )}
 
                     {existingUser && (
-                        <div className={`p-3 text-sm rounded-lg border ${existingUser.role === formData.role ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                        <div className={`p-3 text-sm rounded-lg border ${existingUser.role === formData.role ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-primary/10 text-primary border-primary/30'}`}>
                             User exists: <strong>{existingUser.first_name} {existingUser.last_name}</strong>
                             <br />
                             Current Role: <span className="capitalize font-bold">{existingUser.role}</span>
@@ -133,61 +133,61 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+                            <label className="block text-sm font-medium text-foreground mb-1">First Name</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.firstName}
                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50"
+                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 disabled:opacity-50"
                                 disabled={!!existingUser}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+                            <label className="block text-sm font-medium text-foreground mb-1">Last Name</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.lastName}
                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50"
+                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 disabled:opacity-50"
                                 disabled={!!existingUser}
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
                         <input
                             type="email"
                             required
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             onBlur={() => checkEmail(formData.email)}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                         />
                     </div>
 
                     {!existingUser && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password</label>
+                            <label className="block text-sm font-medium text-foreground mb-1">Temporary Password</label>
                             <input
                                 type="text"
                                 required={!existingUser}
                                 minLength={6}
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                             />
                         </div>
                     )}
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Role</label>
                         <select
                             value={formData.role}
                             onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                         >
                             <option value="mentor">Mentor</option>
                             <option value="admin">Admin</option>
@@ -199,14 +199,14 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium border border-gray-200 dark:border-gray-600"
+                            className="flex-1 px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-colors font-medium border border-border"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading || (existingUser ? existingUser.role === formData.role : false)}
-                            className={`flex-1 px-4 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 ${existingUser && existingUser.role === formData.role ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            className={`flex-1 px-4 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 ${existingUser && existingUser.role === formData.role ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
                         >
                             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                             {existingUser ? 'Update Role' : 'Create User'}

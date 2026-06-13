@@ -3,7 +3,6 @@ import { Plus, Users, RefreshCw } from 'lucide-react';
 import { Batch } from '../../../../types/mentor';
 
 interface BatchHeaderProps {
-    isDarkMode: boolean;
     selectedBatch: string;
     setSelectedBatch: (id: string) => void;
     batches: Batch[];
@@ -17,7 +16,6 @@ interface BatchHeaderProps {
 }
 
 export const BatchHeader: React.FC<BatchHeaderProps> = ({
-    isDarkMode,
     selectedBatch,
     setSelectedBatch,
     batches,
@@ -32,16 +30,13 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
     return (
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex items-center gap-4">
-                <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className="text-lg font-bold text-foreground transition-colors duration-200">
                     Batch & Students Management
                 </h3>
                 <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className={`px-3 py-2 rounded-lg border transition-colors ${isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                    className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground transition-colors"
                 >
                     {batches.map(batch => (
                         <option key={batch.id} value={batch.id}>{batch.name}</option>
@@ -52,7 +47,7 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                 {(userRole === 'admin' || userRole === 'mentor') && (
                     <button
                         onClick={() => setIsAddingBatch(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         New Batch
@@ -62,7 +57,7 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                     <>
                         <button
                             onClick={() => setIsAddingStudent(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             Add Student
@@ -72,7 +67,7 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                                 setIsAssigningStudents(true);
                                 await loadAvailableStudents();
                             }}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                         >
                             <Users className="w-4 h-4" />
                             Assign Students
@@ -82,10 +77,8 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                                 onClick={onSyncProgress}
                                 disabled={isSyncingProgress}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isSyncingProgress
-                                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                                    : isDarkMode
-                                        ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                    ? 'bg-muted cursor-not-allowed text-muted-foreground'
+                                    : 'bg-amber-500 hover:bg-amber-600 text-white'
                                     }`}
                                 title="Sync progress from completed tasks - fixes stale 0% display"
                             >

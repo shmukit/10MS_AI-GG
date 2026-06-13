@@ -16,12 +16,9 @@ import { Batch, Student, RoadmapItem, Notice } from '../../types/mentor';
 interface MentorDashboardProps {
   onLogout?: () => void;
   onProfile?: () => void;
-  isDarkMode?: boolean;
 }
 
-export const MentorDashboard: React.FC<MentorDashboardProps> = ({
-  isDarkMode = false,
-}) => {
+export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice'>('dashboard');
 
@@ -309,16 +306,14 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const stats = getDashboardStats();
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Header */}
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
       <MentorHeader
         userName={user?.user_metadata?.first_name || 'Mentor'}
         userRole="mentor"
         pageTitle="Mentor Dashboard"
       />
 
-      {/* Navigation Tabs */}
-      <div className={`border-b h-16 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+      <div className="border-b border-border h-16 bg-card">
         <div className="max-w-6xl mx-auto px-6 h-full overflow-x-auto custom-scrollbar">
           <div className="flex space-x-8 h-full items-center min-w-max">
             {[
@@ -332,10 +327,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 key={id}
                 onClick={() => setActiveTab(id as any)}
                 className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${activeTab === id
-                  ? isDarkMode ? 'border-blue-400 text-blue-400' : 'border-blue-500 text-blue-600'
-                  : `border-transparent ${isDarkMode ? 'text-gray-100 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
-                style={isDarkMode && activeTab !== id ? { color: '#f3f4f6' } : {}}
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -364,12 +358,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
         {error && (
           <div className="text-center py-8">
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded mb-4">
               <strong>Error:</strong> {error}
             </div>
             <button
               onClick={fetchData}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg"
             >
               Retry
             </button>
@@ -383,7 +377,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 stats={stats}
                 batches={batches}
                 students={students}
-                isDarkMode={isDarkMode}
                 selectedBatch={selectedBatch}
               />
             )}
@@ -395,7 +388,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 setRoadmapData={setRoadmapData}
                 selectedRoadmap={selectedRoadmap}
                 setSelectedRoadmap={setSelectedRoadmap}
-                isDarkMode={isDarkMode}
                 selectedBatch={selectedBatch}
               />
             )}
@@ -406,13 +398,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 roadmaps={roadmaps}
                 selectedBatch={selectedBatch}
                 setSelectedBatch={setSelectedBatch}
-                isDarkMode={isDarkMode}
                 onUpdate={fetchData}
               />
             )}
             {activeTab === 'practice' && (
               <PracticeDeckTab
-                isDarkMode={isDarkMode}
                 onCreateDeck={handleCreateDeck}
                 onEditDeck={handleEditDeck}
                 // Add key to force remount when editor closes to refresh list?
@@ -427,7 +417,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 batches={batches}
                 selectedBatch={selectedBatch}
                 setSelectedBatch={setSelectedBatch}
-                isDarkMode={isDarkMode}
                 onUpdate={fetchData}
               />
             )}
@@ -441,7 +430,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           deckId={editingDeckId}
           onClose={() => setShowDeckEditor(false)}
           onSave={handleDeckSaved}
-          isDarkMode={isDarkMode}
         />
       )}
     </div>

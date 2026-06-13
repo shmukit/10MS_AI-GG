@@ -63,11 +63,10 @@ export const NotificationDropdown: React.FC = () => {
 
     const getTagStyles = (tag: string) => {
         const tagLower = tag.toLowerCase();
-        if (tagLower === 'homework' || tagLower === 'assignment') return isDarkMode ? 'bg-blue-900/40 text-blue-300 border-blue-800' : 'bg-blue-50 text-blue-700 border-blue-200';
-        if (tagLower === 'exam' || tagLower === 'urgent') return isDarkMode ? 'bg-red-900/40 text-red-300 border-red-800' : 'bg-red-50 text-red-700 border-red-200';
-        if (tagLower === 'resources') return isDarkMode ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-green-50 text-green-700 border-green-200';
-        if (tagLower === 'cancellation') return isDarkMode ? 'bg-orange-900/40 text-orange-300 border-orange-800' : 'bg-orange-50 text-orange-700 border-orange-200';
-        return isDarkMode ? 'bg-gray-700/50 text-gray-300 border-gray-600' : 'bg-gray-100 text-gray-700 border-gray-200';
+        if (tagLower === 'exam' || tagLower === 'urgent') {
+            return isDarkMode ? 'bg-red-900/40 text-red-300 border-red-800' : 'bg-red-50 text-red-700 border-red-200';
+        }
+        return 'bg-muted text-muted-foreground border-border';
     };
 
     const fetchNotices = async () => {
@@ -97,9 +96,7 @@ export const NotificationDropdown: React.FC = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
                     "p-2 rounded-lg transition-all duration-200 relative group",
-                    isDarkMode
-                        ? "bg-gray-700/50 text-blue-400 hover:bg-gray-700"
-                        : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    "bg-muted text-primary hover:bg-muted/80"
                 )}
             >
                 <Bell className="w-5 h-5" />
@@ -110,19 +107,17 @@ export const NotificationDropdown: React.FC = () => {
 
             {isOpen && (
                 <div className={cn(
-                    "absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl shadow-2xl border transition-all duration-300 z-[100] transform origin-top-right scale-100",
-                    isDarkMode
-                        ? "bg-gray-800 border-gray-700 shadow-black/40"
-                        : "bg-white border-gray-100 shadow-gray-200/50"
+                    "absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl shadow-2xl border border-border transition-all duration-300 z-[100] transform origin-top-right scale-100",
+                    "bg-card shadow-black/40"
                 )}>
                     <div className="flex items-center justify-between p-4 border-b border-border">
                         <div className="flex items-center gap-2">
                             <Bell className="w-4 h-4 text-primary" />
-                            <h3 className={cn("font-bold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>Notifications</h3>
+                            <h3 className="font-bold text-lg text-foreground">Notifications</h3>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className={cn("p-1.5 rounded-full hover:bg-muted transition-colors", isDarkMode ? "text-gray-400" : "text-gray-500")}
+                            className="p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -141,35 +136,34 @@ export const NotificationDropdown: React.FC = () => {
                                         key={notice.id}
                                         className={cn(
                                             "p-4 rounded-xl transition-all duration-200 hover:bg-muted/50 cursor-pointer group border border-transparent relative",
-                                            isDarkMode ? "hover:border-gray-700" : "hover:border-gray-100",
-                                            !readNotices.has(notice.id) && (isDarkMode ? "bg-blue-900/10" : "bg-blue-50/50")
+                                            "hover:border-border",
+                                            !readNotices.has(notice.id) && "bg-primary/5"
                                         )}
                                     >
                                         <div className="flex items-start gap-3">
                                             <div className={cn(
                                                 "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
                                                 notice.priority === 'urgent' ? "bg-red-500/10" :
-                                                    notice.priority === 'high' ? "bg-orange-500/10" : "bg-blue-500/10"
+                                                    notice.priority === 'high' ? "bg-muted" : "bg-muted"
                                             )}>
                                                 {notice.priority === 'urgent'
                                                     ? <AlertCircle className="w-4 h-4 text-red-600" />
                                                     : notice.priority === 'high'
-                                                        ? <AlertTriangle className="w-4 h-4 text-orange-500" />
-                                                        : <Info className="w-4 h-4 text-blue-500" />
+                                                        ? <AlertTriangle className="w-4 h-4 text-muted-foreground" />
+                                                        : <Info className="w-4 h-4 text-primary" />
                                                 }
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between gap-2 mb-1">
                                                     <div className="flex items-center gap-2 overflow-hidden">
                                                         <h4 className={cn(
-                                                            "text-sm font-bold truncate group-hover:text-primary transition-colors",
-                                                            isDarkMode ? "text-white" : "text-gray-900",
-                                                            !readNotices.has(notice.id) && "text-blue-600 dark:text-blue-400"
+                                                            "text-sm font-bold truncate group-hover:text-primary transition-colors text-foreground",
+                                                            !readNotices.has(notice.id) && "text-primary"
                                                         )}>
                                                             {notice.title}
                                                         </h4>
                                                         {!readNotices.has(notice.id) && (
-                                                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
                                                         )}
                                                     </div>
                                                     <button
@@ -177,17 +171,16 @@ export const NotificationDropdown: React.FC = () => {
                                                         className={cn(
                                                             "text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors opacity-0 group-hover:opacity-100",
                                                             readNotices.has(notice.id)
-                                                                ? "text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
-                                                                : "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                                                                ? "text-muted-foreground bg-muted"
+                                                                : "text-primary bg-primary/10"
                                                         )}
                                                     >
                                                         {readNotices.has(notice.id) ? 'Mark unread' : 'Mark read'}
                                                     </button>
                                                 </div>
                                                 <p className={cn(
-                                                    "text-xs line-clamp-2 leading-relaxed mb-2",
-                                                    isDarkMode ? "text-gray-400 font-normal" : "text-gray-600",
-                                                    !readNotices.has(notice.id) && (isDarkMode ? "text-gray-300" : "text-gray-900")
+                                                    "text-xs line-clamp-2 leading-relaxed mb-2 text-muted-foreground",
+                                                    !readNotices.has(notice.id) && "text-foreground"
                                                 )}>
                                                     {notice.content}
                                                 </p>
@@ -200,11 +193,11 @@ export const NotificationDropdown: React.FC = () => {
                                                         )}>
                                                             {notice.tag || 'General'}
                                                         </span>
-                                                        <span className={cn("text-[10px] truncate", isDarkMode ? "text-gray-500" : "text-gray-500")}>
+                                                        <span className="text-[10px] truncate text-muted-foreground">
                                                             From: Mentor
                                                         </span>
                                                     </div>
-                                                    <span className="text-[10px] text-gray-500 whitespace-nowrap">
+                                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                                         {formatDate(notice.created_at)}
                                                     </span>
                                                 </div>
@@ -219,7 +212,7 @@ export const NotificationDropdown: React.FC = () => {
                                     <Bell className="w-8 h-8 text-muted-foreground/30" />
                                 </div>
                                 <div className="text-center">
-                                    <p className={cn("font-bold text-gray-900", isDarkMode && "text-white")}>All caught up!</p>
+                                    <p className="font-bold text-foreground">All caught up!</p>
                                     <p className="text-xs text-muted-foreground mt-1">No new notifications at the moment.</p>
                                 </div>
                             </div>

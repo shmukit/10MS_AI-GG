@@ -1,7 +1,6 @@
 import React from 'react';
 
 interface RoadmapFiltersProps {
-    isDarkMode: boolean;
     weekFilter: string;
     setWeekFilter: (week: string) => void;
     typeFilter: string;
@@ -10,7 +9,6 @@ interface RoadmapFiltersProps {
 }
 
 export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
-    isDarkMode,
     weekFilter,
     setWeekFilter,
     typeFilter,
@@ -18,22 +16,17 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
     getWeekOptions
 }) => {
     return (
-        <div className={`rounded-xl p-4 border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+        <div className="rounded-xl p-4 border border-border bg-card transition-colors duration-200">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                     <div>
-                        <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                            }`}>
+                        <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                             Filter by Week
                         </label>
                         <select
                             value={weekFilter}
                             onChange={(e) => setWeekFilter(e.target.value)}
-                            className={`px-3 py-2 border rounded-lg transition-colors ${isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300 text-gray-900'
-                                }`}
+                            className="px-3 py-2 border border-border rounded-lg bg-muted text-foreground transition-colors"
                         >
                             <option value="">All Weeks</option>
                             {getWeekOptions().map(week => (
@@ -43,17 +36,13 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
                     </div>
 
                     <div>
-                        <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                            }`}>
+                        <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                             Filter by Task Type
                         </label>
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className={`px-3 py-2 border rounded-lg transition-colors ${isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300 text-gray-900'
-                                }`}
+                            className="px-3 py-2 border border-border rounded-lg bg-muted text-foreground transition-colors"
                         >
                             <option value="">All Types</option>
                             <option value="Watch">Watch</option>
@@ -72,11 +61,7 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
                             setWeekFilter('');
                             setTypeFilter('');
                         }}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                            ? 'bg-white hover:bg-gray-100 !text-black border-none'
-                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                            }`}
-                        style={isDarkMode ? { backgroundColor: '#ffffff', color: '#000000' } : {}}
+                        className="px-4 py-2 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-foreground border border-border"
                     >
                         Clear Filters
                     </button>

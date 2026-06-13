@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Map, ChevronDown } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { cn } from '../../../lib/utils';
 
 interface RoadmapDropdownProps {
-    isDarkMode: boolean;
     enrolledBatches: any[];
     currentBatch: any;
     showDropdown: boolean;
@@ -13,7 +13,6 @@ interface RoadmapDropdownProps {
 }
 
 export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
-    isDarkMode,
     enrolledBatches,
     currentBatch,
     showDropdown,
@@ -23,7 +22,6 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
 }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Handle click outside to close dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -44,30 +42,29 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
     return (
         <div className="relative roadmap-dropdown-container" ref={dropdownRef}>
             <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="gap-2"
+                className="gap-2 border border-border bg-card hover:bg-muted"
             >
-                <Map className="w-4 h-4" />
-                <span className="text-sm font-medium">
+                <Map className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">
                     {currentBatch?.name || currentBatch?.title || 'Select Batch'}
                 </span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+                <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform duration-200', showDropdown && 'rotate-180')} />
             </Button>
 
-            {/* Roadmap Dropdown */}
             {showDropdown && (
-                <div className={`absolute top-full right-0 mt-2 rounded-lg shadow-lg z-10 border min-w-48 transition-colors duration-200 ${isDarkMode
-                    ? 'bg-gray-800 border-gray-700'
-                    : 'bg-white border-gray-200'
-                    }`}>
+                <div className="absolute top-full right-0 mt-2 rounded-xl shadow-modal z-10 border border-border bg-card min-w-48">
                     <div className="py-2">
                         {enrolledBatches.map((batch: any) => (
                             <Button
                                 key={batch.id}
                                 variant="ghost"
                                 onClick={() => handleBatchChange(batch.id)}
-                                className={`w-full justify-start font-normal ${selectedBatchId === batch.id ? (isDarkMode ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-50 text-blue-700') : ''}`}
+                                className={cn(
+                                    'w-full justify-start font-normal',
+                                    selectedBatchId === batch.id && 'bg-accent text-accent-foreground'
+                                )}
                             >
                                 {batch.name}
                             </Button>

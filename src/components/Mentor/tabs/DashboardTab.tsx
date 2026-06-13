@@ -13,7 +13,6 @@ interface DashboardTabProps {
     };
     batches: Batch[];
     students: Student[];
-    isDarkMode: boolean;
     selectedBatch: string;
 }
 
@@ -21,7 +20,6 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
     stats,
     batches,
     students,
-    isDarkMode,
     selectedBatch
 }) => {
     const [isSchedulingSession, setIsSchedulingSession] = useState(false);
@@ -31,60 +29,56 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
         <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className={`p-6 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="p-6 rounded-xl border border-border bg-card transition-colors duration-200">
                     <div className="flex items-center gap-3">
-                        <Users className="w-8 h-8 text-blue-500" />
+                        <Users className="w-8 h-8 text-primary" />
                         <div>
-                            <p className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stats.totalStudents}</p>
-                            <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Students</p>
+                            <p className="text-2xl font-bold text-foreground transition-colors duration-200">{stats.totalStudents}</p>
+                            <p className="text-sm text-muted-foreground transition-colors duration-200">Total Students</p>
                         </div>
                     </div>
                 </div>
 
-                <div className={`p-6 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="p-6 rounded-xl border border-border bg-card transition-colors duration-200">
                     <div className="flex items-center gap-3">
-                        <BookOpen className="w-8 h-8 text-purple-500" />
+                        <BookOpen className="w-8 h-8 text-muted-foreground" />
                         <div>
-                            <p className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stats.totalBatches}</p>
-                            <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Batches</p>
+                            <p className="text-2xl font-bold text-foreground transition-colors duration-200">{stats.totalBatches}</p>
+                            <p className="text-sm text-muted-foreground transition-colors duration-200">Total Batches</p>
                         </div>
                     </div>
                 </div>
 
-                <div className={`p-6 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="p-6 rounded-xl border border-border bg-card transition-colors duration-200">
                     <div className="flex items-center gap-3">
-                        <BookOpen className="w-8 h-8 text-green-500" />
+                        <BookOpen className="w-8 h-8 text-muted-foreground" />
                         <div>
-                            <p className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stats.totalRoadmapTasks}</p>
-                            <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Roadmap Tasks</p>
+                            <p className="text-2xl font-bold text-foreground transition-colors duration-200">{stats.totalRoadmapTasks}</p>
+                            <p className="text-sm text-muted-foreground transition-colors duration-200">Roadmap Tasks</p>
                         </div>
                     </div>
                 </div>
 
-                <div className={`p-6 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="p-6 rounded-xl border border-border bg-card transition-colors duration-200">
                     <div className="flex items-center gap-3">
-                        <Bell className="w-8 h-8 text-orange-500" />
+                        <Bell className="w-8 h-8 text-muted-foreground" />
                         <div>
-                            <p className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stats.totalNotices}</p>
-                            <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Notices</p>
+                            <p className="text-2xl font-bold text-foreground transition-colors duration-200">{stats.totalNotices}</p>
+                            <p className="text-sm text-muted-foreground transition-colors duration-200">Total Notices</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Live Class Management */}
-            <div className={`rounded-xl p-6 shadow-sm border mb-8 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <div className="rounded-xl p-6 shadow-sm border border-border bg-card mb-8 transition-colors duration-200">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h3 className="text-lg font-bold text-foreground transition-colors duration-200">
                         Live Class Management
                     </h3>
                     <button
                         onClick={() => setIsSchedulingSession(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         Schedule Class
@@ -94,10 +88,9 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
             </div>
 
             {/* Batch-Roadmap Management Table */}
-            <div className={`rounded-xl p-6 shadow-sm border mb-8 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                }`}>
+            <div className="rounded-xl p-6 shadow-sm border border-border bg-card mb-8 transition-colors duration-200">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h3 className="text-lg font-bold text-foreground transition-colors duration-200">
                         Batch & Roadmap Management
                     </h3>
                 </div>
@@ -105,35 +98,35 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className={`border-b transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                                <th className={`text-left py-3 px-4 font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <tr className="border-b border-border transition-colors duration-200">
+                                <th className="text-left py-3 px-4 font-medium text-muted-foreground transition-colors duration-200">
                                     Batch Name
                                 </th>
-                                <th className={`text-left py-3 px-4 font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <th className="text-left py-3 px-4 font-medium text-muted-foreground transition-colors duration-200">
                                     Assigned Roadmap
                                 </th>
-                                <th className={`text-left py-3 px-4 font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <th className="text-left py-3 px-4 font-medium text-muted-foreground transition-colors duration-200">
                                     Students
                                 </th>
-                                <th className={`text-left py-3 px-4 font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <th className="text-left py-3 px-4 font-medium text-muted-foreground transition-colors duration-200">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             {batches.map((batch: Batch) => (
-                                <tr key={batch.id} className={`border-b transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                                    <td className={`py-3 px-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                <tr key={batch.id} className="border-b border-border transition-colors duration-200">
+                                    <td className="py-3 px-4 text-foreground transition-colors duration-200">
                                         {batch.name}
                                     </td>
-                                    <td className={`py-3 px-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <td className="py-3 px-4 text-muted-foreground transition-colors duration-200">
                                         {batch.roadmapName}
                                     </td>
-                                    <td className={`py-3 px-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <td className="py-3 px-4 text-muted-foreground transition-colors duration-200">
                                         {students.filter((s: Student) => s.batchId === batch.id).length} students
                                     </td>
                                     <td className="py-3 px-4">
-                                        <span className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        <span className="text-sm text-muted-foreground transition-colors duration-200">
                                             View Only
                                         </span>
                                     </td>
@@ -152,7 +145,6 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
                     setIsSchedulingSession(false);
                     setRefreshSessionsTrigger(prev => prev + 1);
                 }}
-                isDarkMode={isDarkMode}
             />
         </div>
     );

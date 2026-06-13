@@ -52,10 +52,10 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+      className="bg-card rounded-xl shadow-sm border border-border overflow-hidden"
     >
       {/* Image Preview */}
-      <div className="bg-gray-100 aspect-video flex items-center justify-center p-4 border-b border-gray-200">
+      <div className="bg-muted aspect-video flex items-center justify-center p-4 border-b border-border">
         {certificate.image_url ? (
           <img 
             src={certificate.image_url} 
@@ -63,7 +63,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
             className="max-h-full object-contain rounded drop-shadow-md"
           />
         ) : (
-          <div className="text-gray-400 flex flex-col items-center">
+          <div className="text-muted-foreground flex flex-col items-center">
             <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -75,10 +75,10 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
       <div className="p-5">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-foreground">
               {certificate.certificate_type.replace(/_/g, ' ')}
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Issued: {new Date(certificate.issued_at).toLocaleDateString()}
             </p>
           </div>
@@ -91,9 +91,9 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
             target="_blank"
             rel="noreferrer"
             onClick={handleDownload}
-            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
           >
-            <svg className="mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="mr-2 h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             Download
@@ -111,10 +111,10 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
 
           <button
             onClick={handleCopyLink}
-            className={`flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            className={`flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-[3px] focus:ring-offset-2 ${
               copied 
-                ? 'border-green-500 text-green-700 bg-green-50 focus:ring-green-500' 
-                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'
+                ? 'border-green-500 text-green-700 bg-green-50 focus:ring-green-500/15' 
+                : 'border-border text-foreground bg-card hover:bg-muted focus:border-primary focus:ring-primary/15'
             }`}
           >
             {copied ? (

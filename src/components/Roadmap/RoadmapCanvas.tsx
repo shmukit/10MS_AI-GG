@@ -4,14 +4,13 @@ import { NodeContentPanel } from './NodeContentPanel';
 import { RoadmapNodeData } from './RoadmapNode';
 
 interface RoadmapCanvasProps {
-  isDarkMode?: boolean;
   roadmapNodes: RoadmapNodeData[];
   onRefresh?: () => void; // Add refresh callback
   batchId?: string | null; // Add batchId prop for completion data
   targetWeekNumber?: number | null; // Add target week number for auto-opening
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = false, roadmapNodes, onRefresh, batchId, targetWeekNumber }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes, onRefresh, batchId, targetWeekNumber }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -55,40 +54,50 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
   }, [targetWeekNumber, roadmapNodes]);
 
   return (
-    <div className={`flex flex-col lg:flex-row h-full transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="flex flex-col lg:flex-row h-full transition-colors duration-200 bg-background">
       {/* Main Roadmap Area */}
       <div className={`transition-all duration-300 ${selectedNode ? 'w-full lg:w-2/3' : 'w-full'}`}>
         <div className="h-full overflow-y-auto">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-12 pb-32 lg:pb-12">
             {/* Roadmap Path */}
             <div className="relative">
-              {/* Main Path Line */}
-              <div className={`absolute left-1/2 transform -translate-x-0.5 w-0.5 h-full transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-                }`}></div>
+              {/* Timeline spine — always behind cards */}
+              <div
+                className="pointer-events-none absolute inset-y-0 left-1/2 z-0 w-0.5 -translate-x-1/2 bg-border"
+                aria-hidden="true"
+              />
 
               {/* Nodes */}
-              <div className="space-y-8 lg:space-y-16">
+              <div className="relative z-10 space-y-8 lg:space-y-16">
                 {roadmapNodes.map((node, index) => {
-                  // Extract week number from node title for ID
                   const weekMatch = node.title.match(/Week (\d+)/i);
                   const weekNumber = weekMatch ? weekMatch[1] : index + 1;
+                  const isEven = index % 2 === 0;
 
                   return (
-                    <div key={node.id} id={`week-${weekNumber}`} className="relative">
-                      {/* Connection Point */}
-                      <div className={`absolute left-1/2 transform -translate-x-1/2 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 sm:border-4 z-10 transition-colors duration-200 ${isDarkMode
-                          ? 'bg-gray-800 border-gray-600'
-                          : 'bg-white border-gray-300'
-                        }`}></div>
+                    <div key={node.id} id={`week-${weekNumber}`} className="relative z-10">
+                      {/* Connection dot — sits on the spine, above the line but below card content is ok at card top edge */}
+                      <div className="absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-border bg-card sm:top-8 sm:h-4 sm:w-4 sm:border-4" />
 
-                      {/* Node */}
-                      <div className={`${index % 2 === 0 ? 'pr-1/2 text-right' : 'pl-1/2 text-left'}`}>
-                        <div className={`inline-block ${index % 2 === 0 ? 'mr-4 sm:mr-8' : 'ml-4 sm:ml-8'}`}>
+                      {/* Card — full width on mobile; alternating halves on lg+ */}
+                      <div
+                        className={
+                          isEven
+                            ? 'flex justify-center lg:block lg:pr-[50%] lg:text-right'
+                            : 'flex justify-center lg:block lg:pl-[50%] lg:text-left'
+                        }
+                      >
+                        <div
+                          className={
+                            isEven
+                              ? 'relative z-10 w-full max-w-md lg:mr-8 lg:inline-block lg:w-80'
+                              : 'relative z-10 w-full max-w-md lg:ml-8 lg:inline-block lg:w-80'
+                          }
+                        >
                           <RoadmapNode
                             node={node}
                             onClick={() => handleNodeClick(node)}
-                            isAlternate={index % 2 !== 0}
-                            isDarkMode={isDarkMode}
+                            isAlternate={!isEven}
                           />
                         </div>
                       </div>
@@ -106,7 +115,6 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ isDarkMode = 
         <NodeContentPanel
           node={selectedNode}
           onClose={handleClosePanel}
-          isDarkMode={isDarkMode}
           onRefresh={onRefresh}
           batchId={batchId || undefined}
         />

@@ -179,35 +179,22 @@ export const useStudentDashboard = () => {
         return dashboardData.batch;
     };
 
-    // Get weekly streaks based on current roadmap and batch
+    // Weekly streaks from profile progress (completed_weeks)
     const getWeeklyStreaks = () => {
-        // Get data from current roadmap
         const roadmap = getCurrentRoadmap();
-        const batch = getCurrentBatch();
+        const totalWeeks = roadmap?.total_weeks ?? 6;
+        const completedWeeks = dashboardData?.profile?.completed_weeks ?? 0;
 
-        if (!roadmap || !batch) {
-            // If no roadmap data, show a default of 6 weeks
-            return Array.from({ length: 6 }, (_, index) => ({
-                week: index + 1,
-                status: 'incomplete' as const
-            }));
-        }
-
-        // Get actual student progress from the database
-        const studentProgress = dashboardData?.studentProgress || [];
-
-        // Map weeks based on actual progress data
-        return Array.from({ length: roadmap.total_weeks }, (_, index) => {
+        return Array.from({ length: totalWeeks }, (_, index) => {
             const weekNumber = index + 1;
-            const weekProgress = studentProgress.find((p: any) => p.week_number === weekNumber);
 
-            if (weekProgress?.is_completed) {
+            if (weekNumber <= completedWeeks) {
                 return { week: weekNumber, status: 'done' as const };
-            } else if (weekProgress?.is_active) {
-                return { week: weekNumber, status: 'current' as const };
-            } else {
-                return { week: weekNumber, status: 'incomplete' as const };
             }
+            if (weekNumber === completedWeeks + 1 && completedWeeks < totalWeeks) {
+                return { week: weekNumber, status: 'current' as const };
+            }
+            return { week: weekNumber, status: 'incomplete' as const };
         });
     };
 

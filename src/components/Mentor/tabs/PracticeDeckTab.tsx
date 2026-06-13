@@ -7,13 +7,11 @@ import { Database } from '../../../types/database.types';
 type PracticeDeck = Database['public']['Tables']['practice_decks']['Row'];
 
 interface PracticeDeckTabProps {
-    isDarkMode: boolean;
     onCreateDeck: () => void;
     onEditDeck: (deckId: string) => void;
 }
 
 export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
-    isDarkMode,
     onCreateDeck,
     onEditDeck
 }) => {
@@ -49,45 +47,43 @@ export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className={`text-2xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h2 className="text-2xl font-bold text-foreground transition-colors duration-200">
                         Practice Decks
                     </h2>
-                    <p className={`text-sm mt-1 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className="text-sm mt-1 text-muted-foreground transition-colors duration-200">
                         Create micro-learning decks with text, images, videos, and quizzes
                     </p>
                 </div>
                 <button
                     onClick={onCreateDeck}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                 >
                     <Plus className="w-4 h-4" />
                     Create New Deck
                 </button>
             </div>
 
-            {/* Deck List */}
             {loading ? (
-                <div className={`text-center py-12 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                    <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <div className="text-center py-12 rounded-xl border border-border bg-card transition-colors duration-200">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground transition-colors duration-200">
                         Loading decks...
                     </p>
                 </div>
             ) : decks.length === 0 ? (
-                <div className={`text-center py-12 rounded-xl border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <Book className={`w-16 h-16 mx-auto mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                    <h3 className={`text-lg font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <div className="text-center py-12 rounded-xl border border-border bg-card transition-colors duration-200">
+                    <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground transition-colors duration-200" />
+                    <h3 className="text-lg font-semibold mb-2 text-foreground transition-colors duration-200">
                         No practice decks yet
                     </h3>
-                    <p className={`text-sm mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className="text-sm mb-4 text-muted-foreground transition-colors duration-200">
                         Create your first micro-learning deck to help students practice
                     </p>
                     <button
                         onClick={onCreateDeck}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         Create Deck
@@ -98,10 +94,8 @@ export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
                     {decks.map(deck => (
                         <div
                             key={deck.id}
-                            className={`rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                                }`}
+                            className="rounded-xl border border-border bg-card overflow-hidden transition-all duration-200 hover:shadow-lg"
                         >
-                            {/* Cover Image */}
                             {deck.cover_image ? (
                                 <img
                                     src={deck.cover_image}
@@ -109,31 +103,25 @@ export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
                                     className="w-full h-40 object-cover"
                                 />
                             ) : (
-                                <div className={`w-full h-40 flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                                    }`}>
-                                    <Book className={`w-12 h-12 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+                                <div className="w-full h-40 flex items-center justify-center bg-muted">
+                                    <Book className="w-12 h-12 text-muted-foreground" />
                                 </div>
                             )}
 
-                            {/* Content */}
                             <div className="p-4">
-                                <h3 className={`font-semibold mb-1 line-clamp-1 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                                    }`}>
+                                <h3 className="font-semibold mb-1 line-clamp-1 text-foreground transition-colors duration-200">
                                     {deck.title}
                                 </h3>
                                 {deck.description && (
-                                    <p className={`text-sm mb-3 line-clamp-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                                        }`}>
+                                    <p className="text-sm mb-3 line-clamp-2 text-muted-foreground transition-colors duration-200">
                                         {deck.description}
                                     </p>
                                 )}
 
-                                {/* Meta Info */}
-                                <div className={`flex items-center gap-2 text-xs mb-3 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'
-                                    }`}>
+                                <div className="flex items-center gap-2 text-xs mb-3 text-muted-foreground transition-colors duration-200">
                                     <span className={`px-2 py-1 rounded ${deck.is_public
-                                        ? 'bg-green-500/10 text-green-500'
-                                        : (isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-600')
+                                        ? 'bg-accent text-primary'
+                                        : 'bg-muted text-muted-foreground'
                                         }`}>
                                         {deck.is_public ? 'Public' : 'Private'}
                                     </span>
@@ -141,24 +129,17 @@ export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
                                     <span>Created {new Date(deck.created_at).toLocaleDateString()}</span>
                                 </div>
 
-                                {/* Actions */}
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => onEditDeck(deck.id)}
-                                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            }`}
+                                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
                                     >
                                         <Edit className="w-4 h-4" />
                                         Edit
                                     </button>
                                     <button
                                         onClick={() => handleDeleteDeck(deck.id)}
-                                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                                            : 'bg-red-600 hover:bg-red-700 text-white'
-                                            }`}
+                                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>

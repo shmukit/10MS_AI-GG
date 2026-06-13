@@ -15,19 +15,13 @@ import { posthog } from '../../lib/posthog';
 
 interface RoadmapInterfaceProps {
   onBack: () => void;
-  isDarkMode?: boolean;
-  toggleDarkMode?: () => void;
 }
 
-export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDarkMode = false }) => {
+export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) => {
   const { roadmapSlug } = useParams();
   const [searchParams] = useSearchParams();
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode: themeDarkMode } = useTheme();
-  // const posthog = usePostHog();
-
-  // Use theme context if no props provided
-  const effectiveDarkMode = isDarkMode ?? themeDarkMode;
+  const { isDarkMode } = useTheme();
 
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [weeks, setWeeks] = useState<RoadmapWeek[]>([]);
@@ -240,10 +234,10 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="min-h-screen flex items-center justify-center transition-colors duration-200 bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className={`text-lg transition-colors duration-200 ${effectiveDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Loading roadmap...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg transition-colors duration-200 text-muted-foreground">Loading roadmap...</p>
         </div>
       </div>
     );
@@ -251,13 +245,13 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
 
   if (error || !roadmap) {
     return (
-      <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="min-h-screen flex items-center justify-center transition-colors duration-200 bg-background">
         <div className="text-center">
-          <h2 className={`text-xl font-bold mb-4 transition-colors duration-200 ${effectiveDarkMode ? 'text-white' : 'text-gray-900'}`}>Error Loading Roadmap</h2>
-          <p className={`text-gray-600 mb-6 transition-colors duration-200 ${effectiveDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{error || 'No roadmap available'}</p>
+          <h2 className="text-xl font-bold mb-4 transition-colors duration-200 text-foreground">Error Loading Roadmap</h2>
+          <p className="text-muted-foreground mb-6 transition-colors duration-200">{error || 'No roadmap available'}</p>
           <button
             onClick={onBack}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Go Back
           </button>
@@ -289,7 +283,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
   });
 
   return (
-    <div className={`h-screen flex flex-col transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="h-screen flex flex-col transition-colors duration-200 bg-background">
       {/* Header */}
       <StudentHeader
         userName={userName}
@@ -298,7 +292,6 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
         actions={
           enrolledBatches.length > 1 && (
             <RoadmapDropdown
-              isDarkMode={effectiveDarkMode}
               enrolledBatches={enrolledBatches}
               currentBatch={enrolledBatches.find(b => b.id === batchId) || roadmap}
               showDropdown={showRoadmapDropdown}
@@ -311,16 +304,12 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       />
 
       {/* Breadcrumb / Back button */}
-      <div className={`border-b min-h-12 md:min-h-16 transition-colors duration-200 ${effectiveDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+      <div className="border-b border-border min-h-12 md:min-h-16 transition-colors duration-200 bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 md:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={onBack}
-              className={`flex items-center gap-1.5 md:gap-2 transition-colors ${effectiveDarkMode
-                ? 'text-gray-400 hover:text-white'
-                : 'text-gray-600 hover:text-gray-900'
-                }`}
+              className="flex items-center gap-1.5 md:gap-2 transition-colors text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
               <span className="font-medium text-xs md:text-base">Back to Dashboard</span>
@@ -332,12 +321,11 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack, isDa
       </div>
 
       {/* Progress Bar */}
-      <ProgressBar completed={completedNodes} total={totalNodes} isDarkMode={effectiveDarkMode} />
+      <ProgressBar completed={completedNodes} total={totalNodes} />
 
       {/* Canvas */}
       <div className="flex-1 relative">
         <RoadmapCanvas
-          isDarkMode={effectiveDarkMode}
           roadmapNodes={nodesWithStats}
           onRefresh={refreshRoadmapData}
           batchId={batchId}

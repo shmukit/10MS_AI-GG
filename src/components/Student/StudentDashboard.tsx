@@ -117,7 +117,6 @@ export const StudentDashboard: React.FC = () => {
               {/* Welcome Section with Roadmap Selection */}
               <DashboardHeader
                 displayName={getUserDisplayName()}
-                isDarkMode={isDarkMode}
                 enrolledBatches={dashboardData.enrolledBatches}
                 currentBatch={getCurrentBatch()}
                 showRoadmapDropdown={showRoadmapDropdown}
@@ -138,14 +137,14 @@ export const StudentDashboard: React.FC = () => {
               {/* Practice & Micro-learning Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-[var(--accent-soft)]">
-                    <Layers className="w-5 h-5 text-[var(--primary-accent)]" />
+                  <div className="p-2 rounded-lg bg-muted">
+                    <Layers className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className="text-lg font-bold text-foreground">
                     Practice & Micro-learning
                   </h2>
                 </div>
-                <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-none shadow-sm hover:shadow-md`}>
+                <Card className="p-6">
                   <PracticeDeckList isDarkMode={isDarkMode} batchId={selectedBatchId} roadmapId={getCurrentRoadmap()?.id} />
                 </Card>
               </div>
@@ -192,7 +191,7 @@ export const StudentDashboard: React.FC = () => {
               </div> */}
 
               {/* Live Sessions */}
-              <Card className={`p-6 transition-all duration-300 bg-[var(--accent-soft)] border-none shadow-sm hover:shadow-md`}>
+              <Card className="p-6">
                 <LiveSessionList
                   batchId={selectedBatchId}
                   currentLevel={dashboardData?.currentLevel}

@@ -23,54 +23,42 @@ interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 
 // 10MS button variant styles — light + dark mode
 const VARIANTS: Record<string, string> = {
-  // Primary — bg #1CAB55, text white. One per view.
   default:
-    'bg-[#1CAB55] text-white border-transparent ' +
+    'bg-primary text-primary-foreground border-transparent ' +
     'hover:bg-[#17994B] ' +
-    'dark:bg-[#1CAB55] dark:text-white dark:hover:bg-[#17994B] ' +
-    'disabled:bg-[#E5E7EB] disabled:text-[#D1D5DB] dark:disabled:bg-[#2D3748] dark:disabled:text-[#4B5563]',
+    'disabled:bg-muted disabled:text-muted-foreground',
 
-  // CTA — bg #37C25C. For prominent CTAs where primary reads too saturated.
   cta:
     'bg-[#37C25C] text-white border-transparent ' +
-    'hover:bg-[#1CAB55] ' +
-    'dark:bg-[#37C25C] dark:text-white dark:hover:bg-[#1CAB55] ' +
-    'disabled:bg-[#E5E7EB] disabled:text-[#D1D5DB] dark:disabled:bg-[#2D3748] dark:disabled:text-[#4B5563]',
+    'hover:bg-primary ' +
+    'disabled:bg-muted disabled:text-muted-foreground',
 
-  // Secondary filled — bg #D0FAD0, text #086347
   secondary:
-    'bg-[#D0FAD0] text-[#086347] border border-[#1CAB55] ' +
-    'hover:bg-[#BBFAD0] ' +
-    'dark:bg-[#0F2419] dark:text-[#1CAB55] dark:border-[#1CAB55] dark:hover:bg-[#163520] ' +
-    'disabled:bg-[#E5E7EB] disabled:text-[#D1D5DB] disabled:border-transparent dark:disabled:bg-[#2D3748] dark:disabled:text-[#4B5563]',
+    'bg-accent text-accent-foreground border border-primary/30 ' +
+    'hover:bg-accent/80 ' +
+    'disabled:bg-muted disabled:text-muted-foreground disabled:border-transparent',
 
-  // Outline — transparent, green-link text, green-link border
   outline:
     'bg-transparent text-[#149353] border border-[#149353] ' +
-    'hover:bg-[#EAFEF2] ' +
-    'dark:text-[#37C25C] dark:border-[#37C25C] dark:hover:bg-[#0F2419] ' +
-    'disabled:text-[#D1D5DB] disabled:border-[#E5E7EB] dark:disabled:text-[#4B5563] dark:disabled:border-[#2D3748]',
+    'hover:bg-accent ' +
+    'dark:text-[#37C25C] dark:border-[#37C25C] dark:hover:bg-accent ' +
+    'disabled:text-muted-foreground disabled:border-border',
 
-  // Ghost — transparent, text-secondary, subtle outline border
   ghost:
-    'bg-transparent text-[#374151] border border-[#E5E7EB] ' +
-    'hover:bg-[#F3F4F6] hover:border-[#D1D5DB] ' +
-    'dark:text-[#D1D5DB] dark:border-[#2D3748] dark:hover:bg-[#1E2A38] dark:hover:border-[#374151] ' +
-    'disabled:text-[#D1D5DB] disabled:border-[#E5E7EB] dark:disabled:text-[#4B5563] dark:disabled:border-[#2D3748]',
+    'bg-transparent text-foreground border border-border ' +
+    'hover:bg-muted hover:border-border ' +
+    'disabled:text-muted-foreground disabled:border-border',
 
-  // Link — text only, no background, no border
   link:
     'bg-transparent text-[#149353] border-transparent underline-offset-4 ' +
     'hover:underline ' +
     'dark:text-[#37C25C] ' +
-    'disabled:text-[#D1D5DB] dark:disabled:text-[#4B5563]',
+    'disabled:text-muted-foreground',
 
-  // Destructive — error-red only for dangerous actions
   destructive:
-    'bg-[#DC2626] text-white border-transparent ' +
+    'bg-destructive text-destructive-foreground border-transparent ' +
     'hover:bg-[#B91C1C] ' +
-    'dark:bg-[#DC2626] dark:text-white dark:hover:bg-[#B91C1C] ' +
-    'disabled:bg-[#E5E7EB] disabled:text-[#D1D5DB] dark:disabled:bg-[#2D3748] dark:disabled:text-[#4B5563]',
+    'disabled:bg-muted disabled:text-muted-foreground',
 };
 
 // 10MS size specs

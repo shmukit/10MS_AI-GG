@@ -66,11 +66,11 @@ export const ManageCertificatesModal: React.FC<ManageCertificatesModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Manage Certificates - {studentName}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-card rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+          <h3 className="text-lg font-medium text-foreground">Manage Certificates - {studentName}</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <span className="sr-only">Close</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -78,7 +78,7 @@ export const ManageCertificatesModal: React.FC<ManageCertificatesModalProps> = (
           </button>
         </div>
         
-        <div className="p-6 overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900">
+        <div className="p-6 overflow-y-auto flex-1 bg-background">
           {error && (
             <div className="mb-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
               {error}
@@ -86,25 +86,25 @@ export const ManageCertificatesModal: React.FC<ManageCertificatesModalProps> = (
           )}
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading certificates...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading certificates...</div>
           ) : certificates.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-center py-12 text-muted-foreground bg-card rounded-lg border border-border">
               No certificates have been issued to this student.
             </div>
           ) : (
             <div className="space-y-4">
               {certificates.map((cert) => (
-                <div key={cert.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between">
+                <div key={cert.id} className="bg-card p-4 rounded-lg border border-border shadow-sm flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {cert.image_url ? (
-                      <img src={cert.image_url} alt="Cert" className="h-16 w-auto object-cover rounded border border-gray-200 dark:border-gray-700" />
+                      <img src={cert.image_url} alt="Cert" className="h-16 w-auto object-cover rounded border border-border" />
                     ) : (
-                      <div className="h-16 w-24 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 rounded">No Image</div>
+                      <div className="h-16 w-24 bg-muted flex items-center justify-center text-xs text-muted-foreground rounded">No Image</div>
                     )}
                     <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white">{cert.certificate_type.replace(/_/g, ' ')}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Issued: {new Date(cert.issued_at).toLocaleDateString()}</p>
-                      <a href={`/certificate/${cert.id}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-1 hover:underline">
+                      <h4 className="font-medium text-foreground">{cert.certificate_type.replace(/_/g, ' ')}</h4>
+                      <p className="text-sm text-muted-foreground">Issued: {new Date(cert.issued_at).toLocaleDateString()}</p>
+                      <a href={`/certificate/${cert.id}`} target="_blank" rel="noreferrer" className="text-xs text-primary flex items-center gap-1 mt-1 hover:underline">
                         View Public Link <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>

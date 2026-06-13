@@ -9,18 +9,17 @@ interface CardEditorProps {
     cardId?: string | null;
     onClose: () => void;
     onSave: () => void;
-    isDarkMode: boolean;
 }
 
-export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose, onSave, isDarkMode }) => {
+const inputClass = 'w-full px-4 py-2 rounded-lg border border-border bg-muted text-foreground';
+
+export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose, onSave }) => {
     const [loading, setLoading] = useState(!!cardId);
     const [saving, setSaving] = useState(false);
 
-    // Card data
     const [cardType, setCardType] = useState<CardType>('text');
     const [orderIndex, setOrderIndex] = useState(0);
 
-    // Content fields (different per type)
     const [textContent, setTextContent] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [imageCaption, setImageCaption] = useState('');
@@ -145,9 +144,9 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
     if (loading) {
         return (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]">
-                <div className={`p-8 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className={`mt-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Loading card...</p>
+                <div className="p-8 rounded-xl bg-card">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading card...</p>
                 </div>
             </div>
         );
@@ -155,29 +154,23 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
-            <div className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                }`}>
-                {/* Header */}
-                <div className={`sticky top-0 z-10 flex justify-between items-center p-6 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
-                    <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-xl bg-card">
+                <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-border bg-card">
+                    <h3 className="text-xl font-bold text-foreground">
                         {cardId ? 'Edit Card' : 'Add New Card'}
                     </h3>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-                            }`}
+                        className="p-2 rounded-lg transition-colors hover:bg-accent"
                     >
-                        <X className={`w-6 h-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`} />
+                        <X className="w-6 h-6 text-muted-foreground" />
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-6 space-y-6">
-                    {/* Card Type Selector */}
                     {!cardId && (
                         <div>
-                            <label className={`block text-sm font-medium mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label className="block text-sm font-medium mb-3 text-muted-foreground">
                                 Card Type
                             </label>
                             <div className="grid grid-cols-2 gap-3">
@@ -186,23 +179,18 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                                         key={type.value}
                                         onClick={() => setCardType(type.value)}
                                         className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${cardType === type.value
-                                            ? 'border-blue-500 bg-blue-500/10'
-                                            : isDarkMode
-                                                ? 'border-gray-700 hover:border-gray-600'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-primary bg-primary/10 ring-primary/20'
+                                            : 'border-border hover:border-primary/30'
                                             }`}
                                     >
-                                        <div className={cardType === type.value ? 'text-blue-500' : (isDarkMode ? 'text-gray-400' : 'text-gray-600')}>
+                                        <div className={cardType === type.value ? 'text-primary' : 'text-muted-foreground'}>
                                             {type.icon}
                                         </div>
                                         <div className="text-left">
-                                            <div className={`font-medium ${cardType === type.value
-                                                ? 'text-blue-500'
-                                                : (isDarkMode ? 'text-white' : 'text-gray-900')
-                                                }`}>
+                                            <div className={`font-medium ${cardType === type.value ? 'text-primary' : 'text-foreground'}`}>
                                                 {type.label}
                                             </div>
-                                            <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                            <div className="text-xs text-muted-foreground">
                                                 {type.description}
                                             </div>
                                         </div>
@@ -212,61 +200,50 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                         </div>
                     )}
 
-                    {/* Text Card */}
                     {cardType === 'text' && (
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                 Text Content *
                             </label>
                             <textarea
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 rows={6}
-                                className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                    ? 'bg-gray-700 border-gray-600 text-white'
-                                    : 'bg-white border-gray-300 text-gray-900'
-                                    }`}
+                                className={inputClass}
                                 placeholder="Enter the text content to display..."
                             />
                         </div>
                     )}
 
-                    {/* Image Card */}
                     {cardType === 'image' && (
                         <>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Image URL *
                                 </label>
                                 <input
                                     type="text"
                                     value={imageUrl}
                                     onChange={(e) => setImageUrl(e.target.value)}
-                                    className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="https://example.com/image.jpg"
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Caption (optional)
                                 </label>
                                 <input
                                     type="text"
                                     value={imageCaption}
                                     onChange={(e) => setImageCaption(e.target.value)}
-                                    className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="Image caption or description..."
                                 />
                             </div>
                             {imageUrl && (
                                 <div>
-                                    <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Preview:</p>
+                                    <p className="text-sm mb-2 text-muted-foreground">Preview:</p>
                                     <img src={imageUrl} alt="Preview" className="w-full rounded-lg" onError={(e) => {
                                         e.currentTarget.src = '';
                                         e.currentTarget.alt = 'Failed to load image';
@@ -276,62 +253,51 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                         </>
                     )}
 
-                    {/* Video Card */}
                     {cardType === 'video' && (
                         <>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Video URL * (YouTube or Vimeo)
                                 </label>
                                 <input
                                     type="text"
                                     value={videoUrl}
                                     onChange={(e) => setVideoUrl(e.target.value)}
-                                    className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="https://www.youtube.com/watch?v=..."
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Description (optional)
                                 </label>
                                 <textarea
                                     value={videoDescription}
                                     onChange={(e) => setVideoDescription(e.target.value)}
                                     rows={3}
-                                    className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="What will students learn from this video..."
                                 />
                             </div>
                         </>
                     )}
 
-                    {/* Quiz Card */}
                     {cardType === 'quiz' && (
                         <>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Question *
                                 </label>
                                 <textarea
                                     value={quizQuestion}
                                     onChange={(e) => setQuizQuestion(e.target.value)}
                                     rows={3}
-                                    className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="Enter your question..."
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-3 text-muted-foreground">
                                     Answer Options * (at least 2 required)
                                 </label>
                                 <div className="space-y-3">
@@ -352,16 +318,13 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                                                     newOptions[index] = e.target.value;
                                                     setQuizOptions(newOptions);
                                                 }}
-                                                className={`flex-1 px-4 py-2 rounded-lg border ${isDarkMode
-                                                    ? 'bg-gray-700 border-gray-600 text-white'
-                                                    : 'bg-white border-gray-300 text-gray-900'
-                                                    }`}
+                                                className={`flex-1 ${inputClass}`}
                                                 placeholder={`Option ${index + 1}`}
                                             />
                                         </div>
                                     ))}
                                 </div>
-                                <p className={`text-xs mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                <p className="text-xs mt-2 text-muted-foreground">
                                     Select the radio button next to the correct answer
                                 </p>
                             </div>
@@ -369,22 +332,17 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className={`sticky bottom-0 flex justify-end gap-3 p-6 border-t ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t border-border bg-card">
                     <button
                         onClick={onClose}
-                        className={`px-6 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                            ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                            : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                            }`}
+                        className="px-6 py-2 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-muted-foreground"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Save className="w-4 h-4" />
                         {saving ? 'Saving...' : 'Save Card'}

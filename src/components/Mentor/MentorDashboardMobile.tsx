@@ -87,8 +87,8 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
             className={`flex flex-col items-center justify-center py-2 px-1 transition-colors ${
               activeTab === id
                 ? isDarkMode 
-                  ? 'text-blue-400 bg-gray-700' 
-                  : 'text-blue-600 bg-blue-50'
+                  ? 'text-primary bg-gray-700' 
+                  : 'text-primary bg-muted'
                 : isDarkMode 
                   ? 'text-gray-400' 
                   : 'text-gray-600'
@@ -132,7 +132,7 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
         </div>
         <button
           onClick={() => {/* Handle delete */}}
-          className="p-1 rounded hover:bg-red-100 text-red-600"
+          className="p-1 rounded hover:bg-destructive/10 text-destructive"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -146,13 +146,13 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
           {student.institute}
         </div>
         <div className="flex items-center gap-2">
-          <a href={`mailto:${student.email}`} className="flex items-center gap-1 text-xs text-blue-600">
+          <a href={`mailto:${student.email}`} className="flex items-center gap-1 text-xs text-primary">
             <Mail className="w-3 h-3" />
             <span className="truncate">{student.email}</span>
           </a>
         </div>
         {student.phone && (
-          <div className="flex items-center gap-1 text-xs text-green-600">
+          <div className="flex items-center gap-1 text-xs text-primary">
             <Phone className="w-3 h-3" />
             <span>{student.phone}</span>
           </div>
@@ -173,11 +173,9 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
             {student.progressPercentage}% Complete
           </span>
         </div>
-        <div className={`w-full h-2 rounded-full ${
-          isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
-        }`}>
+        <div className="progress-track h-2 w-full rounded-full">
           <div 
-            className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+            className="progress-fill h-2 rounded-full transition-all duration-300"
             style={{ width: `${student.progressPercentage}%` }}
           />
         </div>
@@ -218,11 +216,11 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
   // Mobile-optimized action buttons
   const MobileActionButtons = () => (
     <div className="grid grid-cols-2 gap-2 mb-4">
-      <button className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm">
+      <button className="flex items-center justify-center gap-2 py-2 px-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors text-sm">
         <Plus className="w-4 h-4" />
         Add Student
       </button>
-      <button className="flex items-center justify-center gap-2 py-2 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm">
+      <button className="flex items-center justify-center gap-2 py-2 px-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors text-sm">
         <Plus className="w-4 h-4" />
         New Batch
       </button>
@@ -236,7 +234,7 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
         <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-blue-500" />
+          <Users className="w-5 h-5 text-primary" />
           <div>
             <p className={`text-lg font-bold transition-colors duration-200 ${
               isDarkMode ? 'text-white' : 'text-gray-900'
@@ -256,7 +254,7 @@ export const MentorDashboardMobile: React.FC<MentorDashboardMobileProps> = ({
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-purple-500" />
+          <BookOpen className="w-5 h-5 text-muted-foreground" />
           <div>
             <p className={`text-lg font-bold transition-colors duration-200 ${
               isDarkMode ? 'text-white' : 'text-gray-900'

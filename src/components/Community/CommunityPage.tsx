@@ -292,8 +292,8 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                 <button
                   onClick={handleDiscordClick}
                   className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${isDarkMode
-                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                      : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                      ? 'bg-primary hover:bg-[#17994B] text-primary-foreground'
+                      : 'bg-primary hover:bg-[#17994B] text-primary-foreground'
                     }`}
                 >
                   <MessageCircle className="w-3 h-3" />
@@ -432,9 +432,9 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack, isDarkMode
                         <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                           {student.progressPercentage}% Complete
                         </div>
-                        <div className={`w-20 h-2 rounded-full mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                        <div className="progress-track mt-1 h-2 w-20 rounded-full">
                           <div
-                            className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                            className="progress-fill h-2 rounded-full transition-all duration-300"
                             style={{ width: `${student.progressPercentage}%` }}
                           />
                         </div>

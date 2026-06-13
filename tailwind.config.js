@@ -72,11 +72,11 @@ export default {
 
         // ── 10MS Dark Mode Surface Tokens ──
         'dark-surface': {
-          base:   '#0D1117',
-          card:   '#161D27',
-          subtle: '#1E2A38',
-          tinted: '#0F2419',
-          border: '#2D3748',
+          base:   '#0F172A',
+          card:   '#1E293B',
+          subtle: '#334155',
+          tinted: '#142019',
+          border: '#475569',
         },
       },
       borderRadius: {

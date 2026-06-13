@@ -34,11 +34,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                         key={item.path}
                         to={item.path}
                         className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-muted'
                             }`}
                     >
-                        <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`} />
+                        <item.icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                         {item.label}
                     </Link>
                 );
@@ -47,7 +47,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+        <div className="min-h-screen bg-background text-foreground font-sans">
             <AdminHeader
                 userName={user?.user_metadata?.first_name || 'Admin'}
                 pageTitle="Admin Dashboard"
@@ -56,7 +56,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
             <div className="flex h-[calc(100vh-4rem)]">
                 {/* Desktop Sidebar */}
-                <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:block overflow-y-auto">
+                <aside className="w-64 bg-card border-r border-border hidden lg:block overflow-y-auto">
                     <SidebarContent />
                 </aside>
 
@@ -70,12 +70,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                         />
 
                         {/* Drawer */}
-                        <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl border-r border-gray-200 dark:border-gray-700 animate-in slide-in-from-left duration-200">
-                            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
-                                <span className="font-semibold text-gray-800 dark:text-white">Menu</span>
+                        <aside className="absolute left-0 top-0 bottom-0 w-64 bg-card shadow-xl border-r border-border animate-in slide-in-from-left duration-200">
+                            <div className="flex items-center justify-between p-4 border-b border-border">
+                                <span className="font-semibold text-foreground">Menu</span>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                                    className="p-1 text-muted-foreground hover:text-foreground"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

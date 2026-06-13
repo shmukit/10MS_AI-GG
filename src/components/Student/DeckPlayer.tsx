@@ -4,6 +4,8 @@ import { getDeckCards, recordCardInteraction } from '../../services/db/practiceD
 import { Database } from '../../types/database.types';
 import { useAuthContext } from '../../lib';
 import { posthog } from '../../lib/posthog';
+import { Button } from '../ui/Button';
+
 type PracticeCard = Database['public']['Tables']['practice_cards']['Row'];
 
 interface DeckPlayerProps {
@@ -12,25 +14,31 @@ interface DeckPlayerProps {
     batchId: string;
     onClose: () => void;
     onComplete?: () => void;
-    initialCards?: PracticeCard[]; // For review mode
+    initialCards?: PracticeCard[];
 }
 
-export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batchId, onClose, onComplete, initialCards }) => {
+export const DeckPlayer: React.FC<DeckPlayerProps> = ({
+    deckId,
+    deckTitle,
+    batchId,
+    onClose,
+    onComplete,
+    initialCards,
+}) => {
     const { user } = useAuthContext();
     const [cards, setCards] = useState<PracticeCard[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
-    
-    // Tracking refs
+
     const sessionStartTime = React.useRef(Date.now());
     const cardStartTime = React.useRef(Date.now());
     const correctCount = React.useRef(0);
 
     useEffect(() => {
         loadCards();
-    }, [deckId, initialCards]); // Reload if deckId or initialCards changes
+    }, [deckId, initialCards]);
 
     const loadCards = async () => {
         setLoading(true);
@@ -42,7 +50,7 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
         }
         setCards(loadedCards);
         setLoading(false);
-        
+
         if (loadedCards.length > 0) {
             sessionStartTime.current = Date.now();
             cardStartTime.current = Date.now();
@@ -51,18 +59,24 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
                 deck_id: deckId,
                 deck_name: deckTitle,
                 total_cards: loadedCards.length,
-                batch_id: batchId
+                batch_id: batchId,
             });
         }
     };
 
+    const resetCardState = () => {
+        setQuizSelectedOption(null);
+        setQuizSubmitted(false);
+    };
+
     const handleNext = useCallback(() => {
-        // Track non-quiz cards when moving next
+        if (cards[currentIndex]?.card_type === 'quiz' && !quizSubmitted) return;
+
         if (cards[currentIndex]?.card_type !== 'quiz') {
             posthog?.capture('deck_card_viewed', {
                 deck_id: deckId,
                 card_id: cards[currentIndex]?.id,
-                time_spent_ms: Date.now() - cardStartTime.current
+                time_spent_ms: Date.now() - cardStartTime.current,
             });
         }
 
@@ -71,17 +85,16 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
             resetCardState();
             cardStartTime.current = Date.now();
         } else {
-            // End of deck
             posthog?.capture('deck_session_completed', {
                 deck_id: deckId,
                 cards_reviewed: cards.length,
                 correct_count: correctCount.current,
-                total_time_spent_ms: Date.now() - sessionStartTime.current
+                total_time_spent_ms: Date.now() - sessionStartTime.current,
             });
             onComplete?.();
             onClose();
         }
-    }, [currentIndex, cards.length, onComplete, onClose]);
+    }, [currentIndex, cards, quizSubmitted, deckId, onComplete, onClose]);
 
     const handlePrevious = useCallback(() => {
         if (currentIndex > 0) {
@@ -90,17 +103,12 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
         }
     }, [currentIndex]);
 
-    const resetCardState = () => {
-        setQuizSelectedOption(null);
-        setQuizSubmitted(false);
-    };
-
     const handleQuizSubmit = async () => {
         if (quizSelectedOption === null || !user) return;
 
         setQuizSubmitted(true);
         const card = cards[currentIndex];
-        const content = card.content as any;
+        const content = card.content as { correctAnswer: number };
         const isCorrect = quizSelectedOption === content.correctAnswer;
 
         if (isCorrect) correctCount.current += 1;
@@ -109,18 +117,16 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
             deck_id: deckId,
             card_id: card.id,
             outcome: isCorrect ? 'correct' : 'incorrect',
-            time_spent_ms: Date.now() - cardStartTime.current
+            time_spent_ms: Date.now() - cardStartTime.current,
         });
 
-        // Record interaction
         await recordCardInteraction(user.id, card.id, batchId, isCorrect);
-
-        // Auto advance after short delay if correct? No, let user advance.
     };
 
     const currentCard = cards[currentIndex];
+    const isQuiz = currentCard?.card_type === 'quiz';
+    const showTouchNav = !isQuiz || quizSubmitted;
 
-    // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight') handleNext();
@@ -134,58 +140,55 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
 
     if (loading) {
         return (
-            <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
             </div>
         );
     }
 
     if (cards.length === 0) {
         return (
-            <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white p-4">
-                <p>This deck has no cards.</p>
-                <button onClick={onClose} className="mt-4 px-4 py-2 bg-white/20 rounded-lg">Close</button>
+            <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background p-6 text-foreground">
+                <p className="text-muted-foreground">This deck has no cards.</p>
+                <Button variant="secondary" className="mt-4" onClick={onClose}>
+                    Close
+                </Button>
             </div>
         );
     }
 
     const renderCardContent = () => {
-        const content = currentCard.content as any;
+        const content = currentCard.content as Record<string, unknown>;
 
         switch (currentCard.card_type) {
             case 'text':
                 return (
-                    <div className="h-full flex flex-col justify-center items-center p-8 text-center animate-in fade-in slide-in-from-right duration-300">
-                        <div className="prose prose-invert prose-lg max-w-none">
-                            <p className="text-2xl md:text-3xl font-medium leading-relaxed">
-                                {content.text}
-                            </p>
-                        </div>
+                    <div className="flex min-h-full flex-col items-center justify-center px-6 py-8 text-center animate-in fade-in slide-in-from-right duration-300">
+                        <p className="max-w-2xl text-xl font-medium leading-relaxed text-foreground md:text-2xl">
+                            {content.text as string}
+                        </p>
                     </div>
                 );
 
             case 'image':
                 return (
-                    <div className="h-full flex flex-col animate-in fade-in duration-500">
-                        <div className="flex-1 relative">
+                    <div className="flex min-h-full flex-col animate-in fade-in duration-500">
+                        <div className="relative flex-1">
                             <img
-                                src={content.imageUrl}
-                                alt={content.caption || "Card image"}
-                                className="w-full h-full object-contain"
+                                src={content.imageUrl as string}
+                                alt={(content.caption as string) || 'Card image'}
+                                className="h-full w-full object-contain"
                             />
                         </div>
                         {content.caption && (
-                            <div className="bg-black/50 backdrop-blur-sm p-4 text-center">
-                                <p className="text-lg font-medium">{content.caption}</p>
+                            <div className="border-t border-border bg-card/90 p-4 text-center backdrop-blur-sm">
+                                <p className="text-base font-medium text-foreground">{content.caption as string}</p>
                             </div>
                         )}
                     </div>
                 );
 
-            case 'video':
-                // Simple embed handler. Supports YouTube/Vimeo if URL format is standard.
-                // For now, simpler iframe or video tag.
-                // Assuming YouTube for MVP
+            case 'video': {
                 const getEmbedUrl = (url: string) => {
                     if (url.includes('youtube.com') || url.includes('youtu.be')) {
                         const videoId = url.split('v=')[1] || url.split('/').pop();
@@ -195,43 +198,58 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
                 };
 
                 return (
-                    <div className="h-full flex flex-col justify-center bg-black">
-                        <div className="aspect-video w-full max-w-4xl mx-auto">
+                    <div className="flex min-h-full flex-col justify-center bg-background">
+                        <div className="mx-auto aspect-video w-full max-w-4xl">
                             <iframe
-                                src={getEmbedUrl(content.videoUrl)}
-                                className="w-full h-full"
+                                src={getEmbedUrl(content.videoUrl as string)}
+                                className="h-full w-full rounded-lg border border-border"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
+                                title="Practice video"
                             />
                         </div>
                         {content.description && (
                             <div className="p-6 text-center">
-                                <p className="text-lg text-gray-300">{content.description}</p>
+                                <p className="text-base text-muted-foreground">{content.description as string}</p>
                             </div>
                         )}
                     </div>
                 );
+            }
 
-            case 'quiz':
+            case 'quiz': {
+                const quizContent = content as {
+                    question: string;
+                    options: string[];
+                    correctAnswer: number;
+                };
+
                 return (
-                    <div className="h-full flex flex-col justify-center items-center p-6 max-w-2xl mx-auto w-full animate-in fade-in duration-300">
-                        <h3 className="text-2xl font-bold text-center mb-8">
-                            {content.question}
+                    <div className="mx-auto w-full max-w-2xl px-4 py-6 animate-in fade-in duration-300 md:px-6 md:py-8">
+                        <h3 className="mb-6 text-center text-xl font-bold text-foreground md:text-2xl">
+                            {quizContent.question}
                         </h3>
 
-                        <div className="w-full space-y-3">
-                            {content.options.map((option: string, idx: number) => {
+                        <div className="space-y-3">
+                            {quizContent.options.map((option, idx) => {
                                 const isSelected = quizSelectedOption === idx;
-                                const isCorrect = idx === content.correctAnswer;
-                                let buttonClass = "w-full p-4 rounded-xl text-left transition-all duration-200 border-2 ";
+                                const isCorrect = idx === quizContent.correctAnswer;
+
+                                let optionClass =
+                                    'w-full rounded-xl border-2 p-4 text-left transition-all duration-200 ';
 
                                 if (quizSubmitted) {
-                                    if (isCorrect) buttonClass += "bg-green-600 border-green-500 text-white";
-                                    else if (isSelected) buttonClass += "bg-red-600 border-red-500 text-white";
-                                    else buttonClass += "bg-gray-800 border-gray-700 text-gray-400 opacity-50";
+                                    if (isCorrect) {
+                                        optionClass += 'border-primary bg-primary/15 text-foreground';
+                                    } else if (isSelected) {
+                                        optionClass += 'border-destructive bg-destructive/10 text-foreground';
+                                    } else {
+                                        optionClass += 'border-border bg-muted/50 text-muted-foreground opacity-60';
+                                    }
+                                } else if (isSelected) {
+                                    optionClass += 'border-primary bg-accent text-accent-foreground';
                                 } else {
-                                    if (isSelected) buttonClass += "bg-blue-600 border-blue-500 text-white transform scale-[1.02]";
-                                    else buttonClass += "bg-gray-800 border-gray-700 hover:bg-gray-700 text-white";
+                                    optionClass += 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/50';
                                 }
 
                                 return (
@@ -239,105 +257,140 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({ deckId, deckTitle, batch
                                         key={idx}
                                         disabled={quizSubmitted}
                                         onClick={() => setQuizSelectedOption(idx)}
-                                        className={buttonClass}
+                                        className={optionClass}
                                     >
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center justify-between gap-3">
                                             <span>{option}</span>
-                                            {quizSubmitted && isCorrect && <CheckCircle className="w-5 h-5 text-white" />}
-                                            {quizSubmitted && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-white" />}
+                                            {quizSubmitted && isCorrect && (
+                                                <CheckCircle className="h-5 w-5 shrink-0 text-primary" />
+                                            )}
+                                            {quizSubmitted && isSelected && !isCorrect && (
+                                                <XCircle className="h-5 w-5 shrink-0 text-destructive" />
+                                            )}
                                         </div>
                                     </button>
                                 );
                             })}
                         </div>
 
-                        {!quizSubmitted && (
-                            <button
-                                disabled={quizSelectedOption === null}
-                                onClick={handleQuizSubmit}
-                                className="mt-8 w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Check Answer
-                            </button>
-                        )}
-
                         {quizSubmitted && (
-                            <div className={`mt-6 p-4 rounded-xl w-full text-center ${quizSelectedOption === content.correctAnswer
-                                ? 'bg-green-500/20 text-green-300 border border-green-500/50'
-                                : 'bg-red-500/20 text-red-300 border border-red-500/50'
-                                }`}>
-                                {quizSelectedOption === content.correctAnswer
-                                    ? "Correct! Well done."
-                                    : "Not quite. Try again next time!"}
+                            <div
+                                className={`mt-6 w-full rounded-xl border p-4 text-center ${
+                                    quizSelectedOption === quizContent.correctAnswer
+                                        ? 'border-primary/30 bg-accent text-accent-foreground'
+                                        : 'border-destructive/30 bg-destructive/10 text-destructive'
+                                }`}
+                            >
+                                {quizSelectedOption === quizContent.correctAnswer
+                                    ? 'Correct! Well done.'
+                                    : 'Not quite. Review and continue when ready.'}
                             </div>
                         )}
                     </div>
                 );
+            }
+
+            default:
+                return null;
         }
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-gray-900 text-white flex flex-col overflow-hidden">
-            {/* Progress Bar */}
-            <div className="h-1 bg-gray-800 w-full">
+        <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-background text-foreground">
+            {/* Session progress */}
+            <div className="progress-track h-1 w-full shrink-0">
                 <div
-                    className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                    className="progress-fill h-full transition-all duration-300 ease-out"
                     style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }}
                 />
             </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 absolute top-1 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent">
-                <div className="flex-1">
-                    <h2 className="text-sm font-medium text-gray-300 uppercase tracking-wider truncate">
+            {/* Header — in document flow, no overlap */}
+            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-3">
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {deckTitle}
-                    </h2>
+                    </p>
+                    <p className="text-sm text-foreground">
+                        Card {currentIndex + 1} of {cards.length}
+                    </p>
                 </div>
                 <button
+                    type="button"
                     onClick={onClose}
-                    className="p-2 bg-black/30 rounded-full hover:bg-black/50 transition-colors"
+                    className="rounded-full border border-border bg-muted/50 p-2 text-foreground transition-colors hover:bg-muted"
+                    aria-label="Close deck"
                 >
-                    <X className="w-6 h-6" />
+                    <X className="h-5 w-5" />
                 </button>
-            </div>
+            </header>
 
-            {/* Main Content Area */}
-            <div className="flex-1 relative flex flex-col">
-                {/* Touch Zones for Navigation (Mobile optimized) */}
-                <div className="absolute inset-y-0 left-0 w-1/4 z-0 cursor-w-resize" onClick={handlePrevious} />
-                <div className="absolute inset-y-0 right-0 w-1/4 z-0 cursor-e-resize" onClick={handleNext} />
+            {/* Scrollable content */}
+            <div className="relative min-h-0 flex-1">
+                {showTouchNav && (
+                    <>
+                        <button
+                            type="button"
+                            aria-label="Previous card"
+                            className="absolute inset-y-0 left-0 z-10 w-1/5 md:hidden"
+                            onClick={handlePrevious}
+                        />
+                        <button
+                            type="button"
+                            aria-label="Next card"
+                            className="absolute inset-y-0 right-0 z-10 w-1/5 md:hidden"
+                            onClick={handleNext}
+                        />
+                    </>
+                )}
 
-                {/* Content Container */}
-                <div className="flex-1 z-0 relative overflow-y-auto custom-scrollbar">
+                <div className="custom-scrollbar h-full overflow-y-auto overscroll-contain">
                     {renderCardContent()}
                 </div>
             </div>
 
-            {/* Footer / Navigation Controls */}
-            <div className="p-6 flex items-center justify-between bg-black/20 backdrop-blur-sm relative z-10">
-                <button
-                    onClick={handlePrevious}
-                    disabled={currentIndex === 0}
-                    className="p-3 rounded-full hover:bg-white/10 disabled:opacity-30 transition-colors"
-                >
-                    <ChevronLeft className="w-6 h-6" />
-                </button>
+            {/* Footer — always visible, safe-area aware */}
+            <footer className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                {isQuiz && !quizSubmitted ? (
+                    <Button
+                        variant="cta"
+                        className="w-full"
+                        disabled={quizSelectedOption === null}
+                        onClick={handleQuizSubmit}
+                    >
+                        Check Answer
+                    </Button>
+                ) : (
+                    <div className="flex items-center justify-between gap-4">
+                        <button
+                            type="button"
+                            onClick={handlePrevious}
+                            disabled={currentIndex === 0}
+                            className="rounded-full p-3 text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
+                            aria-label="Previous card"
+                        >
+                            <ChevronLeft className="h-6 w-6" />
+                        </button>
 
-                <div className="text-sm font-medium text-gray-400">
-                    {currentIndex + 1} / {cards.length}
-                </div>
+                        <span className="text-sm font-medium text-muted-foreground">
+                            {currentIndex + 1} / {cards.length}
+                        </span>
 
-                <button
-                    onClick={handleNext}
-                    className="p-3 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20"
-                >
-                    {currentIndex === cards.length - 1 ? (
-                        <CheckCircle className="w-6 h-6" />
-                    ) : (
-                        <ChevronRight className="w-6 h-6" />
-                    )}
-                </button>
-            </div>
+                        <button
+                            type="button"
+                            onClick={handleNext}
+                            className="rounded-full bg-primary p-3 text-primary-foreground shadow-sm transition-colors hover:bg-[#17994B]"
+                            aria-label={currentIndex === cards.length - 1 ? 'Finish deck' : 'Next card'}
+                        >
+                            {currentIndex === cards.length - 1 ? (
+                                <CheckCircle className="h-6 w-6" />
+                            ) : (
+                                <ChevronRight className="h-6 w-6" />
+                            )}
+                        </button>
+                    </div>
+                )}
+            </footer>
         </div>
     );
 };

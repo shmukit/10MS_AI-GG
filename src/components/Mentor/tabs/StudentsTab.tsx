@@ -14,7 +14,6 @@ interface StudentsTabProps {
     roadmaps: any[];
     selectedBatch: string;
     setSelectedBatch: (id: string) => void;
-    isDarkMode: boolean;
     onUpdate: () => void;
 }
 
@@ -24,7 +23,6 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
     roadmaps,
     selectedBatch,
     setSelectedBatch,
-    isDarkMode,
     onUpdate
 }) => {
     const {
@@ -56,7 +54,6 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
     return (
         <div className="space-y-6">
             <BatchHeader
-                isDarkMode={isDarkMode}
                 selectedBatch={selectedBatch}
                 setSelectedBatch={setSelectedBatch}
                 batches={batches}
@@ -70,7 +67,6 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             />
 
             <BatchInfo
-                isDarkMode={isDarkMode}
                 selectedBatchData={selectedBatchData}
                 studentCount={batchStudents.length}
                 setEditingBatchData={setEditingBatchData}
@@ -78,14 +74,11 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             />
 
             <StudentsList
-                isDarkMode={isDarkMode}
                 students={batchStudents}
                 handleDeleteStudent={handleDeleteStudent}
             />
 
-            {/* Create Batch Modal */}
             <BatchModal
-                isDarkMode={isDarkMode}
                 isOpen={isAddingBatch}
                 onClose={() => setIsAddingBatch(false)}
                 mode="create"
@@ -95,10 +88,8 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 roadmaps={roadmaps}
             />
 
-            {/* Edit Batch Modal */}
             {editingBatchData && (
                 <BatchModal
-                    isDarkMode={isDarkMode}
                     isOpen={isEditingBatch}
                     onClose={() => {
                         setIsEditingBatch(false);
@@ -112,7 +103,6 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             )}
 
             <StudentModal
-                isDarkMode={isDarkMode}
                 isOpen={isAddingStudent}
                 onClose={() => setIsAddingStudent(false)}
                 studentData={newStudent}
@@ -124,7 +114,6 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             />
 
             <AssignStudentsModal
-                isDarkMode={isDarkMode}
                 isOpen={isAssigningStudents}
                 onClose={() => {
                     setIsAssigningStudents(false);
