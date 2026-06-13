@@ -20,9 +20,9 @@ This document provides a comprehensive guide to all PostHog events being tracked
 ## Configuration
 
 ### PostHog Setup
-- **API Key**: `phc_cfUCdGAUd0Y5AxxIRnvEeKQ7EEyfRI2UcursFuYpZQ3`
+- **API Key**: Set via `VITE_POSTHOG_KEY` in `.env.local` (never commit)
 - **Region**: US 🇺🇸
-- **Host**: `https://us.i.posthog.com`
+- **Host**: `VITE_POSTHOG_HOST` (default: `https://us.i.posthog.com`)
 - **Person Profiles**: `identified_only`
 - **Page View Capture**: `false` (manual tracking)
 

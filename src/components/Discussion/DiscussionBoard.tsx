@@ -102,11 +102,11 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
         }
     };
 
-    if (loading) return <div className={`p-4 text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading discussions...</div>;
+    if (loading) return <div className="p-4 text-center text-muted-foreground">Loading discussions...</div>;
 
     return (
-        <div className={`rounded-xl p-6 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
-            <h3 className={`text-xl font-bold mb-6 flex items-center gap-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+        <div className="rounded-xl p-6 transition-colors duration-200 bg-card">
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 transition-colors duration-200 text-foreground">
                 <span>💬</span> Discussion Board
             </h3>
 
@@ -116,17 +116,14 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
                     value={newPostContent}
                     onChange={(e) => setNewPostContent(e.target.value)}
                     placeholder={`Ask a question about this ${entityType}...`}
-                    className={`w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all ${isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
-                        }`}
+                    className="w-full p-4 border border-border rounded-lg shadow-sm focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 resize-none transition-all bg-card text-foreground placeholder:text-muted-foreground"
                     rows={3}
                 />
                 <div className="mt-2 flex justify-end">
                     <button
                         type="submit"
                         disabled={isPosting || !newPostContent.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                        className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                     >
                         {isPosting ? 'Posting...' : 'Post Question'}
                     </button>
@@ -136,10 +133,7 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
             {/* Thread List */}
             <div className="space-y-4">
                 {discussions.length === 0 ? (
-                    <div className={`text-center py-10 rounded-lg border border-dashed transition-colors duration-200 ${isDarkMode
-                        ? 'text-gray-400 bg-gray-700/30 border-gray-600'
-                        : 'text-gray-400 bg-white border-gray-300'
-                        }`}>
+                    <div className="text-center py-10 rounded-lg border border-dashed border-border transition-colors duration-200 text-muted-foreground bg-card">
                         <p>No discussions yet. Be the first to ask!</p>
                     </div>
                 ) : (

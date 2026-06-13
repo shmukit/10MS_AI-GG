@@ -7,18 +7,22 @@ import { LiveSessionCard } from './LiveSessionCard';
 interface LiveSessionListProps {
     batchId: string;
     isMentor?: boolean;
-    refreshTrigger?: number; // A simple counter to trigger Refetch
+    refreshTrigger?: number;
     currentLevel?: number;
+    /** @deprecated Theme is driven by CSS tokens; prop is ignored */
     isDarkMode?: boolean;
 }
 
-export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMentor = false, refreshTrigger, currentLevel, isDarkMode }) => {
+export const LiveSessionList: React.FC<LiveSessionListProps> = ({
+    batchId,
+    isMentor = false,
+    refreshTrigger,
+    currentLevel,
+}) => {
     const [sessions, setSessions] = useState<LiveSession[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSessions = async () => {
-        // If no batch, maybe don't fetch anything? Or fetch all?
-        // For now assuming batchId is provided (e.g. from Dashboard context)
         if (!batchId) {
             setLoading(false);
             return;
@@ -27,8 +31,6 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
         try {
             setLoading(true);
             const data = await getUpcomingSessions(batchId);
-            // Client-side sort just in case: Live ones first, then nearest future
-            // Actually DB query handles time order.
             setSessions(data);
         } catch (error) {
             console.error('Error fetching sessions:', error);
@@ -41,32 +43,34 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
         fetchSessions();
     }, [batchId, refreshTrigger]);
 
-    if (loading) return (
-        <div className="flex justify-center p-8 text-blue-500">
-            <Loader className="w-6 h-6 animate-spin" />
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex justify-center p-8 text-primary">
+                <Loader className="h-6 w-6 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className={`font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                    <CalendarIcon className="w-5 h-5 text-[var(--primary-accent)]" />
+            <div className="mb-4 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 font-bold text-foreground">
+                    <CalendarIcon className="h-5 w-5 text-primary" />
                     Upcoming Sessions
                 </h3>
-                {/* If we had a "view all" link, it would go here */}
             </div>
 
             {sessions.length === 0 ? (
-                <div className={`text-center py-8 rounded-xl border border-dashed ${isDarkMode
-                    ? 'bg-gray-700/20 border-gray-700'
-                    : 'bg-muted/20 border-border'
-                    }`}>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>No upcoming sessions scheduled.</p>
-                    {isMentor && <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-muted-foreground'}`}>Click "Schedule Class" to add one.</p>}
+                <div className="rounded-xl border border-dashed border-border bg-muted/30 py-8 text-center">
+                    <p className="text-sm text-muted-foreground">No upcoming sessions scheduled.</p>
+                    {isMentor && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Click &quot;Schedule Class&quot; to add one.
+                        </p>
+                    )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {sessions.map(session => (
                         <LiveSessionCard
                             key={session.id}
@@ -74,7 +78,6 @@ export const LiveSessionList: React.FC<LiveSessionListProps> = ({ batchId, isMen
                             isMentor={isMentor}
                             onDelete={fetchSessions}
                             currentLevel={currentLevel}
-                            isDarkMode={isDarkMode}
                         />
                     ))}
                 </div>

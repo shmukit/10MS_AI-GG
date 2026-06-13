@@ -15,7 +15,6 @@ interface RoadmapTabProps {
     setRoadmapData: React.Dispatch<React.SetStateAction<RoadmapItem[]>>;
     selectedRoadmap: string;
     setSelectedRoadmap: (id: string) => void;
-    isDarkMode: boolean;
     selectedBatch?: string;
 }
 
@@ -26,7 +25,6 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
     setRoadmapData,
     selectedRoadmap,
     setSelectedRoadmap,
-    isDarkMode,
     selectedBatch
 }) => {
     const {
@@ -63,9 +61,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
 
     return (
         <div className="space-y-6">
-            {/* Roadmap Controls */}
             <RoadmapControls
-                isDarkMode={isDarkMode}
                 roadmaps={roadmaps}
                 selectedRoadmap={selectedRoadmap}
                 setSelectedRoadmap={setSelectedRoadmap}
@@ -77,10 +73,8 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 setIsAddingTask={setIsAddingTask}
             />
 
-            {/* Filters */}
             {selectedRoadmap && (
                 <RoadmapFilters
-                    isDarkMode={isDarkMode}
                     weekFilter={weekFilter}
                     setWeekFilter={setWeekFilter}
                     typeFilter={typeFilter}
@@ -89,9 +83,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 />
             )}
 
-            {/* Tasks Table */}
             <TasksTable
-                isDarkMode={isDarkMode}
                 currentRoadmapTitle={getCurrentRoadmap()?.title || 'Selected Roadmap'}
                 filteredTasks={getFilteredTasks()}
                 setEditingTask={setEditingTask}
@@ -99,9 +91,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 handleDeleteTask={handleDeleteTask}
             />
 
-            {/* Add Task Modal */}
             <TaskModal
-                isDarkMode={isDarkMode}
                 isOpen={isAddingTask}
                 onClose={() => setIsAddingTask(false)}
                 taskData={newTask}
@@ -112,12 +102,10 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 submitLabel="Add Task"
             />
 
-            {/* Edit Task Modal */}
             <TaskModal
-                isDarkMode={isDarkMode}
                 isOpen={!!editingTask && !!editingTaskData}
                 onClose={() => { setEditingTask(null); setEditingTaskData(null); }}
-                taskData={editingTaskData || newTask} // Fallback to newTask just to satisfy type if null, though modal won't show
+                taskData={editingTaskData || newTask}
                 setTaskData={setEditingTaskData}
                 onSubmit={handleUpdateTask}
                 weekOptions={getWeekOptions()}
@@ -125,9 +113,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 submitLabel="Update Task"
             />
 
-            {/* Add Week Modal */}
             <AddWeekModal
-                isDarkMode={isDarkMode}
                 isOpen={showAddWeekModal}
                 onClose={() => setShowAddWeekModal(false)}
                 roadmapTitle={getCurrentRoadmap()?.title || 'Selected Roadmap'}
@@ -135,9 +121,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 onAddWeek={handleAddWeek}
             />
 
-            {/* Add Roadmap Modal */}
             <RoadmapModal
-                isDarkMode={isDarkMode}
                 isOpen={isAddingRoadmap}
                 onClose={() => setIsAddingRoadmap(false)}
                 roadmapData={newRoadmap}
@@ -147,9 +131,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 submitLabel="Add Roadmap"
             />
 
-            {/* Edit Roadmap Modal */}
             <RoadmapModal
-                isDarkMode={isDarkMode}
                 isOpen={isEditingRoadmap && !!editingRoadmapData}
                 onClose={() => {
                     setIsEditingRoadmap(false);

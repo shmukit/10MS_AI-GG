@@ -1,5 +1,7 @@
 # Beautification Plan: UI Uplift & Micro-interactions
 
+> **Status (2026-06):** Visual direction is now defined in [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) and previewed at `/style-lab`. Glassmorphism and rainbow accent themes are **retired**. Remaining items below should follow the restrained 10MS green + neutral surface system.
+
 ## 1. Objective
 To enhance the user experience of the 10MS AI-GG platform by introducing fluid animations, micro-interactions, and visual polish, making the application feel more "alive" and premium.
 

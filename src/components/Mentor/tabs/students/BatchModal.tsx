@@ -1,19 +1,18 @@
 import React from 'react';
 
+const inputClass = 'w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-colors duration-200 bg-muted text-foreground';
 
 interface BatchModalProps {
-    isDarkMode: boolean;
     isOpen: boolean;
     onClose: () => void;
     mode: 'create' | 'edit';
-    batchData: any; // newBatch or editingBatchData
+    batchData: any;
     setBatchData: (data: any) => void;
     onSubmit: () => void;
-    roadmaps?: any[]; // Only for create
+    roadmaps?: any[];
 }
 
 export const BatchModal: React.FC<BatchModalProps> = ({
-    isDarkMode,
     isOpen,
     onClose,
     mode,
@@ -26,9 +25,8 @@ export const BatchModal: React.FC<BatchModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`max-w-md w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                }`}>
-                <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="max-w-md w-full mx-4 p-6 rounded-xl shadow-lg bg-card transition-colors duration-200">
+                <h3 className="text-lg font-bold mb-4 text-foreground transition-colors duration-200">
                     {mode === 'create' ? 'Create New Batch' : `Edit Batch: ${batchData.name}`}
                 </h3>
 
@@ -36,21 +34,19 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                     {mode === 'create' ? (
                         <>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Batch Name
                                 </label>
                                 <input
                                     type="text"
                                     value={batchData.name}
                                     onChange={(e) => setBatchData({ ...batchData, name: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
 
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                    }`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Assign Roadmap
                                 </label>
                                 <select
@@ -63,10 +59,7 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                                             roadmapName: selectedRoadmap?.name || ''
                                         });
                                     }}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     required
                                 >
                                     <option value="">Select Roadmap</option>
@@ -79,7 +72,7 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                             </div>
 
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Start Date
                                 </label>
                                 <input
@@ -87,8 +80,7 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                                     required
                                     value={batchData.startDate || ''}
                                     onChange={(e) => setBatchData({ ...batchData, startDate: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                     placeholder="Select start date"
                                 />
                             </div>
@@ -96,50 +88,46 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                     ) : (
                         <>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     WhatsApp Group Link
                                 </label>
                                 <input
                                     type="url"
                                     value={batchData.whatsappLink}
                                     onChange={(e) => setBatchData({ ...batchData, whatsappLink: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Discord Server Link
                                 </label>
                                 <input
                                     type="url"
                                     value={batchData.discordLink}
                                     onChange={(e) => setBatchData({ ...batchData, discordLink: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Emergency Contact
                                 </label>
                                 <input
                                     type="tel"
                                     value={batchData.emergencyContact}
                                     onChange={(e) => setBatchData({ ...batchData, emergencyContact: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Status
                                 </label>
                                 <select
                                     value={batchData.status || 'active'}
                                     onChange={(e) => setBatchData({ ...batchData, status: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 >
                                     <option value="active">Active</option>
                                     <option value="completed">Completed</option>
@@ -152,17 +140,13 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                     <div className="flex gap-3 pt-2">
                         <button
                             onClick={onSubmit}
-                            className={`flex-1 py-2 px-4 text-white rounded-lg font-medium transition-colors ${mode === 'create' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-600 hover:bg-orange-700'
-                                }`}
+                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${mode === 'create' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
                         >
                             {mode === 'create' ? 'Create Batch' : 'Update Batch'}
                         </button>
                         <button
                             onClick={onClose}
-                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${isDarkMode
-                                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                                }`}
+                            className="flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-muted-foreground"
                         >
                             Cancel
                         </button>

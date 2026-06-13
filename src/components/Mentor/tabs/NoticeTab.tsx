@@ -10,16 +10,16 @@ interface NoticeTabProps {
     batches: Batch[];
     selectedBatch: string;
     setSelectedBatch: (id: string) => void;
-    isDarkMode: boolean;
     onUpdate: () => void;
 }
+
+const inputClass = 'w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-colors duration-200 bg-muted text-foreground';
 
 export const NoticeTab: React.FC<NoticeTabProps> = ({
     notices,
     batches,
     selectedBatch,
     setSelectedBatch,
-    isDarkMode,
     onUpdate
 }) => {
     const { user } = useAuth();
@@ -48,7 +48,7 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                     scheduled_time: newNotice.scheduledTime || null,
                     is_published: newNotice.isPublished,
                     author_id: user?.id,
-                    batch_id: selectedBatch || null // Associate with selected batch or global
+                    batch_id: selectedBatch || null
                 }] as unknown as never)
                 .select()
                 .single() as { data: any; error: any };
@@ -118,23 +118,18 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end justify-between">
-                <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className="text-lg font-bold text-foreground transition-colors duration-200">
                     Notice Management
                 </h3>
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-                    {/* Batch Dropdown */}
                     <div>
-                        <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                            }`}>
+                        <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                             Filter by Batch
                         </label>
                         <select
                             value={selectedBatch}
                             onChange={(e) => setSelectedBatch(e.target.value)}
-                            className={`px-3 py-2 rounded-lg border transition-colors ${isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300 text-gray-900'
-                                }`}
+                            className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground transition-colors"
                         >
                             <option value="">All Batches</option>
                             {batches.map(batch => (
@@ -145,7 +140,7 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
 
                     <button
                         onClick={() => setIsAddingNotice(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors h-10"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors h-10"
                     >
                         <Plus className="w-4 h-4" />
                         Create Notice
@@ -153,40 +148,35 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                 </div>
             </div>
 
-            {/* Notices List */}
-            <div className={`rounded-xl border overflow-hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                }`}>
+            <div className="rounded-xl border border-border bg-card overflow-hidden transition-colors duration-200">
                 <div className="p-6">
                     <div className="space-y-4">
                         {notices
-                            .filter(notice => !selectedBatch || notice.batchId === selectedBatch || !notice.batchId) // Show batch specific or global
+                            .filter(notice => !selectedBatch || notice.batchId === selectedBatch || !notice.batchId)
                             .map((notice) => (
                                 <div
                                     key={notice.id}
-                                    className={`p-4 rounded-lg border transition-colors duration-200 ${isDarkMode
-                                        ? 'bg-gray-700 border-gray-600'
-                                        : 'bg-gray-50 border-gray-200'
-                                        }`}
+                                    className="p-4 rounded-lg border border-border bg-muted transition-colors duration-200"
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <h4 className={`font-semibold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                <h4 className="font-semibold text-foreground transition-colors duration-200">
                                                     {notice.title}
                                                 </h4>
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getTagColor(notice.tag)}`}>
                                                     {notice.tag}
                                                 </span>
                                                 {!notice.isPublished && (
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                                                         Draft
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className={`text-sm mb-3 leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <p className="text-sm mb-3 leading-relaxed text-muted-foreground transition-colors duration-200">
                                                 {notice.content}
                                             </p>
-                                            <div className={`flex items-center gap-4 text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <div className="flex items-center gap-4 text-xs text-muted-foreground transition-colors duration-200">
                                                 <div className="flex items-center gap-1">
                                                     <Calendar className="w-3 h-3" />
                                                     <span>{notice.scheduledDate || 'No date'}</span>
@@ -196,7 +186,7 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                                     <span>{notice.scheduledTime || 'No time'}</span>
                                                 </div>
                                                 {notice.batchId && (
-                                                    <div className="flex items-center gap-1 text-blue-500">
+                                                    <div className="flex items-center gap-1 text-primary">
                                                         For: {batches.find(b => b.id === notice.batchId)?.name || 'Unknown Batch'}
                                                     </div>
                                                 )}
@@ -206,14 +196,13 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setNoticeToEdit(notice)}
-                                                className={`p-2 rounded transition-colors ${isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
-                                                    }`}
+                                                className="p-2 rounded transition-colors hover:bg-accent text-muted-foreground"
                                             >
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteNotice(notice.id)}
-                                                className="p-2 rounded hover:bg-red-100 text-red-600"
+                                                className="p-2 rounded hover:bg-destructive/10 text-destructive"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -222,7 +211,7 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                 </div>
                             ))}
                         {notices.length === 0 && (
-                            <div className={`text-center py-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div className="text-center py-8 text-muted-foreground">
                                 No notices found.
                             </div>
                         )}
@@ -230,52 +219,47 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                 </div>
             </div>
 
-            {/* Add Notice Modal */}
             {isAddingNotice && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className={`max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                        }`}>
-                        <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg bg-card transition-colors duration-200">
+                        <h3 className="text-lg font-bold mb-4 text-foreground transition-colors duration-200">
                             Create New Notice
                         </h3>
 
                         <div className="space-y-4 mb-6">
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Title
                                 </label>
                                 <input
                                     type="text"
                                     value={newNotice.title}
                                     onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
 
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Content
                                 </label>
                                 <textarea
                                     value={newNotice.content}
                                     onChange={(e) => setNewNotice({ ...newNotice, content: e.target.value })}
                                     rows={4}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Tag
                                     </label>
                                     <select
                                         value={newNotice.tag}
                                         onChange={(e) => setNewNotice({ ...newNotice, tag: e.target.value as any })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     >
                                         <option value="Reminder">Reminder</option>
                                         <option value="Homework">Homework</option>
@@ -287,28 +271,26 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                 </div>
 
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Date
                                     </label>
                                     <input
                                         type="date"
                                         value={newNotice.scheduledDate}
                                         onChange={(e) => setNewNotice({ ...newNotice, scheduledDate: e.target.value })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Time
                                     </label>
                                     <input
                                         type="time"
                                         value={newNotice.scheduledTime}
                                         onChange={(e) => setNewNotice({ ...newNotice, scheduledTime: e.target.value })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     />
                                 </div>
                             </div>
@@ -319,9 +301,9 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                     id="publish"
                                     checked={newNotice.isPublished}
                                     onChange={(e) => setNewNotice({ ...newNotice, isPublished: e.target.checked })}
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                    className="w-4 h-4 text-primary rounded focus:ring-primary/15 focus:border-primary"
                                 />
-                                <label htmlFor="publish" className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label htmlFor="publish" className="text-sm text-muted-foreground transition-colors duration-200">
                                     Publish immediately
                                 </label>
                             </div>
@@ -330,16 +312,13 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                         <div className="flex gap-3">
                             <button
                                 onClick={handleAddNotice}
-                                className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex-1 py-2 px-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                             >
                                 Create Notice
                             </button>
                             <button
                                 onClick={() => setIsAddingNotice(false)}
-                                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${isDarkMode
-                                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                                    }`}
+                                className="flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-muted-foreground"
                             >
                                 Cancel
                             </button>
@@ -348,52 +327,47 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                 </div>
             )}
 
-            {/* Edit Notice Modal */}
             {noticeToEdit && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className={`max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                        }`}>
-                        <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg bg-card transition-colors duration-200">
+                        <h3 className="text-lg font-bold mb-4 text-foreground transition-colors duration-200">
                             Edit Notice
                         </h3>
 
                         <div className="space-y-4 mb-6">
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Title
                                 </label>
                                 <input
                                     type="text"
                                     value={noticeToEdit.title}
                                     onChange={(e) => setNoticeToEdit({ ...noticeToEdit, title: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
 
                             <div>
-                                <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     Content
                                 </label>
                                 <textarea
                                     value={noticeToEdit.content}
                                     onChange={(e) => setNoticeToEdit({ ...noticeToEdit, content: e.target.value })}
                                     rows={4}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
+                                    className={inputClass}
                                 />
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Tag
                                     </label>
                                     <select
                                         value={noticeToEdit.tag}
                                         onChange={(e) => setNoticeToEdit({ ...noticeToEdit, tag: e.target.value as any })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     >
                                         <option value="Reminder">Reminder</option>
                                         <option value="Homework">Homework</option>
@@ -405,28 +379,26 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                 </div>
 
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Date
                                     </label>
                                     <input
                                         type="date"
                                         value={noticeToEdit.scheduledDate || ''}
                                         onChange={(e) => setNoticeToEdit({ ...noticeToEdit, scheduledDate: e.target.value })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                         Time
                                     </label>
                                     <input
                                         type="time"
                                         value={noticeToEdit.scheduledTime || ''}
                                         onChange={(e) => setNoticeToEdit({ ...noticeToEdit, scheduledTime: e.target.value })}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
+                                        className={inputClass}
                                     />
                                 </div>
                             </div>
@@ -437,9 +409,9 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                                     id="edit-publish"
                                     checked={noticeToEdit.isPublished}
                                     onChange={(e) => setNoticeToEdit({ ...noticeToEdit, isPublished: e.target.checked })}
-                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                    className="w-4 h-4 text-primary rounded focus:ring-primary/15 focus:border-primary"
                                 />
-                                <label htmlFor="edit-publish" className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label htmlFor="edit-publish" className="text-sm text-muted-foreground transition-colors duration-200">
                                     Published
                                 </label>
                             </div>
@@ -448,16 +420,13 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                         <div className="flex gap-3">
                             <button
                                 onClick={handleUpdateNotice}
-                                className="flex-1 py-2 px-4 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex-1 py-2 px-4 bg-muted text-foreground hover:bg-muted/80 border border-border rounded-lg font-medium transition-colors"
                             >
                                 Update Notice
                             </button>
                             <button
                                 onClick={() => setNoticeToEdit(null)}
-                                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${isDarkMode
-                                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                                    }`}
+                                className="flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-muted-foreground"
                             >
                                 Cancel
                             </button>
@@ -465,7 +434,6 @@ export const NoticeTab: React.FC<NoticeTabProps> = ({
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

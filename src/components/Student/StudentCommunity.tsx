@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Users, AlertCircle, Mail, Check } from 'lucide-react';
+import { ArrowLeft, Users, AlertCircle, Mail } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Batch, User } from '../../services/database';
 import { StudentHeader } from './StudentHeader';
-import { useTheme } from '../../lib/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { RoadmapDropdown } from './dashboard/RoadmapDropdown';
+import { Toast } from '../ui/Toast';
 
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +14,6 @@ export const StudentCommunity: React.FC = () => {
   const [searchParams] = useSearchParams();
   const batchIdParam = searchParams.get('batch_id');
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [batch, setBatch] = useState<Batch | null>(null);
@@ -200,7 +199,7 @@ export const StudentCommunity: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      <div className="min-h-screen bg-background text-foreground">
         <StudentHeader
           userName={getUserDisplayName()}
           userRole="student"
@@ -209,8 +208,8 @@ export const StudentCommunity: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-lg text-gray-600">Loading community...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-lg text-muted-foreground">Loading community...</p>
             </div>
           </div>
         </div>
@@ -220,7 +219,7 @@ export const StudentCommunity: React.FC = () => {
 
   if (error) {
     return (
-      <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      <div className="min-h-screen bg-background text-foreground">
         <StudentHeader
           userName={getUserDisplayName()}
           userRole="student"
@@ -229,7 +228,7 @@ export const StudentCommunity: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <button
             onClick={() => navigate('/student/dashboard')}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
+            className="flex items-center gap-2 text-primary hover:text-primary/80 mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -277,7 +276,7 @@ export const StudentCommunity: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+    <div className="min-h-screen bg-background text-foreground">
       <StudentHeader
         userName={getUserDisplayName()}
         userRole="student"
@@ -287,7 +286,7 @@ export const StudentCommunity: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8 pb-32 md:pb-8">
         <button
           onClick={() => navigate('/student/dashboard')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors text-xs sm:text-base"
+          className="flex items-center gap-2 text-primary hover:text-primary/80 mb-4 transition-colors text-xs sm:text-base"
         >
           <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Back to Dashboard
@@ -299,7 +298,6 @@ export const StudentCommunity: React.FC = () => {
           {/* Roadmap Dropdown */}
           {currentRoadmap && (
             <RoadmapDropdown
-              isDarkMode={isDarkMode}
               enrolledBatches={enrolledBatches}
               currentBatch={batch}
               showDropdown={showRoadmapDropdown}
@@ -311,10 +309,10 @@ export const StudentCommunity: React.FC = () => {
         </div>
 
         {/* Batch Information */}
-        <div className={`rounded-xl p-4 md:p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
+        <div className="bg-card border border-border rounded-xl p-4 md:p-6 shadow-sm mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-            <h2 className={`text-lg md:text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <Users className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+            <h2 className="text-lg md:text-2xl font-bold text-foreground">
               {batch?.name || 'Loading...'}
             </h2>
           </div>
@@ -323,12 +321,12 @@ export const StudentCommunity: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <div className="grid grid-cols-1 sm:flex sm:items-center gap-3 md:gap-6">
               <div className="flex items-center gap-2">
-                <Users className={`w-4 h-4 md:w-5 md:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Students: {students.length}</span>
+                <Users className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Students: {students.length}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xl md:text-2xl">👨‍🎓</span>
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <span className="text-sm text-muted-foreground">
                   Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name}` : 'Uttam Deb'}
                 </span>
               </div>
@@ -352,7 +350,7 @@ export const StudentCommunity: React.FC = () => {
                   href={batch.discord_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-purple-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm"
+                  className="flex items-center gap-2 border border-border bg-card text-foreground px-3 md:px-4 py-2 rounded-lg hover:bg-muted transition-colors text-xs md:text-sm"
                 >
                   <span>💬</span>
                   <span className="hidden sm:inline">Discord</span>
@@ -368,7 +366,7 @@ export const StudentCommunity: React.FC = () => {
                 </a>
               )}
               {!batch?.whatsapp_link && !batch?.discord_link && !batch?.emergency_contact && (
-                <div className="text-sm text-gray-500 italic px-4 py-2">
+                <div className="text-sm text-muted-foreground italic px-4 py-2">
                   No community links available yet
                 </div>
               )}
@@ -377,11 +375,11 @@ export const StudentCommunity: React.FC = () => {
         </div>
 
         {/* Group Members */}
-        <div className={`rounded-lg p-6 shadow-sm mb-6 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Group Members</h3>
+            <h3 className="text-xl font-bold text-foreground">Group Members</h3>
             <div className="flex items-center gap-3">
-              <button className={`p-2 hover:text-gray-800 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600'}`}>
+              <button className="p-2 text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                 </svg>
@@ -389,10 +387,7 @@ export const StudentCommunity: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'progress')}
-                className={`flex items-center gap-2 border rounded-lg px-3 py-2 ${isDarkMode
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-600 hover:text-gray-800'
-                  }`}
+                className="flex items-center gap-2 border border-border bg-card rounded-lg px-3 py-2 text-foreground hover:bg-muted"
               >
                 <option value="name">Sort by Name</option>
                 <option value="progress">Sort by Progress</option>
@@ -404,20 +399,20 @@ export const StudentCommunity: React.FC = () => {
             {/* Real Group Members */}
             {sortedStudents.length > 0 ? (
               sortedStudents.map((member, memberIndex) => (
-                <div key={member.id} className={`rounded-xl p-3 md:p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                <div key={member.id} className="bg-muted/50 border border-border rounded-xl p-3 md:p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3 md:gap-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-semibold text-sm md:text-base">
                         {member.first_name?.[0] || 'S'}{member.last_name?.[0] || ''}
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="min-w-0">
-                          <h4 className={`font-semibold text-sm md:text-base truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          <h4 className="font-semibold text-sm md:text-base truncate text-foreground">
                             {member.first_name} {member.last_name}
                           </h4>
                           {/* Display profile information if available */}
                           {member.profile && (
-                            <div className={`text-[10px] md:text-xs space-y-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div className="text-[10px] md:text-xs space-y-0.5 text-muted-foreground">
                               <p className="truncate">{member.profile.degree} • {member.profile.year} Year</p>
                               <p className="truncate">{member.profile.institute}</p>
                             </div>
@@ -426,33 +421,33 @@ export const StudentCommunity: React.FC = () => {
                         {/* Email copy button */}
                         <button
                           onClick={() => copyEmailToClipboard(member.email)}
-                          className={`p-1.5 md:p-2 rounded-lg transition-colors flex-shrink-0 ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
+                          className="p-1.5 md:p-2 rounded-lg transition-colors flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                           title="Copy email to clipboard"
                         >
                           <Mail className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 sm:gap-0 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-gray-600">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 sm:gap-0 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
                       {member.progress ? (
                         <>
-                          <p className={`text-[10px] md:text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <p className="text-[10px] md:text-xs font-medium text-muted-foreground">
                             Week {member.progress.current_week}/6
                           </p>
                           <div className="flex flex-col sm:items-end">
-                            <p className={`text-[10px] md:text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className="text-[10px] md:text-xs text-muted-foreground">
                               {Math.round(member.progress.progress_percentage || 0)}% Complete
                             </p>
-                            <div className={`w-16 md:w-20 rounded-full h-1.5 mt-1 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                            <div className="progress-track mt-1 h-1.5 w-16 rounded-full md:w-20">
                               <div
-                                className="bg-blue-600 h-1.5 rounded-full"
+                                className="bg-primary h-1.5 rounded-full"
                                 style={{ width: `${Math.round(member.progress.progress_percentage || 0)}%` }}
                               ></div>
                             </div>
                           </div>
                         </>
                       ) : (
-                        <p className={`text-[10px] md:text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className="text-[10px] md:text-xs text-muted-foreground">
                           Enrolled
                         </p>
                       )}
@@ -504,30 +499,30 @@ export const StudentCommunity: React.FC = () => {
                   completion: 60
                 }
               ].map((member, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-4">
+                <div key={index} className="bg-muted/50 border border-border rounded-xl p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
+                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-semibold">
                         {member.initials}
                       </div>
                       <div className="flex items-center gap-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{member.name}</h4>
-                          <p className="text-sm text-gray-600">{member.details}</p>
-                          <p className="text-xs text-gray-500">{member.university}</p>
+                          <h4 className="font-semibold text-foreground">{member.name}</h4>
+                          <p className="text-sm text-muted-foreground">{member.details}</p>
+                          <p className="text-xs text-muted-foreground">{member.university}</p>
                         </div>
                         {/* Email icon beside the name */}
-                        <button className="p-2 text-gray-600 hover:text-gray-800">
+                        <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg">
                           <Mail className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">{member.progress}</p>
-                      <p className="text-xs text-gray-600">{member.completion}% Complete</p>
-                      <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                      <p className="text-sm font-medium text-foreground">{member.progress}</p>
+                      <p className="text-xs text-muted-foreground">{member.completion}% Complete</p>
+                      <div className="progress-track mt-1 h-2 w-20 rounded-full">
                         <div
-                          className="bg-blue-600 h-2 rounded-full"
+                          className="bg-primary h-2 rounded-full"
                           style={{ width: `${member.completion}%` }}
                         ></div>
                       </div>
@@ -540,21 +535,12 @@ export const StudentCommunity: React.FC = () => {
         </div>
       </div>
 
-      {/* Toast Notification */}
       {toast && (
-        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${toast.type === 'success'
-          ? 'bg-green-500 text-white'
-          : 'bg-red-500 text-white'
-          }`}>
-          <div className="flex items-center gap-2">
-            {toast.type === 'success' ? (
-              <Check className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        </div>
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
+        />
       )}
     </div>
   );

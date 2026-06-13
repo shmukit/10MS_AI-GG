@@ -3,6 +3,9 @@ import { supabase } from '../../../../lib/supabase';
 import { useAuth } from '../../../../lib/useAuth';
 import { Batch } from '../../../../types/mentor';
 
+const getDefaultStudentPassword = () =>
+    import.meta.env.VITE_DEFAULT_STUDENT_PASSWORD || '';
+
 interface UseStudentsTabProps {
     selectedBatch: string;
     onUpdate: () => void;
@@ -34,7 +37,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         name: '',
         email: '',
         phone: '',
-        password: 'NeverStopLearning!',
+        password: getDefaultStudentPassword(),
         institute: '',
         year: '1st Year',
         subject: '',
@@ -172,7 +175,11 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         }
 
         try {
-            const studentPassword = 'NeverStopLearning!';
+            const studentPassword = newStudent.password || getDefaultStudentPassword();
+            if (!studentPassword) {
+                alert('Please set a password for the student or configure VITE_DEFAULT_STUDENT_PASSWORD.');
+                return;
+            }
             const { data: existingUser, error: checkError } = await supabase
                 .from('users')
                 .select('id, email')

@@ -1,11 +1,29 @@
 // Create Auth Users via Supabase Management API
-// This script uses Supabase's official API to create users properly
+// This script uses Supabase's official API to create users properly.
+//
+// Usage:
+//   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... TEST_USER_PASSWORD=... node scripts/create_users_via_api.js
+//
+// Edit usersToCreate below with your own test accounts before running.
+
+require('dotenv').config({ path: '.env.local' });
+require('dotenv').config();
 
 const { createClient } = require('@supabase/supabase-js');
 
-// You'll need your service role key for this
-const supabaseUrl = 'https://hayhwvddwhgdvlxrxqun.supabase.co';
-const supabaseServiceKey = 'YOUR_SERVICE_ROLE_KEY'; // Get from Supabase Dashboard → Settings → API
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const defaultPassword = process.env.TEST_USER_PASSWORD;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set them in .env.local or your shell.');
+  process.exit(1);
+}
+
+if (!defaultPassword) {
+  console.error('Missing TEST_USER_PASSWORD. Set a secure password in .env.local before running.');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
@@ -14,58 +32,52 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
-// Users from your public.users table that need auth accounts
+// Replace with your own test users before running
 const usersToCreate = [
-  { email: 'raied@10minuteschool.com', name: 'Raied Rahman' },
-  { email: 'raihana@10minuteschool.com', name: 'Raihana Sultana' },
-  { email: 'shams@10minuteschool.com', name: 'Shams Ul Haque' },
-  { email: 'farhanur@10minuteschool.com', name: 'Farhanur Rahman' },
-  { email: 'zinat.khan@lightcastlepartners.com', name: 'Zinat Khan' },
-  { email: 'ridwanur.rahman@lightcastlepartners.com', name: 'Ridwanur Rahman' },
-  { email: 'afsanamimi194@gmail.com', name: 'Afsana Mimi' },
-  // Add more users as needed
+  { email: 'admin@example.com', name: 'Admin User' },
+  { email: 'mentor@example.com', name: 'Mentor User' },
+  { email: 'student@example.com', name: 'Student User' },
 ];
 
 async function createAuthUsers() {
-  console.log('🚀 Starting to create auth users...');
-  
+  console.log('Starting to create auth users...');
+
   let created = 0;
   let skipped = 0;
-  
+
   for (const user of usersToCreate) {
     try {
       console.log(`Creating user: ${user.email}`);
-      
+
       const { data, error } = await supabase.auth.admin.createUser({
         email: user.email,
-        password: 'NeverStopLearning!',
-        email_confirm: true, // Auto-confirm email
+        password: defaultPassword,
+        email_confirm: true,
         user_metadata: {
           name: user.name
         }
       });
-      
+
       if (error) {
         if (error.message.includes('already exists')) {
-          console.log(`✅ User ${user.email} already exists - skipping`);
+          console.log(`User ${user.email} already exists - skipping`);
           skipped++;
         } else {
-          console.error(`❌ Error creating ${user.email}:`, error.message);
+          console.error(`Error creating ${user.email}:`, error.message);
         }
       } else {
-        console.log(`✅ Created user: ${user.email} with ID: ${data.user.id}`);
+        console.log(`Created user: ${user.email} with ID: ${data.user.id}`);
         created++;
       }
-      
+
     } catch (err) {
-      console.error(`❌ Exception creating ${user.email}:`, err.message);
+      console.error(`Exception creating ${user.email}:`, err.message);
     }
   }
-  
-  console.log('\n🎉 Completed!');
-  console.log(`✅ Created: ${created} users`);
-  console.log(`⏭️  Skipped: ${skipped} users`);
+
+  console.log('\nCompleted!');
+  console.log(`Created: ${created} users`);
+  console.log(`Skipped: ${skipped} users`);
 }
 
-// Run the script
 createAuthUsers().catch(console.error);

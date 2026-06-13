@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anek+Bangla:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Fonts ──────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anek+Bangla:wght@400;500;600;700&display=swap');
+/* ─── Fonts loaded above ─────────────────────────────────────── */
 
 /* ─── 10MS Design Tokens — Light Mode ───────────────────────── */
 :root {
@@ -32,60 +33,21 @@
   --c-outline:              #E5E7EB;
   --c-outline-v:            #D1D5DB;
 
-  /* Tailwind semantic bridge — maps Tailwind vars to 10MS tokens */
-  --background:             #FFFFFF;
-  --foreground:             #111827;
-  --card:                   #FFFFFF;
-  --card-foreground:        #111827;
-  --popover:                #FFFFFF;
-  --popover-foreground:     #111827;
+  /* Shared semantic tokens (palette-specific values in palettes.css) */
   --primary:                #1CAB55;
   --primary-foreground:     #FFFFFF;
-  --secondary:              #F3F4F6;
-  --secondary-foreground:   #111827;
-  --muted:                  #F3F4F6;
-  --muted-foreground:       #6B7280;
   --accent:                 #EAFEF2;
   --accent-foreground:      #086347;
   --destructive:            #DC2626;
   --destructive-foreground: #FFFFFF;
-  --border:                 #E5E7EB;
-  --input:                  #E5E7EB;
   --ring:                   #1CAB55;
   --radius:                 0.75rem;
 }
 
-/* ─── 10MS Dark Mode — Derived from inverse-surface vocabulary ─ */
-/* Warm blue-blacks anchored in 10MS token language, not zinc/slate */
+/* Dark shared accent tokens */
 .dark {
-  --c-surface:              #161D27;
-  --c-surface-subtle:       #1E2A38;
-  --c-surface-tinted:       #0F2419; /* dark green tint */
-  --c-outline:              #2D3748;
-  --c-text:                 #F9FAFB;
-  --c-text-2:               #D1D5DB;
-  --c-text-3:               #9CA3AF;
-  --c-text-dis:             #4B5563;
-
-  --background:             #0D1117;
-  --foreground:             #F9FAFB;
-  --card:                   #161D27;
-  --card-foreground:        #F9FAFB;
-  --popover:                #161D27;
-  --popover-foreground:     #F9FAFB;
-  --primary:                #1CAB55; /* green is unchanged — works on dark */
-  --primary-foreground:     #FFFFFF;
-  --secondary:              #1E2A38;
-  --secondary-foreground:   #D1D5DB;
-  --muted:                  #1E2A38;
-  --muted-foreground:       #9CA3AF;
-  --accent:                 #0F2419;
+  --accent:                 #142019;
   --accent-foreground:      #1CAB55;
-  --destructive:            #DC2626;
-  --destructive-foreground: #FFFFFF;
-  --border:                 #2D3748;
-  --input:                  #2D3748;
-  --ring:                   #1CAB55;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────── */
@@ -124,6 +86,10 @@ body {
 .shadow-hover   { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
 .shadow-modal   { box-shadow: 0 8px 40px rgba(0,0,0,0.14); }
 .shadow-tab-bar { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+
+/* Progress bar track — always visible against card/muted surfaces */
+.progress-track { background: var(--progress-track); }
+.progress-fill  { background: var(--primary); }
 
 /* ─── Animations — Feedback, Not Decoration ──────────────────── */
 @keyframes fade-in {

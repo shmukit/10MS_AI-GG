@@ -7,7 +7,6 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   message: string;
-  isDarkMode?: boolean;
   isLoading?: boolean;
   loadingText?: string;
 }
@@ -18,68 +17,48 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  isDarkMode = false,
   isLoading = false,
   loadingText = "Processing..."
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`rounded-xl p-6 shadow-lg max-w-md w-full mx-4 transition-colors duration-200 ${
-        isDarkMode 
-          ? 'bg-gray-800 border border-gray-700' 
-          : 'bg-white border border-gray-200'
-      }`}>
-        {/* Header */}
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="rounded-xl p-6 shadow-modal max-w-md w-full mx-4 bg-card border border-border">
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            {title}
-          </h3>
+          <h3 className="text-lg font-bold text-foreground">{title}</h3>
           <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${
-              isDarkMode 
-                ? 'hover:bg-gray-700 text-gray-400' 
-                : 'hover:bg-gray-100 text-gray-500'
-            }`}
+            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Message */}
-        <p className={`mb-6 leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-          {message}
-        </p>
+        <p className="mb-6 leading-relaxed text-muted-foreground">{message}</p>
 
-        {/* Action Buttons */}
         <div className="flex gap-3">
           <button
             onClick={onConfirm}
             disabled={isLoading}
             className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
               isLoading
-                ? `${isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500'} cursor-not-allowed`
-                : isDarkMode 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-green-500 hover:bg-green-600 text-white'
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-primary hover:bg-[#17994B] text-primary-foreground'
             }`}
           >
             {isLoading && (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
             )}
             {isLoading ? loadingText : 'Yes, I am sure'}
           </button>
           <button
             onClick={onClose}
             disabled={isLoading}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+            className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors border border-border ${
               isLoading
-                ? `${isDarkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-200 text-gray-400'} cursor-not-allowed`
-                : isDarkMode 
-                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-muted hover:bg-accent text-foreground'
             }`}
           >
             No, I am unsure

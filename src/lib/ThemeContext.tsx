@@ -1,15 +1,34 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type ColorTheme = 'default' | 'cherryblossoms' | 'shroomhaze' | 'flare';
+export type NeutralPalette =
+  | 'warm-stone'
+  | 'charcoal-ivory'
+  | 'cool-slate'
+  | 'paper-white';
+
+export const PALETTE_OPTIONS: { id: NeutralPalette; label: string; hint: string }[] = [
+  { id: 'warm-stone', label: 'Warm Stone', hint: 'Stone canvas · zinc dark' },
+  { id: 'charcoal-ivory', label: 'Charcoal + Ivory', hint: 'Warm grey · true charcoal' },
+  { id: 'cool-slate', label: 'Cool Slate', hint: 'Blue-grey · navy dark' },
+  { id: 'paper-white', label: 'Paper White', hint: 'Cream canvas · warm dark' },
+];
 
 interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  colorTheme: ColorTheme;
-  setColorTheme: (theme: ColorTheme) => void;
+  palette: NeutralPalette;
+  setPalette: (palette: NeutralPalette) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+const VALID_PALETTES = new Set<string>(PALETTE_OPTIONS.map((p) => p.id));
+
+function readStoredPalette(): NeutralPalette {
+  const saved = localStorage.getItem('palette');
+  if (saved && VALID_PALETTES.has(saved)) return saved as NeutralPalette;
+  return 'warm-stone';
+}
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
@@ -26,30 +45,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  const [colorTheme, setColorTheme] = useState<ColorTheme>(() => {
-    return (localStorage.getItem('colorTheme') as ColorTheme) || 'default';
-  });
+  const [palette, setPaletteState] = useState<NeutralPalette>(readStoredPalette);
 
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    const root = document.documentElement;
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
       document.body.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
       document.body.classList.remove('dark');
     }
   }, [isDarkMode]);
 
   useEffect(() => {
-    localStorage.setItem('colorTheme', colorTheme);
-    document.documentElement.setAttribute('data-color-theme', colorTheme);
-  }, [colorTheme]);
+    document.documentElement.setAttribute('data-palette', palette);
+    localStorage.setItem('palette', palette);
+  }, [palette]);
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+  const setPalette = (next: NeutralPalette) => setPaletteState(next);
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, colorTheme, setColorTheme }}>
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, palette, setPalette }}>
       {children}
     </ThemeContext.Provider>
   );

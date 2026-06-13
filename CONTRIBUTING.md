@@ -46,15 +46,39 @@ To contribute to this codebase, you need to set up your local development enviro
    ```bash
    cp .env.example .env.local
    ```
-   Open `.env.local` in your preferred editor and fill in your Supabase connection strings:
+   Open `.env.local` in your preferred editor and fill in your values:
    ```env
+   # Required
    VITE_SUPABASE_URL=https://your_project_ref.supabase.co
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # Optional — analytics
+   VITE_POSTHOG_KEY=your_posthog_key
+   VITE_POSTHOG_HOST=https://us.i.posthog.com
+
+   # Optional — mentor dashboard default password for new students
+   VITE_DEFAULT_STUDENT_PASSWORD=change_me
+
+   # Optional — partner email auto-assignment (comma-separated domains)
+   VITE_PARTNER_EMAIL_DOMAINS=example.com,partner.org
+   VITE_PARTNER_ROADMAP_KEYWORD=partner
    ```
    > [!WARNING]
    > **Never commit your `.env` or `.env.local` files to version control.** These files are automatically ignored by `.gitignore` to prevent credential exposure.
 
-4. **Run the Development Server**
+4. **Set Up Your Supabase Instance**
+
+   If you do not have access to the production Supabase project, create your own:
+
+   1. Create a free project at [supabase.com](https://supabase.com)
+   2. Run `sql/create_tables.sql` in the Supabase SQL Editor
+   3. Apply security migrations in order (see [sql/README.md](sql/README.md))
+   4. Run `sql/sync_auth_users.sql` to enable auth → public user sync
+   5. Copy your project URL and anon key into `.env.local`
+
+   See [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) for detailed instructions.
+
+5. **Run the Development Server**
    Start the Vite dev server locally:
    ```bash
    npm run dev
@@ -118,17 +142,23 @@ Our CI/CD pipeline runs automated code quality checks on every Pull Request. You
 We believe robust testing is the key to codebase confidence. Before submitting your pull request, please run the following test suites to ensure zero regressions:
 
 ```bash
-# Run comprehensive end-to-end and logic tests
-node scripts/final_comprehensive_test.js
+# Production smoke test (env, Supabase API, RLS, optional frontend)
+npm run smoke
 
-# Verify database connection integrity
-node scripts/test_database_connection.js
-
-# Test noticeboard features specifically
-node scripts/test_notice_creation.js
+# Database connectivity test (RLS-aware)
+npm run test:db
 ```
 
-Ensure all tests print green pass indicators before submitting!
+Scripts load `.env` then `.env.local` automatically. For authenticated table checks, set in your env file:
+
+```env
+SMOKE_TEST_EMAIL=your_test_user@example.com
+TEST_USER_PASSWORD=your_test_password
+```
+
+Optional: start the preview server first (`npm run build:prod && npm run preview`) so the frontend check runs against `http://127.0.0.1:4173`.
+
+Ensure `npm run smoke` reports zero failures before submitting!
 
 ---
 

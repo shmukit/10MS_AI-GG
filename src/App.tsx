@@ -10,6 +10,7 @@ import { PageTransition } from './components/ui/MotionPrimitives';
 // Critical components (loaded immediately for first paint)
 import { LoginPage } from './components/Auth/LoginPage';
 import { MarketingPage } from './components/Marketing/MarketingPage';
+import { StyleLabPage } from './components/StyleLab/StyleLabPage';
 
 // Lazy load non-critical components
 const StudentDashboard = lazy(() => import('./components/Student/StudentDashboard').then(module => ({ default: module.StudentDashboard })));
@@ -31,8 +32,8 @@ const PublicCertificatePage = lazy(() => import('./components/Public/PublicCerti
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-      <p className="text-sm text-gray-600">Loading...</p>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+      <p className="text-sm text-muted-foreground">Loading...</p>
     </div>
   </div>
 );
@@ -41,13 +42,18 @@ const RouteLoader = () => (
 const ProtectedRouteWithRole = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
   const { user, loading, userRole, roleLoading } = useAuthContext();
 
-  if (loading || roleLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
     console.log('🔄 ProtectedRoute: No user, redirecting to login');
     return <Navigate to="/login" replace />;
+  }
+
+  // Only block on first role resolution — not on background token refresh
+  if (roleLoading && !userRole) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   // If user has a role but it's not in the allowed list, redirect to their allowed dashboard
@@ -170,6 +176,7 @@ const AnimatedAppContent = () => {
         <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><LoginPage /></PageTransition>} />
         <Route path="/certificate/:id" element={<PageTransition><Suspense fallback={<RouteLoader />}><PublicCertificatePage /></Suspense></PageTransition>} />
+        <Route path="/style-lab" element={<StyleLabPage />} />
 
         {/* Student Routes - All authenticated users can access */}
         <Route

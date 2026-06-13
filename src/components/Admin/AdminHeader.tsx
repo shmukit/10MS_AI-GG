@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
-import { LogOut, User, Bell } from 'lucide-react';
+import { LogOut, Settings, Moon, Sun } from 'lucide-react';
 import { SheSTEMLogo } from '../Logo/SheSTEMLogo';
+import { useTheme } from '../../lib/ThemeContext';
+import { NotificationDropdown } from '../Notification/NotificationDropdown';
 
 interface AdminHeaderProps {
     userName: string;
@@ -11,76 +14,100 @@ interface AdminHeaderProps {
 
 export const AdminHeader: React.FC<AdminHeaderProps> = ({ userName, pageTitle, onMenuClick }) => {
     const { signOut } = useAuth();
-    const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+    const navigate = useNavigate();
+    const { isDarkMode, toggleDarkMode } = useTheme();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowProfileMenu(false);
+            }
+        };
+
+        if (showProfileMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProfileMenu]);
+
+    const goToSettings = () => {
+        setShowProfileMenu(false);
+        navigate('/admin/settings');
+    };
 
     return (
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 sticky top-0 z-30">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <header className="sticky top-0 z-30 h-16 border-b border-border bg-background">
+            <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-4">
                     {onMenuClick && (
                         <button
                             onClick={onMenuClick}
-                            className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted lg:hidden"
+                            aria-label="Open menu"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
                     )}
                     <div className="flex items-center gap-2">
-                        <div className="scale-75 sm:scale-90 origin-left">
+                        <div className="origin-left scale-75 sm:scale-90">
                             <SheSTEMLogo />
                         </div>
-                        <span className="hidden sm:inline-block px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        <span className="hidden rounded border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-block">
                             Admin
                         </span>
                     </div>
-                    <div className="hidden md:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
-                    <h1 className="hidden md:block text-xl font-semibold text-gray-800 dark:text-white">
-                        {pageTitle}
-                    </h1>
+                    <div className="mx-2 hidden h-6 w-px bg-border md:block" />
+                    <h1 className="hidden text-xl font-semibold text-foreground md:block">{pageTitle}</h1>
                 </div>
 
-                {/* Right Actions */}
-                <div className="flex items-center gap-4">
-                    <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                <div className="flex items-center gap-3">
+                    <NotificationDropdown />
+
+                    <button
+                        onClick={toggleDarkMode}
+                        className="rounded-lg border border-border bg-muted p-2 text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
+                        aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                    >
+                        {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                     </button>
 
-                    <div className="relative">
+                    <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setShowProfileMenu(!showProfileMenu)}
-                            className="flex items-center gap-2 sm:gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 pl-2 sm:pl-3 pr-2 sm:pr-4 py-1.5 rounded-full transition-colors border border-gray-200 dark:border-gray-600"
+                            className="flex items-center gap-2 rounded-full border border-border py-1.5 pl-2 pr-2 transition-colors hover:bg-muted sm:gap-3 sm:pl-3 sm:pr-4"
+                            aria-expanded={showProfileMenu}
+                            aria-haspopup="menu"
                         >
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-sm font-bold text-foreground">
                                 {userName.charAt(0).toUpperCase()}
                             </div>
-                            <div className="hidden sm:flex flex-col items-start">
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 leading-none mb-1">
-                                    {userName}
-                                </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">
-                                    Administrator
-                                </span>
+                            <div className="hidden flex-col items-start sm:flex">
+                                <span className="mb-1 text-sm font-medium leading-none text-foreground">{userName}</span>
+                                <span className="text-xs leading-none text-muted-foreground">Administrator</span>
                             </div>
                         </button>
 
                         {showProfileMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-1 origin-top-right animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute right-0 mt-2 w-52 rounded-xl border border-border bg-card py-1 shadow-modal">
                                 <button
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                                    onClick={() => {/* TODO: Profile settings */ }}
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-foreground hover:bg-muted"
+                                    onClick={goToSettings}
                                 >
-                                    <User className="w-4 h-4" />
-                                    Profile Settings
+                                    <Settings className="h-4 w-4" />
+                                    Settings
                                 </button>
-                                <div className="h-px bg-gray-100 dark:bg-gray-700 my-1" />
+                                <div className="my-1 h-px bg-border" />
                                 <button
+                                    type="button"
                                     onClick={() => signOut()}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
                                 >
-                                    <LogOut className="w-4 h-4" />
+                                    <LogOut className="h-4 w-4" />
                                     Sign Out
                                 </button>
                             </div>

@@ -1,51 +1,80 @@
 # Design System Documentation
 
+> **Canonical source:** For the full 10MS design spec, see `docs/10ms-design-skill/DESIGN.md` (maintainer-local). This document describes what the app actually loads at runtime.
+
 ## 1. Overview
-This document outlines the current design system used in the 10MS AI-GG Interactive Roadmap Interface. The project uses **Tailwind CSS** as the utility-first CSS framework and **Lucide React** for icons.
 
-## 2. Colors
-The application uses a semantic color system defined in `src/index.css` using CSS variables. This supports both light and dark modes.
+The 10MS SheSTEM AI-GG platform uses **Tailwind CSS v3** with **CSS custom properties** defined in [`src/index.css`](../src/index.css). Icons use **Lucide React**. Motion uses **Framer Motion** for feedback, not decoration.
 
-### Semantic Tokens
-| Token | Description | Light Value | Dark Value |
-|-------|-------------|-------------|------------|
-| `--background` | Page background | `#ffffff` | `#0a0a0a` |
-| `--foreground` | Default text color | `#171717` | `#ededed` |
-| `--card` | Card background | `#ffffff` | `#171717` |
-| `--card-foreground` | Card text color | `#171717` | `#ededed` |
-| `--popover` | Popover/Modal background | `#ffffff` | `#171717` |
-| `--popover-foreground` | Popover text color | `#171717` | `#ededed` |
-| `--primary` | Primary brand color | `#2563eb` (Blue-600) | `#3b82f6` (Blue-500) |
-| `--primary-foreground` | Text on primary color | `#fafafa` | `#171717` |
-| `--secondary` | Secondary background | `#f5f5f5` | `#262626` |
-| `--secondary-foreground` | Text on secondary color | `#171717` | `#ededed` |
-| `--muted` | Muted background | `#f5f5f5` | `#262626` |
-| `--muted-foreground` | Muted text color | `#737373` | `#a3a3a3` |
-| `--destructive` | Error/Destructive action | `#ef4444` | `#7f1d1d` |
-| `--destructive-foreground` | Text on destructive color | `#fafafa` | `#ededed` |
-| `--border` | Border color | `#e5e5e5` | `#262626` |
-| `--input` | Input border color | `#e5e5e5` | `#262626` |
-| `--ring` | Focus ring color | `#2563eb` | `#3b82f6` |
+**Preview the live system:** visit [`/style-lab`](./STYLE_LAB.md) (hidden route, not linked in nav). See [`docs/STYLE_LAB.md`](./STYLE_LAB.md) for maintainer documentation.
 
-## 3. Typography
-The project uses the system font stack for maximum performance and native feel.
-- **Font Family**: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif`
+## 2. Design direction
 
-## 4. Spacing & Layout
-- **Border Radius**: Default radius is `0.5rem` (`8px`).
-- **Container**: Standard Tailwind container classes are used.
+- **Single accent:** 10MS green (`#1CAB55`) — primary CTAs, active states, focus rings only
+- **Surfaces:** warm stone (light) / zinc noir (dark) — **production default palette**
+- **Themes:** light/dark only (multi-color theme picker removed)
+- **Palettes:** four neutral options switchable on Style Lab; persisted in `localStorage` key `palette`
+- **Logos:** SheSTEM + 10 Minute School co-brand — never recolored
 
-## 5. Effects & Animations
-### Shadows
-- `.shadow-professional`: Soft, professional shadow for cards.
-- `.shadow-professional-lg`: Larger shadow for elevated elements.
+## 3. Semantic tokens
 
-### Animations (CSS)
-- `fade-in`: Opacity 0 -> 1, TranslateY 10px -> 0.
-- `slide-in-left`: Opacity 0 -> 1, TranslateX -20px -> 0.
-- `slide-in-right`: Opacity 0 -> 1, TranslateX 20px -> 0.
-- `spin`: Standard loading spinner rotation.
+Defined in `src/index.css` (shared tokens), `src/styles/palettes.css` (neutral palette variants), and `.dark`:
 
-## 6. Icons
-- **Library**: `lucide-react`
-- **Usage**: Consistent stroke width and size (usually `w-4 h-4` or `w-5 h-5`).
+| Token | Light (warm stone) | Dark (zinc noir) | Use |
+|-------|--------------------|------------------|-----|
+| `--background` | `#F5F5F4` | `#09090B` | Page canvas |
+| `--foreground` | `#111827` | `#FAFAFA` | Primary text |
+| `--card` | `#FFFFFF` | `#18181B` | Elevated cards on canvas |
+| `--muted` | `#E7E5E4` | `#27272A` | Nested surfaces / chips |
+| `--muted-foreground` | `#78716C` | `#A1A1AA` | Captions, metadata |
+| `--border` | `#D6D3D1` | `#3F3F46` | Hairline borders |
+| `--progress-track` | `#C4C0BA` | `#52525B` | Unfilled portion of progress bars |
+| `--primary` | `#1CAB55` | `#1CAB55` | CTAs, active, focus |
+| `--accent` | `#EAFEF2` | `#142019` | Active tint (sparingly) |
+| `--destructive` | `#DC2626` | `#DC2626` | Errors only |
+| `--ring` | `#1CAB55` | `#1CAB55` | Focus ring color |
+
+Tailwind bridge: `bg-background`, `text-foreground`, `border-border`, `bg-primary`, etc.
+
+## 4. Typography
+
+- **English:** Inter (400–700), loaded in `index.css`
+- **Bengali:** Anek Bangla via `.lang-bn`
+- **Scale:** 15px card titles, 13px body, 11–12px labels
+
+## 5. Components
+
+Shared primitives in `src/components/ui/`:
+
+- **Button** — pill radius, variants: default, secondary, outline, ghost, destructive
+- **Card** — flat at rest, border only; hover lift + shadow
+- **Skeleton** — `bg-muted` pulse
+- **Toast** — semantic success/error; sits above mobile bottom nav (`bottom-20`)
+
+## 6. Elevation
+
+| Name | Use |
+|------|-----|
+| `shadow-nav` | Top navigation |
+| `shadow-hover` | Card hover |
+| `shadow-modal` | Modals, dropdowns |
+| `shadow-tab-bar` | Mobile bottom nav |
+
+Cards have **no shadow at rest** — border provides depth.
+
+## 7. Dark mode
+
+- Strategy: Tailwind `class` on `<html>` via `ThemeProvider`
+- Toggle: headers, mobile menu, marketing nav
+- Palette: calm neutral near-blacks, not blue-tinted zinc
+
+## 8. Do's and don'ts
+
+**Do:** neutral surfaces, one green accent, hairline borders, generous spacing  
+**Don't:** neon borders, rainbow card colors, glassmorphism, gradient text, multi-accent theme pickers
+
+## 9. Migration notes
+
+- Legacy `docs/DASHBOARD_THEME_PRD.md` gradient themes are **retired**
+- `docs/BEAUTIFICATION_PLAN.md` glassmorphism items are **superseded** by this system
+- Prefer semantic Tailwind classes over inline hex or `isDarkMode ? ... : ...`

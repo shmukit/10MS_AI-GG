@@ -2,7 +2,6 @@ import React from 'react';
 import { Plus, Edit2 } from 'lucide-react';
 
 interface RoadmapControlsProps {
-    isDarkMode: boolean;
     roadmaps: any[];
     selectedRoadmap: string;
     setSelectedRoadmap: (id: string) => void;
@@ -15,7 +14,6 @@ interface RoadmapControlsProps {
 }
 
 export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
-    isDarkMode,
     roadmaps,
     selectedRoadmap,
     setSelectedRoadmap,
@@ -30,17 +28,13 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex gap-4 items-center">
                 <div>
-                    <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
+                    <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                         Select Roadmap
                     </label>
                     <select
                         value={selectedRoadmap}
                         onChange={(e) => setSelectedRoadmap(e.target.value)}
-                        className={`px-3 py-2 border rounded-lg transition-colors ${isDarkMode
-                            ? 'bg-gray-700 border-gray-600 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                        className="px-3 py-2 border border-border rounded-lg bg-muted text-foreground transition-colors"
                     >
                         {roadmaps.map((roadmap: any) => (
                             <option key={roadmap.id} value={roadmap.id}>
@@ -60,7 +54,7 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
                                 setIsEditingRoadmap(true);
                             }
                         }}
-                        className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                        className="bg-muted text-foreground hover:bg-muted/80 border border-border px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                         <Edit2 className="w-4 h-4" />
                         Edit Roadmap
@@ -71,21 +65,21 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
             <div className="flex gap-2">
                 <button
                     onClick={() => setIsAddingRoadmap(true)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
                     Add Roadmap
                 </button>
                 <button
                     onClick={() => setShowAddWeekModal(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
                     Add Week
                 </button>
                 <button
                     onClick={() => setIsAddingTask(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
                     Add Task

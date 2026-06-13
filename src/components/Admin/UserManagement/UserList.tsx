@@ -132,8 +132,8 @@ export const UserList: React.FC = () => {
     };
 
     const roleIcons = {
-        admin: <Shield className="w-4 h-4 text-purple-600" />,
-        mentor: <User className="w-4 h-4 text-blue-600" />,
+        admin: <Shield className="w-4 h-4 text-primary" />,
+        mentor: <User className="w-4 h-4 text-primary" />,
         student: <GraduationCap className="w-4 h-4 text-green-600" />
     };
 
@@ -141,20 +141,20 @@ export const UserList: React.FC = () => {
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search users..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-all"
                     />
                 </div>
                 <div className="flex gap-2">
                     <select
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value as any)}
-                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="px-4 py-2 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
                     >
                         <option value="all">All Roles</option>
                         <option value="student">Student</option>
@@ -163,7 +163,7 @@ export const UserList: React.FC = () => {
                     </select>
                     <button
                         onClick={() => setIsAddUserModalOpen(true)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-medium transition-colors"
                     >
                         Add User
                     </button>
@@ -178,7 +178,7 @@ export const UserList: React.FC = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead>
-                            <tr className="border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
+                            <tr className="border-b border-border text-muted-foreground">
                                 <th className="py-3 px-4 font-medium">User</th>
                                 <th className="py-3 px-4 font-medium">Role</th>
                                 <th className="py-3 px-4 font-medium">Status</th>
@@ -186,38 +186,38 @@ export const UserList: React.FC = () => {
                                 <th className="py-3 px-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tbody className="divide-y divide-border">
                             {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <tr key={user.id} className="hover:bg-muted/50 transition-colors">
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center font-bold text-xs text-gray-600 dark:text-gray-300">
+                                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs text-muted-foreground">
                                                 {user.first_name?.[0]}{user.last_name?.[0]}
                                             </div>
                                             <div>
-                                                <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                                <div className="font-medium text-foreground flex items-center gap-2">
                                                     {user.first_name} {user.last_name}
                                                     {user.role === 'student' && certifiedStudents[user.id] && (
                                                         <div className="relative group inline-flex items-center">
-                                                            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 p-1.5 rounded-full shadow-sm cursor-help transition-transform hover:scale-110">
+                                                            <span className="inline-flex items-center justify-center bg-primary/10 text-primary p-1.5 rounded-full shadow-sm cursor-help transition-transform hover:scale-110">
                                                                 <Award className="w-4 h-4" strokeWidth={2.5} />
                                                             </span>
-                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[250px] bg-gray-900 text-white text-xs rounded py-2 px-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center shadow-lg">
+                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[250px] bg-foreground text-background text-xs rounded py-2 px-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center shadow-lg">
                                                                 <p className="font-semibold mb-1">Certificate Awarded</p>
                                                                 <p className="opacity-90">Course: {certifiedStudents[user.id].batch_name}</p>
                                                                 <p className="opacity-90 mt-0.5">Date: {new Date(certifiedStudents[user.id].issued_at).toLocaleDateString()}</p>
                                                                 {/* Triangle pointer */}
-                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground"></div>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-gray-500">{user.email}</div>
+                                                <div className="text-xs text-muted-foreground">{user.email}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="py-3 px-4">
-                                        <div className="flex items-center gap-1.5 capitalize text-gray-700 dark:text-gray-300">
+                                        <div className="flex items-center gap-1.5 capitalize text-foreground">
                                             {roleIcons[user.role]}
                                             {user.role}
                                         </div>
@@ -233,7 +233,7 @@ export const UserList: React.FC = () => {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="py-3 px-4 text-gray-500">
+                                    <td className="py-3 px-4 text-muted-foreground">
                                         {new Date(user.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="py-3 px-4 text-right relative action-menu-container">
@@ -242,16 +242,16 @@ export const UserList: React.FC = () => {
                                                 e.stopPropagation();
                                                 setActiveMenuId(activeMenuId === user.id ? null : user.id);
                                             }}
-                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 transition-colors"
+                                            className="p-1 hover:bg-muted rounded text-muted-foreground transition-colors"
                                         >
                                             <MoreVertical className="w-4 h-4" />
                                         </button>
 
                                         {activeMenuId === user.id && (
-                                            <div className="absolute right-8 top-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-[100] text-left">
+                                            <div className="absolute right-8 top-0 w-48 bg-card rounded-lg shadow-xl border border-border py-1 z-[100] text-left">
                                                 <button
                                                     onClick={() => handleToggleStatus(user.id, user.is_active)}
-                                                    className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                    className="w-full px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2"
                                                 >
                                                     <Power className={`w-4 h-4 ${user.is_active ? 'text-red-500' : 'text-green-500'}`} />
                                                     {user.is_active ? 'Deactivate User' : 'Activate User'}
@@ -263,9 +263,9 @@ export const UserList: React.FC = () => {
                                                                 setIssueCertUser(user);
                                                                 setActiveMenuId(null);
                                                             }}
-                                                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                                                            className="w-full px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2 border-t border-border"
                                                         >
-                                                            <Award className="w-4 h-4 text-blue-500" />
+                                                            <Award className="w-4 h-4 text-primary" />
                                                             Issue Certificate
                                                         </button>
                                                         <button
@@ -273,16 +273,16 @@ export const UserList: React.FC = () => {
                                                                 setManageCertUser(user);
                                                                 setActiveMenuId(null);
                                                             }}
-                                                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                            className="w-full px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2"
                                                         >
-                                                            <FileText className="w-4 h-4 text-purple-500" />
+                                                            <FileText className="w-4 h-4 text-primary" />
                                                             Manage Certificates
                                                         </button>
                                                     </>
                                                 )}
                                                 <button
                                                     onClick={() => handleDeleteUser(user.id)}
-                                                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                                                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-border"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                     Delete User
@@ -295,7 +295,7 @@ export const UserList: React.FC = () => {
                         </tbody>
                     </table>
                     {users.length === 0 && (
-                        <div className="text-center py-12 text-gray-500">No users found.</div>
+                        <div className="text-center py-12 text-muted-foreground">No users found.</div>
                     )}
                 </div>
             )}

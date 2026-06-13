@@ -21,9 +21,8 @@ const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
       ref={ref}
       className={cn(
         // Flat-by-default — border only, no shadow
-        'rounded-2xl border border-[#E5E7EB]',
-        'bg-white dark:bg-[#161D27] dark:border-[#2D3748]',
-        'text-[#111827] dark:text-[#F9FAFB]',
+        'rounded-2xl border border-border',
+        'bg-card text-card-foreground',
         // Padding: 16px mobile, 24px desktop
         'p-4 md:p-6',
         className
@@ -46,9 +45,8 @@ const CardSm = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
     <motion.div
       ref={ref}
       className={cn(
-        'rounded-xl border border-[#E5E7EB]',
-        'bg-white dark:bg-[#161D27] dark:border-[#2D3748]',
-        'text-[#111827] dark:text-[#F9FAFB]',
+        'rounded-xl border border-border',
+        'bg-card text-card-foreground',
         'p-3',
         className
       )}
@@ -97,7 +95,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
     <h3
       ref={ref}
       className={cn(
-        'text-[15px] font-semibold leading-[1.47] text-[#111827] dark:text-[#F9FAFB]',
+        'text-[15px] font-semibold leading-[1.47] text-foreground',
         className
       )}
       {...props}
@@ -111,7 +109,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
     <p
       ref={ref}
       className={cn(
-        'text-[13px] leading-[1.46] text-[#6B7280] dark:text-[#9CA3AF]',
+        'text-[13px] leading-[1.46] text-muted-foreground',
         className
       )}
       {...props}
@@ -131,7 +129,7 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center pt-4 border-t border-[#E5E7EB] dark:border-[#2D3748]', className)}
+      className={cn('flex items-center pt-4 border-t border-border', className)}
       {...props}
     />
   )

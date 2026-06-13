@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase';
+import { partnerConfig, isPartnerEmail } from '../../../config/partnerConfig';
 import { Batch } from '../../../types/models';
 import { getUserById } from '../userService';
 
@@ -10,17 +11,18 @@ export const assignUserToAvailableBatch = async (userId: string): Promise<Batch 
         const userData = await getUserById(userId);
         let preferredRoadmapId: string | null = null;
 
-        // Check if user should be assigned to Augmedix roadmap based on email
-        if (userData?.email?.includes('10minuteschool.com') || userData?.email?.includes('lightcastlepartners.com')) {
-            console.log('🏢 Company email detected:', userData.email, '- Looking for Augmedix roadmap');
+        // Check if user should be assigned to a partner roadmap based on configured email domains
+        if (isPartnerEmail(userData?.email)) {
+            const roadmapKeyword = partnerConfig.roadmapKeyword;
+            console.log('🏢 Partner email detected:', userData.email, '- Looking for partner roadmap');
 
-            // First try exact title match for "Augmedix" (case insensitive)
+            // First try exact title match for configured keyword (case insensitive)
             let augmedixRoadmap: any = null;
 
-            let { data: exactMatch, error: exactError } = await supabase
+            const { data: exactMatch, error: exactError } = await supabase
                 .from('roadmaps')
                 .select('id, title, description') // consistent selection
-                .ilike('title', '%augmedix%')
+                .ilike('title', roadmapKeyword ? `%${roadmapKeyword}%` : '%')
                 .eq('is_active', true)
                 .limit(1)
                 .maybeSingle(); // Use maybeSingle to avoid error on not found
@@ -28,12 +30,12 @@ export const assignUserToAvailableBatch = async (userId: string): Promise<Batch 
             augmedixRoadmap = exactMatch;
 
             if (exactError && exactError.code !== 'PGRST116') {
-                console.error('Error searching for Augmedix roadmap:', exactError);
+                console.error('Error searching for partner roadmap:', exactError);
             }
 
             // If exact match failed, try broader search
-            if (!augmedixRoadmap) {
-                console.log('🔍 Exact Augmedix match not found, trying broader search...');
+            if (!augmedixRoadmap && roadmapKeyword) {
+                console.log('🔍 Exact partner match not found, trying broader search...');
                 const { data: allRoadmaps, error: allError } = await supabase
                     .from('roadmaps')
                     .select('id, title, description')
@@ -42,14 +44,14 @@ export const assignUserToAvailableBatch = async (userId: string): Promise<Batch 
                 if (!allError && allRoadmaps) {
                     const roadmaps = allRoadmaps as { id: string; title: string | null; description: string | null }[];
 
-                    // Find roadmap that contains "augmedix" in title or description
+                    // Find roadmap that contains the configured keyword in title or description
                     augmedixRoadmap = roadmaps.find(r =>
-                        (r.title && r.title.toLowerCase().includes('augmedix')) ||
-                        (r.description && r.description.toLowerCase().includes('augmedix'))
+                        (r.title && r.title.toLowerCase().includes(roadmapKeyword)) ||
+                        (r.description && r.description.toLowerCase().includes(roadmapKeyword))
                     ) || null;
 
                     if (augmedixRoadmap) {
-                        console.log('🎯 Found Augmedix roadmap via broader search:', augmedixRoadmap.title);
+                        console.log('🎯 Found partner roadmap via broader search:', augmedixRoadmap.title);
                     } else {
                         // Try to find a roadmap with "machine learning" or "ai" for Augmedix users
                         augmedixRoadmap = roadmaps.find(r =>

@@ -4,7 +4,6 @@ import { RoadmapItem } from '../../../../types/mentor';
 import { getTaskTypeColor } from '../../../../utils/mentorUtils';
 
 interface TasksTableProps {
-    isDarkMode: boolean;
     currentRoadmapTitle: string;
     filteredTasks: RoadmapItem[];
     setEditingTask: (id: string | null) => void;
@@ -13,7 +12,6 @@ interface TasksTableProps {
 }
 
 export const TasksTable: React.FC<TasksTableProps> = ({
-    isDarkMode,
     currentRoadmapTitle,
     filteredTasks,
     setEditingTask,
@@ -21,45 +19,43 @@ export const TasksTable: React.FC<TasksTableProps> = ({
     handleDeleteTask
 }) => {
     return (
-        <div className={`rounded-xl p-6 shadow-sm border transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
-            <h3 className={`text-lg font-bold mb-6 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <div className="rounded-xl p-6 shadow-sm border border-border bg-card transition-colors duration-200">
+            <h3 className="text-lg font-bold mb-6 text-foreground transition-colors duration-200">
                 {currentRoadmapTitle} - Tasks
             </h3>
 
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className={`transition-colors duration-200 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                    <thead className="bg-muted transition-colors duration-200">
                         <tr>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Week</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Domain</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Type</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Task Name</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Details</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Links</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Deadline</th>
-                            <th className={`px-4 py-3 text-left text-sm font-medium transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Week</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Domain</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Type</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Task Name</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Details</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Links</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Deadline</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredTasks.map((task) => (
-                            <tr key={task.id} className={`border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-600' : 'border-gray-200'
-                                }`}>
-                                <td className={`px-4 py-3 text-sm transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            <tr key={task.id} className="border-t border-border transition-colors duration-200">
+                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
                                     Week {task.weekNumber}
                                 </td>
-                                <td className={`px-4 py-3 text-sm transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
                                     {task.domain}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(task.taskType, isDarkMode)}`}>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(task.taskType)}`}>
                                         {task.taskType}
                                     </span>
                                 </td>
-                                <td className={`px-4 py-3 text-sm transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
                                     {task.taskName}
                                 </td>
-                                <td className={`px-4 py-3 text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <td className="px-4 py-3 text-sm text-muted-foreground transition-colors duration-200">
                                     {task.taskDetails}
                                 </td>
                                 <td className="px-4 py-3">
@@ -68,13 +64,13 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                                             href={task.relevantLinks}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-700"
+                                            className="text-primary hover:text-primary/80"
                                         >
                                             <ExternalLink className="w-4 h-4" />
                                         </a>
                                     )}
                                 </td>
-                                <td className={`px-4 py-3 text-sm transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
                                     {task.deadline}
                                 </td>
                                 <td className="px-4 py-3">
@@ -84,14 +80,13 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                                                 setEditingTask(task.id);
                                                 setEditingTaskData(task);
                                             }}
-                                            className={`p-1 rounded transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                                }`}
+                                            className="p-1 rounded transition-colors hover:bg-accent text-muted-foreground"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteTask(task.id)}
-                                            className="p-1 rounded hover:bg-red-100 text-red-600"
+                                            className="p-1 rounded hover:bg-destructive/10 text-destructive"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>

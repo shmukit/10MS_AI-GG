@@ -24,13 +24,14 @@ interface CardContent {
 }
 
 interface DeckEditorProps {
-    deckId?: string; // If provided, edit existing deck; otherwise create new
+    deckId?: string;
     onClose: () => void;
     onSave: () => void;
-    isDarkMode: boolean;
 }
 
-export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave, isDarkMode }) => {
+const inputClass = 'w-full px-4 py-2 rounded-lg border border-border bg-muted text-foreground';
+
+export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave }) => {
     const { user } = useAuthContext();
     const [loading, setLoading] = useState(!!deckId);
     const [saving, setSaving] = useState(false);
@@ -167,9 +168,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
             case 'text':
                 return <p className="text-sm line-clamp-2">{content.text}</p>;
             case 'image':
-                return <p className="text-sm text-gray-500">Image: {content.imageUrl}</p>;
+                return <p className="text-sm text-muted-foreground">Image: {content.imageUrl}</p>;
             case 'video':
-                return <p className="text-sm text-gray-500">Video: {content.videoUrl}</p>;
+                return <p className="text-sm text-muted-foreground">Video: {content.videoUrl}</p>;
             case 'quiz':
                 return <p className="text-sm line-clamp-1">{content.question}</p>;
         }
@@ -178,9 +179,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
     if (loading) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className={`p-8 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className={`mt-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Loading deck...</p>
+                <div className="p-8 rounded-xl bg-card">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading deck...</p>
                 </div>
             </div>
         );
@@ -188,20 +189,16 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                }`}>
-                {/* Header */}
-                <div className={`sticky top-0 z-10 flex justify-between items-center p-6 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
-                    <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-xl bg-card">
+                <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-border bg-card">
+                    <h2 className="text-2xl font-bold text-foreground">
                         {deckId ? 'Edit Deck' : 'Create New Deck'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-                            }`}
+                        className="p-2 rounded-lg transition-colors hover:bg-accent"
                     >
-                        <X className={`w-6 h-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`} />
+                        <X className="w-6 h-6 text-muted-foreground" />
                     </button>
                 </div>
 
@@ -210,49 +207,40 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                     {/* Deck Metadata */}
                     <div className="space-y-4">
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                 Deck Title *
                             </label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                    ? 'bg-gray-700 border-gray-600 text-white'
-                                    : 'bg-white border-gray-300 text-gray-900'
-                                    }`}
+                                className={inputClass}
                                 placeholder="Enter deck title..."
                             />
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                 Description
                             </label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={3}
-                                className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                    ? 'bg-gray-700 border-gray-600 text-white'
-                                    : 'bg-white border-gray-300 text-gray-900'
-                                    }`}
+                                className={inputClass}
                                 placeholder="Describe what this deck teaches..."
                             />
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                 Cover Image URL
                             </label>
                             <input
                                 type="text"
                                 value={coverImage}
                                 onChange={(e) => setCoverImage(e.target.value)}
-                                className={`w-full px-4 py-2 rounded-lg border ${isDarkMode
-                                    ? 'bg-gray-700 border-gray-600 text-white'
-                                    : 'bg-white border-gray-300 text-gray-900'
-                                    }`}
+                                className={inputClass}
                                 placeholder="https://example.com/image.jpg"
                             />
                         </div>
@@ -263,9 +251,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                                 id="isPublic"
                                 checked={isPublic}
                                 onChange={(e) => setIsPublic(e.target.checked)}
-                                className="w-4 h-4 rounded border-gray-300"
+                                className="w-4 h-4 rounded border-border"
                             />
-                            <label htmlFor="isPublic" className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <label htmlFor="isPublic" className="text-sm text-muted-foreground">
                                 Make this deck public (visible to all students)
                             </label>
                         </div>
@@ -275,12 +263,12 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                     {deckId && (
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                <h3 className="text-lg font-semibold text-foreground">
                                     Cards ({cards.length})
                                 </h3>
                                 <button
                                     onClick={handleAddCard}
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Add Card
@@ -288,9 +276,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                             </div>
 
                             {cards.length === 0 ? (
-                                <div className={`text-center py-8 rounded-lg border ${isDarkMode ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'
-                                    }`}>
-                                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <div className="text-center py-8 rounded-lg border border-border bg-muted">
+                                    <p className="text-sm text-muted-foreground">
                                         No cards yet. Add your first card to get started.
                                     </p>
                                 </div>
@@ -299,38 +286,34 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                                     {cards.map((card) => (
                                         <div
                                             key={card.id}
-                                            className={`flex items-center gap-3 p-4 rounded-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
-                                                }`}
+                                            className="flex items-center gap-3 p-4 rounded-lg border border-border bg-muted"
                                         >
-                                            <GripVertical className={`w-5 h-5 cursor-move ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
-                                            <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-600' : 'bg-gray-100'}`}>
+                                            <GripVertical className="w-5 h-5 cursor-move text-muted-foreground" />
+                                            <div className="p-2 rounded bg-muted border border-border">
                                                 {getCardIcon(card.card_type)}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <span className={`text-xs font-medium px-2 py-1 rounded ${isDarkMode ? 'bg-blue-600/20 text-blue-400' : 'bg-blue-100 text-blue-700'
-                                                        }`}>
+                                                    <span className="text-xs font-medium px-2 py-1 rounded bg-muted text-muted-foreground">
                                                         {card.card_type.toUpperCase()}
                                                     </span>
                                                 </div>
-                                                <div className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                                                <div className="text-muted-foreground">
                                                     {getCardPreview(card)}
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleEditCard(card.id)}
-                                                    className={`p-2 rounded transition-colors ${isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
-                                                        }`}
+                                                    className="p-2 rounded transition-colors hover:bg-accent"
                                                 >
-                                                    <Eye className={`w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                                                    <Eye className="w-4 h-4 text-muted-foreground" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteCard(card)}
-                                                    className={`p-2 rounded transition-colors ${isDarkMode ? 'hover:bg-red-600/20' : 'hover:bg-red-100'
-                                                        }`}
+                                                    className="p-2 rounded transition-colors hover:bg-destructive/10"
                                                 >
-                                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                                    <Trash2 className="w-4 h-4 text-destructive" />
                                                 </button>
                                             </div>
                                         </div>
@@ -341,8 +324,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                     )}
 
                     {!deckId && (
-                        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-600/10 border-blue-600/30 border' : 'bg-blue-50 border-blue-200 border'}`}>
-                            <p className={`text-sm ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                        <div className="p-4 rounded-lg bg-muted border border-border">
+                            <p className="text-sm text-foreground">
                                 💡 Save the deck first, then you can add cards to it.
                             </p>
                         </div>
@@ -350,21 +333,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                 </div>
 
                 {/* Footer */}
-                <div className={`sticky bottom-0 flex justify-end gap-3 p-6 border-t ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}>
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t border-border bg-card">
                     <button
                         onClick={onClose}
-                        className={`px-6 py-2 rounded-lg font-medium transition-colors ${isDarkMode
-                            ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                            : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                            }`}
+                        className="px-6 py-2 rounded-lg font-medium transition-colors bg-muted hover:bg-accent text-muted-foreground"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSaveDeck}
                         disabled={saving}
-                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Save className="w-4 h-4" />
                         {saving ? 'Saving...' : 'Save Deck'}
@@ -379,7 +358,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave,
                     cardId={editingCardId}
                     onClose={() => setShowCardEditor(false)}
                     onSave={handleCardSaved}
-                    isDarkMode={isDarkMode}
                 />
             )}
         </div>

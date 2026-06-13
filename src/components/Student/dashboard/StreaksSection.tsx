@@ -1,51 +1,71 @@
 import React from 'react';
+import { Check } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface StreaksSectionProps {
     isDarkMode: boolean;
     streaks: any[];
 }
 
-export const StreaksSection: React.FC<StreaksSectionProps> = ({
-    isDarkMode,
-    streaks
-}) => {
+type StreakStatus = 'done' | 'current' | 'incomplete';
+
+function StreakCircle({ status }: { status: StreakStatus }) {
     return (
-        <div className="rounded-xl p-4 md:p-6 transition-all duration-200 bg-[var(--accent-soft)] shadow-sm hover:shadow-md">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <h3 className={`text-sm md:text-base font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Week Streaks</h3>
-                <div className={`flex items-center flex-wrap gap-3 md:gap-4 text-[10px] md:text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-sm">
-                            <svg className="w-1.5 h-1.5 md:w-2 md:h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
+        <div
+            className={cn(
+                'mx-auto flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 md:h-10 md:w-10',
+                status === 'done' && 'border-2 border-primary bg-primary text-primary-foreground shadow-sm',
+                status === 'current' && 'border-[3px] border-primary bg-primary/15',
+                status === 'incomplete' && 'border-2 border-dashed border-muted-foreground/60 bg-card'
+            )}
+            aria-label={`Week ${status}`}
+        >
+            {status === 'done' && <Check className="h-3.5 w-3.5 md:h-4 md:w-4" strokeWidth={3} />}
+            {status === 'current' && <span className="h-2.5 w-2.5 rounded-full bg-primary md:h-3 md:w-3" />}
+        </div>
+    );
+}
+
+function LegendDot({ status }: { status: StreakStatus }) {
+    if (status === 'done') {
+        return (
+            <div className="flex h-3 w-3 items-center justify-center rounded-full bg-primary md:h-3.5 md:w-3.5">
+                <Check className="h-2 w-2 text-primary-foreground" strokeWidth={3} />
+            </div>
+        );
+    }
+    if (status === 'current') {
+        return (
+            <div className="flex h-3 w-3 items-center justify-center rounded-full border-2 border-primary bg-primary/10 md:h-3.5 md:w-3.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            </div>
+        );
+    }
+    return <div className="h-3 w-3 rounded-full border-2 border-dashed border-muted-foreground/60 bg-card md:h-3.5 md:w-3.5" />;
+}
+
+export const StreaksSection: React.FC<StreaksSectionProps> = ({ streaks }) => {
+    return (
+        <div className="rounded-xl border border-border bg-card p-4 md:p-6 transition-all duration-200 hover:shadow-md">
+            <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                <h3 className="text-sm font-bold text-foreground md:text-base">Week Streaks</h3>
+                <div className="flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground md:gap-4 md:text-xs">
+                    {(['done', 'current', 'incomplete'] as StreakStatus[]).map((status) => (
+                        <div key={status} className="flex items-center gap-1.5">
+                            <LegendDot status={status} />
+                            <span className="font-medium capitalize">{status === 'incomplete' ? 'Incomplete' : status === 'done' ? 'Done' : 'Current'}</span>
                         </div>
-                        <span className="font-medium">Done</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 bg-[var(--primary-gradient)] rounded-full border border-[var(--primary-accent)]/30 shadow-sm"></div>
-                        <span className="font-medium">Current</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-sm"></div>
-                        <span className="font-medium">Incomplete</span>
-                    </div>
+                    ))}
                 </div>
             </div>
 
-            <div className="flex justify-between items-center gap-1">
-                {streaks.map((streak: any) => (
-                    <div key={streak.week} className="text-center flex-1">
-                        <div className={`text-[10px] md:text-xs mb-1.5 md:mb-2 transition-colors duration-200 truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <div className="flex items-center justify-between gap-1">
+                {streaks.map((streak: { week: number; status: StreakStatus }) => (
+                    <div key={streak.week} className="flex-1 text-center">
+                        <div className="mb-1.5 truncate text-[10px] font-medium text-foreground md:mb-2 md:text-xs">
                             W{streak.week}
                         </div>
-                        <div className={`w-7 h-7 md:w-10 md:h-10 mx-auto rounded-full flex items-center justify-center relative ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                            }`}>
-                            <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-200 ${streak.status === 'done' ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-sm' :
-                                streak.status === 'current' ? 'bg-[var(--primary-gradient)] border border-[var(--primary-accent)]/30 shadow-sm' :
-                                    'bg-gradient-to-r from-red-500 to-red-600 shadow-sm'
-                                }`} />
-                        </div>
+                        <StreakCircle status={streak.status} />
                     </div>
                 ))}
             </div>
