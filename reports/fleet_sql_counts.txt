@@ -1,0 +1,8 @@
+[dotenv@17.2.1] injecting env (14) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+Fleet SQL-style counts
+
+public.users students: 354
+
+Without service role — login-based estimate (sampling all students):
+  login_ok (estimate): 51
+  login_fail (estimate): 303
