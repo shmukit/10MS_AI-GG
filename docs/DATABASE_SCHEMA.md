@@ -286,3 +286,26 @@ CREATE POLICY "Students can view their own progress" ON student_progress
 - The `student_profiles.batch_id` column has been removed
 - Existing student-batch relationships have been migrated to `student_batch_assignments`
 - All queries that previously used `student_profiles.batch_id` should be updated to use the new table structure
+- Certificates are scoped per batch enrollment: run `sql/20260726_certificate_batch_roadmap.sql` to add `batch_id` / `roadmap_id`
+
+### student_certificates
+```sql
+CREATE TABLE student_certificates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  issued_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  certificate_type VARCHAR(255) NOT NULL DEFAULT 'SheSTEM_Zoom_Completion',
+  issued_at TIMESTAMPTZ DEFAULT NOW(),
+  public_url_slug VARCHAR(255) UNIQUE,
+  image_url TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  batch_id UUID REFERENCES batches(id) ON DELETE SET NULL,
+  roadmap_id UUID REFERENCES roadmaps(id) ON DELETE SET NULL
+);
+
+CREATE UNIQUE INDEX student_certificates_student_batch_unique
+  ON student_certificates (student_id, batch_id)
+  WHERE batch_id IS NOT NULL;
+```
+
+See `docs/CERTIFICATE_PRD.md` for issuance flows and UACs.

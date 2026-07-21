@@ -13,14 +13,17 @@ The Admin Dashboard provides a centralized interface for platform administrators
 ### Phase 1: MVP (Current Focus)
 - **Authentication & Routing**:
     - Secure access to `/admin` routes.
-    - Role-based redirection (Admins -> Admin Dashboard).
+    - Role-based redirection (Admins → Admin Dashboard; mentors/students to their dashboards via `roleAccess.ts`).
 - **Navigation**:
-    - Sidebar navigation for Admin sections.
+    - Sidebar navigation for Admin sections (Overview, User Management).
 - **User Management**:
-    - View list of all users.
-    - Filter users by role (Student, Mentor, Admin).
-    - **Add Mentor/Admin**: functionality to invite or create new Mentor/Admin accounts.
-    - **Remove/Deactivate User**: Ability to deactivate or delete users.
+    - View list of all users with **Roadmaps** and **Batches** columns (enrollment pills from `student_batch_assignments`).
+    - Filter users by role, status, roadmap, and batch.
+    - **Add Mentor/Admin**: invite or create accounts via modal.
+    - **Deactivate / delete** users with ConfirmDialog.
+    - **Issue Certificate**: cohort-aware issuance (batch · roadmap selector for multi-enrollment students).
+    - **Manage Certificates**: per-enrollment status + revoke with ConfirmDialog.
+    - Award badge on students with certificates (tooltip lists all cohorts when multiple).
 
 ### Phase 2: Enhanced Management (Suggested)
 - **Batch Management**: Create, edit, archive batches. Assign mentors to batches.
@@ -36,15 +39,16 @@ The Admin Dashboard provides a centralized interface for platform administrators
 
 ### 4.2. User Management
 - **User List Table**:
-    - Columns: Name, Email, Role, Status (Active/Inactive), Joined Date, Actions.
+    - Columns: Name (+ certificate badge), Email, Role, Roadmaps, Batches, Status, Joined Date, Actions.
     - Search bar for filtering by name/email.
-    - Filter dropdown for Role.
+    - Filters: Role, Status, Roadmap, Batch.
 - **Add User Action**:
-    - Modal/Form to input: Email, First Name, Last Name, Role (Mentor/Admin).
-    - On submit: Creates user record (likely via Supabase Auth invite or direct DB insertion if using custom auth flow).
+    - Modal/Form: Email, First Name, Last Name, Role (Mentor/Admin).
 - **User Actions**:
-    - Edit Role.
-    - Deactivate/Re-activate user.
+    - Activate / deactivate (ConfirmDialog).
+    - Issue Certificate (cohort selector + editable name).
+    - Manage Certificates (enrollment matrix + revoke).
+    - Delete user (destructive ConfirmDialog).
 
 ## 5. Technical Considerations
 - **Supabase RLS**: Ensure Row Level Security policies allow `admin` role users to `INSERT`, `UPDATE`, `DELETE` on `users` table.

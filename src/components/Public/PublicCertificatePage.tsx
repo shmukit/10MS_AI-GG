@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { motion } from 'framer-motion';
 import { Linkedin, Mail, Link as LinkIcon, Download, AlertCircle } from 'lucide-react';
 import { useToast } from '../ui/ToastProvider';
+import { formatCertificateType, getCertificateCohortLabel } from '../../lib/certificateTypes';
 
 const actionLinkClass =
   'inline-flex items-center px-4 py-2 rounded-full border text-sm font-medium transition-colors';
@@ -80,6 +81,9 @@ export const PublicCertificatePage = () => {
             Issued to {certificate.metadata?.student_name || 'Student'} on{' '}
             {new Date(certificate.issued_at).toLocaleDateString()}
           </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {getCertificateCohortLabel(certificate)}
+          </p>
         </div>
 
         <motion.div
@@ -110,7 +114,13 @@ export const PublicCertificatePage = () => {
               <p>
                 Type:{' '}
                 <span className="font-medium text-foreground">
-                  {certificate.certificate_type.replace(/_/g, ' ')}
+                  {formatCertificateType(certificate.certificate_type)}
+                </span>
+              </p>
+              <p>
+                Cohort:{' '}
+                <span className="font-medium text-foreground">
+                  {getCertificateCohortLabel(certificate)}
                 </span>
               </p>
             </div>

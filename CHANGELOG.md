@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `src/config/partnerConfig.ts` for configurable partner email domain matching
 - `.github/dependabot.yml` for automated dependency updates
 - `.github/CODEOWNERS` for PR review routing
+- Multi-cohort certificate support: `batch_id` / `roadmap_id` on `student_certificates` (`sql/20260726_certificate_batch_roadmap.sql`)
+- Shared certificate helpers in `src/lib/certificateTypes.ts`
+- Public marketing stats RPC (`get_public_marketing_data`) and active batch counts
+- Admin user list roadmap/batch columns and filters; role-based dashboard access (`roleAccess.ts`)
+- Shared UI primitives: Modal, ToastProvider, ConfirmProvider, Badge, Input, EmptyState
 
 ### Changed
 - PostHog analytics key moved to `VITE_POSTHOG_KEY` environment variable
@@ -22,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker builds use `SSM_PARAM_NAME` build arg instead of hardcoded parameter names
 - CI/CD workflows use GitHub repository variables for deployment identifiers
 - Operational SQL/scripts with PII moved to `sql/archive/` and `scripts/archive/`
+- **Issue Certificate** modal: cohort (batch · roadmap) selector; blocks duplicate per batch
+- **Manage Certificates** modal: enrollment status matrix; ConfirmDialog for revoke
+- Student profile certificate cards and public certificate page show cohort labels
+- Profile edit sends whitelisted fields only (fixes permission denied on email)
+- Roadmap sticky subheader; mentor batch completion workflow; marketing page uses real RPC data
 
 ### Security
 - Removed hardcoded PostHog project key from source

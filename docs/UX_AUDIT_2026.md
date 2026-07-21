@@ -92,3 +92,20 @@ The platform has a solid design spec but **~92% of UI bypasses shared primitives
 6. Cross-cutting a11y + microcopy
 
 See `.cursor/plans/ux_rehaul_and_audit_ee5d7162.plan.md` for wireframes and color spec.
+
+---
+
+## Resolved / shipped (Jul 2026)
+
+| Area | Change |
+|------|--------|
+| **Design system** | Shared `ui/` primitives (Button, Modal, Toast, ConfirmDialog, Badge, Input); semantic tokens in `palettes.css` |
+| **Admin** | User list roadmap/batch columns + filters; RBAC route guards; cohort-aware certificate issue/manage modals |
+| **Certificates** | One cert per student per batch; enrollment matrix in Manage modal; cohort labels on profile + public page |
+| **Marketing** | Public stats via `get_public_marketing_data()` RPC; honest batch counts (no fake stats) |
+| **Profile** | Profile edit whitelisted fields (no email PATCH); certificates show batch · roadmap |
+| **Roadmap** | Sticky subheader (breadcrumbs + progress + tabs); locked-node contrast fix |
+| **Mentor** | Batch status mapping; mark cohort complete; fetch completed/cancelled batches |
+| **Dialogs** | Certificate revoke uses ConfirmDialog (Manage Certificates); broader migration ongoing per audit |
+
+**Pending from audit:** Full `gray-*` token migration, stub mentor routes, mobile mentor dashboard, OG tags on public certificate page.

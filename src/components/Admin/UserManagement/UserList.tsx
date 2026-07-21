@@ -10,6 +10,11 @@ import { useConfirm } from '../../ui/ConfirmProvider';
 import { useToast } from '../../ui/ToastProvider';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
+import {
+    getCertificateCohortLabel,
+    type EnrollmentDetail,
+    type StudentCertificateRecord,
+} from '../../../lib/certificateTypes';
 
 interface UserData {
     id: string;
@@ -26,6 +31,7 @@ interface EnrollmentInfo {
     roadmaps: string[];
     batchIds: string[];
     roadmapIds: string[];
+    details: EnrollmentDetail[];
 }
 
 export const UserList: React.FC = () => {
@@ -44,7 +50,7 @@ export const UserList: React.FC = () => {
     const [issueCertUser, setIssueCertUser] = useState<UserData | null>(null);
     const [manageCertUser, setManageCertUser] = useState<UserData | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
-    const [certifiedStudents, setCertifiedStudents] = useState<Record<string, any>>({});
+    const [certificatesByStudent, setCertificatesByStudent] = useState<Record<string, StudentCertificateRecord[]>>({});
     const [enrollmentsByUser, setEnrollmentsByUser] = useState<Record<string, EnrollmentInfo>>({});
     const [roadmapOptions, setRoadmapOptions] = useState<{ id: string; title: string }[]>([]);
     const [batchOptions, setBatchOptions] = useState<{ id: string; name: string }[]>([]);
@@ -100,7 +106,7 @@ export const UserList: React.FC = () => {
                 { data: roadmaps },
                 { data: batches },
             ] = await Promise.all([
-                supabase.from('student_certificates').select('student_id, certificate_type, issued_at'),
+                supabase.from('student_certificates').select('id, student_id, certificate_type, issued_at, batch_id, roadmap_id, metadata'),
                 supabase.from('student_batch_assignments').select(`
                     student_id,
                     batch_id,
@@ -119,7 +125,6 @@ export const UserList: React.FC = () => {
             setBatchOptions((batches as any[]) || []);
 
             const enrollmentMap: Record<string, EnrollmentInfo> = {};
-            const batchNameByStudent: Record<string, string> = {};
 
             (batchData || []).forEach((row: any) => {
                 const studentId = row.student_id as string;
@@ -135,6 +140,7 @@ export const UserList: React.FC = () => {
                         roadmaps: [],
                         batchIds: [],
                         roadmapIds: [],
+                        details: [],
                     };
                 }
 
@@ -151,22 +157,30 @@ export const UserList: React.FC = () => {
                 if (roadmap?.id && !info.roadmapIds.includes(roadmap.id)) {
                     info.roadmapIds.push(roadmap.id);
                 }
-                if (batch?.name) {
-                    batchNameByStudent[studentId] = batch.name;
+                if (batch?.id && batch?.name && roadmap?.id && roadmap?.title) {
+                    const exists = info.details.some((d) => d.batchId === batch.id);
+                    if (!exists) {
+                        info.details.push({
+                            batchId: batch.id,
+                            batchName: batch.name,
+                            roadmapId: roadmap.id,
+                            roadmapTitle: roadmap.title,
+                        });
+                    }
                 }
             });
 
             setEnrollmentsByUser(enrollmentMap);
 
             if (certData) {
-                const certMap: Record<string, any> = {};
-                certData.forEach((c: any) => {
-                    certMap[c.student_id] = {
-                        ...c,
-                        batch_name: batchNameByStudent[c.student_id] || 'SheSTEM Mentorship Program'
-                    };
+                const certMap: Record<string, StudentCertificateRecord[]> = {};
+                (certData as StudentCertificateRecord[]).forEach((cert) => {
+                    if (!certMap[cert.student_id]) {
+                        certMap[cert.student_id] = [];
+                    }
+                    certMap[cert.student_id].push(cert);
                 });
-                setCertifiedStudents(certMap);
+                setCertificatesByStudent(certMap);
             }
         } catch (err: any) {
             console.error('Error fetching users:', err);
@@ -345,6 +359,7 @@ export const UserList: React.FC = () => {
                         <tbody className="divide-y divide-border">
                             {filteredUsers.map((user) => {
                                 const enrollment = enrollmentsByUser[user.id];
+                                const studentCerts = certificatesByStudent[user.id] || [];
                                 return (
                                     <tr key={user.id} className="hover:bg-muted/50 transition-colors">
                                         <td className="py-3 px-4">
@@ -355,15 +370,25 @@ export const UserList: React.FC = () => {
                                                 <div>
                                                     <div className="font-medium text-foreground flex items-center gap-2">
                                                         {user.first_name} {user.last_name}
-                                                        {user.role === 'student' && certifiedStudents[user.id] && (
+                                                        {user.role === 'student' && studentCerts.length > 0 && (
                                                             <div className="relative group inline-flex items-center">
                                                                 <span className="inline-flex items-center justify-center bg-primary/10 text-primary p-1.5 rounded-full cursor-help transition-transform hover:scale-110">
                                                                     <Award className="w-4 h-4" strokeWidth={2.5} />
+                                                                    {studentCerts.length > 1 && (
+                                                                        <span className="sr-only">{studentCerts.length} certificates</span>
+                                                                    )}
                                                                 </span>
-                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[250px] bg-foreground text-background text-xs rounded py-2 px-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center">
-                                                                    <p className="font-semibold mb-1">Certificate Awarded</p>
-                                                                    <p className="opacity-90">Course: {certifiedStudents[user.id].batch_name}</p>
-                                                                    <p className="opacity-90 mt-0.5">Date: {new Date(certifiedStudents[user.id].issued_at).toLocaleDateString()}</p>
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[280px] bg-foreground text-background text-xs rounded py-2 px-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-left">
+                                                                    <p className="font-semibold mb-1 text-center">
+                                                                        {studentCerts.length === 1 ? 'Certificate Awarded' : `${studentCerts.length} Certificates`}
+                                                                    </p>
+                                                                    <ul className="space-y-1 opacity-90">
+                                                                        {studentCerts.map((cert) => (
+                                                                            <li key={cert.id}>
+                                                                                {getCertificateCohortLabel(cert)} — {new Date(cert.issued_at).toLocaleDateString()}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
                                                                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground"></div>
                                                                 </div>
                                                             </div>
@@ -508,19 +533,33 @@ export const UserList: React.FC = () => {
                     student={{
                         id: issueCertUser.id,
                         email: issueCertUser.email,
-                        raw_user_meta_data: { full_name: `${issueCertUser.first_name} ${issueCertUser.last_name}`.trim() }
+                        first_name: issueCertUser.first_name,
+                        last_name: issueCertUser.last_name,
+                        raw_user_meta_data: { full_name: `${issueCertUser.first_name} ${issueCertUser.last_name}`.trim() },
                     }}
+                    enrollments={enrollmentsByUser[issueCertUser.id]?.details || []}
+                    certifiedBatchIds={(certificatesByStudent[issueCertUser.id] || [])
+                        .map((cert) => cert.batch_id)
+                        .filter((id): id is string => Boolean(id))}
                     onClose={() => setIssueCertUser(null)}
                     onSuccess={() => {
                         setIssueCertUser(null);
                         success('Certificate issued successfully!');
+                        fetchUsers();
                     }}
                 />
             )}
 
             {manageCertUser && (
                 <ManageCertificatesModal
-                    student={manageCertUser}
+                    student={{
+                        id: manageCertUser.id,
+                        email: manageCertUser.email,
+                        first_name: manageCertUser.first_name,
+                        last_name: manageCertUser.last_name,
+                        raw_user_meta_data: { full_name: `${manageCertUser.first_name} ${manageCertUser.last_name}`.trim() },
+                    }}
+                    enrollments={enrollmentsByUser[manageCertUser.id]?.details || []}
                     onClose={() => setManageCertUser(null)}
                 />
             )}

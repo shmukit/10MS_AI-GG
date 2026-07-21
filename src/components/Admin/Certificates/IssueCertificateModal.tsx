@@ -1,24 +1,55 @@
-import React, { useState, useRef } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useAuthContext } from '../../../lib/AuthContext';
+import {
+  buildEnrollmentLabel,
+  type EnrollmentDetail,
+} from '../../../lib/certificateTypes';
 
 interface IssueCertificateModalProps {
-  student: any; // The student object with id and raw_user_meta_data.full_name
+  student: {
+    id: string;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    raw_user_meta_data?: { full_name?: string };
+  };
+  enrollments: EnrollmentDetail[];
+  certifiedBatchIds?: string[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ student, onClose, onSuccess }) => {
+export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
+  student,
+  enrollments,
+  certifiedBatchIds = [],
+  onClose,
+  onSuccess,
+}) => {
   const { user } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [editableName, setEditableName] = useState(
-    student?.raw_user_meta_data?.full_name || student?.first_name || student?.email || 'Student'
+    student?.raw_user_meta_data?.full_name ||
+      [student?.first_name, student?.last_name].filter(Boolean).join(' ') ||
+      student?.email ||
+      'Student'
   );
 
-  // The path to the template image. 
-  // Please place the PNG you provided into the 'public' folder of the project as 'shestem_certificate_template.png'.
+  const availableEnrollments = useMemo(
+    () => enrollments.filter((e) => !certifiedBatchIds.includes(e.batchId)),
+    [enrollments, certifiedBatchIds]
+  );
+
+  const [selectedBatchId, setSelectedBatchId] = useState<string>(() => {
+    if (availableEnrollments.length === 1) return availableEnrollments[0].batchId;
+    return '';
+  });
+
+  const selectedEnrollment = availableEnrollments.find((e) => e.batchId === selectedBatchId);
+
   const templateSrc = '/shestem_certificate_template.png';
 
   const generateAndUploadImage = async (): Promise<string | null> => {
@@ -32,28 +63,19 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = async () => {
-        // Set canvas dimensions to match template
         canvas.width = img.width;
         canvas.height = img.height;
-
-        // Draw template
         ctx.drawImage(img, 0, 0);
 
-        // Draw student name (Center of the template, just above the line)
-        // Using a beautiful cursive font stack for the certificate name
         ctx.font = 'normal 80px "Great Vibes", "Brush Script MT", "Dancing Script", cursive';
-        ctx.fillStyle = '#0A2540'; // Dark navy blue to match the line in the template
+        ctx.fillStyle = '#0A2540';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom'; // Aligning bottom so it sits perfectly on the line
-        
-        // The exact coordinates depend on the actual resolution of your PNG.
-        // Assuming the line is roughly at 64% of the image height:
+        ctx.textBaseline = 'bottom';
+
         const xPos = canvas.width / 2;
-        const yPos = canvas.height * 0.665; // Moved down slightly more to ensure perfect placement
-        
+        const yPos = canvas.height * 0.665;
         ctx.fillText(editableName, xPos, yPos);
 
-        // Convert canvas to blob
         canvas.toBlob(async (blob) => {
           if (!blob) return reject('Failed to create image blob');
 
@@ -64,7 +86,7 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
               .upload(fileName, blob, {
                 contentType: 'image/png',
                 cacheControl: '3600',
-                upsert: false
+                upsert: false,
               });
 
             if (uploadError) throw uploadError;
@@ -85,51 +107,70 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
   };
 
   const handleIssue = async () => {
+    if (enrollments.length === 0) {
+      setError('This student has no batch enrollments. Assign them to a batch before issuing a certificate.');
+      return;
+    }
+
+    if (!selectedEnrollment) {
+      setError('Select the batch and roadmap this certificate is for.');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      // 1. Generate image and upload to storage
       const imageUrl = await generateAndUploadImage();
+      const cohortLabel = buildEnrollmentLabel(selectedEnrollment);
 
-      // 2. Insert record into database
-      const { error: dbError } = await supabase
-        .from('student_certificates')
-        .insert({
-          student_id: student.id,
-          issued_by: user?.id,
-          certificate_type: 'SheSTEM_Zoom_Completion',
-          image_url: imageUrl,
-          metadata: { student_name: editableName }
-        } as any);
+      const { error: dbError } = await supabase.from('student_certificates').insert({
+        student_id: student.id,
+        issued_by: user?.id,
+        certificate_type: 'SheSTEM_Zoom_Completion',
+        image_url: imageUrl,
+        batch_id: selectedEnrollment.batchId,
+        roadmap_id: selectedEnrollment.roadmapId,
+        metadata: {
+          student_name: editableName,
+          batch_name: selectedEnrollment.batchName,
+          roadmap_title: selectedEnrollment.roadmapTitle,
+        },
+      } as never);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        if (dbError.code === '23505') {
+          throw new Error(`A certificate has already been issued for ${cohortLabel}.`);
+        }
+        throw dbError;
+      }
 
-      // 3. Send direct notification to the student
-      const { error: noticeError } = await supabase
-        .from('notices')
-        .insert({
-          title: 'Congratulations! Certificate Issued 🎓',
-          content: `Great news! Your SheSTEM Zoom Completion Certificate has been successfully issued. You can view, download, and share it from your profile under the "My Certificates & Achievements" section.`,
-          author_id: user?.id,
-          target_student_id: student.id,
-          tag: 'certificate',
-          priority: 'high',
-          is_published: true
-        } as any);
-        
+      const { error: noticeError } = await supabase.from('notices').insert({
+        title: 'Congratulations! Certificate Issued 🎓',
+        content: `Great news! Your SheSTEM Zoom Completion Certificate for ${cohortLabel} has been issued. View, download, and share it from your profile under "My Certificates & Achievements".`,
+        author_id: user?.id,
+        target_student_id: student.id,
+        tag: 'certificate',
+        priority: 'high',
+        is_published: true,
+      } as never);
+
       if (noticeError) {
         console.error('Failed to send notice but certificate was issued:', noticeError);
       }
 
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to issue certificate:', err);
-      setError(err.message || 'An error occurred while issuing the certificate.');
+      const message = err instanceof Error ? err.message : 'An error occurred while issuing the certificate.';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
+
+  const allEnrollmentsCertified =
+    enrollments.length > 0 && availableEnrollments.length === 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -147,16 +188,58 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
           <p className="text-sm text-muted-foreground mb-4">
             You are about to issue a <strong>SheSTEM Zoom Completion</strong> certificate to:
           </p>
+
+          {enrollments.length === 0 ? (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-200">
+              This student is not enrolled in any batch. Assign them to a batch before issuing a certificate.
+            </div>
+          ) : allEnrollmentsCertified ? (
+            <div className="mb-4 rounded-lg border border-border bg-muted p-3 text-sm text-muted-foreground">
+              A certificate has already been issued for every enrolled batch.
+            </div>
+          ) : (
+            <div className="bg-muted p-4 rounded-lg mb-4">
+              <label htmlFor="cohort-select" className="block text-sm font-medium text-foreground mb-1">
+                Cohort (batch · roadmap)
+              </label>
+              {availableEnrollments.length === 1 ? (
+                <p className="text-sm text-foreground">{buildEnrollmentLabel(availableEnrollments[0])}</p>
+              ) : (
+                <select
+                  id="cohort-select"
+                  value={selectedBatchId}
+                  onChange={(e) => setSelectedBatchId(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 bg-background text-foreground text-sm"
+                >
+                  <option value="">Select batch and roadmap…</option>
+                  {availableEnrollments.map((enrollment) => (
+                    <option key={enrollment.batchId} value={enrollment.batchId}>
+                      {buildEnrollmentLabel(enrollment)}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <p className="text-xs text-muted-foreground mt-2">
+                One certificate is issued per batch enrollment. Students in multiple cohorts need separate certificates.
+              </p>
+            </div>
+          )}
+
           <div className="bg-muted p-4 rounded-lg mb-6">
-            <label className="block text-sm font-medium text-foreground mb-1">Name on Certificate</label>
+            <label htmlFor="cert-name" className="block text-sm font-medium text-foreground mb-1">
+              Name on Certificate
+            </label>
             <input
+              id="cert-name"
               type="text"
               value={editableName}
               onChange={(e) => setEditableName(e.target.value)}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 bg-background text-foreground placeholder:text-muted-foreground"
               placeholder="Enter full name"
             />
-            <p className="text-xs text-muted-foreground mt-2">You can edit the name above if it needs correction before issuing.</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              You can edit the name above if it needs correction before issuing.
+            </p>
           </div>
 
           {error && (
@@ -165,7 +248,6 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
             </div>
           )}
 
-          {/* Hidden canvas for image generation */}
           <canvas ref={canvasRef} style={{ display: 'none' }} />
 
           <div className="flex justify-end gap-3">
@@ -178,7 +260,7 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({ st
             </button>
             <button
               onClick={handleIssue}
-              disabled={loading}
+              disabled={loading || enrollments.length === 0 || allEnrollmentsCertified || !selectedEnrollment}
               className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 flex items-center"
             >
               {loading ? (

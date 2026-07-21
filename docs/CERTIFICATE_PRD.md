@@ -11,20 +11,27 @@ Enable the platform to issue certificates to students, displaying a dynamic cert
 ## 3. User Flow
 ### 3.1 Mentor/Admin Flow (Manual Issuance)
 1. Admin/Mentor navigates to the User Management or Batch Management dashboard.
-2. Selects a student (or multiple students) who have completed 2 Zoom sessions.
+2. Selects a student who has completed 2 Zoom sessions for a **specific batch enrollment**.
 3. Clicks on "Issue Certificate".
-4. A modal appears showing the student's pre-filled name. The Admin can edit this name if corrections or full names are needed before issuance. Email address is specifically hidden to keep the UI clean.
-5. The Admin clicks "Issue Certificate". The system automatically reads the `public/shestem_certificate_template.png` template, perfectly draws the confirmed student name in a cursive signature font using HTML5 Canvas, and uploads it to Supabase Storage.
-6. The system generates a certificate record for the student in the database linking to the generated PNG URL.
-7. The system automatically dispatches a direct, high-priority notification to that specific student's Notice Board alerting them that their certificate has been issued.
+4. A modal appears showing:
+   - **Cohort selector** (batch · roadmap) when the student is enrolled in multiple batches; auto-selected when there is only one enrollment.
+   - The student's pre-filled name (editable). Email is hidden to keep the UI clean.
+5. The Admin clicks "Issue Certificate". The system reads `public/shestem_certificate_template.png`, draws the confirmed name on canvas, and uploads to Supabase Storage.
+6. The system creates a certificate record linked to the student **and their batch/roadmap enrollment** (`batch_id`, `roadmap_id`, plus cohort labels in `metadata`).
+7. A targeted notification is sent to the student mentioning which cohort the certificate is for.
+
+**Constraints:**
+- One certificate per student **per batch** (enforced by DB unique index when `batch_id` is set).
+- Students with no batch enrollment cannot receive a certificate until assigned to a batch.
 
 ### 3.2 Mentor/Admin Flow (Revoking & Viewing Status)
 1. Admin/Mentor navigates to the User Management dashboard.
-2. Students who have been issued a certificate display a small blue "Award" icon/badge next to their name in the user list.
-3. Selects a student who has been issued a certificate.
-4. Clicks on "Manage Certificates" in the action menu.
-5. A modal appears showing all issued certificates for that student.
-6. Admin clicks the "Trash" icon to immediately revoke it. The system deletes the database record and removes the generated PNG from Supabase storage.
+2. Students with at least one issued certificate show an **Award** badge next to their name (tooltip lists each cohort and issue date when multiple exist).
+3. Selects a student and clicks **Manage Certificates** in the action menu.
+4. A modal shows:
+   - **Enrollments** — each batch · roadmap with issued / not issued status.
+   - **Issued certificates** — list with cohort label, preview, public link, and revoke action.
+5. Admin revokes via the trash icon; the DB record and storage PNG are deleted (ConfirmDialog, not native `confirm()`).
 
 ### 3.3 Student Flow (Viewing & Sharing)
 1. Student logs into the platform.
@@ -40,16 +47,18 @@ Enable the platform to issue certificates to students, displaying a dynamic cert
 5. When a non-authenticated user visits the unique public URL, they see a public verification page displaying the certificate, student name, and metadata (OpenGraph tags for rich previews on social media).
 
 ## 4. User Acceptance Criteria (UAC)
-- **UAC 1:** An Admin/Mentor can manually issue a certificate to a student.
-- **UAC 2:** An Admin/Mentor is presented with an editable text input to correct or complete the student's name before the certificate is generated. No email ID is displayed in the modal.
-- **UAC 3:** When issued, the student receives an automatic, targeted notification in their dashboard alerting them of the new certificate.
-- **UAC 4:** A student can view their issued certificate(s) on their profile platform under "My Certificates & Achievements".
-- **UAC 5:** The certificate dynamically overlays the student's final confirmed name onto the provided template (PNG/PDF).
-- **UAC 4:** Each certificate has a unique, publicly accessible URL (e.g., `app.domain.com/certificate/:uuid`).
-- **UAC 5:** The public URL displays correctly with OG meta tags so that when shared on LinkedIn, a nice preview of the certificate is shown.
-- **UAC 6:** The certificate page has functional CTAs to Download, Share, and Copy Link.
-- **UAC 7:** An Admin/Mentor can view a list of a student's issued certificates and immediately revoke/delete them.
-- **UAC 8:** The student's name is rendered in an elegant cursive font (e.g., "Great Vibes" or "Dancing Script") centered exactly above the blue line in the template.
+- **UAC 1:** An Admin/Mentor can manually issue a certificate to a student for a chosen batch enrollment.
+- **UAC 2:** When a student has multiple batch enrollments, the issue modal requires selecting the cohort (batch · roadmap) before issuance.
+- **UAC 3:** An Admin/Mentor is presented with an editable text input to correct or complete the student's name before the certificate is generated. No email ID is displayed in the modal.
+- **UAC 4:** When issued, the student receives an automatic, targeted notification naming the cohort the certificate belongs to.
+- **UAC 5:** A student can view all issued certificate(s) on their profile under "My Certificates & Achievements", each labeled with batch · roadmap context.
+- **UAC 6:** The certificate dynamically overlays the student's final confirmed name onto the provided template (PNG).
+- **UAC 7:** Each certificate has a unique, publicly accessible URL (e.g., `app.domain.com/certificate/:uuid`).
+- **UAC 8:** The public URL displays cohort context (batch · roadmap) and OG-friendly metadata for social sharing.
+- **UAC 9:** The certificate page has functional CTAs to Download, Share, and Copy Link.
+- **UAC 10:** An Admin/Mentor can view enrollments vs issued certificates per cohort and revoke individual certificates.
+- **UAC 11:** Duplicate issuance for the same student + batch is blocked (UI and database).
+- **UAC 12:** The student's name is rendered in an elegant cursive font centered above the blue line in the template.
 
 ## 5. Technical Requirements & Dynamic Generation Approach
 Since the certificate template is provided in PNG/Canva format, we will use the **PNG template** as the base.
@@ -69,6 +78,13 @@ We will need a new table in the database to track certificates.
 | `issued_at` | `TIMESTAMP` | Default NOW() | When it was issued |
 | `public_url_slug` | `VARCHAR` | Unique | A unique short slug or just use the ID |
 | `image_url` | `TEXT` | Nullable | URL of the generated image in storage (if pre-generated) |
+| `batch_id` | `UUID` | FK → `batches(id)`, nullable | Batch enrollment this certificate belongs to |
+| `roadmap_id` | `UUID` | FK → `roadmaps(id)`, nullable | Roadmap for the enrollment (denormalized for queries) |
+| `metadata` | `JSONB` | Default `{}` | `student_name`, `batch_name`, `roadmap_title`, etc. |
+
+**Indexes:** Unique `(student_id, batch_id)` where `batch_id IS NOT NULL` — one certificate per student per batch.
+
+**Migration:** Run `sql/20260726_certificate_batch_roadmap.sql` in Supabase SQL Editor.
 
 ### APIs Needed (Supabase RPCs or direct DB operations)
 - `issue_certificate(student_id, type)`: Issues a certificate.
