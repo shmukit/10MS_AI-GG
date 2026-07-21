@@ -9,6 +9,7 @@ import {
     upsertBatchTaskDeadline,
 } from './roadmapTaskApi';
 import { DEFAULT_NEW_TASK, type NewTaskForm } from './types';
+import { useToast } from '../../../../ui/ToastProvider';
 
 interface UseRoadmapTasksParams {
     selectedRoadmap: string;
@@ -27,6 +28,7 @@ export function useRoadmapTasks({
     getNodeLabel,
     refreshRoadmapNodes,
 }: UseRoadmapTasksParams) {
+    const { success, error: toastError } = useToast();
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [editingTask, setEditingTask] = useState<string | null>(null);
     const [editingTaskData, setEditingTaskData] = useState<any>(null);
@@ -35,7 +37,7 @@ export function useRoadmapTasks({
     const handleAddTask = async () => {
         try {
             if (!selectedRoadmap) {
-                alert('Please select a roadmap first');
+                toastError('Please select a roadmap first');
                 return;
             }
 
@@ -49,7 +51,7 @@ export function useRoadmapTasks({
 
             if (weekError || !weekId) {
                 console.error('Error creating node:', weekError);
-                alert(`Failed to create ${unitLabel} ${newTask.weekNumber}. Please try again.`);
+                toastError(`Failed to create ${unitLabel} ${newTask.weekNumber}. Please try again.`);
                 return;
             }
 
@@ -74,7 +76,7 @@ export function useRoadmapTasks({
             }
         } catch (error) {
             console.error('Error adding task:', error);
-            alert('Failed to add task');
+            toastError('Failed to add task');
         }
     };
 
@@ -92,7 +94,7 @@ export function useRoadmapTasks({
 
             if (weekError || !weekId) {
                 console.error('Error creating node:', weekError);
-                alert(`Failed to create ${unitLabel} ${editingTaskData.weekNumber}. Please try again.`);
+                toastError(`Failed to create ${unitLabel} ${editingTaskData.weekNumber}. Please try again.`);
                 return;
             }
 
@@ -123,10 +125,10 @@ export function useRoadmapTasks({
 
             setEditingTask(null);
             setEditingTaskData(null);
-            alert('Task updated successfully!');
+            success('Task updated successfully!');
         } catch (error) {
             console.error('Error updating task:', error);
-            alert('Failed to update task');
+            toastError('Failed to update task');
         }
     };
 
@@ -141,7 +143,7 @@ export function useRoadmapTasks({
             setRoadmapData(roadmapData.filter(task => task.id !== id));
         } catch (error) {
             console.error('Error deleting task:', error);
-            alert('Failed to delete task');
+            toastError('Failed to delete task');
         }
     };
 

@@ -9,6 +9,7 @@ import { RoadmapModal } from './roadmap/RoadmapModal';
 import { AddWeekModal } from './roadmap/AddWeekModal';
 import { EditNodeModal } from './roadmap/EditNodeModal';
 import { NodesPanel } from './roadmap/NodesPanel';
+import { RoadmapResourcesPanel } from './roadmap/RoadmapResourcesPanel';
 
 interface RoadmapTabProps {
     roadmaps: any[];
@@ -56,6 +57,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
         handleAddRoadmap,
         handleUpdateRoadmap,
         handleDeleteRoadmap,
+        handleDuplicateRoadmap,
         handleAddWeek
     } = useRoadmapTab({
         roadmaps,
@@ -82,7 +84,10 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 setShowAddWeekModal={setShowAddWeekModal}
                 setIsAddingTask={setIsAddingTask}
                 nodeUnitLabel={nodeUnitLabel}
+                onDuplicateRoadmap={handleDuplicateRoadmap}
             />
+
+            {selectedRoadmap && <RoadmapResourcesPanel roadmapId={selectedRoadmap} />}
 
             {selectedRoadmap && (
                 <NodesPanel

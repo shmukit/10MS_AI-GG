@@ -1,4 +1,6 @@
 import React from 'react';
+import { BatchResourceToggles } from './BatchResourceToggles';
+import type { BatchResourceSelection } from '../../../../types/models';
 
 const inputClass = 'w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-colors duration-200 bg-muted text-foreground';
 
@@ -10,6 +12,8 @@ interface BatchModalProps {
     setBatchData: (data: any) => void;
     onSubmit: () => void;
     roadmaps?: any[];
+    resourceSelection?: BatchResourceSelection;
+    onResourceSelectionChange?: (selection: BatchResourceSelection) => void;
 }
 
 export const BatchModal: React.FC<BatchModalProps> = ({
@@ -19,7 +23,9 @@ export const BatchModal: React.FC<BatchModalProps> = ({
     batchData,
     setBatchData,
     onSubmit,
-    roadmaps
+    roadmaps,
+    resourceSelection,
+    onResourceSelectionChange,
 }) => {
     if (!isOpen) return null;
 
@@ -84,9 +90,26 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                                     placeholder="Select start date"
                                 />
                             </div>
+
+                            {batchData.roadmapId && resourceSelection && onResourceSelectionChange && (
+                                <BatchResourceToggles
+                                    roadmapId={batchData.roadmapId}
+                                    selection={resourceSelection}
+                                    onChange={onResourceSelectionChange}
+                                />
+                            )}
                         </>
                     ) : (
                         <>
+                            {batchData.roadmapId && resourceSelection && onResourceSelectionChange && (
+                                <BatchResourceToggles
+                                    roadmapId={batchData.roadmapId}
+                                    batchId={batchData.id}
+                                    selection={resourceSelection}
+                                    onChange={onResourceSelectionChange}
+                                />
+                            )}
+
                             <div>
                                 <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                                     WhatsApp Group Link

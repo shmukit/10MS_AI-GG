@@ -7,6 +7,7 @@ import {
     updateRoadmapTotalWeeks,
     updateRoadmapWeekInDb,
 } from './roadmapWeekApi';
+import { useToast } from '../../../../ui/ToastProvider';
 
 interface UseRoadmapNodesParams {
     selectedRoadmap: string;
@@ -23,6 +24,7 @@ export function useRoadmapNodes({
     getCurrentRoadmap,
     getNodeLabel,
 }: UseRoadmapNodesParams) {
+    const { success, error: toastError } = useToast();
     const [showAddWeekModal, setShowAddWeekModal] = useState(false);
     const [editingNode, setEditingNode] = useState<string | null>(null);
     const [editingNodeData, setEditingNodeData] = useState<EditNodeFormData | null>(null);
@@ -71,10 +73,10 @@ export function useRoadmapNodes({
             setRoadmaps(roadmaps.map(r => r.id === currentRoadmap.id ? updatedRoadmap : r));
             setShowAddWeekModal(false);
             await refreshRoadmapNodes();
-            alert(`${unitLabel} ${nextWeekNumber} added successfully!`);
+            success(`${unitLabel} ${nextWeekNumber} added successfully!`);
         } catch (error) {
             console.error('Error adding node:', error);
-            alert(`Failed to add ${getNodeLabel()}`);
+            toastError(`Failed to add ${getNodeLabel()}`);
         }
     };
 
@@ -104,10 +106,10 @@ export function useRoadmapNodes({
             await refreshRoadmapNodes();
             setEditingNode(null);
             setEditingNodeData(null);
-            alert(`${getNodeLabel()} updated successfully!`);
+            success(`${getNodeLabel()} updated successfully!`);
         } catch (error) {
             console.error('Error updating node:', error);
-            alert(`Failed to update ${getNodeLabel()}`);
+            toastError(`Failed to update ${getNodeLabel()}`);
         }
     };
 

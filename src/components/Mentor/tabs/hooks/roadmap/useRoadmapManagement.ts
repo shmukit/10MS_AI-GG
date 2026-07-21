@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { RoadmapItem } from '../../../../../types/mentor';
+import { supabase } from '../../../../../lib/supabase';
 import { deleteRoadmapFromDb, insertRoadmap, updateRoadmapInDb } from './roadmapApi';
+import { duplicateRoadmap } from './roadmapDuplicateApi';
 import { DEFAULT_NEW_ROADMAP, type NewRoadmapForm } from './types';
+import { useToast } from '../../../../ui/ToastProvider';
 
 interface UseRoadmapManagementParams {
     roadmaps: any[];
@@ -18,6 +21,7 @@ export function useRoadmapManagement({
     setSelectedRoadmap,
     setRoadmapData,
 }: UseRoadmapManagementParams) {
+    const { error: toastError } = useToast();
     const [isAddingRoadmap, setIsAddingRoadmap] = useState(false);
     const [isEditingRoadmap, setIsEditingRoadmap] = useState(false);
     const [editingRoadmapData, setEditingRoadmapData] = useState<any>(null);
@@ -37,7 +41,7 @@ export function useRoadmapManagement({
             }
         } catch (error) {
             console.error('Error adding roadmap:', error);
-            alert('Failed to add roadmap');
+            toastError('Failed to add roadmap');
         }
     };
 
@@ -54,7 +58,7 @@ export function useRoadmapManagement({
             setEditingRoadmapData(null);
         } catch (error) {
             console.error('Error updating roadmap:', error);
-            alert('Failed to update roadmap');
+            toastError('Failed to update roadmap');
         }
     };
 
@@ -79,7 +83,32 @@ export function useRoadmapManagement({
             }
         } catch (error) {
             console.error('Error deleting roadmap:', error);
-            alert('Failed to delete roadmap');
+            toastError('Failed to delete roadmap');
+        }
+    };
+
+    const handleDuplicateRoadmap = async (sourceRoadmapId: string, newTitle?: string) => {
+        try {
+            const result = await duplicateRoadmap(sourceRoadmapId, newTitle);
+            if (!result) {
+                toastError('Failed to duplicate roadmap');
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('roadmaps')
+                .select('*')
+                .eq('id', result.id)
+                .single();
+
+            if (error || !data) throw error;
+
+            setRoadmaps([...roadmaps, data]);
+            setSelectedRoadmap(result.id);
+            setRoadmapData([]);
+        } catch (error) {
+            console.error('Error duplicating roadmap:', error);
+            toastError('Failed to duplicate roadmap');
         }
     };
 
@@ -95,5 +124,6 @@ export function useRoadmapManagement({
         handleAddRoadmap,
         handleUpdateRoadmap,
         handleDeleteRoadmap,
+        handleDuplicateRoadmap,
     };
 }

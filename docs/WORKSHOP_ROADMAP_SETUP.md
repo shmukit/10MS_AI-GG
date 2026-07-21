@@ -2,73 +2,56 @@
 
 Run these scripts in the **Supabase SQL Editor** in order:
 
-1. [`sql/20260721_roadmap_node_unit_label.sql`](../sql/20260721_roadmap_node_unit_label.sql) — adds `node_unit_label` to roadmaps
-2. [`sql/20260721_roadmap_slides_url.sql`](../sql/20260721_roadmap_slides_url.sql) — adds optional `slides_url` for instructor decks
-3. [`sql/20260721_become_manager_of_ai_agents_roadmap.sql`](../sql/20260721_become_manager_of_ai_agents_roadmap.sql) — seeds the workshop roadmap
+1. [`sql/20260721_roadmap_node_unit_label.sql`](../sql/20260721_roadmap_node_unit_label.sql)
+2. [`sql/20260721_roadmap_slides_url.sql`](../sql/20260721_roadmap_slides_url.sql)
+3. [`sql/20260721_roadmap_decision_tree_enabled.sql`](../sql/20260721_roadmap_decision_tree_enabled.sql)
+4. [`sql/20260721_become_manager_of_ai_agents_roadmap_rerun.sql`](../sql/20260721_become_manager_of_ai_agents_roadmap_rerun.sql) — workshop seed (self-contained)
+5. Resource library (required for multi-deck + cohort toggles):
+   - [`sql/20260722_roadmap_resource_catalog.sql`](../sql/20260722_roadmap_resource_catalog.sql)
+   - [`sql/20260722_batch_resource_enablement.sql`](../sql/20260722_batch_resource_enablement.sql)
+   - [`sql/20260722_migrate_roadmap_resources_from_legacy.sql`](../sql/20260722_migrate_roadmap_resources_from_legacy.sql)
+   - [`sql/20260722_roadmap_resource_rls.sql`](../sql/20260722_roadmap_resource_rls.sql)
+6. Optional: [`sql/20260722_workshop_resource_catalog_seed.sql`](../sql/20260722_workshop_resource_catalog_seed.sql) — 3 session deck placeholders + agentic tree
 
 ## Verify
 
 ```sql
-SELECT id, title, node_unit_label, total_weeks
+SELECT id, title, node_unit_label, total_weeks, decision_tree_enabled
 FROM roadmaps
 WHERE title = 'Become a Manager of AI Agents';
 
-SELECT w.week_number, w.title, COUNT(t.id) AS tasks
-FROM roadmap_weeks w
-JOIN roadmaps r ON r.id = w.roadmap_id
-LEFT JOIN roadmap_tasks t ON t.week_id = w.id
-WHERE r.title = 'Become a Manager of AI Agents'
-GROUP BY w.week_number, w.title
-ORDER BY w.week_number;
+SELECT sd.title, sd.slides_url, dt.title AS tree_title, dt.tree_key
+FROM roadmaps r
+LEFT JOIN roadmap_slide_decks sd ON sd.roadmap_id = r.id
+LEFT JOIN roadmap_decision_trees dt ON dt.roadmap_id = r.id
+WHERE r.title = 'Become a Manager of AI Agents';
 ```
 
-Expected: **3 sessions**, **20 tasks** total (7 + 6 + 7).
+Expected: **3 sessions**, **20 tasks**, resource catalog rows after optional seed.
 
-Student URL slug: `/student/roadmap/become_a_manager_of_ai_agents`
+Student URL: `/student/roadmap/become_a_manager_of_ai_agents?batch_id={batch_uuid}`
 
-Decision tree: embedded on the roadmap page — **Decision Tree** tab, or `/student/roadmap/become_a_manager_of_ai_agents?view=decision-tree`
+Decision tree: **Decision Tree** tab when enabled for the student's cohort.
 
-Standalone route (still works): `/student/playbooks/agentic-decision`
+## Mentor setup after SQL
 
-## Placeholder links to replace (before workshop)
+1. **Roadmaps tab → Resource library** — add/replace slide deck URLs (Session 1–3).
+2. **Students tab → Create batch** — assign roadmap; check which decks/trees this cohort gets.
+3. **Duplicate** roadmap if you need a variant program with the same content.
 
-Replace `docs.google.com/.../placeholder-*` and `youtube.com/watch?v=placeholder-*` URLs via **Mentor dashboard → Roadmaps** or a forward-fix SQL script.
+## Placeholder links to replace
+
+Replace task placeholder URLs via **Mentor dashboard → Roadmaps** or forward-fix SQL.
 
 | Template | Used in |
 | -------- | ------- |
 | `placeholder-prompt-cheatsheet` | Session 1 — Prompting Properly |
 | `placeholder-opportunity-map` | Session 1 — Reflection |
-| `placeholder-thinking-brain` | Session 1 — Thinking brain |
 | `placeholder-workflow-catalog` | Session 2 — Workflow catalog |
-| `placeholder-workflow-canvas` | Session 2 — Breakdown + annotation |
 | `placeholder-harness-card` | Session 3 — Harness Card |
-| `placeholder-ai-workforce-canvas` | Session 3 — AI workforce |
-| `placeholder-failure-lab` | Session 3 — Failure lab |
-| `placeholder-capstone-template` | Session 3 — Capstone |
-| `placeholder-adoption-plan` | Session 3 — 30-day plan |
-| `placeholder-demo-feedback` | Session 3 — Demo day form |
+| `placeholder-session-1/2/3` | Resource library slide decks (optional seed) |
 
-## Instructor slides
+## Related docs
 
-After migrations, add your workshop deck via **Mentor dashboard → Roadmaps → Edit Roadmap → Slides URL**.
-
-- **PDF:** Upload to Google Drive → share “Anyone with the link” → paste link
-- **Google Slides:** File → Publish to web → paste publish or embed URL
-
-Students then see **View Slides** at the top of the roadmap page. See [ROADMAP_SLIDES.md](./ROADMAP_SLIDES.md).
-
-## Mentor features
-
-- **Node label**: Edit roadmap → set Week / Session / Month / Module / custom
-- **Slides URL**: Edit roadmap → optional PDF / Google Slides / PPT link
-- **Rename nodes**: Roadmaps tab → Session Nodes panel → Edit
-- **Add nodes**: "Add Session" (label follows roadmap setting)
-
-## Optional: assign to a batch
-
-```sql
--- After creating a batch, point it at the workshop roadmap:
--- UPDATE batches SET roadmap_id = (
---   SELECT id FROM roadmaps WHERE title = 'Become a Manager of AI Agents'
--- ) WHERE name = 'Your Workshop Batch Name';
-```
+- [ROADMAP_SLIDES.md](./ROADMAP_SLIDES.md) — slides + cohort toggles
+- [MENTOR_FEATURES.md](./MENTOR_FEATURES.md) — duplicate roadmap, resource library

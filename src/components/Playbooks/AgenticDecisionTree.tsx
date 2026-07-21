@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowRight, RotateCcw, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
 import {
-  AGENTIC_DECISION_START_ID,
   DecisionNode,
   DecisionQuestionNode,
   DecisionResultNode,
-  getDecisionNode,
 } from '../../data/agenticDecisionTree';
+import {
+  getDecisionTreeNode,
+  getDecisionTreeStartId,
+} from '../../data/decisionTreeRegistry';
 
 function isQuestion(node: DecisionNode): node is DecisionQuestionNode {
   return node.type === 'question';
@@ -18,14 +20,24 @@ function isResult(node: DecisionNode): node is DecisionResultNode {
 
 interface AgenticDecisionTreeProps {
   embedded?: boolean;
+  treeKey?: string;
 }
 
-export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({ embedded = false }) => {
-  const [path, setPath] = useState<string[]>([AGENTIC_DECISION_START_ID]);
+export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({
+  embedded = false,
+  treeKey = 'agentic',
+}) => {
+  const startId = getDecisionTreeStartId(treeKey);
+  const [path, setPath] = useState<string[]>([startId]);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    setPath([getDecisionTreeStartId(treeKey)]);
+    setCopied(false);
+  }, [treeKey]);
+
   const currentId = path[path.length - 1];
-  const currentNode = useMemo(() => getDecisionNode(currentId), [currentId]);
+  const currentNode = useMemo(() => getDecisionTreeNode(treeKey, currentId), [treeKey, currentId]);
 
   const goTo = (nextId: string) => {
     setPath((prev) => [...prev, nextId]);
@@ -38,7 +50,7 @@ export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({ embedd
   };
 
   const restart = () => {
-    setPath([AGENTIC_DECISION_START_ID]);
+    setPath([startId]);
     setCopied(false);
   };
 
@@ -114,7 +126,7 @@ export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({ embedd
 
         <div className="mb-6 flex flex-wrap gap-2">
           {path.map((id, index) => {
-            const node = getDecisionNode(id);
+            const node = getDecisionTreeNode(treeKey, id);
             const label = node && isQuestion(node)
               ? `Q${index + 1}`
               : node && isResult(node)

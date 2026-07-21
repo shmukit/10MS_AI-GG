@@ -7,7 +7,12 @@ import {
   RoadmapWeek,
   RoadmapTask,
   StudentProgress,
-  Notice
+  Notice,
+  RoadmapSlideDeck,
+  RoadmapDecisionTree,
+  EnabledSlideDeck,
+  BatchEnabledResources,
+  BatchResourceSelection,
 } from '../types/models';
 
 import * as UserService from './db/userService';
@@ -22,7 +27,7 @@ import * as LiveSessionService from './liveSessionService';
 import * as SpacedRepetitionService from './db/spacedRepetitionService';
 import * as PracticeDeckService from './db/practiceDeckService';
 import * as GamificationService from './db/gamificationService';
-import * as MarketingService from './db/marketingService';
+import * as RoadmapResourceService from './db/roadmapResourceService';
 
 // Re-export types
 export type {
@@ -34,7 +39,12 @@ export type {
   RoadmapWeek,
   RoadmapTask,
   StudentProgress,
-  Notice
+  Notice,
+  RoadmapSlideDeck,
+  RoadmapDecisionTree,
+  EnabledSlideDeck,
+  BatchEnabledResources,
+  BatchResourceSelection,
 };
 
 // Database service class acting as a facade
@@ -75,6 +85,18 @@ export class DatabaseService {
   static getRoadmapBySlug = RoadmapService.getRoadmapBySlug;
   static getCurrentWeekTasks = RoadmapService.getCurrentWeekTasks;
   static getUpcomingTasks = RoadmapService.getUpcomingTasks;
+
+  // Roadmap resources (slides + decision trees)
+  static getRoadmapSlideDecks = RoadmapResourceService.getRoadmapSlideDecks;
+  static getRoadmapDecisionTrees = RoadmapResourceService.getRoadmapDecisionTrees;
+  static upsertSlideDeck = RoadmapResourceService.upsertSlideDeck;
+  static deleteSlideDeck = RoadmapResourceService.deleteSlideDeck;
+  static upsertDecisionTree = RoadmapResourceService.upsertDecisionTree;
+  static deleteDecisionTree = RoadmapResourceService.deleteDecisionTree;
+  static getBatchEnabledResources = RoadmapResourceService.getBatchEnabledResources;
+  static getBatchResourceSelection = RoadmapResourceService.getBatchResourceSelection;
+  static saveBatchResourceSelection = RoadmapResourceService.saveBatchResourceSelection;
+  static seedBatchResourcesFromCatalog = RoadmapResourceService.seedBatchResourcesFromCatalog;
 
   // Progress tracking
   static getStudentProgress = ProgressService.getStudentProgress;

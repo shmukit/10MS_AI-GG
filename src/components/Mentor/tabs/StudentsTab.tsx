@@ -35,6 +35,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         availableStudents,
         showPassword, setShowPassword,
         newBatch, setNewBatch,
+        batchResourceSelection, setBatchResourceSelection,
         newStudent, setNewStudent,
         copyToClipboard,
         loadAvailableStudents,
@@ -50,6 +51,8 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
     const selectedBatchData = batches.find(b => b.id === selectedBatch);
     const batchStudents = students.filter(s => s.batchId === selectedBatch);
+    const linkedRoadmap = roadmaps.find(r => r.id === selectedBatchData?.roadmapId);
+    const totalWeeks = linkedRoadmap?.total_weeks ?? 6;
 
     return (
         <div className="space-y-6">
@@ -69,23 +72,32 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             <BatchInfo
                 selectedBatchData={selectedBatchData}
                 studentCount={batchStudents.length}
-                setEditingBatchData={setEditingBatchData}
+                setEditingBatchData={(data) => {
+                    setEditingBatchData(data);
+                    setBatchResourceSelection({ slideDecks: [], decisionTrees: [] });
+                }}
                 setIsEditingBatch={setIsEditingBatch}
             />
 
             <StudentsList
                 students={batchStudents}
                 handleDeleteStudent={handleDeleteStudent}
+                totalWeeks={totalWeeks}
             />
 
             <BatchModal
                 isOpen={isAddingBatch}
-                onClose={() => setIsAddingBatch(false)}
+                onClose={() => {
+                    setIsAddingBatch(false);
+                    setBatchResourceSelection({ slideDecks: [], decisionTrees: [] });
+                }}
                 mode="create"
                 batchData={newBatch}
                 setBatchData={setNewBatch}
                 onSubmit={handleAddBatch}
                 roadmaps={roadmaps}
+                resourceSelection={batchResourceSelection}
+                onResourceSelectionChange={setBatchResourceSelection}
             />
 
             {editingBatchData && (
@@ -94,11 +106,14 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     onClose={() => {
                         setIsEditingBatch(false);
                         setEditingBatchData(null);
+                        setBatchResourceSelection({ slideDecks: [], decisionTrees: [] });
                     }}
                     mode="edit"
                     batchData={editingBatchData}
                     setBatchData={setEditingBatchData}
                     onSubmit={handleUpdateBatch}
+                    resourceSelection={batchResourceSelection}
+                    onResourceSelectionChange={setBatchResourceSelection}
                 />
             )}
 

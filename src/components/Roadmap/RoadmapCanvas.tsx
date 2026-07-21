@@ -73,8 +73,8 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
 
                   return (
                     <div key={node.id} id={`roadmap-node-${nodeNumber}`} className="relative z-10">
-                      {/* Connection dot — sits on the spine, above the line but below card content is ok at card top edge */}
-                      <div className="absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-border bg-card sm:top-8 sm:h-4 sm:w-4 sm:border-4" />
+                      {/* Connection dot — desktop alternating layout only */}
+                      <div className="hidden lg:block absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-border bg-card sm:top-8 sm:h-4 sm:w-4 sm:border-4" />
 
                       {/* Card — full width on mobile; alternating halves on lg+ */}
                       <div

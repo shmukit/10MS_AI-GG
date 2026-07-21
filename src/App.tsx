@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
+import { ToastProvider } from './components/ui/ToastProvider';
+import { ConfirmProvider } from './components/ui/ConfirmProvider';
 // import { PostHogProvider } from 'posthog-js/react';
 // import { posthog } from './lib/posthog';
 import { PageTransition } from './components/ui/MotionPrimitives';
@@ -219,15 +221,17 @@ const AnimatedAppContent = () => {
 
 function App() {
   return (
-    // <PostHogProvider client={posthog}> // Removed provider
     <AuthProvider>
       <ThemeProvider>
-        <Router>
-          <AnimatedAppContent />
-        </Router>
+        <ToastProvider>
+          <ConfirmProvider>
+            <Router>
+              <AnimatedAppContent />
+            </Router>
+          </ConfirmProvider>
+        </ToastProvider>
       </ThemeProvider>
     </AuthProvider>
-    // </PostHogProvider>
   );
 }
 

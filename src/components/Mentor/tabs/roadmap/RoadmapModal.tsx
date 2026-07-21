@@ -159,19 +159,19 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({
                         <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
                             Slides URL (optional)
                         </label>
+                        <p className="text-xs text-muted-foreground mb-2 rounded-lg border border-border bg-muted/40 p-3">
+                            Manage slide decks and decision trees in the <strong>Resource library</strong> panel below the roadmap selector. Legacy fields here are kept for backward compatibility only.
+                        </p>
                         <input
                             type="url"
                             value={roadmapData.slides_url || ''}
                             onChange={(e) => setRoadmapData({ ...roadmapData, slides_url: e.target.value })}
                             className={inputClass}
-                            placeholder="PDF or Google Slides publish/embed link"
+                            placeholder="Legacy single-deck URL (optional)"
                         />
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Paste a public PDF link, Google Slides publish URL, or PPT link. Students see a View Slides button when set.
-                        </p>
                     </div>
 
-                    <div className="flex items-start gap-3 rounded-lg border border-border p-4 bg-muted/40">
+                    <div className="hidden">
                         <input
                             id="decision-tree-enabled"
                             type="checkbox"

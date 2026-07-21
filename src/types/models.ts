@@ -127,3 +127,46 @@ export interface Notice {
     created_at: string;
     updated_at: string;
 }
+
+export interface RoadmapSlideDeck {
+    id: string;
+    roadmap_id: string;
+    title: string;
+    slides_url: string;
+    sort_order: number;
+    is_default_enabled: boolean;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface RoadmapDecisionTree {
+    id: string;
+    roadmap_id: string;
+    title: string;
+    tree_key: string;
+    sort_order: number;
+    is_default_enabled: boolean;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface EnabledSlideDeck extends RoadmapSlideDeck {
+    is_enabled: boolean;
+}
+
+export interface EnabledDecisionTree extends RoadmapDecisionTree {
+    is_enabled: boolean;
+}
+
+export interface BatchEnabledResources {
+    slideDecks: EnabledSlideDeck[];
+    decisionTrees: EnabledDecisionTree[];
+    usesLegacyFallback: boolean;
+}
+
+export interface BatchResourceSelection {
+    slideDecks: { id: string; is_enabled: boolean }[];
+    decisionTrees: { id: string; is_enabled: boolean }[];
+}
