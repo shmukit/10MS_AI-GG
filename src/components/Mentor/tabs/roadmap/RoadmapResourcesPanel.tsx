@@ -20,13 +20,16 @@ export const RoadmapResourcesPanel: React.FC<RoadmapResourcesPanelProps> = ({ ro
   const loadResources = async () => {
     if (!roadmapId) return;
     setLoading(true);
-    const [decks, trees] = await Promise.all([
-      DatabaseService.getRoadmapSlideDecks(roadmapId),
-      DatabaseService.getRoadmapDecisionTrees(roadmapId),
-    ]);
-    setSlideDecks(decks);
-    setDecisionTrees(trees);
-    setLoading(false);
+    try {
+      const [decks, trees] = await Promise.all([
+        DatabaseService.getRoadmapSlideDecks(roadmapId),
+        DatabaseService.getRoadmapDecisionTrees(roadmapId),
+      ]);
+      setSlideDecks(decks);
+      setDecisionTrees(trees);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

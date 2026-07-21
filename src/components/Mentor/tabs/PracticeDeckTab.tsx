@@ -24,12 +24,18 @@ export const PracticeDeckTab: React.FC<PracticeDeckTabProps> = ({
     }, [user]);
 
     const loadDecks = async () => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
-        const mentorDecks = await getMentorDecks(user.id);
-        setDecks(mentorDecks);
-        setLoading(false);
+        try {
+            const mentorDecks = await getMentorDecks(user.id);
+            setDecks(mentorDecks);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteDeck = async (deckId: string) => {

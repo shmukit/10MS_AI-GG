@@ -30,29 +30,31 @@ export const BatchResourceToggles: React.FC<BatchResourceTogglesProps> = ({
     const load = async () => {
       if (!roadmapId || initializedRef.current) return;
       setLoading(true);
+      try {
+        const [decks, trees] = await Promise.all([
+          DatabaseService.getRoadmapSlideDecks(roadmapId),
+          DatabaseService.getRoadmapDecisionTrees(roadmapId),
+        ]);
 
-      const [decks, trees] = await Promise.all([
-        DatabaseService.getRoadmapSlideDecks(roadmapId),
-        DatabaseService.getRoadmapDecisionTrees(roadmapId),
-      ]);
-
-      setCatalogLabels({
-        slides: Object.fromEntries(decks.map((deck) => [deck.id, deck.title])),
-        trees: Object.fromEntries(trees.map((tree) => [tree.id, tree.title])),
-      });
-
-      if (batchId) {
-        const existing = await DatabaseService.getBatchResourceSelection(batchId, roadmapId);
-        onChange(existing);
-      } else {
-        onChange({
-          slideDecks: decks.map((deck) => ({ id: deck.id, is_enabled: deck.is_default_enabled })),
-          decisionTrees: trees.map((tree) => ({ id: tree.id, is_enabled: tree.is_default_enabled })),
+        setCatalogLabels({
+          slides: Object.fromEntries(decks.map((deck) => [deck.id, deck.title])),
+          trees: Object.fromEntries(trees.map((tree) => [tree.id, tree.title])),
         });
-      }
 
-      initializedRef.current = true;
-      setLoading(false);
+        if (batchId) {
+          const existing = await DatabaseService.getBatchResourceSelection(batchId, roadmapId);
+          onChange(existing);
+        } else {
+          onChange({
+            slideDecks: decks.map((deck) => ({ id: deck.id, is_enabled: deck.is_default_enabled })),
+            decisionTrees: trees.map((tree) => ({ id: tree.id, is_enabled: tree.is_default_enabled })),
+          });
+        }
+
+        initializedRef.current = true;
+      } finally {
+        setLoading(false);
+      }
     };
 
     load();

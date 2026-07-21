@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/useAuth';
+import { useAuthContext } from '../../lib';
 import { posthog } from '../../lib/posthog';
 import { MentorHeader } from './MentorHeader';
 import { Skeleton } from '../ui/Skeleton';
@@ -28,8 +28,46 @@ function readStoredTab(): MentorTab {
   return saved && VALID_TABS.has(saved as MentorTab) ? (saved as MentorTab) : 'dashboard';
 }
 
+const STUDENT_ID_CHUNK_SIZE = 100;
+
+async function fetchUsersByIds(ids: string[]) {
+  if (ids.length === 0) return [];
+
+  const rows: any[] = [];
+  for (let i = 0; i < ids.length; i += STUDENT_ID_CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + STUDENT_ID_CHUNK_SIZE);
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, first_name, last_name, email, phone, is_active')
+      .in('id', chunk);
+
+    if (error) throw error;
+    rows.push(...(data || []));
+  }
+
+  return rows;
+}
+
+async function fetchProfilesByUserIds(ids: string[]) {
+  if (ids.length === 0) return [];
+
+  const rows: any[] = [];
+  for (let i = 0; i < ids.length; i += STUDENT_ID_CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + STUDENT_ID_CHUNK_SIZE);
+    const { data, error } = await supabase
+      .from('student_profiles')
+      .select('*')
+      .in('user_id', chunk);
+
+    if (error) throw error;
+    rows.push(...(data || []));
+  }
+
+  return rows;
+}
+
 export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
-  const { user, userRole } = useAuth();
+  const { user, userRole } = useAuthContext();
   const [activeTab, setActiveTab] = useState<MentorTab>(readStoredTab);
   const hasLoadedRef = useRef(false);
 
@@ -62,10 +100,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
     try {
       console.log('🔄 Fetching tasks for roadmap:', roadmapId);
 
-      // Get roadmap weeks
       const { data: weeksData, error: weeksError } = await supabase
         .from('roadmap_weeks')
-        .select('*')
+        .select('id, week_number, domain')
         .eq('roadmap_id', roadmapId)
         .order('week_number');
 
@@ -74,37 +111,47 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
         throw weeksError;
       }
 
-      console.log('✅ Weeks found:', weeksData?.length || 0);
+      const weeks = (weeksData as any[]) || [];
+      console.log('✅ Weeks found:', weeks.length);
 
-      // Get tasks for all weeks
+      if (weeks.length === 0) {
+        setRoadmapData([]);
+        return;
+      }
+
+      const weekIds = weeks.map((week) => week.id);
+      const weekById = new Map(weeks.map((week) => [week.id, week]));
       const allTasks: RoadmapItem[] = [];
 
-      for (const week of (weeksData as any[]) || []) {
+      for (let i = 0; i < weekIds.length; i += STUDENT_ID_CHUNK_SIZE) {
+        const chunk = weekIds.slice(i, i + STUDENT_ID_CHUNK_SIZE);
         const { data: tasksData, error: tasksError } = await supabase
           .from('roadmap_tasks')
           .select('*')
-          .eq('week_id', week.id)
+          .in('week_id', chunk)
           .order('created_at');
 
         if (tasksError) {
-          console.error('Error fetching tasks for week:', week.week_number, tasksError);
-          continue;
+          console.error('Error fetching tasks for roadmap weeks:', tasksError);
+          throw tasksError;
         }
 
-        // Transform tasks to RoadmapItem format
-        const weekTasks = (tasksData || []).map((task: any) => ({
-          id: task.id,
-          weekNumber: week.week_number,
-          domain: task.domain || '',
-          taskType: task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1) as any,
-          taskName: task.task_name,
-          taskDetails: task.task_details || '',
-          relevantLinks: Array.isArray(task.relevant_links) ? task.relevant_links[0] || '' : task.relevant_links || '',
-          deadline: task.deadline || '',
-          meetingTime: task.meeting_time || ''
-        }));
+        for (const task of (tasksData as any[]) || []) {
+          const week = weekById.get(task.week_id);
+          if (!week) continue;
 
-        allTasks.push(...weekTasks);
+          allTasks.push({
+            id: task.id,
+            weekNumber: week.week_number,
+            domain: task.domain || week.domain || '',
+            taskType: task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1) as any,
+            taskName: task.task_name,
+            taskDetails: task.task_details || '',
+            relevantLinks: Array.isArray(task.relevant_links) ? task.relevant_links[0] || '' : task.relevant_links || '',
+            deadline: task.deadline || '',
+            meetingTime: task.meeting_time || ''
+          });
+        }
       }
 
       console.log('✅ Total tasks fetched:', allTasks.length);
@@ -170,21 +217,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
       let profilesData: any[] = [];
 
       if (studentIds.length > 0) {
-        const { data: uData, error: usersError } = await supabase
-          .from('users')
-          .select('id, first_name, last_name, email, phone, is_active')
-          .in('id', studentIds);
-
-        if (usersError) throw usersError;
-        usersData = uData || [];
-
-        const { data: pData, error: profilesError } = await supabase
-          .from('student_profiles')
-          .select('*')
-          .in('user_id', studentIds);
-
-        if (profilesError) throw profilesError;
-        profilesData = pData || [];
+        usersData = await fetchUsersByIds(studentIds);
+        profilesData = await fetchProfilesByUserIds(studentIds);
       }
 
       console.log('✅ Student assignments fetched:', assignmentsData?.length || 0);
@@ -260,13 +294,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
         setSelectedBatch((batchesData[0] as any).id);
       }
 
-      // Set default selected roadmap if available
       if (roadmapsData && roadmapsData.length > 0 && !selectedRoadmapRef.current) {
-        setSelectedRoadmap((roadmapsData[0] as any).id);
-        await fetchRoadmapTasks((roadmapsData[0] as any).id);
+        const defaultRoadmapId = (roadmapsData[0] as any).id;
+        setSelectedRoadmap(defaultRoadmapId);
       }
 
-      console.log('🎉 All data fetched successfully!');
+      console.log('🎉 Core dashboard data fetched successfully!');
 
     } catch (err) {
       console.error('❌ Error loading data:', err);
@@ -395,8 +428,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
           </div>
         )}
 
-        {/* Keep all tabs mounted so form state survives tab / browser switches */}
-        <div className={loading || error ? 'hidden' : undefined}>
+        {/* Mount tabs only after initial load so hidden panels don't compete for requests */}
+        {!loading && !error && (
+        <div>
           <div className={activeTab !== 'dashboard' ? 'hidden' : undefined} aria-hidden={activeTab !== 'dashboard'}>
             <DashboardTab
               stats={stats}
@@ -443,6 +477,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
             />
           </div>
         </div>
+        )}
       </div>
 
       {/* Deck Editor Modal */}
