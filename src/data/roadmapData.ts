@@ -1,5 +1,6 @@
 import { RoadmapNodeData } from '../components/Roadmap/RoadmapNode';
-import { Roadmap, RoadmapWeek, RoadmapTask } from '../services/database';
+import { RoadmapWeek, RoadmapTask } from '../services/database';
+import { formatNodeDuration, sumTaskMinutes } from '../utils/roadmapNodeUtils';
 
 export interface RoadmapConnection {
   from: string;
@@ -8,7 +9,6 @@ export interface RoadmapConnection {
 
 // Function to generate roadmap data from real database data
 export const generateRoadmapData = (
-  roadmap: Roadmap, 
   weeks: RoadmapWeek[], 
   tasks: RoadmapTask[], 
   studentProgress?: any[],
@@ -54,9 +54,11 @@ export const generateRoadmapData = (
     
     // Get tasks for this week
     const weekTasks = tasks.filter(task => task.week_id === week.id);
+    const totalMinutes = sumTaskMinutes(weekTasks);
     
     return {
       id: week.id,
+      weekNumber: week.week_number,
       title: week.title,
       description: week.description || 'No description available',
       status,
@@ -74,7 +76,7 @@ export const generateRoadmapData = (
         };
       }),
       relatedSkills: [week.domain],
-      estimatedTime: '1 week',
+      estimatedTime: formatNodeDuration(totalMinutes),
       // Add completion statistics placeholder - will be populated by the component
       completionStats: batchId ? {
         totalStudents: 0, // Will be fetched dynamically

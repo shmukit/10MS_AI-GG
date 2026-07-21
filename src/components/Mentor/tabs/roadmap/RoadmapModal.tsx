@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { NODE_LABEL_PRESETS } from '../../../../utils/roadmapNodeUtils';
 
 interface RoadmapModalProps {
     isOpen: boolean;
@@ -26,6 +27,10 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({
     submitLabel,
     showDelete
 }) => {
+    const [customLabel, setCustomLabel] = useState(false);
+    const nodeLabel = roadmapData.node_unit_label || 'Week';
+    const isPreset = NODE_LABEL_PRESETS.includes(nodeLabel as typeof NODE_LABEL_PRESETS[number]);
+
     if (!isOpen) return null;
 
     return (
@@ -53,7 +58,7 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({
                             value={roadmapData.title}
                             onChange={(e) => setRoadmapData({ ...roadmapData, title: e.target.value })}
                             className={inputClass}
-                            placeholder="e.g., Python Fundamentals"
+                            placeholder="e.g., Become a Manager of AI Agents"
                             required
                         />
                     </div>
@@ -71,10 +76,45 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({
                         />
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
+                            Node Label
+                        </label>
+                        {!customLabel && isPreset ? (
+                            <select
+                                value={nodeLabel}
+                                onChange={(e) => {
+                                    if (e.target.value === '__custom__') {
+                                        setCustomLabel(true);
+                                        return;
+                                    }
+                                    setRoadmapData({ ...roadmapData, node_unit_label: e.target.value });
+                                }}
+                                className={inputClass}
+                            >
+                                {NODE_LABEL_PRESETS.map((preset) => (
+                                    <option key={preset} value={preset}>{preset}</option>
+                                ))}
+                                <option value="__custom__">Custom…</option>
+                            </select>
+                        ) : (
+                            <input
+                                type="text"
+                                value={nodeLabel}
+                                onChange={(e) => setRoadmapData({ ...roadmapData, node_unit_label: e.target.value })}
+                                className={inputClass}
+                                placeholder="e.g. Session, Week, Month"
+                            />
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Used in student UI (e.g. &quot;Complete previous session to unlock&quot;).
+                        </p>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                                Week Count
+                                {nodeLabel} Count
                             </label>
                             <input
                                 type="number"
@@ -111,8 +151,40 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({
                             value={roadmapData.category}
                             onChange={(e) => setRoadmapData({ ...roadmapData, category: e.target.value })}
                             className={inputClass}
-                            placeholder="e.g., Programming, Data Science, Web Development"
+                            placeholder="e.g., AI Leadership"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
+                            Slides URL (optional)
+                        </label>
+                        <input
+                            type="url"
+                            value={roadmapData.slides_url || ''}
+                            onChange={(e) => setRoadmapData({ ...roadmapData, slides_url: e.target.value })}
+                            className={inputClass}
+                            placeholder="PDF or Google Slides publish/embed link"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Paste a public PDF link, Google Slides publish URL, or PPT link. Students see a View Slides button when set.
+                        </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-lg border border-border p-4 bg-muted/40">
+                        <input
+                            id="decision-tree-enabled"
+                            type="checkbox"
+                            checked={roadmapData.decision_tree_enabled === true}
+                            onChange={(e) => setRoadmapData({ ...roadmapData, decision_tree_enabled: e.target.checked })}
+                            className="mt-1 h-4 w-4 rounded border-border"
+                        />
+                        <label htmlFor="decision-tree-enabled" className="text-sm text-foreground">
+                            <span className="font-medium">Enable AI agent decision tree</span>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Adds a Decision Tree tab on the student roadmap for this program only. Leave off for standard curricula.
+                            </p>
+                        </label>
                     </div>
 
                     <div>

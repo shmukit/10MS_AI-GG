@@ -95,6 +95,8 @@ CREATE TABLE roadmaps (
   total_weeks INTEGER NOT NULL,
   difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('beginner', 'intermediate', 'advanced')) DEFAULT 'beginner',
   category VARCHAR(100) NOT NULL,
+  node_unit_label VARCHAR(50) NOT NULL DEFAULT 'Week',
+  slides_url TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

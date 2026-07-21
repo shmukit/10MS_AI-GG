@@ -54,7 +54,7 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 - **`batches`**: Batch management (name, roadmap_id, mentor_id, max_students, status)
 
 ### Learning & Content Tables
-- **`roadmaps`**: Learning program definitions (title, description, total_weeks, difficulty, category)
+- **`roadmaps`**: Learning program definitions (title, description, total_weeks, node_unit_label, slides_url, difficulty, category)
 - **`roadmap_weeks`**: Weekly learning modules (week_number, title, description, domain)
 - **`roadmap_tasks`**: Individual learning tasks (task_name, task_type, deadline, estimated_hours, points)
 
@@ -83,6 +83,8 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 
 ### 🗺️ Roadmap Management
 - **Week Creation**: Add new learning weeks with descriptions
+- **Node labeling**: Set node unit label (Week, Session, Month, Module, or custom) and rename individual nodes
+- **Workshop slides**: Optional `slides_url` on each roadmap — PDF, Google Slides publish/embed, or PPT link; students see **View Slides** when set
 - **Task Management**: Create and edit tasks with different types
 - **Content Upload**: Add relevant links, resources, and materials
 - **Progress Monitoring**: Track completion rates across batches

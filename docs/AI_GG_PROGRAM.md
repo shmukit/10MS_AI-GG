@@ -10,6 +10,8 @@ The AI-GG program is a comprehensive learning platform designed to provide struc
 - **Adaptive Progression**: AI suggests next steps based on student performance
 - **Week-by-Week Breakdown**: Organized learning modules with clear milestones
 - **Task Variety**: Mix of videos, readings, projects, and assessments
+- **Instructor slides**: Optional PDF/Google Slides URL per roadmap — [ROADMAP_SLIDES.md](./ROADMAP_SLIDES.md)
+- **Workshop tools**: Embedded decision tree for AI pattern selection on workshop roadmaps
 
 ### 👥 Group Learning Management
 - **Batch Organization**: Students grouped into learning cohorts

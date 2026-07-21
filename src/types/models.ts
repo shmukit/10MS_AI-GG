@@ -63,6 +63,9 @@ export interface Roadmap {
     title: string;
     description?: string;
     total_weeks: number;
+    node_unit_label?: string;
+    slides_url?: string | null;
+    decision_tree_enabled?: boolean;
     difficulty_level: 'beginner' | 'intermediate' | 'advanced';
     category: string;
     is_active: boolean;

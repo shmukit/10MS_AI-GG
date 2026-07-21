@@ -6,12 +6,15 @@ import { useAuth } from '../../lib/useAuth';
 import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
 import { DiscussionBoard } from '../Discussion/DiscussionBoard';
 import { posthog } from '../../lib/posthog';
+import { isDecisionTreeResourceUrl } from '../Playbooks/AgenticDecisionTree';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
   onClose: () => void;
   onRefresh?: () => void;
   batchId?: string;
+  nodeUnitLabel?: string;
+  onOpenDecisionTree?: () => void;
 }
 
 interface StudentCompletion {
@@ -24,7 +27,7 @@ interface StudentCompletion {
   lastCompletedAt?: string;
 }
 
-export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClose, onRefresh, batchId }) => {
+export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClose, onRefresh, batchId, nodeUnitLabel = 'Week', onOpenDecisionTree }) => {
   const [completedTasks, setCompletedTasks] = useState(node.tasks.map(t => t.completed));
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showTaskConfirmation, setShowTaskConfirmation] = useState(false);
@@ -313,21 +316,42 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     {getTaskIcon(task.type)}
                     <span className={`text-sm ${completedTasks[index] ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</span>
                   </div>
-                  {task.url && <a 
-                      href={task.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      onClick={() => {
-                        posthog?.capture('task_started', {
-                          task_id: task.id,
-                          task_name: task.title,
-                          task_type: task.type,
-                          roadmap_id: node.id
-                        });
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                    </a>}
+                  {task.url && (
+                    isDecisionTreeResourceUrl(task.url) && onOpenDecisionTree ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          posthog?.capture('task_started', {
+                            task_id: task.id,
+                            task_name: task.title,
+                            task_type: task.type,
+                            roadmap_id: node.id,
+                          });
+                          onOpenDecisionTree();
+                        }}
+                        className="p-1 rounded hover:bg-accent"
+                        title="Open decision tree"
+                      >
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    ) : (
+                      <a
+                        href={task.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          posthog?.capture('task_started', {
+                            task_id: task.id,
+                            task_name: task.title,
+                            task_type: task.type,
+                            roadmap_id: node.id,
+                          });
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </a>
+                    )
+                  )}
                 </div>
               ))}
             </div>
@@ -372,7 +396,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                       isCompleted ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-muted text-muted-foreground cursor-not-allowed'
                   }`}
               >
-                {isMarkingComplete ? 'Processing...' : node.status === 'completed' ? 'Week Completed ✓' : isCompleted ? 'Mark Week as Complete' : 'Complete all tasks first'}
+                {isMarkingComplete ? 'Processing...' : node.status === 'completed' ? `${nodeUnitLabel} Completed ✓` : isCompleted ? `Mark ${nodeUnitLabel} as Complete` : 'Complete all tasks first'}
               </button>
             </div>
           )}
@@ -387,7 +411,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         isOpen={showConfirmation}
         onClose={() => !isMarkingComplete && setShowConfirmation(false)}
         onConfirm={handleConfirmCompletion}
-        title="Confirm Week Completion"
+        title={`Confirm ${nodeUnitLabel} Completion`}
         message={`Are you sure you have completed all tasks for "${node.title}"?`}
         isLoading={isMarkingComplete}
       />

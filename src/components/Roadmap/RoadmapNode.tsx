@@ -5,6 +5,7 @@ export type NodeStatus = 'locked' | 'active' | 'completed';
 
 export interface RoadmapNodeData {
   id: string;
+  weekNumber?: number;
   title: string;
   description: string;
   status: NodeStatus;
@@ -29,9 +30,10 @@ interface RoadmapNodeProps {
   onClick: () => void;
   isAlternate?: boolean;
   isDarkMode?: boolean;
+  nodeUnitLabel?: string;
 }
 
-export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
+export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, nodeUnitLabel = 'Week' }) => {
   const getNodeStyles = () => {
     const baseStyles = "relative z-10 w-full max-w-md lg:w-80 p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:shadow-lg bg-card";
 
@@ -162,7 +164,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
               <Lock className="w-6 h-6" />
             </div>
             <p className="text-sm font-semibold max-w-[180px] mx-auto leading-tight text-muted-foreground">
-              Complete previous week to unlock
+              Complete previous {nodeUnitLabel.toLowerCase()} to unlock
             </p>
           </div>
         </div>

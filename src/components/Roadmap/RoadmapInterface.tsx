@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, GitBranch, Map, Presentation } from 'lucide-react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Roadmap, RoadmapWeek, RoadmapTask } from '../../services/database';
 import { supabase } from '../../lib/supabase';
 import { RoadmapCanvas } from './RoadmapCanvas';
 import { ProgressBar } from './ProgressBar';
-import { useTheme } from '../../lib/ThemeContext';
 import { generateRoadmapData } from '../../data/roadmapData';
+import { getNodeUnitLabel } from '../../utils/roadmapNodeUtils';
 import { StudentHeader } from '../Student/StudentHeader';
 import { RoadmapDropdown } from '../Student/dashboard/RoadmapDropdown';
 import { useNavigate } from 'react-router-dom';
 import { posthog } from '../../lib/posthog';
+import { AgenticDecisionTree } from '../Playbooks/AgenticDecisionTree';
+import { RoadmapSlidesModal } from './RoadmapSlidesModal';
+import { hasSlidesUrl } from '../../utils/slidesUtils';
+
+type RoadmapView = 'sessions' | 'decision-tree';
 
 interface RoadmapInterfaceProps {
   onBack: () => void;
@@ -21,7 +26,6 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
   const { roadmapSlug } = useParams();
   const [searchParams] = useSearchParams();
   const { user, databaseUserId } = useAuth();
-  const { isDarkMode } = useTheme();
 
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [weeks, setWeeks] = useState<RoadmapWeek[]>([]);
@@ -35,6 +39,8 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
   const [targetWeekNumber, setTargetWeekNumber] = useState<number | null>(null);
   const [enrolledBatches, setEnrolledBatches] = useState<any[]>([]);
   const [showRoadmapDropdown, setShowRoadmapDropdown] = useState(false);
+  const [activeView, setActiveView] = useState<RoadmapView>('sessions');
+  const [showSlidesModal, setShowSlidesModal] = useState(false);
   const navigate = useNavigate();
 
   const refreshRoadmapData = async () => {
@@ -122,6 +128,8 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
           }
         }
 
+        const viewParam = searchParams.get('view');
+
         // Fetch only essential data in parallel - avoid heavy getDashboardData
         const [userDataQuery, batchQuery, enrolledQuery, progressQuery] = await Promise.all([
           DatabaseService.getUserById(databaseUserId),
@@ -173,6 +181,12 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
         }
 
         setRoadmap(roadmapData);
+
+        if (viewParam === 'decision-tree' && roadmapData.decision_tree_enabled === true) {
+          setActiveView('decision-tree');
+        } else {
+          setActiveView('sessions');
+        }
 
         // Fetch weeks and all tasks in a single optimized query
         const weeksData = await DatabaseService.getRoadmapWeeks(roadmapData.id);
@@ -261,7 +275,7 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
   }
 
   // Generate roadmap data from real database data with completion stats
-  const roadmapData = generateRoadmapData(roadmap, weeks, tasks, studentProgress, batchId || undefined);
+  const roadmapData = generateRoadmapData(weeks, tasks, studentProgress, batchId || undefined);
 
   // Update nodes with completion statistics
   const nodesWithStats = roadmapData.nodes.map(node => ({
@@ -281,6 +295,22 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
     totalNodes,
     nodeStatuses: nodesWithStats.map(n => ({ title: n.title, status: n.status, completedTasks: n.tasks.filter(t => t.completed).length, totalTasks: n.tasks.length }))
   });
+
+  const nodeUnitLabel = getNodeUnitLabel(roadmap);
+
+  const showDecisionTree = roadmap.decision_tree_enabled === true;
+
+  const handleViewChange = (view: RoadmapView) => {
+    setActiveView(view);
+    const params = new URLSearchParams(searchParams);
+    if (view === 'decision-tree') {
+      params.set('view', 'decision-tree');
+    } else {
+      params.delete('view');
+    }
+    const query = params.toString();
+    navigate(`/student/roadmap/${roadmapSlug}${query ? `?${query}` : ''}`, { replace: true });
+  };
 
   return (
     <div className="h-screen flex flex-col transition-colors duration-200 bg-background">
@@ -315,22 +345,75 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
               <span className="font-medium text-xs md:text-base">Back to Dashboard</span>
             </button>
 
-            {/* Removed duplicate title here as it's now in StudentHeader */}
+            {hasSlidesUrl(roadmap.slides_url) && (
+              <button
+                type="button"
+                onClick={() => setShowSlidesModal(true)}
+                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-primary text-primary-foreground text-xs md:text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Presentation className="w-4 h-4" />
+                View Slides
+              </button>
+            )}
           </div>
         </div>
       </div>
 
+      <RoadmapSlidesModal
+        isOpen={showSlidesModal}
+        onClose={() => setShowSlidesModal(false)}
+        slidesUrl={roadmap.slides_url!}
+        roadmapTitle={roadmap.title}
+      />
+
       {/* Progress Bar */}
       <ProgressBar completed={completedNodes} total={totalNodes} />
 
-      {/* Canvas */}
-      <div className="flex-1 relative">
-        <RoadmapCanvas
-          roadmapNodes={nodesWithStats}
-          onRefresh={refreshRoadmapData}
-          batchId={batchId}
-          targetWeekNumber={targetWeekNumber}
-        />
+      {showDecisionTree && (
+        <div className="border-b border-border bg-card">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="flex gap-1 py-2">
+              <button
+                onClick={() => handleViewChange('sessions')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'sessions'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                <Map className="w-4 h-4" />
+                {nodeUnitLabel}s
+              </button>
+              <button
+                onClick={() => handleViewChange('decision-tree')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'decision-tree'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                <GitBranch className="w-4 h-4" />
+                Decision Tree
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Canvas or decision tree */}
+      <div className="flex-1 relative overflow-y-auto">
+        {activeView === 'decision-tree' && showDecisionTree ? (
+          <AgenticDecisionTree embedded />
+        ) : (
+          <RoadmapCanvas
+            roadmapNodes={nodesWithStats}
+            onRefresh={refreshRoadmapData}
+            batchId={batchId}
+            targetWeekNumber={targetWeekNumber}
+            nodeUnitLabel={nodeUnitLabel}
+            onOpenDecisionTree={showDecisionTree ? () => handleViewChange('decision-tree') : undefined}
+          />
+        )}
       </div>
     </div>
   );

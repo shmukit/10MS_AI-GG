@@ -7,6 +7,8 @@ import { TasksTable } from './roadmap/TasksTable';
 import { TaskModal } from './roadmap/TaskModal';
 import { RoadmapModal } from './roadmap/RoadmapModal';
 import { AddWeekModal } from './roadmap/AddWeekModal';
+import { EditNodeModal } from './roadmap/EditNodeModal';
+import { NodesPanel } from './roadmap/NodesPanel';
 
 interface RoadmapTabProps {
     roadmaps: any[];
@@ -34,6 +36,12 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
         isAddingRoadmap, setIsAddingRoadmap,
         isEditingRoadmap, setIsEditingRoadmap,
         showAddWeekModal, setShowAddWeekModal,
+        editingNode, setEditingNode,
+        editingNodeData, setEditingNodeData,
+        roadmapNodes,
+        getNodeLabel,
+        handleEditNodeOpen,
+        handleUpdateNode,
         editingTask, setEditingTask,
         editingTaskData, setEditingTaskData,
         editingRoadmapData, setEditingRoadmapData,
@@ -59,6 +67,8 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
         selectedBatch
     });
 
+    const nodeUnitLabel = getNodeLabel();
+
     return (
         <div className="space-y-6">
             <RoadmapControls
@@ -71,7 +81,16 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 setIsAddingRoadmap={setIsAddingRoadmap}
                 setShowAddWeekModal={setShowAddWeekModal}
                 setIsAddingTask={setIsAddingTask}
+                nodeUnitLabel={nodeUnitLabel}
             />
+
+            {selectedRoadmap && (
+                <NodesPanel
+                    nodes={roadmapNodes}
+                    nodeUnitLabel={nodeUnitLabel}
+                    onEditNode={handleEditNodeOpen}
+                />
+            )}
 
             {selectedRoadmap && (
                 <RoadmapFilters
@@ -80,6 +99,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                     typeFilter={typeFilter}
                     setTypeFilter={setTypeFilter}
                     getWeekOptions={getWeekOptions}
+                    nodeUnitLabel={nodeUnitLabel}
                 />
             )}
 
@@ -100,6 +120,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 weekOptions={getWeekOptions()}
                 title="Add New Task"
                 submitLabel="Add Task"
+                nodeUnitLabel={nodeUnitLabel}
             />
 
             <TaskModal
@@ -111,6 +132,7 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 weekOptions={getWeekOptions()}
                 title="Edit Task"
                 submitLabel="Update Task"
+                nodeUnitLabel={nodeUnitLabel}
             />
 
             <AddWeekModal
@@ -119,6 +141,16 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 roadmapTitle={getCurrentRoadmap()?.title || 'Selected Roadmap'}
                 currentWeeks={getCurrentRoadmap()?.total_weeks || 0}
                 onAddWeek={handleAddWeek}
+                nodeUnitLabel={nodeUnitLabel}
+            />
+
+            <EditNodeModal
+                isOpen={!!editingNode && !!editingNodeData}
+                onClose={() => { setEditingNode(null); setEditingNodeData(null); }}
+                nodeData={editingNodeData}
+                setNodeData={setEditingNodeData}
+                onSubmit={handleUpdateNode}
+                nodeUnitLabel={nodeUnitLabel}
             />
 
             <RoadmapModal

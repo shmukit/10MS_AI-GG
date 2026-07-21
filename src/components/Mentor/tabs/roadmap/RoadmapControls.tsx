@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Edit2 } from 'lucide-react';
+import { getNodeUnitLabel } from '../../../../utils/roadmapNodeUtils';
 
 interface RoadmapControlsProps {
     roadmaps: any[];
@@ -11,6 +12,7 @@ interface RoadmapControlsProps {
     setIsAddingRoadmap: (isAdding: boolean) => void;
     setShowAddWeekModal: (show: boolean) => void;
     setIsAddingTask: (isAdding: boolean) => void;
+    nodeUnitLabel: string;
 }
 
 export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
@@ -22,7 +24,8 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
     setIsEditingRoadmap,
     setIsAddingRoadmap,
     setShowAddWeekModal,
-    setIsAddingTask
+    setIsAddingTask,
+    nodeUnitLabel,
 }) => {
     return (
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -38,19 +41,23 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
                     >
                         {roadmaps.map((roadmap: any) => (
                             <option key={roadmap.id} value={roadmap.id}>
-                                {roadmap.title} ({roadmap.total_weeks} weeks)
+                                {roadmap.title} ({roadmap.total_weeks} {getNodeUnitLabel(roadmap).toLowerCase()}s)
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {/* Edit Roadmap Button */}
                 {selectedRoadmap && (
                     <button
                         onClick={() => {
                             const currentRoadmap = getCurrentRoadmap();
                             if (currentRoadmap) {
-                                setEditingRoadmapData(currentRoadmap);
+                                setEditingRoadmapData({
+                                    ...currentRoadmap,
+                                    node_unit_label: currentRoadmap.node_unit_label || 'Week',
+                                    slides_url: currentRoadmap.slides_url || '',
+                                    decision_tree_enabled: currentRoadmap.decision_tree_enabled === true,
+                                });
                                 setIsEditingRoadmap(true);
                             }
                         }}
@@ -75,7 +82,7 @@ export const RoadmapControls: React.FC<RoadmapControlsProps> = ({
                     className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
-                    Add Week
+                    Add {nodeUnitLabel}
                 </button>
                 <button
                     onClick={() => setIsAddingTask(true)}
