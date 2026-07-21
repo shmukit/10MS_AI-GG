@@ -145,17 +145,25 @@ export const BatchModal: React.FC<BatchModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                                    Status
+                                    Cohort status
                                 </label>
                                 <select
                                     value={batchData.status || 'active'}
-                                    onChange={(e) => setBatchData({ ...batchData, status: e.target.value })}
+                                    onChange={(e) =>
+                                        setBatchData({
+                                            ...batchData,
+                                            status: e.target.value as 'active' | 'completed' | 'cancelled',
+                                        })
+                                    }
                                     className={inputClass}
                                 >
-                                    <option value="active">Active</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    <option value="active">Active (shown as Ongoing on marketing page)</option>
+                                    <option value="completed">Completed (moves to Past Batches)</option>
+                                    <option value="cancelled">Cancelled (moves to Past Batches)</option>
                                 </select>
+                                <p className="mt-1.5 text-xs text-muted-foreground">
+                                    Updating status changes how this cohort appears on the public homepage.
+                                </p>
                             </div>
                         </>
                     )}

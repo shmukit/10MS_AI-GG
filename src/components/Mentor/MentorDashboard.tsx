@@ -138,11 +138,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
 
       console.log('✅ Roadmaps fetched:', roadmapsData?.length || 0);
 
-      // Fetch all batches
+      // Fetch all batches (include completed/cancelled so mentors can update cohort status)
       const { data: batchesData, error: batchesError } = await supabase
         .from('batches')
         .select('*')
-        .eq('status', 'active')
+        .in('status', ['active', 'completed', 'cancelled'])
         .order('name');
 
       if (batchesError) {
@@ -214,7 +214,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
         whatsappLink: batch.whatsapp_link || '',
         discordLink: batch.discord_link || '',
         emergencyContact: batch.emergency_contact || '',
-        createdDate: batch.created_at ? new Date(batch.created_at).toLocaleDateString() : 'N/A'
+        createdDate: batch.created_at ? new Date(batch.created_at).toLocaleDateString() : 'N/A',
+        status: (batch.status || 'active') as Batch['status'],
       }));
       setBatches(mappedBatches);
 

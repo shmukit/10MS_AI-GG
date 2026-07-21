@@ -40,7 +40,10 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                     className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground transition-colors"
                 >
                     {batches.map(batch => (
-                        <option key={batch.id} value={batch.id}>{batch.name}</option>
+                        <option key={batch.id} value={batch.id}>
+                            {batch.name}
+                            {batch.status && batch.status !== 'active' ? ` (${batch.status})` : ''}
+                        </option>
                     ))}
                 </select>
             </div>

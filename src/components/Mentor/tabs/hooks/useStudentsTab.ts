@@ -170,15 +170,23 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         if (!editingBatchData) return;
 
         try {
+            const today = new Date().toISOString().split('T')[0];
+            const nextStatus = editingBatchData.status || 'active';
+            const updatePayload: Record<string, unknown> = {
+                whatsapp_link: editingBatchData.whatsappLink,
+                discord_link: editingBatchData.discordLink,
+                emergency_contact: editingBatchData.emergencyContact,
+                status: nextStatus,
+                updated_at: new Date().toISOString(),
+            };
+
+            if (nextStatus === 'completed' || nextStatus === 'cancelled') {
+                updatePayload.end_date = today;
+            }
+
             const { error } = await supabase
                 .from('batches')
-                .update({
-                    whatsapp_link: editingBatchData.whatsappLink,
-                    discord_link: editingBatchData.discordLink,
-                    emergency_contact: editingBatchData.emergencyContact,
-                    status: editingBatchData.status,
-                    updated_at: new Date().toISOString()
-                } as unknown as never)
+                .update(updatePayload as unknown as never)
                 .eq('id', editingBatchData.id);
 
             if (error) throw error;
