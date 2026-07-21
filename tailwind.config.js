@@ -5,8 +5,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
         anek: ['Anek Bangla', 'sans-serif'],
+      },
+      fontSize: {
+        'display': ['2.25rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'h1': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
+        'h2': ['1.125rem', { lineHeight: '1.35', fontWeight: '600' }],
+        'h3': ['0.9375rem', { lineHeight: '1.47', fontWeight: '600' }],
+        'body': ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }],
+        'caption': ['0.75rem', { lineHeight: '1.46', fontWeight: '400' }],
+        'overline': ['0.6875rem', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.05em' }],
       },
       colors: {
         // ── Tailwind CSS-var bridge (Shadcn/ui compatibility) ──

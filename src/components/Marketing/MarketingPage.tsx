@@ -22,8 +22,20 @@ export const MarketingPage: React.FC = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const ongoingRoadmaps = data?.roadmaps.filter(r => r.batches.length === 0 || r.batches.some(b => b.status === 'active')) || [];
-    const expiredRoadmaps = data?.roadmaps.filter(r => r.batches.some(b => b.status === 'completed') && !r.batches.some(b => b.status === 'active')) || [];
+    const ongoingRoadmaps = (data?.roadmaps || [])
+        .map((r) => ({
+            ...r,
+            batches: r.batches.filter((b) => b.status === 'active'),
+        }))
+        .filter((r) => r.batches.length > 0);
+
+    const expiredRoadmaps = (data?.roadmaps || [])
+        .map((r) => ({
+            ...r,
+            batches: r.batches.filter((b) => b.status === 'completed' || b.status === 'cancelled'),
+        }))
+        .filter((r) => r.batches.length > 0);
+
     const displayRoadmaps = activeTab === 'ongoing' ? ongoingRoadmaps : expiredRoadmaps;
 
     if (loading) {
@@ -53,14 +65,14 @@ export const MarketingPage: React.FC = () => {
 
                         <button
                             onClick={() => navigate('/login')}
-                            className="text-sm font-medium text-muted-foreground hover:text-[#149353] transition-colors bg-transparent border-none cursor-pointer"
+                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
                         >
                             Sign In
                         </button>
 
                         <button
                             onClick={() => navigate('/signup')}
-                            className="bg-primary text-primary-foreground rounded-full border-none px-5 py-2.5 text-sm font-semibold cursor-pointer hover:bg-[#17994B] hover:-translate-y-px hover:shadow-btn-hover transition-all duration-180"
+                            className="bg-primary text-primary-foreground rounded-full border-none px-5 py-2.5 text-sm font-semibold cursor-pointer hover:bg-primary/90 hover:-translate-y-px hover:shadow-btn-hover transition-all duration-180"
                         >
                             Join Now
                         </button>
@@ -72,7 +84,7 @@ export const MarketingPage: React.FC = () => {
                 <div className="mx-auto max-w-content">
                     <MotionDiv variants={SLIDE_UP_VARIANTS}>
                         <span className="inline-block px-3.5 py-1 bg-accent text-accent-foreground border border-border rounded-full text-xs font-semibold tracking-wide uppercase mb-6">
-                            Empowering Women in STEM
+                            Cohort roadmaps · Guided by mentors
                         </span>
 
                         <h1 className="text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold leading-tight tracking-tight text-foreground mb-5">
@@ -88,7 +100,7 @@ export const MarketingPage: React.FC = () => {
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <button
                                 onClick={() => document.getElementById('roadmaps')?.scrollIntoView({ behavior: 'smooth' })}
-                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full border-none px-7 py-4 text-sm font-semibold cursor-pointer hover:bg-[#17994B] hover:-translate-y-px hover:shadow-btn-hover transition-all duration-180"
+                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full border-none px-7 py-4 text-sm font-semibold cursor-pointer hover:bg-primary/90 hover:-translate-y-px hover:shadow-btn-hover transition-all duration-180"
                             >
                                 View Roadmaps <ArrowRight size={16} />
                             </button>
@@ -120,7 +132,7 @@ export const MarketingPage: React.FC = () => {
                                     className={cn(
                                         'px-4 py-2 rounded-[10px] text-[13px] font-medium transition-colors border-none cursor-pointer',
                                         activeTab === tab
-                                            ? 'bg-card text-[#149353] shadow-nav'
+                                            ? 'bg-card text-primary shadow-nav'
                                             : 'bg-transparent text-muted-foreground'
                                     )}
                                 >
@@ -131,6 +143,13 @@ export const MarketingPage: React.FC = () => {
                     </div>
 
                     <MotionDiv variants={STAGGER_CHILDREN_VARIANTS} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {displayRoadmaps.length === 0 ? (
+                            <p className="col-span-full text-center text-sm text-muted-foreground py-12">
+                                {activeTab === 'ongoing'
+                                    ? 'No upcoming or ongoing batches right now.'
+                                    : 'No past batches to show yet.'}
+                            </p>
+                        ) : null}
                         {displayRoadmaps.map((roadmap) => (
                             <HoverLift key={roadmap.id}>
                                 <div className="h-full flex flex-col bg-card border border-border rounded-2xl overflow-hidden">
@@ -191,7 +210,7 @@ export const MarketingPage: React.FC = () => {
                                     <div className="px-4 py-3 border-t border-border">
                                         <button
                                             onClick={() => navigate('/signup')}
-                                            className="w-full py-3 bg-primary text-primary-foreground rounded-full border-none text-[13px] font-semibold cursor-pointer hover:bg-[#17994B] hover:-translate-y-px transition-all duration-180"
+                                            className="w-full py-3 bg-primary text-primary-foreground rounded-full border-none text-[13px] font-semibold cursor-pointer hover:bg-primary/90 hover:-translate-y-px transition-all duration-180"
                                         >
                                             Join Roadmap
                                         </button>
@@ -213,6 +232,11 @@ export const MarketingPage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {(data?.mentors.length ?? 0) === 0 ? (
+                            <p className="col-span-full text-center text-sm text-muted-foreground py-8">
+                                Mentor profiles will appear here once assigned to cohorts.
+                            </p>
+                        ) : null}
                         {data?.mentors.map((mentor) => (
                             <HoverLift key={mentor.id}>
                                 <div className="bg-card border border-border rounded-2xl p-6 text-center">
@@ -224,7 +248,7 @@ export const MarketingPage: React.FC = () => {
                                     <h3 className="text-[15px] font-semibold text-foreground mb-0.5">
                                         {mentor.first_name} {mentor.last_name}
                                     </h3>
-                                    <p className="text-xs text-[#149353] font-medium mb-0.5">
+                                    <p className="text-xs text-primary font-medium mb-0.5">
                                         {mentor.mentor_profiles?.[0]?.designation || 'Expert Mentor'}
                                     </p>
                                     <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-4">
@@ -256,8 +280,8 @@ export const MarketingPage: React.FC = () => {
                         {[
                             { value: `${data?.roadmaps.length || 0}+`, label: 'Specialized Roadmaps' },
                             { value: `${data?.mentors.length || 0}+`, label: 'Expert Mentors' },
-                            { value: '2,500+', label: 'Active Learners' },
-                            { value: '95%', label: 'Success Rate' },
+                            { value: `${(data?.stats.activeBatches ?? 0).toLocaleString()}+`, label: 'Active Batches' },
+                            { value: `${Math.round(data?.stats.avgCompletionRate ?? 0)}%`, label: 'Avg completion (active learners)' },
                         ].map(stat => (
                             <div key={stat.label}>
                                 <div className="text-4xl font-extrabold text-primary tracking-tight">{stat.value}</div>
@@ -272,13 +296,27 @@ export const MarketingPage: React.FC = () => {
                 <div className="mx-auto max-w-content flex flex-col md:flex-row justify-between items-center gap-6">
                     <AppLogo layout="full" />
                     <p className="text-sm text-muted-foreground">© 2026 10 Minute School. All rights reserved.</p>
-                    <div className="flex gap-6">
-                        {['Privacy Policy', 'Terms of Service'].map(link => (
-                            <a key={link} href="#" className="text-sm text-muted-foreground hover:text-[#149353] no-underline transition-colors">
-                                {link}
-                            </a>
-                        ))}
-                    </div>
+                    {[
+                        { label: 'Privacy Policy', url: import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined },
+                        { label: 'Terms of Service', url: import.meta.env.VITE_TERMS_OF_SERVICE_URL as string | undefined },
+                    ].filter((link) => link.url).length > 0 && (
+                        <div className="flex gap-6">
+                            {[
+                                { label: 'Privacy Policy', url: import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined },
+                                { label: 'Terms of Service', url: import.meta.env.VITE_TERMS_OF_SERVICE_URL as string | undefined },
+                            ]
+                                .filter((link) => link.url)
+                                .map((link) => (
+                                    <a
+                                        key={link.label}
+                                        href={link.url}
+                                        className="text-sm text-muted-foreground hover:text-primary no-underline transition-colors"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ))}
+                        </div>
+                    )}
                 </div>
             </footer>
         </div>

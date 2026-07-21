@@ -6,12 +6,16 @@ import { useAuth } from '../../lib/useAuth';
 import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
 import { DiscussionBoard } from '../Discussion/DiscussionBoard';
 import { posthog } from '../../lib/posthog';
+import { isDecisionTreeResourceUrl } from '../Playbooks/AgenticDecisionTree';
+import { useToast } from '../ui/ToastProvider';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
   onClose: () => void;
   onRefresh?: () => void;
   batchId?: string;
+  nodeUnitLabel?: string;
+  onOpenDecisionTree?: () => void;
 }
 
 interface StudentCompletion {
@@ -24,7 +28,7 @@ interface StudentCompletion {
   lastCompletedAt?: string;
 }
 
-export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClose, onRefresh, batchId }) => {
+export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClose, onRefresh, batchId, nodeUnitLabel = 'Week', onOpenDecisionTree }) => {
   const [completedTasks, setCompletedTasks] = useState(node.tasks.map(t => t.completed));
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showTaskConfirmation, setShowTaskConfirmation] = useState(false);
@@ -34,6 +38,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [loadingCompletions, setLoadingCompletions] = useState(false);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const { databaseUserId } = useAuth();
+  const { error: toastError, success: toastSuccess } = useToast();
 
   useEffect(() => {
     const newCompletedTasks = node.tasks.map(t => t.completed);
@@ -98,11 +103,11 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
           });
           if (onRefresh) onRefresh();
         } else {
-          alert('Failed to mark task as completed. Please try again.');
+          toastError('Failed to mark task as completed. Please try again.');
         }
       } catch (error) {
         console.error('Error marking task as completed:', error);
-        alert('Error marking task as completed. Please try again.');
+        toastError('Error marking task as completed. Please try again.');
       } finally {
         setShowTaskConfirmation(false);
         setSelectedTaskIndex(-1);
@@ -129,11 +134,11 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
           });
           if (onRefresh) onRefresh();
         } else {
-          alert('Failed to update task status. Please try again.');
+          toastError('Failed to update task status. Please try again.');
         }
       } catch (error) {
         console.error('Error updating task status:', error);
-        alert('Error updating task status. Please try again.');
+        toastError('Error updating task status. Please try again.');
       } finally {
         setShowTaskUncheckConfirmation(false);
         setSelectedTaskIndex(-1);
@@ -142,17 +147,18 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const getTaskIcon = (type: string) => {
+    const iconClass = 'w-4 h-4 text-muted-foreground';
     switch (type.toLowerCase()) {
-      case 'watch': return <Play className="w-4 h-4 text-blue-500" />;
-      case 'read': return <BookOpen className="w-4 h-4 text-purple-500" />;
-      case 'project': return <Code className="w-4 h-4 text-orange-500" />;
-      case 'attend': return <Users className="w-4 h-4 text-green-500" />;
-      case 'mcq': return <FileText className="w-4 h-4 text-indigo-500" />;
-      case 'written': return <FileText className="w-4 h-4 text-teal-500" />;
-      case 'video': return <Play className="w-4 h-4 text-blue-500" />;
-      case 'exercise': return <Code className="w-4 h-4 text-green-500" />;
-      case 'reading': return <BookOpen className="w-4 h-4 text-purple-500" />;
-      default: return <Circle className="w-4 h-4 text-gray-500" />;
+      case 'watch': return <Play className={iconClass} />;
+      case 'read': return <BookOpen className={iconClass} />;
+      case 'project': return <Code className={iconClass} />;
+      case 'attend': return <Users className={iconClass} />;
+      case 'mcq': return <FileText className={iconClass} />;
+      case 'written': return <FileText className={iconClass} />;
+      case 'video': return <Play className={iconClass} />;
+      case 'exercise': return <Code className={iconClass} />;
+      case 'reading': return <BookOpen className={iconClass} />;
+      default: return <Circle className={iconClass} />;
     }
   };
 
@@ -169,7 +175,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
     setIsMarkingComplete(true);
     try {
       if (!databaseUserId) {
-        alert('User ID missing. Please log in again.');
+        toastError('User ID missing. Please log in again.');
         return;
       }
 
@@ -181,18 +187,18 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       const success = await DatabaseService.markWeekAsComplete(databaseUserId, node.id);
 
       if (success) {
-        alert('Week marked as complete!');
+        toastSuccess('Week marked as complete!');
         if (onRefresh) {
           setTimeout(() => onRefresh(), 1000);
         } else {
           window.location.reload();
         }
       } else {
-        alert('Failed to mark week as complete. Please refresh and try again.');
+        toastError('Failed to mark week as complete. Please refresh and try again.');
       }
     } catch (error) {
       console.error('Error marking week as complete:', error);
-      alert('Error marking week as complete. Please refresh and try again.');
+      toastError('Error marking week as complete. Please refresh and try again.');
     } finally {
       setIsMarkingComplete(false);
       setShowConfirmation(false);
@@ -229,8 +235,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border transition-colors duration-200">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {node.status === 'completed' ? (
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+                <svg className="w-4 h-4 text-accent-foreground" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -243,7 +249,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
             )}
             <h2 className="text-lg sm:text-xl font-bold truncate text-foreground">{node.title}</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground">
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground" aria-label="Close panel">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -313,21 +319,42 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     {getTaskIcon(task.type)}
                     <span className={`text-sm ${completedTasks[index] ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</span>
                   </div>
-                  {task.url && <a 
-                      href={task.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      onClick={() => {
-                        posthog?.capture('task_started', {
-                          task_id: task.id,
-                          task_name: task.title,
-                          task_type: task.type,
-                          roadmap_id: node.id
-                        });
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                    </a>}
+                  {task.url && (
+                    isDecisionTreeResourceUrl(task.url) && onOpenDecisionTree ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          posthog?.capture('task_started', {
+                            task_id: task.id,
+                            task_name: task.title,
+                            task_type: task.type,
+                            roadmap_id: node.id,
+                          });
+                          onOpenDecisionTree();
+                        }}
+                        className="p-1 rounded hover:bg-accent"
+                        title="Open decision tree"
+                      >
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    ) : (
+                      <a
+                        href={task.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          posthog?.capture('task_started', {
+                            task_id: task.id,
+                            task_name: task.title,
+                            task_type: task.type,
+                            roadmap_id: node.id,
+                          });
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </a>
+                    )
+                  )}
                 </div>
               ))}
             </div>
@@ -367,12 +394,17 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
               <button
                 onClick={handleMarkAsComplete}
                 disabled={node.status === 'completed' || !isCompleted || isMarkingComplete}
-                className={`w-full py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 ${isMarkingComplete ? 'bg-gray-400 cursor-wait' :
-                    node.status === 'completed' ? 'bg-green-600 cursor-default' :
-                      isCompleted ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-muted text-muted-foreground cursor-not-allowed'
-                  }`}
+                className={`w-full py-3 px-4 rounded-full font-medium flex items-center justify-center gap-2 ${
+                  isMarkingComplete
+                    ? 'bg-muted text-muted-foreground cursor-wait'
+                    : node.status === 'completed'
+                      ? 'bg-primary text-primary-foreground cursor-default'
+                      : isCompleted
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
               >
-                {isMarkingComplete ? 'Processing...' : node.status === 'completed' ? 'Week Completed ✓' : isCompleted ? 'Mark Week as Complete' : 'Complete all tasks first'}
+                {isMarkingComplete ? 'Processing...' : node.status === 'completed' ? `${nodeUnitLabel} Completed ✓` : isCompleted ? `Mark ${nodeUnitLabel} as Complete` : 'Complete all tasks first'}
               </button>
             </div>
           )}
@@ -387,7 +419,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         isOpen={showConfirmation}
         onClose={() => !isMarkingComplete && setShowConfirmation(false)}
         onConfirm={handleConfirmCompletion}
-        title="Confirm Week Completion"
+        title={`Confirm ${nodeUnitLabel} Completion`}
         message={`Are you sure you have completed all tasks for "${node.title}"?`}
         isLoading={isMarkingComplete}
       />

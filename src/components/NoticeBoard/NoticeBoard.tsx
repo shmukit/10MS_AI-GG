@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Notice } from '../../services/database';
 
 interface Announcement {
@@ -14,14 +14,12 @@ interface Announcement {
 }
 
 interface NoticeBoardProps {
-  isDarkMode?: boolean;
   notices?: Notice[];
   onMarkAsRead?: (noticeId: string) => void;
   onNoticeClick?: (notice: Notice) => void;
 }
 
 export const NoticeBoard: React.FC<NoticeBoardProps> = ({ 
-  isDarkMode = false, 
   notices = [], 
   onMarkAsRead,
   onNoticeClick
@@ -95,14 +93,18 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({
   };
 
   const getTagColor = (tag: string) => {
-    if (tag === 'Exam') {
-      return isDarkMode ? 'bg-red-900/30 text-red-300 border-red-700' : 'bg-red-50 text-red-700 border-red-200';
+    const tagLower = tag.toLowerCase();
+    if (tagLower === 'exam' || tagLower === 'urgent') {
+      return 'bg-destructive/10 text-destructive border-destructive/20';
     }
-    return 'bg-muted text-muted-foreground border-border';
+    if (tagLower === 'general') {
+      return 'bg-muted text-muted-foreground border-border';
+    }
+    return 'bg-accent text-accent-foreground border-border';
   };
 
   return (
-    <div className="rounded-xl p-6 shadow-sm border border-border transition-colors duration-200 bg-card">
+    <div className="rounded-xl p-6 border border-border transition-colors duration-200 bg-card">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -114,9 +116,11 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
           )}
         </div>
-        <div className="text-sm transition-colors duration-200 text-muted-foreground">
-          {currentIndex + 1} of {announcements.length}
-        </div>
+        {announcements.length > 0 && (
+          <div className="text-sm transition-colors duration-200 text-muted-foreground">
+            {currentIndex + 1} of {announcements.length}
+          </div>
+        )}
       </div>
 
       {/* Current Announcement */}

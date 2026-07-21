@@ -5,11 +5,13 @@ import { Student } from '../../../../types/mentor';
 interface StudentsListProps {
     students: Student[];
     handleDeleteStudent: (id: string) => void;
+    totalWeeks: number;
 }
 
 export const StudentsList: React.FC<StudentsListProps> = ({
     students,
-    handleDeleteStudent
+    handleDeleteStudent,
+    totalWeeks,
 }) => {
     return (
         <div className="rounded-xl border border-border bg-card transition-colors duration-200">
@@ -58,7 +60,7 @@ export const StudentsList: React.FC<StudentsListProps> = ({
                                 <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                                     <div className="text-center">
                                         <div className="text-sm font-medium text-foreground transition-colors duration-200">
-                                            Week {student.completedWeeks}/6
+                                            Week {student.completedWeeks}/{totalWeeks}
                                         </div>
                                         <div className="text-xs text-muted-foreground transition-colors duration-200">
                                             {student.progressPercentage}% Complete

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { posthog } from '../../../lib/posthog';
+import {
+  formatCertificateType,
+  getCertificateCohortLabel,
+  type StudentCertificateRecord,
+} from '../../../lib/certificateTypes';
 
 interface CertificateCardProps {
-  certificate: {
-    id: string;
-    certificate_type: string;
-    issued_at: string;
-    image_url: string;
-  };
+  certificate: StudentCertificateRecord;
 }
 
 export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate }) => {
@@ -76,9 +76,12 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-lg font-semibold text-foreground">
-              {certificate.certificate_type.replace(/_/g, ' ')}
+              {formatCertificateType(certificate.certificate_type)}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
+              {getCertificateCohortLabel(certificate)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">
               Issued: {new Date(certificate.issued_at).toLocaleDateString()}
             </p>
           </div>
@@ -86,12 +89,21 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({ certificate })
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <a
-            href={certificate.image_url}
+            href={certificate.image_url ?? undefined}
             download={`SheSTEM-Certificate-${certificate.id}.png`}
             target="_blank"
             rel="noreferrer"
-            onClick={handleDownload}
-            className="flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
+            onClick={(e) => {
+              if (!certificate.image_url) {
+                e.preventDefault();
+                return;
+              }
+              handleDownload();
+            }}
+            aria-disabled={!certificate.image_url}
+            className={`flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium text-foreground bg-card focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 ${
+              certificate.image_url ? 'hover:bg-muted' : 'opacity-50 pointer-events-none'
+            }`}
           >
             <svg className="mr-2 h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

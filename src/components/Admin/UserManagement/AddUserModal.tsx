@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
-import { X, Loader2 } from 'lucide-react';
+import { X, Eye, EyeOff } from 'lucide-react';
+import { Input } from '../../ui/Input';
+import { useToast } from '../../ui/ToastProvider';
+import { Button } from '../../ui/Button';
 
 interface AddUserModalProps {
     isOpen: boolean;
@@ -16,8 +19,10 @@ interface ExistingUser {
 }
 
 export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { success } = useToast();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
     const [existingUser, setExistingUser] = useState<ExistingUser | null>(null);
     const [formData, setFormData] = useState({
         email: '',
@@ -51,7 +56,6 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 setError(null);
             }
         } catch {
-            // User not found is good
             setExistingUser(null);
             setError(null);
         }
@@ -64,7 +68,6 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
         try {
             if (existingUser) {
-                // Update existing user role
                 const { error: updateError } = await supabase
                     .from('users')
                     .update({ role: formData.role } as unknown as never)
@@ -72,10 +75,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
                 if (updateError) throw updateError;
 
-                alert(`User role updated to ${formData.role} successfully!`);
+                success(`User role updated to ${formData.role} successfully!`);
             } else {
-                // Create new user
-                // Create new user via Secure RPC (Prevents session hijacking & 500 errors)
                 const { error: authError } = await supabase.rpc('create_new_user', {
                     p_email: formData.email,
                     p_password: formData.password,
@@ -85,9 +86,6 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 } as any);
 
                 if (authError) throw authError;
-
-                // Explicitly check/insert if trigger doesn't fire immediately (safety net)
-                // For now, trusting the trigger or auth flow.
             }
 
             onSuccess();
@@ -103,10 +101,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-card rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-card rounded-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-border">
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <h2 className="text-lg font-semibold text-foreground">Add New User</h2>
-                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -132,53 +130,57 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                     )}
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">First Name</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.firstName}
-                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 disabled:opacity-50"
-                                disabled={!!existingUser}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">Last Name</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.lastName}
-                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 disabled:opacity-50"
-                                disabled={!!existingUser}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-                        <input
-                            type="email"
+                        <Input
+                            label="First Name"
+                            type="text"
                             required
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            onBlur={() => checkEmail(formData.email)}
-                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            disabled={!!existingUser}
+                        />
+                        <Input
+                            label="Last Name"
+                            type="text"
+                            required
+                            value={formData.lastName}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            disabled={!!existingUser}
                         />
                     </div>
 
+                    <Input
+                        label="Email Address"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onBlur={() => checkEmail(formData.email)}
+                    />
+
                     {!existingUser && (
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">Temporary Password</label>
-                            <input
-                                type="text"
-                                required={!existingUser}
-                                minLength={6}
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15"
-                            />
+                        <div className="space-y-1.5">
+                            <label htmlFor="temporary-password" className="text-overline uppercase text-muted-foreground">
+                                Temporary Password
+                            </label>
+                            <div className="relative">
+                                <Input
+                                    id="temporary-password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    required={!existingUser}
+                                    minLength={6}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -196,21 +198,17 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                     </div>
 
                     <div className="pt-4 flex gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 px-4 py-2 text-foreground hover:bg-muted rounded-lg transition-colors font-medium border border-border"
-                        >
+                        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
+                            className="flex-1"
                             disabled={loading || (existingUser ? existingUser.role === formData.role : false)}
-                            className={`flex-1 px-4 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 ${existingUser && existingUser.role === formData.role ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
+                            isLoading={loading}
                         >
-                            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                             {existingUser ? 'Update Role' : 'Create User'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>

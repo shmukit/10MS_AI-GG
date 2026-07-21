@@ -7,6 +7,7 @@ import { StudentHeader } from './StudentHeader';
 import { supabase } from '../../lib/supabase';
 import { RoadmapDropdown } from './dashboard/RoadmapDropdown';
 import { Toast } from '../ui/Toast';
+import { EmptyState } from '../ui/EmptyState';
 
 export const StudentCommunity: React.FC = () => {
   const navigate = useNavigate();
@@ -73,7 +74,10 @@ export const StudentCommunity: React.FC = () => {
 
           // Also fetch all enrolled batches to populate the dropdown
           try {
-            const userEnrolled = await DatabaseService.getEnrolledBatches(databaseUserId || user.id);
+            const userEnrolled = await DatabaseService.getEnrolledBatches(
+              databaseUserId || user.id,
+              { alternateUserIds: [databaseUserId, user?.id] }
+            );
             setEnrolledBatches(userEnrolled);
           } catch (e) {
             console.error('Failed to fetch enrolled batches:', e);
@@ -202,7 +206,6 @@ export const StudentCommunity: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <StudentHeader
           userName={getUserDisplayName()}
-          userRole="student"
           pageTitle="Community"
         />
         <div className="max-w-6xl mx-auto px-6 py-8">
@@ -222,7 +225,6 @@ export const StudentCommunity: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <StudentHeader
           userName={getUserDisplayName()}
-          userRole="student"
           pageTitle="Community"
         />
         <div className="max-w-6xl mx-auto px-6 py-8">
@@ -279,7 +281,6 @@ export const StudentCommunity: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground">
       <StudentHeader
         userName={getUserDisplayName()}
-        userRole="student"
         pageTitle="Community"
       />
 
@@ -327,7 +328,9 @@ export const StudentCommunity: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="text-xl md:text-2xl">👨‍🎓</span>
                 <span className="text-sm text-muted-foreground">
-                  Mentor: {mentors.length > 0 ? `${mentors[0]?.first_name}` : 'Uttam Deb'}
+                  Mentor: {mentors.length > 0
+                    ? mentors.map((m) => m.first_name).join(', ')
+                    : 'Not assigned'}
                 </span>
               </div>
             </div>
@@ -378,27 +381,19 @@ export const StudentCommunity: React.FC = () => {
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-foreground">Group Members</h3>
-            <div className="flex items-center gap-3">
-              <button className="p-2 text-muted-foreground hover:text-foreground">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                </svg>
-              </button>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'name' | 'progress')}
-                className="flex items-center gap-2 border border-border bg-card rounded-lg px-3 py-2 text-foreground hover:bg-muted"
-              >
-                <option value="name">Sort by Name</option>
-                <option value="progress">Sort by Progress</option>
-              </select>
-            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'progress')}
+              className="flex items-center gap-2 border border-border bg-card rounded-lg px-3 py-2 text-foreground hover:bg-muted"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="progress">Sort by Progress</option>
+            </select>
           </div>
 
           <div className="space-y-4">
-            {/* Real Group Members */}
             {sortedStudents.length > 0 ? (
-              sortedStudents.map((member, memberIndex) => (
+              sortedStudents.map((member) => (
                 <div key={member.id} className="bg-muted/50 border border-border rounded-xl p-3 md:p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3 md:gap-4">
@@ -456,80 +451,11 @@ export const StudentCommunity: React.FC = () => {
                 </div>
               ))
             ) : (
-              // Fallback to sample data if no real students
-              [
-                {
-                  name: 'Amira K.',
-                  initials: 'AK',
-                  details: 'BSc Computer Science • 3rd Year',
-                  university: 'Dhaka University',
-                  progress: 'Week 3/6',
-                  completion: 75
-                },
-                {
-                  name: 'Fatima Rahman',
-                  initials: 'FR',
-                  details: 'BSc Data Science • 4th Year',
-                  university: 'NSU',
-                  progress: 'Week 4/6',
-                  completion: 85
-                },
-                {
-                  name: 'Nadia Islam',
-                  initials: 'NI',
-                  details: 'BSc Computer Science • 1st Year',
-                  university: 'IUT',
-                  progress: 'Week 1/6',
-                  completion: 40
-                },
-                {
-                  name: 'Rashida Khan',
-                  initials: 'RK',
-                  details: 'BSc Information Technology • 3rd Year',
-                  university: 'Dhaka University',
-                  progress: 'Week 3/6',
-                  completion: 70
-                },
-                {
-                  name: 'Sarah Ahmed',
-                  initials: 'SA',
-                  details: 'BSc Software Engineering • 2nd Year',
-                  university: 'BUET',
-                  progress: 'Week 2/6',
-                  completion: 60
-                }
-              ].map((member, index) => (
-                <div key={index} className="bg-muted/50 border border-border rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-semibold">
-                        {member.initials}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <h4 className="font-semibold text-foreground">{member.name}</h4>
-                          <p className="text-sm text-muted-foreground">{member.details}</p>
-                          <p className="text-xs text-muted-foreground">{member.university}</p>
-                        </div>
-                        {/* Email icon beside the name */}
-                        <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg">
-                          <Mail className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-foreground">{member.progress}</p>
-                      <p className="text-xs text-muted-foreground">{member.completion}% Complete</p>
-                      <div className="progress-track mt-1 h-2 w-20 rounded-full">
-                        <div
-                          className="bg-primary h-2 rounded-full"
-                          style={{ width: `${member.completion}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
+              <EmptyState
+                icon={Users}
+                title="No classmates yet"
+                description="Group members will appear here once others join your batch."
+              />
             )}
           </div>
         </div>

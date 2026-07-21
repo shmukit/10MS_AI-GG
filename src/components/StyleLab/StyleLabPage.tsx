@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme, PALETTE_OPTIONS } from '../../lib/ThemeContext';
-import { Moon, Sun, Map, Users, TrendingUp, Bell } from 'lucide-react';
+import { Moon, Sun, Map, Users, TrendingUp, Bell, Inbox, Lock } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { Card, CardSm, CardAlert, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/Card';
 import { AppLogo } from '../Logo/AppLogo';
+import { Breadcrumbs } from '../ui/Breadcrumbs';
+import { EmptyState } from '../ui/EmptyState';
+import { Modal } from '../ui/Modal';
 
 type PreviewMode = 'light' | 'dark';
 
@@ -55,16 +59,50 @@ const PreviewPanel: React.FC<{ mode: PreviewMode; title: string }> = ({ mode, ti
           </div>
         </section>
 
+        {/* Semantic status tokens */}
+        <section>
+          <SectionTitle>Semantic status tokens</SectionTitle>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <Swatch label="Success" className="bg-[var(--success)]" />
+            <Swatch label="Success subtle" className="bg-[var(--success-subtle)]" border />
+            <Swatch label="Warning" className="bg-[var(--warning)]" />
+            <Swatch label="Warning subtle" className="bg-[var(--warning-subtle)]" border />
+            <Swatch label="Destructive" className="bg-destructive" />
+          </div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="success">Success</Badge>
+            <Badge variant="warning">Warning</Badge>
+            <Badge variant="destructive">Error</Badge>
+          </div>
+          <div className="relative h-20 rounded-lg overflow-hidden border border-border">
+            <div className="absolute inset-0 bg-muted flex items-center justify-center text-caption text-muted-foreground">
+              Node content
+            </div>
+            <div
+              className="absolute inset-0 flex items-center justify-center gap-2"
+              style={{ background: 'var(--locked-scrim)' }}
+            >
+              <Lock className="w-4 h-4" style={{ color: 'var(--locked-foreground)' }} />
+              <span className="text-caption font-medium" style={{ color: 'var(--locked-foreground)' }}>
+                Locked overlay
+              </span>
+            </div>
+          </div>
+        </section>
+
         {/* Typography */}
         <section>
-          <SectionTitle>Typography</SectionTitle>
-          <div className="space-y-2">
-            <p className="text-2xl font-bold text-foreground">Display heading</p>
-            <p className="text-lg font-semibold text-foreground">Section title</p>
-            <p className="text-[15px] font-semibold text-foreground">Card title</p>
-            <p className="text-sm text-foreground">Body text — primary content at 14px.</p>
-            <p className="text-sm text-muted-foreground">Secondary text — captions and metadata.</p>
-            <p className="text-xs text-muted-foreground">Tertiary — timestamps, labels.</p>
+          <SectionTitle>Typography — Plus Jakarta Sans</SectionTitle>
+          <p className="text-caption text-muted-foreground mb-4">
+            Display headings use <span className="font-mono text-foreground">font-display</span>; body stays Inter.
+          </p>
+          <div className="space-y-3">
+            <p className="font-display text-display text-foreground">text-display — Hero headline</p>
+            <p className="font-display text-h1 text-foreground">text-h1 — Page title</p>
+            <p className="font-display text-h2 text-foreground">text-h2 — Section heading</p>
+            <p className="font-display text-h3 text-foreground">text-h3 — Card title</p>
+            <p className="text-body text-foreground">text-body — Primary content (Inter)</p>
+            <p className="text-caption text-muted-foreground">text-caption — Metadata and labels</p>
           </div>
         </section>
 
@@ -208,6 +246,7 @@ const PreviewPanel: React.FC<{ mode: PreviewMode; title: string }> = ({ mode, ti
 export const StyleLabPage: React.FC = () => {
   const { isDarkMode, toggleDarkMode, palette, setPalette } = useTheme();
   const active = PALETTE_OPTIONS.find((p) => p.id === palette);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -261,6 +300,36 @@ export const StyleLabPage: React.FC = () => {
               </div>
             </div>
           </section>
+
+          <section className="rounded-xl border border-border bg-card p-4 md:p-6 space-y-6">
+            <SectionTitle>UI components</SectionTitle>
+            <div>
+              <p className="text-caption text-muted-foreground mb-2">Breadcrumbs</p>
+              <Breadcrumbs
+                items={[
+                  { label: 'Dashboard', href: '/student/dashboard' },
+                  { label: 'Roadmap' },
+                  { label: 'Batch 42' },
+                ]}
+              />
+            </div>
+            <div>
+              <p className="text-caption text-muted-foreground mb-2">Empty state</p>
+              <EmptyState
+                icon={Inbox}
+                title="No tasks yet"
+                description="Complete your first week to unlock upcoming tasks."
+                actionLabel="Go to roadmap"
+                onAction={() => {}}
+              />
+            </div>
+            <div>
+              <p className="text-caption text-muted-foreground mb-2">Modal</p>
+              <Button variant="outline" onClick={() => setShowDemoModal(true)}>
+                Open demo modal
+              </Button>
+            </div>
+          </section>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
@@ -270,6 +339,22 @@ export const StyleLabPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      <Modal
+        open={showDemoModal}
+        onClose={() => setShowDemoModal(false)}
+        title="Demo modal"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowDemoModal(false)}>Cancel</Button>
+            <Button onClick={() => setShowDemoModal(false)}>Confirm</Button>
+          </>
+        }
+      >
+        <p className="text-body text-muted-foreground">
+          Modal uses <span className="font-display text-h3 text-foreground">Plus Jakarta Sans</span> for titles and the shared overlay token.
+        </p>
+      </Modal>
     </div>
   );
 };

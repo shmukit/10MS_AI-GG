@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Users, RefreshCw } from 'lucide-react';
 import { Batch } from '../../../../types/mentor';
+import { Button } from '../../../ui/Button';
 
 interface BatchHeaderProps {
     selectedBatch: string;
@@ -39,52 +40,49 @@ export const BatchHeader: React.FC<BatchHeaderProps> = ({
                     className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground transition-colors"
                 >
                     {batches.map(batch => (
-                        <option key={batch.id} value={batch.id}>{batch.name}</option>
+                        <option key={batch.id} value={batch.id}>
+                            {batch.name}
+                            {batch.status && batch.status !== 'active' ? ` (${batch.status})` : ''}
+                        </option>
                     ))}
                 </select>
             </div>
             <div className="flex gap-2 flex-wrap">
                 {(userRole === 'admin' || userRole === 'mentor') && (
-                    <button
-                        onClick={() => setIsAddingBatch(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setIsAddingBatch(true)}>
                         <Plus className="w-4 h-4" />
                         New Batch
-                    </button>
+                    </Button>
                 )}
                 {selectedBatch && (
                     <>
-                        <button
-                            onClick={() => setIsAddingStudent(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
-                        >
+                        <Button size="sm" onClick={() => setIsAddingStudent(true)}>
                             <Plus className="w-4 h-4" />
                             Add Student
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={async () => {
                                 setIsAssigningStudents(true);
                                 await loadAvailableStudents();
                             }}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                         >
                             <Users className="w-4 h-4" />
                             Assign Students
-                        </button>
+                        </Button>
                         {onSyncProgress && (
-                            <button
+                            <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={onSyncProgress}
                                 disabled={isSyncingProgress}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isSyncingProgress
-                                    ? 'bg-muted cursor-not-allowed text-muted-foreground'
-                                    : 'bg-amber-500 hover:bg-amber-600 text-white'
-                                    }`}
+                                isLoading={isSyncingProgress}
                                 title="Sync progress from completed tasks - fixes stale 0% display"
                             >
-                                <RefreshCw className={`w-4 h-4 ${isSyncingProgress ? 'animate-spin' : ''}`} />
+                                {!isSyncingProgress && <RefreshCw className="w-4 h-4" />}
                                 {isSyncingProgress ? 'Syncing...' : 'Sync Progress'}
-                            </button>
+                            </Button>
                         )}
                     </>
                 )}

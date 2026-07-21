@@ -5,6 +5,7 @@ import {
     StudentProfile,
     Batch,
     Roadmap,
+    EnrolledBatch,
     StudentProgress,
     Notice,
     User,
@@ -22,11 +23,14 @@ import { getStudentProgress } from './progressService';
 import { getNotices } from './noticeService';
 import { getMentors } from './mentorService';
 
-export const getDashboardData = async (userId: string, options?: { batchId?: string }): Promise<{
+export const getDashboardData = async (
+    userId: string,
+    options?: { batchId?: string; alternateUserIds?: (string | null | undefined)[] }
+): Promise<{
     profile: StudentProfile | null;
-    batch: Batch | null;
+    batch: Batch | EnrolledBatch | null;
     roadmap: Roadmap | null;
-    enrolledBatches: (Batch & { roadmap: any })[];
+    enrolledBatches: EnrolledBatch[];
     progress: StudentProgress[];
     notices: Notice[];
     mentors: User[];
@@ -36,8 +40,8 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
     userData: User | null;
 }> => {
     try {
-        // Check cache first (but bypass cache for company users during debugging)
-        const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, userId, options?.batchId || 'default');
+        // Bust stale single-cohort cache from prior broken queries
+        const cacheKey = cache.createKey(CACHE_KEYS.DASHBOARD_DATA, 'v2', userId, options?.batchId || 'default');
 
         const cachedData = cache.get(cacheKey);
         if (cachedData) {
@@ -46,11 +50,12 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         }
 
         // Fetching dashboard data components
+        // Enrollments: query auth uid AND public.users.id (they can diverge)
         const [profile, defaultBatch, roadmap, enrolledBatches, progress, userData] = await Promise.all([
             getStudentProfile(userId),
             getStudentBatch(userId), // Keep this as fallback/default
             getStudentRoadmap(userId),
-            getEnrolledBatches(userId),
+            getEnrolledBatches(userId, { alternateUserIds: options?.alternateUserIds }),
             getStudentProgress(userId),
             getUserById(userId)
         ]);
@@ -58,7 +63,7 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
         const isCompanyUser = isPartnerEmail(userData?.email);
 
         // Determine effective batch and roadmap
-        let batch: (Batch & { roadmap?: any }) | null = null;
+        let batch: EnrolledBatch | Batch | null = null;
         let effectiveRoadmap: Roadmap | null = null;
 
         if (options?.batchId) {
@@ -96,18 +101,30 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
                     const preferredBatch = augmedixBatch || aiMlBatch || nonPythonBatch || enrolledBatches[0];
                     batch = preferredBatch;
                     effectiveRoadmap = preferredBatch.roadmap;
-                    console.log(`🎯 Auto-selected prioritized batch: ${batch.name}`);
+                    console.log(`🎯 Auto-selected prioritized batch: ${preferredBatch.name}`);
                 } else {
                     // Default to first enrolled batch
                     batch = enrolledBatches[0];
-                    effectiveRoadmap = batch.roadmap;
-                    console.log(`🎯 Using default first batch: ${batch.name}`);
+                    effectiveRoadmap = enrolledBatches[0].roadmap;
+                    console.log(`🎯 Using default first batch: ${enrolledBatches[0].name}`);
                 }
             } else {
                 // No enrollments found, fallback to legacy checks
                 batch = defaultBatch;
                 effectiveRoadmap = roadmap;
             }
+        }
+
+        // Ensure current/default batch appears in the switcher even if enrollment join missed it
+        let batchesForSwitcher = enrolledBatches;
+        if (batch && !enrolledBatches.some((b) => b.id === batch!.id)) {
+            batchesForSwitcher = [
+                {
+                    ...(batch as Batch),
+                    roadmap: effectiveRoadmap,
+                },
+                ...enrolledBatches,
+            ];
         }
 
         // Final fallback if still no roadmap but we have a batch
@@ -223,7 +240,7 @@ export const getDashboardData = async (userId: string, options?: { batchId?: str
             profile,
             batch,
             roadmap: effectiveRoadmap,
-            enrolledBatches,
+            enrolledBatches: batchesForSwitcher,
             progress,
             notices: finalNotices,
             mentors,

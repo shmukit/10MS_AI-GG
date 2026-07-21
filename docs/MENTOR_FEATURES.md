@@ -54,7 +54,11 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 - **`batches`**: Batch management (name, roadmap_id, mentor_id, max_students, status)
 
 ### Learning & Content Tables
-- **`roadmaps`**: Learning program definitions (title, description, total_weeks, difficulty, category)
+- **`roadmaps`**: Learning program definitions (title, description, total_weeks, node_unit_label, slides_url, decision_tree_enabled, difficulty, category)
+- **`roadmap_slide_decks`**: Slide deck catalog per roadmap
+- **`roadmap_decision_trees`**: Decision tree catalog per roadmap (tree_key maps to in-app playbook)
+- **`batch_slide_decks`**: Per-cohort slide deck enablement
+- **`batch_decision_trees`**: Per-cohort decision tree enablement
 - **`roadmap_weeks`**: Weekly learning modules (week_number, title, description, domain)
 - **`roadmap_tasks`**: Individual learning tasks (task_name, task_type, deadline, estimated_hours, points)
 
@@ -78,11 +82,17 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 ### 👥 Student Management
 - **Student List**: View all assigned students with progress status
 - **Batch Assignment**: Assign students to specific batches
+- **Cohort resources**: Enable/disable slide decks and decision trees per batch (Batch modal)
 - **Progress Tracking**: Monitor task completion and week progress
 - **Student Addition**: Add new students to batches
 
 ### 🗺️ Roadmap Management
 - **Week Creation**: Add new learning weeks with descriptions
+- **Node labeling**: Set node unit label (Week, Session, Month, Module, or custom) and rename individual nodes
+- **Resource library**: Multiple slide decks and decision trees per roadmap (`RoadmapResourcesPanel`)
+- **Duplicate roadmap**: Copy curriculum + weeks + tasks + resource catalog to a new roadmap
+- **Workshop slides**: Slide deck catalog; students see **View Slides** for cohort-enabled decks
+- **Decision trees**: Enable AI agent decision tree(s) per roadmap; cohort toggles in batch edit
 - **Task Management**: Create and edit tasks with different types
 - **Content Upload**: Add relevant links, resources, and materials
 - **Progress Monitoring**: Track completion rates across batches

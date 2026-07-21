@@ -14,6 +14,25 @@ export interface User {
     mentor_profiles?: MentorProfile[];
 }
 
+export interface BatchStudentProfile {
+    institute: string;
+    year: string;
+    subject: string;
+    degree: string;
+    enrollment_date: string;
+}
+
+export interface BatchStudentProgress {
+    completed_weeks: number;
+    progress_percentage: number;
+    current_week: number;
+}
+
+export type BatchStudent = User & {
+    profile?: BatchStudentProfile | null;
+    progress: BatchStudentProgress;
+};
+
 export interface StudentProfile {
     id: string;
     user_id: string;
@@ -63,12 +82,24 @@ export interface Roadmap {
     title: string;
     description?: string;
     total_weeks: number;
+    node_unit_label?: string;
+    slides_url?: string | null;
+    decision_tree_enabled?: boolean;
     difficulty_level: 'beginner' | 'intermediate' | 'advanced';
     category: string;
     is_active: boolean;
     created_at: string;
     updated_at: string;
 }
+
+/** Cohort switcher entry; full batch when joined, partial when batch row is missing. */
+export type EnrolledBatch = Partial<Batch> & {
+    id: string;
+    name: string;
+    roadmap: Roadmap | null;
+    assignmentStatus?: string | null;
+    enrollment_date?: string | null;
+};
 
 export interface RoadmapWeek {
     id: string;
@@ -123,4 +154,47 @@ export interface Notice {
     is_published: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface RoadmapSlideDeck {
+    id: string;
+    roadmap_id: string;
+    title: string;
+    slides_url: string;
+    sort_order: number;
+    is_default_enabled: boolean;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface RoadmapDecisionTree {
+    id: string;
+    roadmap_id: string;
+    title: string;
+    tree_key: string;
+    sort_order: number;
+    is_default_enabled: boolean;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface EnabledSlideDeck extends RoadmapSlideDeck {
+    is_enabled: boolean;
+}
+
+export interface EnabledDecisionTree extends RoadmapDecisionTree {
+    is_enabled: boolean;
+}
+
+export interface BatchEnabledResources {
+    slideDecks: EnabledSlideDeck[];
+    decisionTrees: EnabledDecisionTree[];
+    usesLegacyFallback: boolean;
+}
+
+export interface BatchResourceSelection {
+    slideDecks: { id: string; is_enabled: boolean }[];
+    decisionTrees: { id: string; is_enabled: boolean }[];
 }

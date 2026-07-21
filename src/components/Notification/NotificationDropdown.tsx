@@ -4,10 +4,21 @@ import { Bell, X, Info, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService, Notice } from '../../services/database';
 import { cn } from '../../lib/utils';
-import { useTheme } from '../../lib/ThemeContext';
+
+type NoticeWithAuthor = Notice & {
+    author?: { first_name?: string; last_name?: string };
+    author_name?: string;
+};
+
+const getNoticeAuthor = (notice: NoticeWithAuthor): string | null => {
+    if (notice.author_name?.trim()) return notice.author_name.trim();
+    if (notice.author?.first_name) {
+        return `${notice.author.first_name} ${notice.author.last_name || ''}`.trim();
+    }
+    return null;
+};
 
 export const NotificationDropdown: React.FC = () => {
-    const { isDarkMode } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [notices, setNotices] = useState<Notice[]>([]);
     const [loading, setLoading] = useState(false);
@@ -64,7 +75,7 @@ export const NotificationDropdown: React.FC = () => {
     const getTagStyles = (tag: string) => {
         const tagLower = tag.toLowerCase();
         if (tagLower === 'exam' || tagLower === 'urgent') {
-            return isDarkMode ? 'bg-red-900/40 text-red-300 border-red-800' : 'bg-red-50 text-red-700 border-red-200';
+            return 'bg-destructive/10 text-destructive border-destructive/20';
         }
         return 'bg-muted text-muted-foreground border-border';
     };
@@ -98,6 +109,7 @@ export const NotificationDropdown: React.FC = () => {
                     "p-2 rounded-lg transition-all duration-200 relative group",
                     "bg-muted text-primary hover:bg-muted/80"
                 )}
+                aria-label="Open notifications"
             >
                 <Bell className="w-5 h-5" />
                 {notices.filter(n => !readNotices.has(n.id)).length > 0 && (
@@ -169,7 +181,7 @@ export const NotificationDropdown: React.FC = () => {
                                                     <button
                                                         onClick={(e) => toggleReadStatus(e, notice.id)}
                                                         className={cn(
-                                                            "text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors opacity-0 group-hover:opacity-100",
+                                                            "text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors shrink-0",
                                                             readNotices.has(notice.id)
                                                                 ? "text-muted-foreground bg-muted"
                                                                 : "text-primary bg-primary/10"
@@ -193,9 +205,11 @@ export const NotificationDropdown: React.FC = () => {
                                                         )}>
                                                             {notice.tag || 'General'}
                                                         </span>
-                                                        <span className="text-[10px] truncate text-muted-foreground">
-                                                            From: Mentor
-                                                        </span>
+                                                        {getNoticeAuthor(notice as NoticeWithAuthor) && (
+                                                            <span className="text-[10px] truncate text-muted-foreground">
+                                                                From: {getNoticeAuthor(notice as NoticeWithAuthor)}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                                         {formatDate(notice.created_at)}

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuthContext } from './lib';
 import { ThemeProvider } from './lib/ThemeContext';
+import { ToastProvider } from './components/ui/ToastProvider';
+import { ConfirmProvider } from './components/ui/ConfirmProvider';
 // import { PostHogProvider } from 'posthog-js/react';
 // import { posthog } from './lib/posthog';
 import { PageTransition } from './components/ui/MotionPrimitives';
@@ -22,8 +24,10 @@ const MentorStudents = lazy(() => import('./components/Mentor/MentorStudents').t
 const MentorNotices = lazy(() => import('./components/Mentor/MentorNotices').then(module => ({ default: module.MentorNotices })));
 const MentorSettings = lazy(() => import('./components/Mentor/MentorSettings').then(module => ({ default: module.MentorSettings })));
 const RoadmapInterface = lazy(() => import('./components/Roadmap/RoadmapInterface').then(module => ({ default: module.RoadmapInterface })));
+const AgenticDecisionTreePage = lazy(() => import('./components/Playbooks/AgenticDecisionTreePage').then(module => ({ default: module.AgenticDecisionTreePage })));
 const AdminLayout = lazy(() => import('./components/Admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
 const AdminDashboard = lazy(() => import('./components/Admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
+const AdminUsers = lazy(() => import('./components/Admin/AdminUsers').then(module => ({ default: module.AdminUsers })));
 const AdminSettings = lazy(() => import('./components/Admin/AdminSettings').then(module => ({ default: module.AdminSettings })));
 const CapabilitiesTable = lazy(() => import('./components/Admin/CapabilitiesTable').then(module => ({ default: module.CapabilitiesTable })));
 const PublicCertificatePage = lazy(() => import('./components/Public/PublicCertificatePage').then(module => ({ default: module.PublicCertificatePage })));
@@ -38,9 +42,9 @@ const RouteLoader = () => (
   </div>
 );
 
-// Role-protected Route Component
+// Role-protected route — checks users.role (+ mentor profile) via accessibleRoles
 const ProtectedRouteWithRole = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
-  const { user, loading, userRole, roleLoading } = useAuthContext();
+  const { user, loading, userRole, accessibleRoles, roleLoading } = useAuthContext();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -56,19 +60,16 @@ const ProtectedRouteWithRole = ({ children, allowedRoles }: { children: React.Re
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // If user has a role but it's not in the allowed list, redirect to their allowed dashboard
-  if (userRole && !allowedRoles.includes(userRole)) {
-    console.log(`⛔ Access denied for role: ${userRole}. Allowed: ${allowedRoles.join(', ')}`);
-    // Redirect students to student dashboard
-    if (userRole === 'student') {
-      return <Navigate to="/student/dashboard" replace />;
-    }
-    // Redirect mentors to mentor dashboard (if trying to access admin)
-    if (userRole === 'mentor') {
-      return <Navigate to="/mentor/dashboard" replace />;
-    }
-    // Default fallback
-    return <Navigate to="/" replace />;
+  const roles = accessibleRoles?.length
+    ? accessibleRoles
+    : (userRole ? [userRole] : ['student']);
+  const allowed = roles.some((r) => allowedRoles.includes(r));
+
+  if (!allowed) {
+    console.log(`⛔ Access denied. User platforms: ${roles.join(', ')}. Allowed: ${allowedRoles.join(', ')}`);
+    if (roles.includes('admin')) return <Navigate to="/admin/dashboard" replace />;
+    if (roles.includes('mentor')) return <Navigate to="/mentor/dashboard" replace />;
+    return <Navigate to="/student/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -85,6 +86,7 @@ const StudentRoutes = () => {
           <Route path="/dashboard" element={<PageTransition><StudentDashboard /></PageTransition>} />
           <Route path="/roadmap" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
           <Route path="/roadmap/:roadmapSlug" element={<PageTransition><RoadmapInterface onBack={() => window.history.back()} /></PageTransition>} />
+          <Route path="/playbooks/agentic-decision" element={<PageTransition><AgenticDecisionTreePage /></PageTransition>} />
           <Route path="/profile" element={<PageTransition><StudentProfile /></PageTransition>} />
           <Route path="/community" element={<PageTransition><StudentCommunity /></PageTransition>} />
           <Route path="/community/:roadmapSlug" element={<PageTransition><StudentCommunity /></PageTransition>} />
@@ -119,7 +121,7 @@ const AdminRoutes = () => {
       <AdminLayout>
         <Routes>
           <Route path="/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
-          <Route path="/users" element={<PageTransition><AdminDashboard /></PageTransition>} /> {/* Reusing Dashboard for MVP as it has UserList */}
+          <Route path="/users" element={<PageTransition><AdminUsers /></PageTransition>} />
           <Route path="/capabilities" element={<PageTransition><CapabilitiesTable /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><AdminSettings /></PageTransition>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -149,16 +151,14 @@ const AdminRoutes = () => {
 
 // Public Default Route - No redirection to login
 const PublicDefaultRoute = () => {
-  const { user, loading, userRole } = useAuthContext();
+  const { user, loading } = useAuthContext();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // If user is logged in, redirect based on role
+  // Default landing after auth: student dashboard (multi-role users switch via profile menu)
   if (user) {
-    if (userRole === 'admin') return <Navigate to="/admin/dashboard" replace />;
-    if (userRole === 'mentor') return <Navigate to="/mentor/dashboard" replace />;
     return <Navigate to="/student/dashboard" replace />;
   }
 
@@ -178,7 +178,7 @@ const AnimatedAppContent = () => {
         <Route path="/certificate/:id" element={<PageTransition><Suspense fallback={<RouteLoader />}><PublicCertificatePage /></Suspense></PageTransition>} />
         <Route path="/style-lab" element={<StyleLabPage />} />
 
-        {/* Student Routes - All authenticated users can access */}
+        {/* Student Routes — all authenticated roles */}
         <Route
           path="/student/*"
           element={
@@ -188,7 +188,7 @@ const AnimatedAppContent = () => {
           }
         />
 
-        {/* Mentor Routes - Hidden but accessible to all authenticated users */}
+        {/* Mentor Routes — mentors and admins */}
         <Route
           path="/mentor/*"
           element={
@@ -198,7 +198,7 @@ const AnimatedAppContent = () => {
           }
         />
 
-        {/* Admin Routes */}
+        {/* Admin Routes — admins only */}
         <Route
           path="/admin/*"
           element={
@@ -217,15 +217,17 @@ const AnimatedAppContent = () => {
 
 function App() {
   return (
-    // <PostHogProvider client={posthog}> // Removed provider
     <AuthProvider>
       <ThemeProvider>
-        <Router>
-          <AnimatedAppContent />
-        </Router>
+        <ToastProvider>
+          <ConfirmProvider>
+            <Router>
+              <AnimatedAppContent />
+            </Router>
+          </ConfirmProvider>
+        </ToastProvider>
       </ThemeProvider>
     </AuthProvider>
-    // </PostHogProvider>
   );
 }
 

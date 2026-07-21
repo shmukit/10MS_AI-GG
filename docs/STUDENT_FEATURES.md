@@ -47,7 +47,7 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 - **`student_batch_assignments`**: Student enrollment in batches with progress tracking
 
 ### Learning & Progress Tables
-- **`roadmaps`**: Learning program definitions (title, description, total_weeks, difficulty)
+- **`roadmaps`**: Learning program definitions (title, description, total_weeks, node_unit_label, slides_url, difficulty)
 - **`roadmap_weeks`**: Weekly learning modules (week_number, title, description, domain)
 - **`roadmap_tasks`**: Individual learning tasks (task_name, task_type, deadline, points)
 - **`student_progress`**: Task completion tracking (status, completed_at, score, feedback)
@@ -73,6 +73,8 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 
 ### 🗺️ Roadmap
 - **Week-by-Week Progress**: Visual representation of learning journey
+- **Workshop slides**: When the mentor adds a slides URL, a **View Slides** button appears at the top of the roadmap page; opens a modal with prev/next (PDF), zoom in/out, and close
+- **Decision tree tab**: Interactive AI pattern finder on roadmaps that include it (e.g. workshop)
 - **Task Management**: Mark individual tasks as complete
 - **Progress Tracking**: Real-time completion statistics
 - **Status Indicators**: Locked, Active, and Completed week states

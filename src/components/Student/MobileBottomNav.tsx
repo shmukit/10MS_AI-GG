@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../lib/ThemeContext';
 import { Button } from '../ui/Button';
-import { Home, Users, Map, Menu, LogOut, Moon, Sun, User, Layers, Bell } from 'lucide-react';
+import { Home, Users, Map, Menu, LogOut, Moon, Sun, User, Layers, Bell, Shield, GraduationCap, LayoutDashboard, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { useAuthContext } from '../../lib';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getAccessibleDashboards } from '../../lib/roleAccess';
 
 export const MobileBottomNav: React.FC = () => {
     const { isDarkMode, toggleDarkMode } = useTheme();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isBatchesOpen, setIsBatchesOpen] = useState(false);
-    const { user, signOut } = useAuthContext();
+    const { user, signOut, databaseUserId, userRole, accessibleRoles } = useAuthContext();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -23,17 +24,22 @@ export const MobileBottomNav: React.FC = () => {
     const [notices, setNotices] = useState<any[]>([]);
     const [isNoticesOpen, setIsNoticesOpen] = useState(false);
 
+    // Prefer DB user id when available (auth uid can differ)
+    const userId = databaseUserId || user?.id;
+
     // Get user details safely
     const userName = user?.user_metadata?.first_name || "Student";
     const userEmail = user?.email || "";
 
     // Load data proactively on mount
     React.useEffect(() => {
-        if (user?.id) {
+        if (userId) {
             setIsLoadingData(true);
             import('../../services/database').then(async ({ DatabaseService }) => {
                 try {
-                    const data = await DatabaseService.getDashboardData(user.id);
+                    const data = await DatabaseService.getDashboardData(userId, {
+                        alternateUserIds: [databaseUserId, user?.id],
+                    });
                     if (data?.enrolledBatches) {
                         setEnrolledBatches(data.enrolledBatches);
                     }
@@ -53,7 +59,7 @@ export const MobileBottomNav: React.FC = () => {
                 }
             });
         }
-    }, [user?.id]);
+    }, [userId]);
 
     React.useEffect(() => {
         const handleToggleNotices = () => setIsNoticesOpen(prev => !prev);
@@ -64,36 +70,23 @@ export const MobileBottomNav: React.FC = () => {
     const handleBatchSwitch = async (batchId: string) => {
         setIsBatchesOpen(false);
 
-        // Check if we are currently on the roadmap page
-        const isRoadmapPage = location.pathname.startsWith('/student/roadmap');
-
-        if (isRoadmapPage && user?.id) {
-            // Stay on roadmap page but switch to the new roadmap
+        // Prefer staying in / navigating to the selected cohort's roadmap when multi-batch
+        if (userId) {
             import('../../services/database').then(async ({ DatabaseService }) => {
-                const data = await DatabaseService.getDashboardData(user.id, { batchId });
-                if (data?.roadmap) {
-                    const slug = DatabaseService.generateRoadmapSlug(data.roadmap.title);
-                    navigate(`/student/roadmap/${slug}`);
-                } else {
-                    navigate(`/student/dashboard?batchId=${batchId}`);
-                }
-            });
-        } else {
-            // Default behavior: go to dashboard
-            navigate(`/student/dashboard?batchId=${batchId}`);
-        }
-
-        // Refresh local data to update other links
-        if (user?.id) {
-            import('../../services/database').then(async ({ DatabaseService }) => {
-                const data = await DatabaseService.getDashboardData(user.id, { batchId });
+                const data = await DatabaseService.getDashboardData(userId, { batchId });
                 if (data?.batch) {
                     setCurrentBatch(data.batch);
                     if (data.roadmap) {
-                        setRoadmapSlug(DatabaseService.generateRoadmapSlug(data.roadmap.title));
+                        const slug = DatabaseService.generateRoadmapSlug(data.roadmap.title);
+                        setRoadmapSlug(slug);
+                        navigate(`/student/roadmap/${slug}`);
+                        return;
                     }
                 }
+                navigate(`/student/dashboard?batchId=${batchId}`);
             });
+        } else {
+            navigate(`/student/dashboard?batchId=${batchId}`);
         }
     };
 
@@ -108,6 +101,11 @@ export const MobileBottomNav: React.FC = () => {
             label: 'Roadmap',
             icon: Map,
             onClick: () => {
+                // Multiple cohorts: open picker so students choose which roadmap
+                if (enrolledBatches.length > 1) {
+                    setIsBatchesOpen(true);
+                    return;
+                }
                 if (roadmapSlug) {
                     navigate(`/student/roadmap/${roadmapSlug}`);
                 } else if (!isLoadingData) {
@@ -117,7 +115,7 @@ export const MobileBottomNav: React.FC = () => {
             isActive: location.pathname.startsWith('/student/roadmap')
         },
         {
-            label: 'Batches',
+            label: 'Programs',
             icon: Layers,
             onClick: () => setIsBatchesOpen(!isBatchesOpen),
             isActive: isBatchesOpen
@@ -162,6 +160,7 @@ export const MobileBottomNav: React.FC = () => {
                         <button
                             key={item.label}
                             onClick={item.onClick}
+                            aria-current={item.isActive ? 'page' : undefined}
                             className={cn(
                                 "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors focus:outline-none min-w-[60px]",
                                 item.isActive
@@ -206,8 +205,13 @@ export const MobileBottomNav: React.FC = () => {
                                         <p className="text-xs text-muted-foreground">{userEmail}</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setIsMenuOpen(false)} className="p-2 -mr-2 text-muted-foreground focus:outline-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    aria-label="Close menu"
+                                    className="p-2 -mr-2 text-muted-foreground focus:outline-none"
+                                >
+                                    <X className="w-6 h-6" strokeWidth={2} />
                                 </button>
                             </div>
                             <div className="p-4 space-y-2">
@@ -223,6 +227,32 @@ export const MobileBottomNav: React.FC = () => {
                                     <User className="w-4 h-4 mr-3" />
                                     Profile
                                 </Button>
+                                <h4 className="text-sm font-medium text-muted-foreground px-4 uppercase tracking-wider mb-2 mt-4">Dashboards</h4>
+                                {getAccessibleDashboards(userRole, {
+                                    accessibleRoles,
+                                    email: user?.email,
+                                }).map((d) => {
+                                    const Icon =
+                                        d.role === 'admin'
+                                            ? Shield
+                                            : d.role === 'mentor'
+                                              ? GraduationCap
+                                              : LayoutDashboard;
+                                    return (
+                                        <Button
+                                            key={d.path}
+                                            variant="ghost"
+                                            className="w-full justify-start text-foreground"
+                                            onClick={() => {
+                                                navigate(d.path);
+                                                setIsMenuOpen(false);
+                                            }}
+                                        >
+                                            <Icon className="w-4 h-4 mr-3" />
+                                            {d.label}
+                                        </Button>
+                                    );
+                                })}
                                 <Button
                                     variant="ghost"
                                     className="w-full justify-start text-foreground"
@@ -269,10 +299,12 @@ export const MobileBottomNav: React.FC = () => {
                                     <h3 className="font-semibold text-lg text-foreground">Notifications</h3>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => setIsNoticesOpen(false)}
+                                    aria-label="Close notifications"
                                     className="p-2 -mr-2 text-muted-foreground hover:text-foreground focus:outline-none"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
+                                    <X className="w-6 h-6" strokeWidth={2} />
                                 </button>
                             </div>
                             <div className="flex-1 p-4 overflow-y-auto">
@@ -281,7 +313,7 @@ export const MobileBottomNav: React.FC = () => {
                                         {notices.map((notice, idx) => (
                                             <div key={notice.id || idx} className={cn(
                                                 "p-4 rounded-xl border transition-colors",
-                                                isDarkMode ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"
+                                                "p-4 rounded-xl border transition-colors bg-muted/50 border-border"
                                             )}>
                                                 <div className="flex items-start justify-between gap-2 mb-2">
                                                     <h4 className="font-semibold text-foreground leading-tight">{notice.title}</h4>
@@ -333,12 +365,14 @@ export const MobileBottomNav: React.FC = () => {
                             )}
                         >
                             <div className="p-6 border-b border-border flex items-center justify-between">
-                                <h3 className="font-semibold text-lg text-foreground">Select Batch</h3>
+                                <h3 className="font-semibold text-lg text-foreground">Your cohorts</h3>
                                 <button
+                                    type="button"
                                     onClick={() => setIsBatchesOpen(false)}
+                                    aria-label="Close cohorts"
                                     className="p-2 -mr-2 text-muted-foreground hover:text-foreground focus:outline-none"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
+                                    <X className="w-6 h-6" strokeWidth={2} />
                                 </button>
                             </div>
                             <div className="flex-1 p-4 overflow-y-auto">

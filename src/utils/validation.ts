@@ -127,13 +127,25 @@ const batchUpdate = batchCreate.partial().omit({ roadmap_id: true });
 
 // ============ ROADMAP SCHEMAS ============
 
+const nodeUnitLabel = z.string().trim().min(1).max(50).default('Week');
+const optionalUrl = z.union([z.string().trim().url('Must be a valid URL'), z.literal('')]).optional().nullable();
+
 const roadmapCreate = z.object({
   title: shortText,
   description: optionalText,
   total_weeks: z.number().int().min(1).max(52),
+  node_unit_label: nodeUnitLabel,
+  slides_url: optionalUrl,
+  decision_tree_enabled: z.boolean().default(false),
   difficulty_level: difficultyLevel.default('beginner'),
   category: shortText,
   is_active: z.boolean().default(true),
+});
+
+const roadmapWeekUpdate = z.object({
+  title: shortText,
+  description: optionalText,
+  domain: shortText,
 });
 
 const roadmapTaskCreate = z.object({
@@ -179,6 +191,7 @@ export const schemas = {
   },
   roadmap: {
     create: roadmapCreate,
+    weekUpdate: roadmapWeekUpdate,
     taskCreate: roadmapTaskCreate,
   },
 } as const;

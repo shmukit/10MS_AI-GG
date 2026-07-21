@@ -4,6 +4,7 @@ import { DiscussionThread } from './DiscussionThread';
 import { DatabaseService } from '../../services/database';
 import { useTheme } from '../../lib/ThemeContext';
 import { posthog } from '../../lib/posthog';
+import { useToast } from '../ui/ToastProvider';
 
 interface DiscussionBoardProps {
     entityType: 'roadmap' | 'week' | 'task';
@@ -12,6 +13,7 @@ interface DiscussionBoardProps {
 
 export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, entityId }) => {
     const { isDarkMode } = useTheme();
+    const { error: toastError } = useToast();
     const [discussions, setDiscussions] = useState<RoadmapDiscussion[]>([]);
     const [loading, setLoading] = useState(true);
     const [newPostContent, setNewPostContent] = useState('');
@@ -96,7 +98,7 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
             fetchDiscussions(); // Refresh list
         } catch (error) {
             console.error('Error creating post:', error);
-            alert('Failed to post');
+            toastError('Failed to post');
         } finally {
             setIsPosting(false);
         }

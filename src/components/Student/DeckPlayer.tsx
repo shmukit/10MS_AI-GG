@@ -31,6 +31,7 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
     const [loading, setLoading] = useState(true);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
+    const [showSummary, setShowSummary] = useState(false);
 
     const sessionStartTime = React.useRef(Date.now());
     const cardStartTime = React.useRef(Date.now());
@@ -91,10 +92,9 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
                 correct_count: correctCount.current,
                 total_time_spent_ms: Date.now() - sessionStartTime.current,
             });
-            onComplete?.();
-            onClose();
+            setShowSummary(true);
         }
-    }, [currentIndex, cards, quizSubmitted, deckId, onComplete, onClose]);
+    }, [currentIndex, cards, quizSubmitted, deckId]);
 
     const handlePrevious = useCallback(() => {
         if (currentIndex > 0) {
@@ -157,6 +157,47 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
         );
     }
 
+    const handleFinishSession = () => {
+        onComplete?.();
+        onClose();
+    };
+
+    if (showSummary) {
+        const quizCards = cards.filter((card) => card.card_type === 'quiz').length;
+        const minutes = Math.max(1, Math.round((Date.now() - sessionStartTime.current) / 60000));
+
+        return (
+            <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background p-6 text-foreground">
+                <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center">
+                    <CheckCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
+                    <h2 className="text-2xl font-bold text-foreground">Session complete!</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        You reviewed all {cards.length} cards in {deckTitle}.
+                    </p>
+                    <div className="mt-6 grid grid-cols-3 gap-3 text-left">
+                        <div className="rounded-xl bg-muted/50 p-3">
+                            <p className="text-xs text-muted-foreground">Cards</p>
+                            <p className="text-lg font-semibold text-foreground">{cards.length}</p>
+                        </div>
+                        <div className="rounded-xl bg-muted/50 p-3">
+                            <p className="text-xs text-muted-foreground">Quiz correct</p>
+                            <p className="text-lg font-semibold text-foreground">
+                                {quizCards > 0 ? `${correctCount.current}/${quizCards}` : '—'}
+                            </p>
+                        </div>
+                        <div className="rounded-xl bg-muted/50 p-3">
+                            <p className="text-xs text-muted-foreground">Time</p>
+                            <p className="text-lg font-semibold text-foreground">{minutes}m</p>
+                        </div>
+                    </div>
+                    <Button variant="cta" className="mt-8 w-full" onClick={handleFinishSession}>
+                        Done
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     const renderCardContent = () => {
         const content = currentCard.content as Record<string, unknown>;
 
@@ -170,25 +211,30 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
                     </div>
                 );
 
-            case 'image':
+            case 'image': {
+                const imageContent = content as { imageUrl: string; caption?: string };
+
                 return (
                     <div className="flex min-h-full flex-col animate-in fade-in duration-500">
                         <div className="relative flex-1">
                             <img
-                                src={content.imageUrl as string}
-                                alt={(content.caption as string) || 'Card image'}
+                                src={imageContent.imageUrl}
+                                alt={imageContent.caption || 'Card image'}
                                 className="h-full w-full object-contain"
                             />
                         </div>
-                        {content.caption && (
+                        {imageContent.caption ? (
                             <div className="border-t border-border bg-card/90 p-4 text-center backdrop-blur-sm">
-                                <p className="text-base font-medium text-foreground">{content.caption as string}</p>
+                                <p className="text-base font-medium text-foreground">{imageContent.caption}</p>
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 );
+            }
 
             case 'video': {
+                const videoContent = content as { videoUrl: string; description?: string };
+
                 const getEmbedUrl = (url: string) => {
                     if (url.includes('youtube.com') || url.includes('youtu.be')) {
                         const videoId = url.split('v=')[1] || url.split('/').pop();
@@ -201,18 +247,18 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
                     <div className="flex min-h-full flex-col justify-center bg-background">
                         <div className="mx-auto aspect-video w-full max-w-4xl">
                             <iframe
-                                src={getEmbedUrl(content.videoUrl as string)}
+                                src={getEmbedUrl(videoContent.videoUrl)}
                                 className="h-full w-full rounded-lg border border-border"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                                 title="Practice video"
                             />
                         </div>
-                        {content.description && (
+                        {videoContent.description ? (
                             <div className="p-6 text-center">
-                                <p className="text-base text-muted-foreground">{content.description as string}</p>
+                                <p className="text-base text-muted-foreground">{videoContent.description}</p>
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 );
             }
@@ -379,7 +425,7 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
                         <button
                             type="button"
                             onClick={handleNext}
-                            className="rounded-full bg-primary p-3 text-primary-foreground shadow-sm transition-colors hover:bg-[#17994B]"
+                            className="rounded-full bg-primary p-3 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                             aria-label={currentIndex === cards.length - 1 ? 'Finish deck' : 'Next card'}
                         >
                             {currentIndex === cards.length - 1 ? (

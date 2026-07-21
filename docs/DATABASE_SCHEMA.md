@@ -95,11 +95,64 @@ CREATE TABLE roadmaps (
   total_weeks INTEGER NOT NULL,
   difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('beginner', 'intermediate', 'advanced')) DEFAULT 'beginner',
   category VARCHAR(100) NOT NULL,
+  node_unit_label VARCHAR(50) NOT NULL DEFAULT 'Week',
+  slides_url TEXT,
+  decision_tree_enabled BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 ```
+
+### 6b. roadmap_slide_decks
+```sql
+CREATE TABLE roadmap_slide_decks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  roadmap_id UUID REFERENCES roadmaps(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  slides_url TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  is_default_enabled BOOLEAN DEFAULT true,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### 6c. roadmap_decision_trees
+```sql
+CREATE TABLE roadmap_decision_trees (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  roadmap_id UUID REFERENCES roadmaps(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  tree_key VARCHAR(100) NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  is_default_enabled BOOLEAN DEFAULT true,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (roadmap_id, tree_key)
+);
+```
+
+### 6d. batch_slide_decks / batch_decision_trees
+```sql
+CREATE TABLE batch_slide_decks (
+  batch_id UUID REFERENCES batches(id) ON DELETE CASCADE,
+  slide_deck_id UUID REFERENCES roadmap_slide_decks(id) ON DELETE CASCADE,
+  is_enabled BOOLEAN DEFAULT true,
+  PRIMARY KEY (batch_id, slide_deck_id)
+);
+
+CREATE TABLE batch_decision_trees (
+  batch_id UUID REFERENCES batches(id) ON DELETE CASCADE,
+  decision_tree_id UUID REFERENCES roadmap_decision_trees(id) ON DELETE CASCADE,
+  is_enabled BOOLEAN DEFAULT true,
+  PRIMARY KEY (batch_id, decision_tree_id)
+);
+```
+
+Legacy `roadmaps.slides_url` and `roadmaps.decision_tree_enabled` remain as fallback when catalog is empty.
 
 ### 7. roadmap_weeks
 ```sql
@@ -233,3 +286,26 @@ CREATE POLICY "Students can view their own progress" ON student_progress
 - The `student_profiles.batch_id` column has been removed
 - Existing student-batch relationships have been migrated to `student_batch_assignments`
 - All queries that previously used `student_profiles.batch_id` should be updated to use the new table structure
+- Certificates are scoped per batch enrollment: run `sql/20260726_certificate_batch_roadmap.sql` to add `batch_id` / `roadmap_id`
+
+### student_certificates
+```sql
+CREATE TABLE student_certificates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  issued_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  certificate_type VARCHAR(255) NOT NULL DEFAULT 'SheSTEM_Zoom_Completion',
+  issued_at TIMESTAMPTZ DEFAULT NOW(),
+  public_url_slug VARCHAR(255) UNIQUE,
+  image_url TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  batch_id UUID REFERENCES batches(id) ON DELETE SET NULL,
+  roadmap_id UUID REFERENCES roadmaps(id) ON DELETE SET NULL
+);
+
+CREATE UNIQUE INDEX student_certificates_student_batch_unique
+  ON student_certificates (student_id, batch_id)
+  WHERE batch_id IS NOT NULL;
+```
+
+See `docs/CERTIFICATE_PRD.md` for issuance flows and UACs.

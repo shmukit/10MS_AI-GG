@@ -1,10 +1,12 @@
 import React from 'react';
-import { Lock, Zap, Clock, Users } from 'lucide-react';
+import { Lock, Zap, Clock, Users, Check } from 'lucide-react';
+import { Badge } from '../ui/Badge';
 
 export type NodeStatus = 'locked' | 'active' | 'completed';
 
 export interface RoadmapNodeData {
   id: string;
+  weekNumber?: number;
   title: string;
   description: string;
   status: NodeStatus;
@@ -29,19 +31,25 @@ interface RoadmapNodeProps {
   onClick: () => void;
   isAlternate?: boolean;
   isDarkMode?: boolean;
+  nodeUnitLabel?: string;
 }
 
-export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
+export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, nodeUnitLabel = 'Week' }) => {
+  const prevLabel = node.weekNumber && node.weekNumber > 1
+    ? `${nodeUnitLabel} ${node.weekNumber - 1}`
+    : `previous ${nodeUnitLabel.toLowerCase()}`;
+
   const getNodeStyles = () => {
-    const baseStyles = "relative z-10 w-full max-w-md lg:w-80 p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:shadow-lg bg-card";
+    const baseStyles =
+      'group relative z-10 w-full max-w-md lg:w-80 p-6 rounded-xl border transition-all duration-300 bg-card';
 
     switch (node.status) {
       case 'locked':
         return `${baseStyles} border-border text-muted-foreground cursor-not-allowed bg-muted`;
       case 'active':
-        return `${baseStyles} border-primary text-foreground shadow-md hover:shadow-xl`;
+        return `${baseStyles} border-primary text-foreground cursor-pointer hover:shadow-hover hover:-translate-y-0.5`;
       case 'completed':
-        return `${baseStyles} border-primary/30 text-foreground shadow-md hover:shadow-lg bg-accent`;
+        return `${baseStyles} border-primary/30 text-foreground cursor-pointer hover:shadow-hover hover:-translate-y-0.5 bg-accent`;
       default:
         return baseStyles;
     }
@@ -50,15 +58,13 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
   const getStatusIcon = () => {
     switch (node.status) {
       case 'locked':
-        return <Lock className="w-5 h-5 text-muted-foreground" />;
+        return <Lock className="w-5 h-5 text-muted-foreground" aria-hidden />;
       case 'active':
-        return <Zap className="w-5 h-5 text-primary" />;
+        return <Zap className="w-5 h-5 text-primary" aria-hidden />;
       case 'completed':
         return (
-          <div className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 bg-primary">
-            <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
+          <div className="w-5 h-5 rounded-full flex items-center justify-center bg-primary" aria-hidden>
+            <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />
           </div>
         );
       default:
@@ -66,50 +72,60 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
     }
   };
 
-  const completedTasks = node.tasks.filter(task => task.completed).length;
+  const completedTasks = node.tasks.filter((task) => task.completed).length;
   const totalTasks = node.tasks.length;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  const isLocked = node.status === 'locked';
 
   return (
     <div
       className={getNodeStyles()}
-      onClick={node.status !== 'locked' ? onClick : undefined}
+      onClick={!isLocked ? onClick : undefined}
+      aria-disabled={isLocked}
+      tabIndex={isLocked ? -1 : 0}
+      role="button"
+      onKeyDown={(e) => {
+        if (!isLocked && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between mb-4 gap-2">
+        <div className="flex items-center gap-3 min-w-0">
           {getStatusIcon()}
-          <h3 className="text-lg font-bold leading-tight">{node.title}</h3>
+          <h3 className="font-display text-h3 leading-tight truncate">{node.title}</h3>
         </div>
         {node.status === 'active' && (
-          <span className="text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 bg-primary text-primary-foreground">
-            🔄 In Progress
-          </span>
+          <Badge variant="default" className="shrink-0">
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-foreground opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-foreground" />
+            </span>
+            In progress
+          </Badge>
         )}
         {node.status === 'completed' && (
-          <span className="text-xs px-3 py-1 rounded-full font-medium transition-colors duration-200 bg-primary text-primary-foreground">
-            ✓ Completed
-          </span>
+          <Badge variant="default" className="shrink-0" aria-label="Completed">
+            <Check className="w-3 h-3" strokeWidth={3} aria-hidden />
+            Completed
+          </Badge>
         )}
       </div>
 
-      {/* Description */}
-      <p className="text-sm mb-4 leading-relaxed transition-colors duration-200 text-muted-foreground">
-        {node.description}
-      </p>
+      <p className="text-body mb-4 leading-relaxed text-muted-foreground">{node.description}</p>
 
-      {/* Completion Statistics */}
       {node.completionStats && (
-        <div className="mb-4 p-3 rounded-lg border transition-colors duration-200 bg-muted/50 border-border">
+        <div className="mb-4 p-3 rounded-lg border bg-muted/50 border-border">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-foreground">Class Progress</span>
+            <Users className="w-4 h-4 text-muted-foreground" aria-hidden />
+            <span className="text-body font-medium text-foreground">Class progress</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-caption">
             <span className="text-muted-foreground">
               {node.completionStats.completedStudents}/{node.completionStats.totalStudents} completed
             </span>
-            <span className="text-sm font-medium text-foreground">
+            <span className="font-medium text-foreground">
               {Math.round(node.completionStats.completionPercentage)}%
             </span>
           </div>
@@ -122,11 +138,10 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
         </div>
       )}
 
-      {/* Progress Bar for Active Nodes */}
       {node.status === 'active' && (
         <div className="mb-4">
-          <div className="flex justify-between items-center text-xs mb-2 text-muted-foreground">
-            <span>Your Progress</span>
+          <div className="flex justify-between items-center text-caption mb-2 text-muted-foreground">
+            <span>Your progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
           <div className="progress-track w-full rounded-full h-2">
@@ -138,31 +153,35 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick }) => {
         </div>
       )}
 
-      {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-caption text-muted-foreground">
         <div className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
+          <Clock className="w-3 h-3" aria-hidden />
           <span>{node.estimatedTime}</span>
         </div>
         <div className="flex items-center gap-2">
           <span>{totalTasks} tasks</span>
-          {node.status !== 'locked' && (
-            <span className="font-medium transition-colors duration-200">
-              View Details <span className="inline-block transform transition-transform group-hover:translate-x-1">→</span>
+          {!isLocked && (
+            <span className="font-medium text-primary group-hover:underline">
+              View details
+              <span className="inline-block transition-transform group-hover:translate-x-0.5 ml-0.5" aria-hidden>
+                →
+              </span>
             </span>
           )}
         </div>
       </div>
 
-      {/* Locked State Overlay */}
-      {node.status === 'locked' && (
-        <div className="absolute inset-0 z-20 rounded-xl flex items-center justify-center backdrop-blur-[2px] bg-background/80">
+      {isLocked && (
+        <div
+          className="absolute inset-0 z-20 rounded-xl flex items-center justify-center"
+          style={{ background: 'var(--locked-scrim)' }}
+        >
           <div className="text-center p-4">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
-              <Lock className="w-6 h-6" />
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-muted text-foreground">
+              <Lock className="w-6 h-6" aria-hidden />
             </div>
-            <p className="text-sm font-semibold max-w-[180px] mx-auto leading-tight text-muted-foreground">
-              Complete previous week to unlock
+            <p className="text-body font-semibold max-w-[200px] mx-auto leading-snug text-[var(--locked-foreground)] drop-shadow-sm">
+              Complete {prevLabel} to unlock
             </p>
           </div>
         </div>

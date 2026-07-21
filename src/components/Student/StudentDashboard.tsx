@@ -48,7 +48,6 @@ export const StudentDashboard: React.FC = () => {
     <div className="min-h-screen transition-colors duration-200 bg-background">
       <StudentHeader
         userName={getUserDisplayName()}
-        userRole="student"
         pageTitle="Dashboard"
       />
 
@@ -199,7 +198,7 @@ export const StudentDashboard: React.FC = () => {
               </Card>
 
               {/* Mentors */}
-              <MentorsSection isDarkMode={isDarkMode} />
+              <MentorsSection mentors={dashboardData?.mentors || []} />
             </div>
           </MotionDiv>
         )}

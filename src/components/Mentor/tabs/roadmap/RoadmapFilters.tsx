@@ -1,4 +1,5 @@
 import React from 'react';
+import { nodeFilterLabel } from '../../../../utils/roadmapNodeUtils';
 
 interface RoadmapFiltersProps {
     weekFilter: string;
@@ -6,6 +7,7 @@ interface RoadmapFiltersProps {
     typeFilter: string;
     setTypeFilter: (type: string) => void;
     getWeekOptions: () => number[];
+    nodeUnitLabel: string;
 }
 
 export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
@@ -13,7 +15,8 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
     setWeekFilter,
     typeFilter,
     setTypeFilter,
-    getWeekOptions
+    getWeekOptions,
+    nodeUnitLabel,
 }) => {
     return (
         <div className="rounded-xl p-4 border border-border bg-card transition-colors duration-200">
@@ -21,16 +24,18 @@ export const RoadmapFilters: React.FC<RoadmapFiltersProps> = ({
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                     <div>
                         <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                            Filter by Week
+                            Filter by {nodeUnitLabel}
                         </label>
                         <select
                             value={weekFilter}
                             onChange={(e) => setWeekFilter(e.target.value)}
                             className="px-3 py-2 border border-border rounded-lg bg-muted text-foreground transition-colors"
                         >
-                            <option value="">All Weeks</option>
+                            <option value="">All {nodeUnitLabel}s</option>
                             {getWeekOptions().map(week => (
-                                <option key={week} value={week.toString()}>Week {week}</option>
+                                <option key={week} value={week.toString()}>
+                                    {nodeFilterLabel(nodeUnitLabel, week)}
+                                </option>
                             ))}
                         </select>
                     </div>

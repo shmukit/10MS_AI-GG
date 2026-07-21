@@ -18,7 +18,7 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
   const { toggleDarkMode, isDarkMode } = useTheme();
 
   return (
-    <div className="border-b border-border h-16 sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+    <div className="border-b border-border h-16 sticky top-0 z-50 bg-background">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">

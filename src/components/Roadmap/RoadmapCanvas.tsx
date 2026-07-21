@@ -5,12 +5,14 @@ import { RoadmapNodeData } from './RoadmapNode';
 
 interface RoadmapCanvasProps {
   roadmapNodes: RoadmapNodeData[];
-  onRefresh?: () => void; // Add refresh callback
-  batchId?: string | null; // Add batchId prop for completion data
-  targetWeekNumber?: number | null; // Add target week number for auto-opening
+  onRefresh?: () => void;
+  batchId?: string | null;
+  targetWeekNumber?: number | null;
+  nodeUnitLabel?: string;
+  onOpenDecisionTree?: () => void;
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes, onRefresh, batchId, targetWeekNumber }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes, onRefresh, batchId, targetWeekNumber, nodeUnitLabel = 'Week', onOpenDecisionTree }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -27,21 +29,17 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
   useEffect(() => {
     if (targetWeekNumber && roadmapNodes.length > 0) {
       // Find the node with the target week number
-      const targetNode = roadmapNodes.find(node => {
-        // Extract week number from node title (assuming format like "Week 1: ...")
-        const weekMatch = node.title.match(/Week (\d+)/i);
-        if (weekMatch) {
-          return parseInt(weekMatch[1], 10) === targetWeekNumber;
-        }
-        return false;
-      });
+      const targetNode = roadmapNodes.find(node =>
+        node.weekNumber === targetWeekNumber ||
+        (node.weekNumber == null && roadmapNodes.indexOf(node) + 1 === targetWeekNumber)
+      );
 
       if (targetNode && targetNode.status !== 'locked') {
         setSelectedNode(targetNode);
 
         // Optional: Scroll to the target node
         setTimeout(() => {
-          const nodeElement = document.getElementById(`week-${targetWeekNumber}`);
+          const nodeElement = document.getElementById(`roadmap-node-${targetWeekNumber}`);
           if (nodeElement) {
             nodeElement.scrollIntoView({
               behavior: 'smooth',
@@ -70,14 +68,13 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
               {/* Nodes */}
               <div className="relative z-10 space-y-8 lg:space-y-16">
                 {roadmapNodes.map((node, index) => {
-                  const weekMatch = node.title.match(/Week (\d+)/i);
-                  const weekNumber = weekMatch ? weekMatch[1] : index + 1;
+                  const nodeNumber = node.weekNumber ?? index + 1;
                   const isEven = index % 2 === 0;
 
                   return (
-                    <div key={node.id} id={`week-${weekNumber}`} className="relative z-10">
-                      {/* Connection dot — sits on the spine, above the line but below card content is ok at card top edge */}
-                      <div className="absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-border bg-card sm:top-8 sm:h-4 sm:w-4 sm:border-4" />
+                    <div key={node.id} id={`roadmap-node-${nodeNumber}`} className="relative z-10">
+                      {/* Connection dot — desktop alternating layout only */}
+                      <div className="hidden lg:block absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-border bg-card sm:top-8 sm:h-4 sm:w-4 sm:border-4" />
 
                       {/* Card — full width on mobile; alternating halves on lg+ */}
                       <div
@@ -98,6 +95,7 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
                             node={node}
                             onClick={() => handleNodeClick(node)}
                             isAlternate={!isEven}
+                            nodeUnitLabel={nodeUnitLabel}
                           />
                         </div>
                       </div>
@@ -117,6 +115,8 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
           onClose={handleClosePanel}
           onRefresh={onRefresh}
           batchId={batchId || undefined}
+          nodeUnitLabel={nodeUnitLabel}
+          onOpenDecisionTree={onOpenDecisionTree}
         />
       )}
     </div>

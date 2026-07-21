@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Book, Clock, Trophy } from 'lucide-react';
+import { BookOpen, Book, Clock, Trophy, RotateCcw } from 'lucide-react';
 import { getAvailableDecks } from '../../services/db/practiceDeckService';
 import { Database } from '../../types/database.types';
 import { useAuthContext } from '../../lib';
@@ -85,24 +85,25 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                             <Clock className="w-5 h-5 text-primary" />
                             Due for Review
                         </h3>
-                        <div
+                        <button
+                            type="button"
                             onClick={startReview}
-                            className="group relative rounded-xl border border-border bg-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30"
+                            className="group relative w-full text-left rounded-xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-1 hover:border-primary/30"
                         >
                             <div className="p-6 md:p-8 flex items-center justify-between">
                                 <div className="space-y-2">
-                                    <h4 className="text-xl md:text-2xl font-black text-foreground">
-                                        Daily Review Session
+                                    <h4 className="font-display text-h2 text-foreground">
+                                        Daily review session
                                     </h4>
-                                    <p className="text-sm md:text-base text-muted-foreground">
-                                        You have <span className="font-bold text-primary">{dueCards.length} cards</span> scheduled for review.
+                                    <p className="text-body text-muted-foreground">
+                                        You have <span className="font-semibold text-primary">{dueCards.length} cards</span> scheduled for review.
                                     </p>
                                 </div>
-                                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 bg-primary text-primary-foreground">
-                                    <Play className="w-6 h-6 md:w-8 md:h-8 ml-1 fill-current" />
+                                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
+                                    <RotateCcw className="w-6 h-6 md:w-7 md:h-7" aria-hidden />
                                 </div>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 )}
 
@@ -116,10 +117,11 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {decks.map(deck => (
-                            <div
+                            <button
                                 key={deck.id}
+                                type="button"
                                 onClick={() => setSelectedDeck(deck)}
-                                className="group relative rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 overflow-hidden cursor-pointer"
+                                className="group relative w-full text-left rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-hover hover:-translate-y-1 hover:border-primary/30 overflow-hidden"
                             >
                                 {/* Cover Image or Fallback */}
                                 <div className="h-40 md:h-48 w-full relative overflow-hidden">
@@ -138,16 +140,17 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                         </div>
                                     )}
 
-                                    {/* Play Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-background/40 backdrop-blur-[2px]">
-                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/20 backdrop-blur-xl flex items-center justify-center border border-primary/30 shadow-lg scale-75 group-hover:scale-100 transition-transform duration-300">
-                                            <Play className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground ml-1 fill-current" />
+                                    {/* Hover — practice affordance, not video */}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-background/50">
+                                        <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground text-caption font-semibold">
+                                            <BookOpen className="w-4 h-4" aria-hidden />
+                                            Start practice
                                         </div>
                                     </div>
 
                                     {/* Category Tag */}
                                     <div className="absolute top-3 left-3">
-                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border bg-primary/10 text-primary border-primary/20">
+                                        <span className="px-2 py-0.5 rounded-full text-overline font-semibold border bg-primary/10 text-primary border-primary/20">
                                             Practice
                                         </span>
                                     </div>
@@ -168,7 +171,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                     <div className="flex items-center justify-between text-[10px] md:text-xs mt-auto pt-4 border-t border-dashed border-border">
                                         <div className="flex items-center gap-1 md:gap-1.5 text-muted-foreground">
                                             <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                                            <span>~5 mins</span>
+                                            <span>Practice deck</span>
                                         </div>
                                         <div className="flex items-center gap-1 md:gap-1.5 opacity-80 text-muted-foreground">
                                             <Trophy className="w-3 md:w-3.5 h-3 md:h-3.5" />
@@ -176,7 +179,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>

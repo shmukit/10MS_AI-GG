@@ -32,15 +32,19 @@ Defined in `src/index.css` (shared tokens), `src/styles/palettes.css` (neutral p
 | `--primary` | `#1CAB55` | `#1CAB55` | CTAs, active, focus |
 | `--accent` | `#EAFEF2` | `#142019` | Active tint (sparingly) |
 | `--destructive` | `#DC2626` | `#DC2626` | Errors only |
+| `--success` / `--success-subtle` | green / tint | green / tint | Success states, badges |
+| `--warning` / `--warning-subtle` | amber / tint | amber / tint | Warnings, caution badges |
+| `--locked-scrim` / `--locked-foreground` | overlay / text | overlay / text | Locked roadmap nodes |
 | `--ring` | `#1CAB55` | `#1CAB55` | Focus ring color |
 
 Tailwind bridge: `bg-background`, `text-foreground`, `border-border`, `bg-primary`, etc.
 
 ## 4. Typography
 
-- **English:** Inter (400–700), loaded in `index.css`
+- **Display (headings):** Plus Jakarta Sans via `font-display` — page titles, section headings, modal titles
+- **Body (English):** Inter (400–700), loaded in `index.css`
 - **Bengali:** Anek Bangla via `.lang-bn`
-- **Scale:** 15px card titles, 13px body, 11–12px labels
+- **Scale (Tailwind):** `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body`, `text-caption`
 
 ## 5. Components
 
@@ -48,6 +52,7 @@ Shared primitives in `src/components/ui/`:
 
 - **Button** — pill radius, variants: default, secondary, outline, ghost, destructive
 - **Card** — flat at rest, border only; hover lift + shadow
+- **Modal**, **EmptyState**, **Breadcrumbs** — shared layout primitives
 - **Skeleton** — `bg-muted` pulse
 - **Toast** — semantic success/error; sits above mobile bottom nav (`bottom-20`)
 

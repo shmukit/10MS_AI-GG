@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anek+Bangla:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Anek+Bangla:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -42,12 +42,29 @@
   --destructive-foreground: #FFFFFF;
   --ring:                   #1CAB55;
   --radius:                 0.75rem;
+  --success:                #1CAB55;
+  --success-subtle:         #EAFEF2;
+  --warning:                #B45309;
+  --warning-subtle:         #FFFBEB;
+  --info:                   #374151;
+  --info-subtle:            #F3F4F6;
+  --overlay:                rgba(0, 0, 0, 0.50);
+  --locked-scrim:           rgba(9, 9, 11, 0.70);
+  --locked-foreground:      #FAFAFA;
 }
 
 /* Dark shared accent tokens */
 .dark {
   --accent:                 #142019;
   --accent-foreground:      #1CAB55;
+  --success-subtle:         #142019;
+  --warning:                #F59E0B;
+  --warning-subtle:         #1C1408;
+  --info:                   #94A3B8;
+  --info-subtle:            rgba(30, 41, 59, 0.4);
+  --overlay:                rgba(0, 0, 0, 0.60);
+  --locked-scrim:           rgba(9, 9, 11, 0.85);
+  --locked-foreground:      #E4E4E7;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────── */
@@ -61,10 +78,14 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  color: var(--c-text);
+  color: var(--foreground);
   background: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 /* Bengali strings use Anek Bangla */

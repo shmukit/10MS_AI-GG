@@ -7,6 +7,7 @@ interface AddWeekModalProps {
     roadmapTitle: string;
     currentWeeks: number;
     onAddWeek: () => void;
+    nodeUnitLabel: string;
 }
 
 export const AddWeekModal: React.FC<AddWeekModalProps> = ({
@@ -14,7 +15,8 @@ export const AddWeekModal: React.FC<AddWeekModalProps> = ({
     onClose,
     roadmapTitle,
     currentWeeks,
-    onAddWeek
+    onAddWeek,
+    nodeUnitLabel,
 }) => {
     if (!isOpen) return null;
 
@@ -23,7 +25,7 @@ export const AddWeekModal: React.FC<AddWeekModalProps> = ({
             <div className="rounded-xl p-6 shadow-lg max-w-md w-full mx-4 border border-border bg-card transition-colors duration-200">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-foreground transition-colors duration-200">
-                        Add Week to {roadmapTitle}
+                        Add {nodeUnitLabel} to {roadmapTitle}
                     </h3>
                     <button
                         onClick={onClose}
@@ -36,10 +38,10 @@ export const AddWeekModal: React.FC<AddWeekModalProps> = ({
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                            Current Weeks: {currentWeeks}
+                            Current {nodeUnitLabel}s: {currentWeeks}
                         </label>
                         <p className="text-sm text-muted-foreground transition-colors duration-200">
-                            Adding a new week will extend this roadmap to {currentWeeks + 1} weeks.
+                            Adding a new {nodeUnitLabel.toLowerCase()} will extend this roadmap to {currentWeeks + 1} {nodeUnitLabel.toLowerCase()}s.
                         </p>
                     </div>
 
@@ -48,7 +50,7 @@ export const AddWeekModal: React.FC<AddWeekModalProps> = ({
                             onClick={onAddWeek}
                             className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-lg font-medium transition-colors"
                         >
-                            Add Week
+                            Add {nodeUnitLabel}
                         </button>
                         <button
                             onClick={onClose}

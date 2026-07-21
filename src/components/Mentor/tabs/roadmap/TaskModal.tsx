@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { nodeFilterLabel } from '../../../../utils/roadmapNodeUtils';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -11,6 +12,7 @@ interface TaskModalProps {
     weekOptions: number[];
     title: string;
     submitLabel: string;
+    nodeUnitLabel?: string;
 }
 
 const inputClass = 'w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-colors duration-200 bg-muted text-foreground';
@@ -23,7 +25,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     onSubmit,
     weekOptions,
     title,
-    submitLabel
+    submitLabel,
+    nodeUnitLabel = 'Week',
 }) => {
     if (!isOpen) return null;
 
@@ -46,7 +49,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                                Week Number
+                                {nodeUnitLabel} Number
                             </label>
                             <select
                                 value={taskData.weekNumber}
@@ -54,9 +57,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                 className={inputClass}
                                 required
                             >
-                                <option value="">Select Week</option>
+                                <option value="">Select {nodeUnitLabel}</option>
                                 {weekOptions.map(week => (
-                                    <option key={week} value={week}>Week {week}</option>
+                                    <option key={week} value={week}>{nodeFilterLabel(nodeUnitLabel, week)}</option>
                                 ))}
                             </select>
                         </div>

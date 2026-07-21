@@ -20,7 +20,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
 }) => {
   const { toggleDarkMode, isDarkMode } = useTheme();
   return (
-    <div className="border-b border-border min-h-16 sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+    <div className="border-b border-border min-h-16 sticky top-0 z-50 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
@@ -28,7 +28,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
             {pageTitle && (
               <div className="flex items-center gap-3 min-w-0">
                 <div className="h-6 w-px hidden sm:block bg-border" />
-                <span className="text-base sm:text-xl font-semibold text-muted-foreground truncate">
+                <span className="text-base sm:text-xl font-semibold text-foreground truncate">
                   {pageTitle}
                 </span>
               </div>
@@ -44,6 +44,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-notices'))}
                 className="p-1.5 sm:p-2 rounded-lg transition-colors duration-200 bg-muted text-primary hover:bg-accent border border-border"
+                aria-label="Open notifications"
               >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
@@ -56,6 +57,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
               <button
                 onClick={toggleDarkMode}
                 className="p-2 rounded-lg transition-colors duration-200 bg-muted text-muted-foreground hover:text-foreground hover:bg-accent border border-border"
+                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>

@@ -15,24 +15,25 @@ import { cn } from '../../lib/utils';
  */
 
 // ── Card (Large) ─────────────────────────────────────────────────────────────
-const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
-  ({ className, ...props }, ref) => (
+const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'> & { hoverable?: boolean }>(
+  ({ className, hoverable = false, ...props }, ref) => (
     <motion.div
       ref={ref}
       className={cn(
-        // Flat-by-default — border only, no shadow
         'rounded-2xl border border-border',
         'bg-card text-card-foreground',
-        // Padding: 16px mobile, 24px desktop
         'p-4 md:p-6',
         className
       )}
-      // Hover: lift + shadow (earned, not ambient)
-      whileHover={{
-        y: -2,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-        transition: { duration: 0.2, ease: 'easeOut' },
-      }}
+      whileHover={
+        hoverable
+          ? {
+              y: -2,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+              transition: { duration: 0.2, ease: 'easeOut' },
+            }
+          : undefined
+      }
       {...props}
     />
   )
@@ -67,8 +68,8 @@ const CardAlert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-[#FECACA]',
-        'bg-[#FEF2F2]',
+        'rounded-xl border border-destructive/30',
+        'bg-destructive/10',
         'p-3',
         className
       )}

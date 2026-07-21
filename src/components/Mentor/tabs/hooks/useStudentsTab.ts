@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useAuth } from '../../../../lib/useAuth';
 import { Batch } from '../../../../types/mentor';
+import { DatabaseService } from '../../../../services/database';
+import type { BatchResourceSelection } from '../../../../types/models';
+import { useToast } from '../../../ui/ToastProvider';
+
+const EMPTY_RESOURCE_SELECTION: BatchResourceSelection = {
+    slideDecks: [],
+    decisionTrees: [],
+};
 
 const getDefaultStudentPassword = () =>
     import.meta.env.VITE_DEFAULT_STUDENT_PASSWORD || '';
@@ -13,6 +21,7 @@ interface UseStudentsTabProps {
 
 export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps) => {
     const { user, userRole } = useAuth();
+    const { success, error: toastError, info } = useToast();
     const [isAddingBatch, setIsAddingBatch] = useState(false);
     const [isEditingBatch, setIsEditingBatch] = useState(false);
     const [isAddingStudent, setIsAddingStudent] = useState(false);
@@ -33,6 +42,10 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         startDate: ''
     });
 
+    const [batchResourceSelection, setBatchResourceSelection] = useState<BatchResourceSelection>(
+        EMPTY_RESOURCE_SELECTION
+    );
+
     const [newStudent, setNewStudent] = useState({
         name: '',
         email: '',
@@ -47,7 +60,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
     const copyToClipboard = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text);
-            alert('Password copied to clipboard!');
+            success('Password copied to clipboard!');
         } catch (err) {
             console.error('Failed to copy: ', err);
             const textArea = document.createElement('textarea');
@@ -56,7 +69,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert('Password copied to clipboard!');
+            success('Password copied to clipboard!');
         }
     };
 
@@ -98,17 +111,17 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
     const handleAddBatch = async () => {
         // Enforce Role-Based Access Control
         if (userRole !== 'admin' && userRole !== 'mentor') {
-            alert('Unauthorized: Only Admins and Mentors can create batches.');
+            toastError('Unauthorized: Only Admins and Mentors can create batches.');
             return;
         }
 
         if (!newBatch.startDate) {
-            alert('Start Date is required');
+            toastError('Start Date is required');
             return;
         }
 
         try {
-            const { error } = await supabase
+            const { data: createdBatch, error } = await supabase
                 .from('batches')
                 .insert([{
                     name: newBatch.name,
@@ -124,6 +137,17 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
 
             if (error) throw error;
 
+            if (createdBatch?.id && newBatch.roadmapId) {
+                if (
+                    batchResourceSelection.slideDecks.length > 0 ||
+                    batchResourceSelection.decisionTrees.length > 0
+                ) {
+                    await DatabaseService.saveBatchResourceSelection(createdBatch.id, batchResourceSelection);
+                } else {
+                    await DatabaseService.seedBatchResourcesFromCatalog(createdBatch.id, newBatch.roadmapId);
+                }
+            }
+
             setIsAddingBatch(false);
             setNewBatch({
                 name: '',
@@ -134,10 +158,11 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                 emergencyContact: '',
                 startDate: ''
             });
+            setBatchResourceSelection(EMPTY_RESOURCE_SELECTION);
             onUpdate();
         } catch (error) {
             console.error('Error creating batch:', error);
-            alert('Failed to create batch');
+            toastError('Failed to create batch');
         }
     };
 
@@ -145,39 +170,55 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         if (!editingBatchData) return;
 
         try {
+            const today = new Date().toISOString().split('T')[0];
+            const nextStatus = editingBatchData.status || 'active';
+            const updatePayload: Record<string, unknown> = {
+                whatsapp_link: editingBatchData.whatsappLink,
+                discord_link: editingBatchData.discordLink,
+                emergency_contact: editingBatchData.emergencyContact,
+                status: nextStatus,
+                updated_at: new Date().toISOString(),
+            };
+
+            if (nextStatus === 'completed' || nextStatus === 'cancelled') {
+                updatePayload.end_date = today;
+            }
+
             const { error } = await supabase
                 .from('batches')
-                .update({
-                    whatsapp_link: editingBatchData.whatsappLink,
-                    discord_link: editingBatchData.discordLink,
-                    emergency_contact: editingBatchData.emergencyContact,
-                    status: editingBatchData.status,
-                    updated_at: new Date().toISOString()
-                } as unknown as never)
+                .update(updatePayload as unknown as never)
                 .eq('id', editingBatchData.id);
 
             if (error) throw error;
 
+            if (editingBatchData.roadmapId) {
+                await DatabaseService.saveBatchResourceSelection(
+                    editingBatchData.id,
+                    batchResourceSelection
+                );
+            }
+
             setIsEditingBatch(false);
             setEditingBatchData(null);
+            setBatchResourceSelection(EMPTY_RESOURCE_SELECTION);
             onUpdate();
-            alert(`Batch "${editingBatchData.name}" updated successfully!`);
+            success(`Batch "${editingBatchData.name}" updated successfully!`);
         } catch (error) {
             console.error('Error updating batch:', error);
-            alert('Failed to update batch');
+            toastError('Failed to update batch');
         }
     };
 
     const handleAddStudent = async () => {
         if (!newStudent.name || !newStudent.email || !selectedBatch) {
-            alert('Please fill in name, email, and select a batch');
+            toastError('Please fill in name, email, and select a batch');
             return;
         }
 
         try {
             const studentPassword = newStudent.password || getDefaultStudentPassword();
             if (!studentPassword) {
-                alert('Please set a password for the student or configure VITE_DEFAULT_STUDENT_PASSWORD.');
+                toastError('Please set a password for the student or configure VITE_DEFAULT_STUDENT_PASSWORD.');
                 return;
             }
             const { data: existingUser, error: checkError } = await supabase
@@ -247,16 +288,16 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
                 degree: 'BSc'
             });
             onUpdate();
-            alert(`Student "${newStudent.name}" added successfully!`);
+            success(`Student "${newStudent.name}" added successfully!`);
         } catch (error: any) {
             console.error('Error adding student:', error);
-            alert(error.message || 'Failed to add student');
+            toastError(error.message || 'Failed to add student');
         }
     };
 
     const handleAssignStudents = async () => {
         if (!selectedBatch || selectedStudents.length === 0) {
-            alert('Please select a batch and at least one student');
+            toastError('Please select a batch and at least one student');
             return;
         }
 
@@ -277,10 +318,10 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
             setIsAssigningStudents(false);
             setSelectedStudents([]);
             onUpdate();
-            alert('Students assigned successfully!');
+            success('Students assigned successfully!');
         } catch (error) {
             console.error('Error assigning students:', error);
-            alert('Failed to assign students');
+            toastError('Failed to assign students');
         }
     };
 
@@ -298,7 +339,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
             onUpdate();
         } catch (error) {
             console.error('Error removing student:', error);
-            alert('Failed to remove student');
+            toastError('Failed to remove student');
         }
     };
 
@@ -310,14 +351,14 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
             const result = await ProgressSyncService.syncBatchProgress(selectedBatch);
             onUpdate();
             if (result.success) {
-                alert(`Progress synced for ${result.syncedStudents} students.`);
+                success(`Progress synced for ${result.syncedStudents} students.`);
             } else if (result.errors.length > 0) {
                 console.error('Sync errors:', result.errors);
-                alert(`Synced ${result.syncedStudents} students. Some errors: ${result.errors.slice(0, 2).join(', ')}`);
+                info(`Synced ${result.syncedStudents} students. Some errors: ${result.errors.slice(0, 2).join(', ')}`);
             }
         } catch (error) {
             console.error('Error syncing progress:', error);
-            alert('Failed to sync progress. Please try again.');
+            toastError('Failed to sync progress. Please try again.');
         } finally {
             setIsSyncingProgress(false);
         }
@@ -333,6 +374,7 @@ export const useStudentsTab = ({ selectedBatch, onUpdate }: UseStudentsTabProps)
         availableStudents, setAvailableStudents,
         showPassword, setShowPassword,
         newBatch, setNewBatch,
+        batchResourceSelection, setBatchResourceSelection,
         newStudent, setNewStudent,
         copyToClipboard,
         loadAvailableStudents,

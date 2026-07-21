@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../../../lib/useAuth';
+import { useAuthContext } from '../../../lib';
 import { supabase } from '../../../lib/supabase';
 import { DatabaseService } from '../../../services/database';
 
 export const useStudentDashboard = () => {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, databaseUserId, roleLoading } = useAuthContext();
     const location = useLocation();
+    // Auth uid is what student_batch_assignments.student_id / RLS use.
+    // public.users.id can diverge — pass both when fetching enrollments.
+    const authUserId = user?.id || null;
+    const effectiveUserId = authUserId || databaseUserId || null;
+    const alternateUserIds =
+        databaseUserId && authUserId && databaseUserId !== authUserId
+            ? [databaseUserId]
+            : databaseUserId && !authUserId
+              ? [databaseUserId]
+              : [];
 
     // State
     const [loading, setLoading] = useState(true);
@@ -45,27 +55,9 @@ export const useStudentDashboard = () => {
         setSelectedBatchId(batchId);
         setShowRoadmapDropdown(false);
         // Refresh dashboard data with new batch
-        if (user?.id) {
-            fetchDashboardData(user.id, batchId);
+        if (effectiveUserId) {
+            fetchDashboardData(effectiveUserId, batchId);
         }
-    };
-
-    // Refresh tasks for the selected roadmap
-    // (This is now handled inside fetchDashboardData or via derived state mostly,
-    // but if we need explicit refresh, we can get roadmapId from dashboardData)
-    const refreshTasksForRoadmap = async (roadmapId: string) => {
-        if (!user?.id) return;
-        try {
-            const [currentTasks, upcomingTasks] = await Promise.all([
-                DatabaseService.getCurrentWeekTasks(user.id, roadmapId),
-                DatabaseService.getUpcomingTasks(user.id, roadmapId)
-            ]);
-            setDashboardData((prev: any) => ({
-                ...prev,
-                currentWeekTasks: currentTasks,
-                upcomingTasks: upcomingTasks
-            }));
-        } catch (error) { }
     };
 
     // Fetch dashboard data
@@ -74,15 +66,23 @@ export const useStudentDashboard = () => {
             // Only set full loading state if we don't have data yet
             if (!dashboardData) {
                 setLoading(true);
-            } else {
-                // Otherwise indicate we are switching/refreshing but keep UI mounted
-                // We can expose this state if we want to show a spinner
             }
 
             setError(null);
-            // console.log('🔍 Fetching dashboard data for user ID:', userId, 'batch:', batchId);
-            const data = await DatabaseService.getDashboardData(userId, { batchId });
-            // console.log('📊 Dashboard data received:', data);
+            const data = await DatabaseService.getDashboardData(userId, {
+                batchId,
+                alternateUserIds: [
+                    databaseUserId,
+                    authUserId,
+                    ...alternateUserIds,
+                ],
+            });
+
+            console.log(
+                '📊 Dashboard enrolledBatches:',
+                data?.enrolledBatches?.length,
+                data?.enrolledBatches?.map((b: any) => b.name)
+            );
 
             setDashboardData(data);
 
@@ -154,9 +154,9 @@ export const useStudentDashboard = () => {
     };
 
     useEffect(() => {
-        if (authLoading) return;
+        if (authLoading || roleLoading) return;
 
-        if (!user?.id) {
+        if (!effectiveUserId) {
             setLoading(false);
             return;
         }
@@ -165,8 +165,8 @@ export const useStudentDashboard = () => {
         const params = new URLSearchParams(location.search);
         const batchIdFromUrl = params.get('batchId');
 
-        fetchDashboardData(user.id, batchIdFromUrl || undefined);
-    }, [user?.id, authLoading, location.search]);
+        fetchDashboardData(effectiveUserId, batchIdFromUrl || undefined);
+    }, [effectiveUserId, databaseUserId, authUserId, authLoading, roleLoading, location.search]);
 
     // Get current roadmap data (derived from batch)
     const getCurrentRoadmap = () => {
@@ -199,10 +199,10 @@ export const useStudentDashboard = () => {
     };
 
     const markNoticeAsRead = async (noticeId: string) => {
-        if (!user?.id) return;
+        if (!effectiveUserId) return;
 
         try {
-            await DatabaseService.markNoticeAsRead(noticeId, user.id);
+            await DatabaseService.markNoticeAsRead(noticeId, effectiveUserId);
             // Optimistic update or refetch could happen here
         } catch (error) {
             console.error('Error marking notice as read:', error);
