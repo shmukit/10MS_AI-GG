@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext, ReactNode } from 'react'
 import { useAuth } from './useAuth'
 
 interface AuthContextType {
@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean
   error: any
   userRole: string | null
+  accessibleRoles: ('student' | 'mentor' | 'admin')[]
   roleLoading: boolean
   databaseUserId: string | null
   signIn: (email: string, password: string) => Promise<any>

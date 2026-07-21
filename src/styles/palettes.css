@@ -1,10 +1,8 @@
-/* Neutral palette previews — set via html[data-palette="..."]
-   Light canvases use enough contrast vs white cards to be visibly different. */
+/* Production palette — warm stone (light) / zinc noir (dark) */
 
-/* ── Default: Warm Stone / Zinc Noir ── */
 :root,
 html[data-palette="warm-stone"] {
-  --background:             #F5F5F4;
+  --background:             #F4F4F2;
   --foreground:             #111827;
   --card:                   #FFFFFF;
   --card-foreground:        #111827;
@@ -13,152 +11,113 @@ html[data-palette="warm-stone"] {
   --secondary:              #E7E5E4;
   --secondary-foreground:   #111827;
   --muted:                  #E7E5E4;
-  --muted-foreground:       #78716C;
-  --border:                 #D6D3D1;
-  --input:                  #D6D3D1;
-  --progress-track:         #C4C0BA;
+  --muted-foreground:       #6B6560;
+  --border:                 #D4D0CC;
+  --input:                  #D4D0CC;
+  --progress-track:         #B8B3AD;
+  --locked-scrim:           rgba(9, 9, 11, 0.70);
+  --locked-foreground:      #FAFAFA;
+  --success:                #1CAB55;
+  --success-subtle:         #EAFEF2;
+  --warning:                #B45309;
+  --warning-subtle:         #FFFBEB;
+  --info:                   #374151;
+  --info-subtle:            #F3F4F6;
+  --overlay:                rgba(0, 0, 0, 0.50);
 }
 
 html.dark[data-palette="warm-stone"],
 html.dark:not([data-palette]) {
-  --c-surface:              #18181B;
+  --c-surface:              #161618;
   --c-surface-subtle:       #27272A;
-  --c-outline:              #3F3F46;
+  --c-outline:              #3A3A40;
   --c-text:                 #FAFAFA;
-  --c-text-2:               #A1A1AA;
+  --c-text-2:               #A8A8B0;
   --c-text-3:               #71717A;
   --c-text-dis:             #52525B;
   --background:             #09090B;
   --foreground:             #FAFAFA;
-  --card:                   #18181B;
+  --card:                   #161618;
   --card-foreground:        #FAFAFA;
-  --popover:                #18181B;
+  --popover:                #161618;
   --popover-foreground:     #FAFAFA;
   --secondary:              #27272A;
-  --secondary-foreground:   #A1A1AA;
+  --secondary-foreground:   #A8A8B0;
   --muted:                  #27272A;
-  --muted-foreground:       #A1A1AA;
-  --border:                 #3F3F46;
-  --input:                  #3F3F46;
+  --muted-foreground:       #A8A8B0;
+  --border:                 #3A3A40;
+  --input:                  #3A3A40;
   --progress-track:         #52525B;
+  --locked-scrim:           rgba(9, 9, 11, 0.85);
+  --locked-foreground:      #E4E4E7;
+  --success:                #1CAB55;
+  --success-subtle:         #142019;
+  --warning:                #F59E0B;
+  --warning-subtle:         #1C1408;
+  --info:                   #94A3B8;
+  --info-subtle:            rgba(30, 41, 59, 0.4);
+  --overlay:                rgba(0, 0, 0, 0.60);
 }
 
-/* ── Charcoal + Ivory ── */
+/* Style Lab preview palettes (not production default) */
 html[data-palette="charcoal-ivory"] {
-  --background:             #EEEDE8;
-  --foreground:             #111111;
-  --card:                   #FFFFFF;
-  --card-foreground:        #111111;
-  --popover:                #FFFFFF;
-  --popover-foreground:     #111111;
-  --secondary:              #E5E4DF;
-  --secondary-foreground:   #111111;
-  --muted:                  #E5E4DF;
-  --muted-foreground:       #6B6B66;
-  --border:                 #D8D6CE;
-  --input:                  #D8D6CE;
-  --progress-track:         #C8C6BE;
+  --background: #EEEDE8;
+  --foreground: #111111;
+  --card: #FFFFFF;
+  --card-foreground: #111111;
+  --border: #D8D6CE;
+  --muted: #E5E4DF;
+  --muted-foreground: #6B6B66;
+  --progress-track: #C8C6BE;
 }
 
 html.dark[data-palette="charcoal-ivory"] {
-  --c-surface:              #1A1A1A;
-  --c-surface-subtle:       #262626;
-  --c-outline:              #333333;
-  --c-text:                 #FAFAF8;
-  --c-text-2:               #A3A3A3;
-  --c-text-3:               #737373;
-  --c-text-dis:             #525252;
-  --background:             #111111;
-  --foreground:             #FAFAF8;
-  --card:                   #1A1A1A;
-  --card-foreground:        #FAFAF8;
-  --popover:                #1A1A1A;
-  --popover-foreground:     #FAFAF8;
-  --secondary:              #262626;
-  --secondary-foreground:   #A3A3A3;
-  --muted:                  #262626;
-  --muted-foreground:       #A3A3A3;
-  --border:                 #333333;
-  --input:                  #333333;
-  --progress-track:         #4A4A4A;
+  --background: #111111;
+  --foreground: #FAFAF8;
+  --card: #1A1A1A;
+  --card-foreground: #FAFAF8;
+  --border: #333333;
+  --muted: #262626;
+  --muted-foreground: #A3A3A3;
+  --progress-track: #4A4A4A;
 }
 
-/* ── Cool Slate ── */
 html[data-palette="cool-slate"] {
-  --background:             #E2E8F0;
-  --foreground:             #0F172A;
-  --card:                   #FFFFFF;
-  --card-foreground:        #0F172A;
-  --popover:                #FFFFFF;
-  --popover-foreground:     #0F172A;
-  --secondary:              #CBD5E1;
-  --secondary-foreground:   #0F172A;
-  --muted:                  #CBD5E1;
-  --muted-foreground:       #64748B;
-  --border:                 #CBD5E1;
-  --input:                  #CBD5E1;
-  --progress-track:         #94A3B8;
+  --background: #E2E8F0;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --border: #CBD5E1;
+  --muted: #CBD5E1;
+  --muted-foreground: #64748B;
+  --progress-track: #94A3B8;
 }
 
 html.dark[data-palette="cool-slate"] {
-  --c-surface:              #1E293B;
-  --c-surface-subtle:       #334155;
-  --c-outline:              #475569;
-  --c-text:                 #F8FAFC;
-  --c-text-2:               #94A3B8;
-  --c-text-3:               #64748B;
-  --c-text-dis:             #475569;
-  --background:             #0F172A;
-  --foreground:             #F8FAFC;
-  --card:                   #1E293B;
-  --card-foreground:        #F8FAFC;
-  --popover:                #1E293B;
-  --popover-foreground:     #F8FAFC;
-  --secondary:              #334155;
-  --secondary-foreground:   #94A3B8;
-  --muted:                  #334155;
-  --muted-foreground:       #94A3B8;
-  --border:                 #475569;
-  --input:                  #475569;
-  --progress-track:         #475569;
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  --card: #1E293B;
+  --border: #475569;
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+  --progress-track: #475569;
 }
 
-/* ── Paper White ── */
 html[data-palette="paper-white"] {
-  --background:             #F5F0E8;
-  --foreground:             #1C1917;
-  --card:                   #FFFBF7;
-  --card-foreground:        #1C1917;
-  --popover:                #FFFBF7;
-  --popover-foreground:     #1C1917;
-  --secondary:              #EDE8E0;
-  --secondary-foreground:   #1C1917;
-  --muted:                  #EDE8E0;
-  --muted-foreground:       #78716C;
-  --border:                 #E0D8CC;
-  --input:                  #E0D8CC;
-  --progress-track:         #C9BFB0;
+  --background: #F5F0E8;
+  --foreground: #1C1917;
+  --card: #FFFBF7;
+  --border: #E0D8CC;
+  --muted: #EDE8E0;
+  --muted-foreground: #78716C;
+  --progress-track: #C9BFB0;
 }
 
 html.dark[data-palette="paper-white"] {
-  --c-surface:              #1C1917;
-  --c-surface-subtle:       #292524;
-  --c-outline:              #44403C;
-  --c-text:                 #FAFAF9;
-  --c-text-2:               #A8A29E;
-  --c-text-3:               #78716C;
-  --c-text-dis:             #57534E;
-  --background:             #111111;
-  --foreground:             #FAFAF9;
-  --card:                   #1C1917;
-  --card-foreground:        #FAFAF9;
-  --popover:                #1C1917;
-  --popover-foreground:     #FAFAF9;
-  --secondary:              #292524;
-  --secondary-foreground:   #A8A29E;
-  --muted:                  #292524;
-  --muted-foreground:       #A8A29E;
-  --border:                 #44403C;
-  --input:                  #44403C;
-  --progress-track:         #57534E;
+  --background: #111111;
+  --foreground: #FAFAF9;
+  --card: #1C1917;
+  --border: #44403C;
+  --muted: #292524;
+  --muted-foreground: #A8A29E;
+  --progress-track: #57534E;
 }

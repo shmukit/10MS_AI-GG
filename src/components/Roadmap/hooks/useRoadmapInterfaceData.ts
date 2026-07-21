@@ -11,7 +11,7 @@ import { fetchStudentProgress, fetchWeekCompletionStats } from './roadmapInterfa
 import { EMPTY_RESOURCES, type RoadmapView } from './types';
 
 interface UseRoadmapInterfaceDataParams {
-  databaseUserId: string | undefined;
+  databaseUserId: string | null;
   roadmapSlug: string | undefined;
   searchParams: URLSearchParams;
   user: User | null;

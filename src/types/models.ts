@@ -14,6 +14,25 @@ export interface User {
     mentor_profiles?: MentorProfile[];
 }
 
+export interface BatchStudentProfile {
+    institute: string;
+    year: string;
+    subject: string;
+    degree: string;
+    enrollment_date: string;
+}
+
+export interface BatchStudentProgress {
+    completed_weeks: number;
+    progress_percentage: number;
+    current_week: number;
+}
+
+export type BatchStudent = User & {
+    profile?: BatchStudentProfile | null;
+    progress: BatchStudentProgress;
+};
+
 export interface StudentProfile {
     id: string;
     user_id: string;
@@ -72,6 +91,15 @@ export interface Roadmap {
     created_at: string;
     updated_at: string;
 }
+
+/** Cohort switcher entry; full batch when joined, partial when batch row is missing. */
+export type EnrolledBatch = Partial<Batch> & {
+    id: string;
+    name: string;
+    roadmap: Roadmap | null;
+    assignmentStatus?: string | null;
+    enrollment_date?: string | null;
+};
 
 export interface RoadmapWeek {
     id: string;

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DatabaseService } from '../../../services/database';
 import { Lock } from 'lucide-react';
+import { useToast } from '../../ui/ToastProvider';
 
 interface TasksSectionProps {
     isDarkMode: boolean;
@@ -20,6 +21,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
     currentLevel = 1
 }) => {
     const navigate = useNavigate();
+    const { info } = useToast();
 
     const handleTaskClick = (weekNumber: number) => {
         if (weekNumber > currentLevel) {
@@ -35,7 +37,7 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
             navigate(`/student/roadmap/${roadmapSlug}?week=${weekNumber || 1}`);
         } else {
             console.warn('No roadmaps available for navigation');
-            alert('No roadmaps available. Please contact your administrator.');
+            info('No roadmaps available. Please contact your administrator.');
         }
     };
 
@@ -45,10 +47,10 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
             <div className="rounded-xl border border-border bg-card p-4 md:p-6 transition-all duration-200 hover:shadow-md">
                 <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
                     <h3 className="text-base md:text-lg font-bold transition-colors duration-200 text-foreground">
-                        Current Level Tasks (Week {currentLevel})
+                        This week&apos;s tasks
                     </h3>
                     <span className="text-[10px] md:text-xs px-2 py-0.5 md:py-1 rounded-full border bg-primary/10 text-primary border-primary/20">
-                        Active
+                        Week {currentLevel}
                     </span>
                 </div>
 
@@ -119,18 +121,16 @@ export const TasksSection: React.FC<TasksSectionProps> = ({
                                         }`}>
 
                                     {isLocked && (
-                                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/10 backdrop-blur-[1px] rounded-lg group">
-                                            <div className="bg-foreground/80 text-background text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
-                                                <Lock className="w-3 h-3" />
-                                                <span>Complete Week {task.week_number - 1} first</span>
-                                            </div>
+                                        <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <Lock className="w-3 h-3 shrink-0" />
+                                            <span>Complete Week {task.week_number - 1} first</span>
                                         </div>
                                     )}
 
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
                                             {isLocked ? <Lock className="w-4 h-4 text-muted-foreground" /> : <span className="text-sm">📝</span>}
-                                            <h4 className={`font-medium transition-colors duration-200 text-foreground ${isLocked ? 'blur-[1px]' : ''}`}>
+                                            <h4 className={`font-medium transition-colors duration-200 text-foreground ${isLocked ? 'opacity-50' : ''}`}>
                                                 {task.task_name}
                                             </h4>
                                         </div>

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AlertCircle, Check, X } from 'lucide-react';
+import { AlertCircle, Check, Info, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface ToastProps {
@@ -23,14 +23,15 @@ export const Toast: React.FC<ToastProps> = ({
     return () => window.clearTimeout(timer);
   }, [onDismiss, duration]);
 
-  const Icon = type === 'success' ? Check : type === 'error' ? AlertCircle : AlertCircle;
+  const Icon = type === 'success' ? Check : type === 'error' ? AlertCircle : Info;
+  const liveRole = type === 'error' ? 'alert' : 'status';
 
   return (
     <div
-      role="status"
-      aria-live="polite"
+      role={liveRole}
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
       className={cn(
-        'fixed z-[110] flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg',
+        'fixed z-[110] flex items-start gap-3 rounded-xl border px-4 py-3 shadow-modal',
         'bottom-20 left-4 right-4 md:bottom-6 md:left-auto md:right-6 md:max-w-sm',
         'bg-card text-card-foreground border-border',
         type === 'success' && 'border-primary/30 bg-accent text-accent-foreground',

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map, Users } from 'lucide-react';
 import { DatabaseService } from '../../../services/database';
+import { useToast } from '../../ui/ToastProvider';
 
 interface NavigationCardsProps {
     isDarkMode: boolean;
@@ -16,6 +17,7 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
     batch
 }) => {
     const navigate = useNavigate();
+    const { info } = useToast();
 
     return (
         <div className="hidden md:grid grid-cols-2 gap-4">
@@ -30,7 +32,7 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
                         navigate(`/student/roadmap/${roadmapSlug}`);
                     } else {
                         console.warn('No roadmaps available for navigation');
-                        alert('No roadmaps available. Please contact your administrator.');
+                        info('No roadmaps available. Please contact your administrator.');
                     }
                 }}
                 className="rounded-xl border border-border bg-card p-4 text-center transition-all duration-200 group cursor-pointer hover:shadow-lg transform hover:scale-[1.02] hover:bg-accent"
@@ -55,7 +57,7 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
                         navigate(`/student/community/${batchSlug}`);
                     } else {
                         console.warn('No roadmaps or batches available for navigation');
-                        alert('No roadmaps available. Please contact your administrator.');
+                        info('No roadmaps available. Please contact your administrator.');
                     }
                 }}
                 className="rounded-xl border border-border bg-card p-4 text-center transition-all duration-200 group hover:shadow-lg transform hover:scale-[1.02] hover:bg-accent"

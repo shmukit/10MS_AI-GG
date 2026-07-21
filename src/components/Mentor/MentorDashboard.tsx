@@ -29,7 +29,7 @@ function readStoredTab(): MentorTab {
 }
 
 export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [activeTab, setActiveTab] = useState<MentorTab>(readStoredTab);
   const hasLoadedRef = useRef(false);
 
@@ -195,7 +195,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
       const { data: noticesData, error: noticesError } = await supabase
         .from('notices')
         .select('*')
-        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
       if (noticesError) {
@@ -332,22 +331,24 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
       <MentorHeader
         userName={user?.user_metadata?.first_name || 'Mentor'}
-        userRole="mentor"
+        userRole={userRole || 'mentor'}
         pageTitle="Mentor Dashboard"
       />
 
       <div className="border-b border-border h-16 bg-card">
         <div className="max-w-6xl mx-auto px-6 h-full overflow-x-auto custom-scrollbar">
-          <div className="flex space-x-8 h-full items-center min-w-max">
+          <div className="flex space-x-8 h-full items-center min-w-max" role="tablist" aria-label="Mentor dashboard sections">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
               { id: 'students', label: 'Batch & Students', icon: Users },
               { id: 'practice', label: 'Practice Decks', icon: Layers },
-              { id: 'notice', label: 'Notice', icon: Bell }
+              { id: 'notice', label: 'Notices', icon: Bell }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
+                role="tab"
+                aria-selected={activeTab === id}
                 onClick={() => setActiveTab(id as MentorTab)}
                 className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${activeTab === id
                   ? 'border-primary text-primary'
@@ -401,6 +402,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
               batches={batches}
               students={students}
               selectedBatch={selectedBatch}
+              onManageBatch={() => setActiveTab('students')}
             />
           </div>
           <div className={activeTab !== 'roadmap' ? 'hidden' : undefined} aria-hidden={activeTab !== 'roadmap'}>

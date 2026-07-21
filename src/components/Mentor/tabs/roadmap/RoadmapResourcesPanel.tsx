@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, Presentation, GitBranch } from 'lucide-react';
+import { Plus, Trash2, Presentation, GitBranch, ChevronDown } from 'lucide-react';
 import { DatabaseService } from '../../../../services/database';
 import type { RoadmapDecisionTree, RoadmapSlideDeck } from '../../../../types/models';
 import { DECISION_TREE_KEYS } from '../../../../data/decisionTreeRegistry';
@@ -15,6 +15,7 @@ export const RoadmapResourcesPanel: React.FC<RoadmapResourcesPanelProps> = ({ ro
   const [slideDecks, setSlideDecks] = useState<RoadmapSlideDeck[]>([]);
   const [decisionTrees, setDecisionTrees] = useState<RoadmapDecisionTree[]>([]);
   const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const loadResources = async () => {
     if (!roadmapId) return;
@@ -64,13 +65,27 @@ export const RoadmapResourcesPanel: React.FC<RoadmapResourcesPanelProps> = ({ ro
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-foreground">Resource library</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Attach slide decks and decision trees here. Enable per cohort in Batch settings.
-        </p>
-      </div>
+      <button
+        type="button"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+        className="flex w-full items-start justify-between gap-4 text-left"
+      >
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">Resource library</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Attach slide decks and decision trees here. Enable per cohort in Batch settings.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+          <ChevronDown
+            className={`w-5 h-5 transition-transform duration-200 ${collapsed ? '-rotate-90' : ''}`}
+          />
+        </span>
+      </button>
 
+      {collapsed ? null : (
+        <>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="font-medium text-foreground flex items-center gap-2">
@@ -233,6 +248,8 @@ export const RoadmapResourcesPanel: React.FC<RoadmapResourcesPanelProps> = ({ ro
           ))
         )}
       </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, GitBranch, Map, Presentation, ChevronDown } from 'lucide-react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../lib/useAuth';
 import {
@@ -12,7 +11,7 @@ import {
 } from '../../services/database';
 import { supabase } from '../../lib/supabase';
 import { RoadmapCanvas } from './RoadmapCanvas';
-import { ProgressBar } from './ProgressBar';
+import { RoadmapSubheader } from './RoadmapSubheader';
 import { generateRoadmapData } from '../../data/roadmapData';
 import { getNodeUnitLabel } from '../../utils/roadmapNodeUtils';
 import { StudentHeader } from '../Student/StudentHeader';
@@ -21,7 +20,6 @@ import { useNavigate } from 'react-router-dom';
 import { posthog } from '../../lib/posthog';
 import { AgenticDecisionTree } from '../Playbooks/AgenticDecisionTree';
 import { RoadmapSlidesModal } from './RoadmapSlidesModal';
-import { Breadcrumbs } from '../ui/Breadcrumbs';
 
 type RoadmapView = 'sessions' | 'decision-tree';
 
@@ -159,7 +157,9 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
         const [userDataQuery, batchQuery, enrolledQuery, progressQuery] = await Promise.all([
           DatabaseService.getUserById(databaseUserId),
           DatabaseService.getStudentBatch(databaseUserId),
-          DatabaseService.getEnrolledBatches(databaseUserId),
+          DatabaseService.getEnrolledBatches(databaseUserId, {
+            alternateUserIds: [user?.id],
+          }),
           supabase.from('student_progress').select('*').eq('student_id', databaseUserId),
         ]);
 
@@ -337,7 +337,6 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
     <div className="h-screen flex flex-col bg-background">
       <StudentHeader
         userName={userName}
-        userRole="student"
         pageTitle="Roadmap"
         actions={
           enrolledBatches.length > 1 && (
@@ -353,39 +352,20 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
         }
       />
 
-      <div className="border-b border-border min-h-12 md:min-h-16 bg-card">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 md:py-4">
-          <Breadcrumbs
-            className="mb-2 md:mb-3"
-            items={[
-              { label: 'Dashboard', href: '/student/dashboard' },
-              { label: 'Roadmap' },
-              { label: batchName },
-            ]}
-          />
-          <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="font-medium text-xs md:text-base">Back to Dashboard</span>
-            </button>
-
-            {enabledSlides.length > 0 && (
-              <button
-                type="button"
-                onClick={openSlides}
-                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-primary text-primary-foreground text-xs md:text-sm font-medium hover:bg-primary/90"
-              >
-                <Presentation className="w-4 h-4" />
-                View Slides
-                {enabledSlides.length > 1 && <ChevronDown className="w-4 h-4" />}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <RoadmapSubheader
+        batchName={batchName}
+        nodeUnitLabel={nodeUnitLabel}
+        completedNodes={completedNodes}
+        totalNodes={nodesWithStats.length}
+        activeView={activeView}
+        showDecisionTree={showDecisionTree}
+        enabledTrees={enabledTrees}
+        selectedTreeKey={selectedTreeKey}
+        enabledSlides={enabledSlides}
+        onBack={onBack}
+        onOpenSlides={openSlides}
+        onViewChange={handleViewChange}
+      />
 
       {showSlidePicker && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -426,56 +406,6 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
           slidesUrl={selectedSlideDeck.slides_url}
           roadmapTitle={selectedSlideDeck.title || roadmap.title}
         />
-      )}
-
-      <ProgressBar completed={completedNodes} total={nodesWithStats.length} />
-
-      {showDecisionTree && (
-        <div className="border-b border-border bg-card">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="flex flex-wrap gap-1 py-2">
-              <button
-                onClick={() => handleViewChange('sessions')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeView === 'sessions'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                }`}
-              >
-                <Map className="w-4 h-4" />
-                {nodeUnitLabel}s
-              </button>
-              {enabledTrees.length === 1 ? (
-                <button
-                  onClick={() => handleViewChange('decision-tree', enabledTrees[0].tree_key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeView === 'decision-tree'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  }`}
-                >
-                  <GitBranch className="w-4 h-4" />
-                  {enabledTrees[0].title}
-                </button>
-              ) : (
-                enabledTrees.map((tree) => (
-                  <button
-                    key={tree.id}
-                    onClick={() => handleViewChange('decision-tree', tree.tree_key)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      activeView === 'decision-tree' && selectedTreeKey === tree.tree_key
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                    }`}
-                  >
-                    <GitBranch className="w-4 h-4" />
-                    {tree.title}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
       )}
 
       <div className="flex-1 relative overflow-y-auto">

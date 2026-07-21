@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Zap, Clock, Users, Loader2, Check } from 'lucide-react';
+import { Lock, Zap, Clock, Users, Check } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
 export type NodeStatus = 'locked' | 'active' | 'completed';
@@ -98,7 +98,10 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, nodeUni
         </div>
         {node.status === 'active' && (
           <Badge variant="default" className="shrink-0">
-            <Loader2 className="w-3 h-3 animate-spin" aria-hidden />
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-foreground opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-foreground" />
+            </span>
             In progress
           </Badge>
         )}
@@ -177,10 +180,7 @@ export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, nodeUni
             <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-muted text-foreground">
               <Lock className="w-6 h-6" aria-hidden />
             </div>
-            <p
-              className="text-body font-semibold max-w-[200px] mx-auto leading-snug"
-              style={{ color: 'var(--locked-foreground)' }}
-            >
+            <p className="text-body font-semibold max-w-[200px] mx-auto leading-snug text-[var(--locked-foreground)] drop-shadow-sm">
               Complete {prevLabel} to unlock
             </p>
           </div>

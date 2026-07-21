@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabase';
-import { Batch } from '../../../types/models';
+import { Batch, EnrolledBatch } from '../../../types/models';
 import { createDefaultStudentProfile } from '../studentService';
 
 export const getStudentBatch = async (userId: string): Promise<Batch | null> => {
@@ -220,21 +220,26 @@ export const getAnyActiveBatchForRoadmap = async (roadmapIdentifier: string): Pr
     }
 };
 
-export const getEnrolledBatches = async (userId: string): Promise<(Batch & { roadmap: any })[]> => {
+export const getEnrolledBatches = async (
+    userId: string,
+    options?: { alternateUserIds?: (string | null | undefined)[] }
+): Promise<EnrolledBatch[]> => {
     try {
-        console.log('Fetching enrolled batches for user:', userId);
+        const candidateIds = Array.from(
+            new Set(
+                [userId, ...(options?.alternateUserIds || [])]
+                    .filter((id): id is string => typeof id === 'string' && id.length > 0)
+            )
+        );
 
+        console.log('Fetching enrolled batches for user id(s):', candidateIds);
+
+        // Two-step fetch: nested !inner joins silently drop enrollments when a
+        // roadmap/batch row is missing. Assignments alone are the source of truth.
         const { data: assignments, error: assignmentError } = await supabase
             .from('student_batch_assignments')
-            .select(`
-                batch_id,
-                batches!inner (
-                    *,
-                    roadmaps!inner (*)
-                )
-            `)
-            .eq('student_id', userId)
-            .eq('status', 'active')
+            .select('batch_id, status, enrollment_date, student_id')
+            .in('student_id', candidateIds)
             .order('enrollment_date', { ascending: false });
 
         if (assignmentError) {
@@ -243,26 +248,69 @@ export const getEnrolledBatches = async (userId: string): Promise<(Batch & { roa
         }
 
         if (!assignments || assignments.length === 0) {
+            console.log('⚠️ No student_batch_assignments rows for', candidateIds);
             return [];
         }
 
-        // Transform results
-        const result = assignments.map((a: any) => {
-            const batch = a.batches;
-            const roadmap = batch?.roadmaps;
-            // Remove roadmap from batch object to match Batch type if needed, 
-            // but here we keep it as an explicit property
-            const batchData = { ...batch };
-            delete batchData.roadmaps;
-            return {
+        const batchIds = Array.from(
+            new Set(assignments.map((a: any) => a.batch_id).filter(Boolean))
+        );
+
+        let batchById = new Map<string, any>();
+        if (batchIds.length > 0) {
+            const { data: batches, error: batchError } = await supabase
+                .from('batches')
+                .select('*, roadmaps(*)')
+                .in('id', batchIds);
+
+            if (batchError) {
+                console.error('Error fetching batches for enrollments:', batchError);
+            } else {
+                for (const b of batches || []) {
+                    batchById.set((b as any).id, b);
+                }
+            }
+        }
+
+        const result: EnrolledBatch[] = [];
+        const seen = new Set<string>();
+
+        for (const a of assignments as any[]) {
+            const batchId = a.batch_id as string;
+            if (!batchId || seen.has(batchId)) continue;
+            seen.add(batchId);
+
+            const batch = batchById.get(batchId);
+            if (!batch) {
+                result.push({
+                    id: batchId,
+                    name: 'Previous cohort',
+                    roadmap: null,
+                    assignmentStatus: a.status,
+                    enrollment_date: a.enrollment_date,
+                });
+                continue;
+            }
+
+            // PostgREST may return roadmaps as object or single-element array
+            const rawRoadmap = (batch as any).roadmaps;
+            const roadmap = Array.isArray(rawRoadmap) ? rawRoadmap[0] ?? null : rawRoadmap ?? null;
+            const { roadmaps: _r, ...batchData } = batch as any;
+            result.push({
                 ...batchData,
-                roadmap: roadmap
-            };
+                roadmap,
+                assignmentStatus: a.status,
+            });
+        }
+
+        result.sort((a: any, b: any) => {
+            const aActive = a.assignmentStatus === 'active' ? 0 : 1;
+            const bActive = b.assignmentStatus === 'active' ? 0 : 1;
+            return aActive - bActive;
         });
 
-        console.log(`✅ Found ${result.length} enrolled batches`);
+        console.log(`✅ Found ${result.length} enrolled batches (from ${assignments.length} assignment rows)`);
         return result;
-
     } catch (error) {
         console.error('Error in getEnrolledBatches:', error);
         return [];

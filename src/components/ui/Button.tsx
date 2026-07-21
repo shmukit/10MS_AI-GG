@@ -25,12 +25,12 @@ interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 const VARIANTS: Record<string, string> = {
   default:
     'bg-primary text-primary-foreground border-transparent ' +
-    'hover:bg-[#17994B] ' +
+    'hover:bg-primary/90 ' +
     'disabled:bg-muted disabled:text-muted-foreground',
 
   cta:
-    'bg-[#37C25C] text-white border-transparent ' +
-    'hover:bg-primary ' +
+    'bg-primary text-primary-foreground border-transparent ' +
+    'hover:bg-primary/90 ' +
     'disabled:bg-muted disabled:text-muted-foreground',
 
   secondary:
@@ -39,9 +39,8 @@ const VARIANTS: Record<string, string> = {
     'disabled:bg-muted disabled:text-muted-foreground disabled:border-transparent',
 
   outline:
-    'bg-transparent text-[#149353] border border-[#149353] ' +
+    'bg-transparent text-primary border border-primary ' +
     'hover:bg-accent ' +
-    'dark:text-[#37C25C] dark:border-[#37C25C] dark:hover:bg-accent ' +
     'disabled:text-muted-foreground disabled:border-border',
 
   ghost:
@@ -50,14 +49,13 @@ const VARIANTS: Record<string, string> = {
     'disabled:text-muted-foreground disabled:border-border',
 
   link:
-    'bg-transparent text-[#149353] border-transparent underline-offset-4 ' +
+    'bg-transparent text-primary border-transparent underline-offset-4 ' +
     'hover:underline ' +
-    'dark:text-[#37C25C] ' +
     'disabled:text-muted-foreground',
 
   destructive:
     'bg-destructive text-destructive-foreground border-transparent ' +
-    'hover:bg-[#B91C1C] ' +
+    'hover:bg-destructive/90 ' +
     'disabled:bg-muted disabled:text-muted-foreground',
 };
 

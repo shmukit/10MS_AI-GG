@@ -91,13 +91,31 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
     }
 };
 
+const USER_SELF_UPDATE_FIELDS = [
+    'first_name',
+    'last_name',
+    'profile_picture_url',
+    'phone',
+] as const satisfies readonly (keyof User)[];
+
 export const updateUser = async (userId: string, updates: Partial<User>): Promise<boolean> => {
     try {
-        console.log('Updating user data for user:', userId, 'Updates:', updates);
+        const safeUpdates = Object.fromEntries(
+            Object.entries(updates).filter(([key]) =>
+                USER_SELF_UPDATE_FIELDS.includes(key as (typeof USER_SELF_UPDATE_FIELDS)[number])
+            )
+        ) as Partial<User>;
+
+        console.log('Updating user data for user:', userId, 'Updates:', safeUpdates);
+
+        if (Object.keys(safeUpdates).length === 0) {
+            console.warn('updateUser called with no permitted fields');
+            return true;
+        }
 
         const { error } = await supabase
             .from('users')
-            .update(updates as unknown as never)
+            .update(safeUpdates as unknown as never)
             .eq('id', userId);
 
         if (error) {

@@ -28,6 +28,7 @@ import * as SpacedRepetitionService from './db/spacedRepetitionService';
 import * as PracticeDeckService from './db/practiceDeckService';
 import * as GamificationService from './db/gamificationService';
 import * as RoadmapResourceService from './db/roadmapResourceService';
+import * as MarketingService from './db/marketingService';
 
 // Re-export types
 export type {

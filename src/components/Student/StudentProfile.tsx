@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X } from 'lucide-react';
+import { ArrowLeft, Edit3, Mail, MapPin, Calendar, BookOpen, GraduationCap, Save, X, Award } from 'lucide-react';
 import { useAuth } from '../../lib/useAuth';
 import { DatabaseService } from '../../services/database';
 import { supabase } from '../../lib/supabase';
 import { StudentHeader } from './StudentHeader';
 import { CertificateCard } from './Certificates/CertificateCard';
 import { posthog } from '../../lib/posthog';
+import { EmptyState } from '../ui/EmptyState';
+
+const displayValue = (value?: string | null) => (value?.trim() ? value.trim() : 'Not set');
+
+const formatDegreeLine = (degree?: string | null, subject?: string | null, year?: string | null) => {
+  const parts = [degree, subject].filter((part) => part?.trim());
+  if (parts.length === 0 && !year?.trim()) return 'Not set';
+  const degreeText = parts.length > 0 ? parts.join(' ') : 'Not set';
+  return year?.trim() ? `${degreeText} • ${year} Year` : degreeText;
+};
 
 const inputClass =
   'w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15';
@@ -151,16 +161,13 @@ export const StudentProfile: React.FC = () => {
       const userUpdates = {
         first_name: editForm.first_name,
         last_name: editForm.last_name,
-        email: user?.email || '' // Email is read-only, so we don't update it here
       };
 
-      // Update profile data
       const profileUpdates = {
         degree: editForm.degree,
         subject: editForm.subject,
         year: editForm.year,
         institute: editForm.institute,
-        enrollment_date: profileData?.profile?.enrollment_date || '' // Enrollment date is read-only, so we don't update it here
       };
 
       console.log('📝 Profile updates to save:', { userUpdates, profileUpdates });
@@ -245,11 +252,10 @@ export const StudentProfile: React.FC = () => {
           user?.email?.split('@')[0] ||
           'Student'
         }
-        userRole="student"
         pageTitle="Profile"
       />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20 md:pb-8">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/student/dashboard')}
@@ -262,7 +268,7 @@ export const StudentProfile: React.FC = () => {
           {/* Duplicate title removed */}
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-8">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 overflow-hidden">
           {/* Success/Error Messages */}
           {saveSuccess && (
             <div className="mb-6 p-4 bg-accent border border-border text-accent-foreground rounded-xl">
@@ -300,9 +306,9 @@ export const StudentProfile: React.FC = () => {
                   }
                 </h2>
                 <p className="text-sm md:text-lg text-muted-foreground">
-                  {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'CS'} • {profileData?.profile?.year || '3rd'} Year
+                  {formatDegreeLine(profileData?.profile?.degree, profileData?.profile?.subject, profileData?.profile?.year)}
                 </p>
-                <p className="text-xs md:text-base text-muted-foreground truncate">{profileData?.profile?.institute || 'University'}</p>
+                <p className="text-xs md:text-base text-muted-foreground truncate">{displayValue(profileData?.profile?.institute)}</p>
               </div>
             </div>
             {isEditing ? (
@@ -352,24 +358,24 @@ export const StudentProfile: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left Column */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <BookOpen className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Full Name</p>
                   {isEditing ? (
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
                         value={editForm.first_name}
                         onChange={(e) => handleInputChange('first_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15`}
+                        className={`${inputClass} min-w-0`}
                         placeholder="First Name"
                       />
                       <input
                         type="text"
                         value={editForm.last_name}
                         onChange={(e) => handleInputChange('last_name', e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15`}
+                        className={`${inputClass} min-w-0`}
                         placeholder="Last Name"
                       />
                     </div>
@@ -392,38 +398,38 @@ export const StudentProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <GraduationCap className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Degree</p>
                   {isEditing ? (
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
                         value={editForm.degree}
                         onChange={(e) => handleInputChange('degree', e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15`}
+                        className={`${inputClass} min-w-0`}
                         placeholder="Degree"
                       />
                       <input
                         type="text"
                         value={editForm.subject}
                         onChange={(e) => handleInputChange('subject', e.target.value)}
-                        className={`flex-1 px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15`}
+                        className={`${inputClass} min-w-0`}
                         placeholder="Subject"
                       />
                     </div>
                   ) : (
                     <p className="font-medium text-foreground">
-                      {profileData?.profile?.degree || 'BSc'} {profileData?.profile?.subject || 'Computer Science'}
+                      {[profileData?.profile?.degree, profileData?.profile?.subject].filter((part) => part?.trim()).join(' ') || 'Not set'}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <MapPin className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Academic Institute</p>
                   {isEditing ? (
                     <input
@@ -434,7 +440,7 @@ export const StudentProfile: React.FC = () => {
                       placeholder="Institute"
                     />
                   ) : (
-                    <p className="font-medium text-foreground">{profileData?.profile?.institute || 'University'}</p>
+                    <p className="font-medium text-foreground">{displayValue(profileData?.profile?.institute)}</p>
                   )}
                 </div>
               </div>
@@ -442,9 +448,9 @@ export const StudentProfile: React.FC = () => {
 
             {/* Right Column */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <Mail className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Email Address</p>
                   {isEditing ? (
                     <div className="relative">
@@ -465,9 +471,9 @@ export const StudentProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <Calendar className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Year of Study</p>
                   {isEditing ? (
                     <select
@@ -482,14 +488,16 @@ export const StudentProfile: React.FC = () => {
                       <option value="5th">5th Year</option>
                     </select>
                   ) : (
-                    <p className="font-medium text-foreground">{profileData?.profile?.year || '3rd'} Year</p>
+                    <p className="font-medium text-foreground">
+                      {profileData?.profile?.year ? `${profileData.profile.year} Year` : 'Not set'}
+                    </p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-muted-foreground" />
-                <div className="flex-1">
+              <div className="flex items-start gap-3 min-w-0">
+                <Calendar className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground">Enrollment Date</p>
                   {isEditing ? (
                     <div className="relative">
@@ -518,18 +526,24 @@ export const StudentProfile: React.FC = () => {
         </div>
 
         {/* Certificates Section */}
-        {certificates.length > 0 && (
-          <div className="mt-8 bg-card border border-border rounded-2xl p-8">
-            <h3 className="text-xl font-bold mb-6 text-foreground">
-              My Certificates & Achievements
-            </h3>
+        <div className="mt-8 bg-card border border-border rounded-2xl p-8">
+          <h3 className="text-xl font-bold mb-6 text-foreground">
+            My Certificates & Achievements
+          </h3>
+          {certificates.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {certificates.map(cert => (
                 <CertificateCard key={cert.id} certificate={cert} />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <EmptyState
+              icon={Award}
+              title="No certificates yet"
+              description="Certificates you earn will appear here."
+            />
+          )}
+        </div>
       </div>
     </div>
   );

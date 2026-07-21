@@ -1,16 +1,52 @@
 import React from 'react';
 import { Trophy } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface ProgressBarProps {
   completed: number;
   total: number;
+  variant?: 'full' | 'compact';
+  className?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({ completed, total }) => {
+export const ProgressBar: React.FC<ProgressBarProps> = ({
+  completed,
+  total,
+  variant = 'full',
+  className,
+}) => {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+  if (variant === 'compact') {
+    return (
+      <div className={cn('flex items-center gap-2 sm:gap-3', className)}>
+        <span className="shrink-0 text-xs font-medium text-muted-foreground whitespace-nowrap">
+          {completed}/{total} · {percentage}%
+        </span>
+        <div
+          className="progress-track h-1.5 flex-1 min-w-[72px] max-w-[140px] rounded-full sm:max-w-[160px]"
+          role="progressbar"
+          aria-valuenow={percentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`${completed} of ${total} sessions complete`}
+        >
+          <div
+            className="progress-fill h-1.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="sticky top-0 z-30 border-b border-border bg-card p-3 md:p-4 transition-colors duration-200">
+    <div
+      className={cn(
+        'border-b border-border bg-card p-3 md:p-4 transition-colors duration-200',
+        className
+      )}
+    >
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-1.5 md:mb-2">
           <div className="flex items-center gap-1.5 md:gap-2">

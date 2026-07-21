@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import { StudentProfile, User } from '../../types/models';
+import { StudentProfile, BatchStudent } from '../../types/models';
 
 // Clean up duplicate student profiles for a user
 export const cleanupDuplicateProfiles = async (userId: string): Promise<boolean> => {
@@ -155,13 +155,31 @@ export const getStudentProfile = async (userId: string): Promise<StudentProfile 
     }
 };
 
+const STUDENT_PROFILE_UPDATE_FIELDS = [
+    'degree',
+    'subject',
+    'year',
+    'institute',
+] as const satisfies readonly (keyof StudentProfile)[];
+
 export const updateStudentProfile = async (userId: string, updates: Partial<StudentProfile>): Promise<boolean> => {
     try {
-        console.log('Updating student profile for user:', userId, 'Updates:', updates);
+        const safeUpdates = Object.fromEntries(
+            Object.entries(updates).filter(([key]) =>
+                STUDENT_PROFILE_UPDATE_FIELDS.includes(key as (typeof STUDENT_PROFILE_UPDATE_FIELDS)[number])
+            )
+        ) as Partial<StudentProfile>;
+
+        console.log('Updating student profile for user:', userId, 'Updates:', safeUpdates);
+
+        if (Object.keys(safeUpdates).length === 0) {
+            console.warn('updateStudentProfile called with no permitted fields');
+            return true;
+        }
 
         const { error } = await supabase
             .from('student_profiles')
-            .update(updates as unknown as never)
+            .update(safeUpdates as unknown as never)
             .eq('user_id', userId);
 
         if (error) {
@@ -225,7 +243,7 @@ export const cleanupAllDuplicateProfiles = async (): Promise<boolean> => {
     }
 };
 
-export const getStudentsByBatch = async (batchId: string, currentUserId?: string, _roadmapId?: string): Promise<(User & { profile?: any })[]> => {
+export const getStudentsByBatch = async (batchId: string, currentUserId?: string, _roadmapId?: string): Promise<BatchStudent[]> => {
     try {
         console.log('🔍 getStudentsByBatch called for batch:', batchId);
 

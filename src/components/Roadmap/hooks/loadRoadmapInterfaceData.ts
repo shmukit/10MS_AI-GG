@@ -83,7 +83,9 @@ export async function loadRoadmapInterfaceData(params: {
   const [userDataQuery, batchQuery, enrolledQuery, progressQuery] = await Promise.all([
     DatabaseService.getUserById(databaseUserId),
     DatabaseService.getStudentBatch(databaseUserId),
-    DatabaseService.getEnrolledBatches(databaseUserId),
+    DatabaseService.getEnrolledBatches(databaseUserId, {
+      alternateUserIds: [user?.id],
+    }),
     supabase.from('student_progress').select('*').eq('student_id', databaseUserId),
   ]);
 
