@@ -79,14 +79,14 @@ export const MobileBottomNav: React.FC = () => {
                     if (data.roadmap) {
                         const slug = DatabaseService.generateRoadmapSlug(data.roadmap.title);
                         setRoadmapSlug(slug);
-                        navigate(`/student/roadmap/${slug}`);
+                        navigate(`/student/roadmap/${slug}?batch_id=${batchId}`);
                         return;
                     }
                 }
-                navigate(`/student/dashboard?batchId=${batchId}`);
+                navigate(`/student/dashboard?batch_id=${batchId}`);
             });
         } else {
-            navigate(`/student/dashboard?batchId=${batchId}`);
+            navigate(`/student/dashboard?batch_id=${batchId}`);
         }
     };
 
@@ -107,7 +107,8 @@ export const MobileBottomNav: React.FC = () => {
                     return;
                 }
                 if (roadmapSlug) {
-                    navigate(`/student/roadmap/${roadmapSlug}`);
+                    const batchQuery = currentBatch?.id ? `?batch_id=${currentBatch.id}` : '';
+                    navigate(`/student/roadmap/${roadmapSlug}${batchQuery}`);
                 } else if (!isLoadingData) {
                     navigate('/student/dashboard');
                 }

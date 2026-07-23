@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../lib';
 import { supabase } from '../../../lib/supabase';
 import { DatabaseService } from '../../../services/database';
@@ -7,6 +7,7 @@ import { DatabaseService } from '../../../services/database';
 export const useStudentDashboard = () => {
     const { user, loading: authLoading, databaseUserId, roleLoading } = useAuthContext();
     const location = useLocation();
+    const navigate = useNavigate();
     // Auth uid is what student_batch_assignments.student_id / RLS use.
     // public.users.id can diverge — pass both when fetching enrollments.
     const authUserId = user?.id || null;
@@ -35,26 +36,11 @@ export const useStudentDashboard = () => {
             'Student';
     };
 
-    // Close roadmap dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (showRoadmapDropdown) {
-                const target = event.target as Element;
-                if (!target.closest('.roadmap-dropdown-container')) {
-                    setShowRoadmapDropdown(false);
-                }
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showRoadmapDropdown]);
-
     // Handle batch selection change
     const handleBatchChange = (batchId: string) => {
         setSelectedBatchId(batchId);
         setShowRoadmapDropdown(false);
-        // Refresh dashboard data with new batch
+        navigate(`/student/dashboard?batch_id=${batchId}`, { replace: true });
         if (effectiveUserId) {
             fetchDashboardData(effectiveUserId, batchId);
         }
@@ -163,7 +149,7 @@ export const useStudentDashboard = () => {
 
         // Check for batchId in URL
         const params = new URLSearchParams(location.search);
-        const batchIdFromUrl = params.get('batchId');
+        const batchIdFromUrl = params.get('batch_id') || params.get('batchId');
 
         fetchDashboardData(effectiveUserId, batchIdFromUrl || undefined);
     }, [effectiveUserId, databaseUserId, authUserId, authLoading, roleLoading, location.search]);

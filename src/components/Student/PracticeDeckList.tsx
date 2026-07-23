@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { BookOpen, Book, Clock, Trophy, RotateCcw } from 'lucide-react';
 import { getAvailableDecks } from '../../services/db/practiceDeckService';
+import { getDueCards } from '../../services/db/spacedRepetitionService';
 import { Database } from '../../types/database.types';
 import { useAuthContext } from '../../lib';
 import { DeckPlayer } from './DeckPlayer';
@@ -21,37 +23,82 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
     const [dueCards, setDueCards] = useState<any[]>([]);
     const [isReviewMode, setIsReviewMode] = useState(false);
 
-    const loadDecks = async () => {
-        if (!user?.id) return;
+    const playerOpenRef = useRef(false);
+    playerOpenRef.current = Boolean(selectedDeck || isReviewMode);
+    const playerOpen = playerOpenRef.current;
 
-        setLoading(true);
+    const loadDecks = useCallback(async (options?: { silent?: boolean }) => {
+        if (!user?.id || !roadmapId) {
+            setDecks([]);
+            setDueCards([]);
+            setLoading(false);
+            return;
+        }
+
+        if (!options?.silent && !playerOpenRef.current) {
+            setLoading(true);
+        }
+
         try {
-            const availableDecks = await getAvailableDecks(user.id, roadmapId);
+            const [availableDecks, cards] = await Promise.all([
+                getAvailableDecks(user.id, roadmapId),
+                getDueCards(user.id, { roadmapId }),
+            ]);
             setDecks(availableDecks);
-
-            const { getDueCards } = await import('../../services/db/spacedRepetitionService');
-            const cards = await getDueCards(user.id);
             setDueCards(cards || []);
         } catch (e) {
             console.error('Error loading practice data:', e);
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id, roadmapId]);
 
     useEffect(() => {
         loadDecks();
-    }, [user, roadmapId]);
+    }, [loadDecks]);
 
     const handleDeckComplete = () => {
-        loadDecks();
+        loadDecks({ silent: true });
+    };
+
+    const handleClosePlayer = () => {
+        setSelectedDeck(null);
+        setIsReviewMode(false);
+        loadDecks({ silent: true });
     };
 
     const startReview = () => {
         setIsReviewMode(true);
     };
 
-    if (loading) {
+    const playerPortal =
+        playerOpen && typeof document !== 'undefined'
+            ? createPortal(
+                  <DeckPlayer
+                      deckId={selectedDeck?.id || 'review'}
+                      batchId={batchId}
+                      deckTitle={isReviewMode ? 'Daily Review' : (selectedDeck?.title || 'Practice Deck')}
+                      onClose={handleClosePlayer}
+                      onComplete={handleDeckComplete}
+                      initialCards={isReviewMode ? dueCards : undefined}
+                  />,
+                  document.body
+              )
+            : null;
+
+    if (!roadmapId) {
+        return (
+            <div className="text-center py-12 rounded-xl border border-border bg-card">
+                <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Select a cohort</h3>
+                <p className="text-sm text-muted-foreground">
+                    Choose your roadmap cohort to see practice materials.
+                </p>
+            </div>
+        );
+    }
+
+    if (loading && !playerOpen) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map(i => (
@@ -63,22 +110,24 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
 
     if (decks.length === 0 && dueCards.length === 0) {
         return (
-            <div className="text-center py-12 rounded-xl border border-border bg-card">
-                <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2 text-foreground">
-                    No practice decks yet
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                    Check back later for new practice materials.
-                </p>
-            </div>
+            <>
+                <div className="text-center py-12 rounded-xl border border-border bg-card">
+                    <Book className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">
+                        No practice decks yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                        Check back later for new practice materials for this roadmap.
+                    </p>
+                </div>
+                {playerPortal}
+            </>
         );
     }
 
     return (
         <>
             <div className="space-y-8">
-                {/* Due for Review Section */}
                 {dueCards.length > 0 && (
                     <div className="space-y-4">
                         <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -107,7 +156,6 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                     </div>
                 )}
 
-                {/* Available Decks */}
                 <div className="space-y-4">
                     {dueCards.length > 0 && (
                         <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -123,7 +171,6 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                 onClick={() => setSelectedDeck(deck)}
                                 className="group relative w-full text-left rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-hover hover:-translate-y-1 hover:border-primary/30 overflow-hidden"
                             >
-                                {/* Cover Image or Fallback */}
                                 <div className="h-40 md:h-48 w-full relative overflow-hidden">
                                     {deck.cover_image ? (
                                         <div className="relative h-full w-full">
@@ -140,7 +187,6 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                         </div>
                                     )}
 
-                                    {/* Hover — practice affordance, not video */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-background/50">
                                         <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground text-caption font-semibold">
                                             <BookOpen className="w-4 h-4" aria-hidden />
@@ -148,7 +194,6 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                         </div>
                                     </div>
 
-                                    {/* Category Tag */}
                                     <div className="absolute top-3 left-3">
                                         <span className="px-2 py-0.5 rounded-full text-overline font-semibold border bg-primary/10 text-primary border-primary/20">
                                             Practice
@@ -156,7 +201,6 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                                     </div>
                                 </div>
 
-                                {/* Content */}
                                 <div className="p-5 md:p-6">
                                     <h3 className="text-base md:text-lg font-bold mb-2 line-clamp-1 transition-colors text-foreground">
                                         {deck.title}
@@ -185,20 +229,7 @@ export const PracticeDeckList: React.FC<PracticeDeckListProps> = ({ batchId, roa
                 </div>
             </div>
 
-            {/* Deck Player Overlay */}
-            {(selectedDeck || isReviewMode) && (
-                <DeckPlayer
-                    deckId={selectedDeck?.id || 'review'}
-                    batchId={batchId}
-                    deckTitle={isReviewMode ? 'Daily Review' : (selectedDeck?.title || 'Practice Deck')}
-                    onClose={() => {
-                        setSelectedDeck(null);
-                        setIsReviewMode(false);
-                    }}
-                    onComplete={handleDeckComplete}
-                    initialCards={isReviewMode ? dueCards : undefined}
-                />
-            )}
+            {playerPortal}
         </>
     );
 };

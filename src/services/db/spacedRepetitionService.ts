@@ -1,4 +1,12 @@
 import { supabase } from '../../lib/supabase';
+import type { Database } from '../../types/database.types';
+
+type PracticeDeckIdRow = Pick<Database['public']['Tables']['practice_decks']['Row'], 'id'>;
+type PracticeCardIdRow = Pick<Database['public']['Tables']['practice_cards']['Row'], 'id'>;
+type PracticeCardRow = Database['public']['Tables']['practice_cards']['Row'];
+type MasteryWithCard = {
+    practice_cards: PracticeCardRow | PracticeCardRow[] | null;
+};
 
 // SM-2 Algorithm Constants
 const MIN_EASE_FACTOR = 1.3;
@@ -121,11 +129,51 @@ export const processCardReview = async (
     }
 };
 
-export const getDueCards = async (studentId: string, limit = 20) => {
+export interface GetDueCardsOptions {
+    roadmapId?: string;
+    limit?: number;
+}
+
+export const getDueCards = async (studentId: string, options?: GetDueCardsOptions) => {
     try {
+        const limit = options?.limit ?? 20;
+        const roadmapId = options?.roadmapId;
+        if (!roadmapId) {
+            return [];
+        }
+
+        const { data: deckRows, error: deckError } = await supabase
+            .from('practice_decks')
+            .select('id')
+            .eq('roadmap_id', roadmapId);
+
+        if (deckError) {
+            console.error('Error fetching practice decks for review:', deckError);
+            return [];
+        }
+
+        const deckIds = ((deckRows ?? []) as PracticeDeckIdRow[]).map((row) => row.id);
+        if (deckIds.length === 0) {
+            return [];
+        }
+
+        const { data: cardRows, error: cardError } = await supabase
+            .from('practice_cards')
+            .select('id')
+            .in('deck_id', deckIds);
+
+        if (cardError) {
+            console.error('Error fetching practice cards for review:', cardError);
+            return [];
+        }
+
+        const cardIds = ((cardRows ?? []) as PracticeCardIdRow[]).map((row) => row.id);
+        if (cardIds.length === 0) {
+            return [];
+        }
+
         const now = new Date().toISOString();
 
-        // Fetch cards where next_review_at <= now
         const { data, error } = await supabase
             .from('student_card_mastery')
             .select(`
@@ -136,6 +184,7 @@ export const getDueCards = async (studentId: string, limit = 20) => {
                 )
             `)
             .eq('student_id', studentId)
+            .in('card_id', cardIds)
             .lte('next_review_at', now)
             .limit(limit);
 
@@ -149,7 +198,12 @@ export const getDueCards = async (studentId: string, limit = 20) => {
             return [];
         }
 
-        return data.map((item: any) => item.practice_cards);
+        return ((data ?? []) as MasteryWithCard[])
+            .map((item) => {
+                const card = item.practice_cards;
+                return Array.isArray(card) ? card[0] : card;
+            })
+            .filter((card): card is PracticeCardRow => Boolean(card));
     } catch (error) {
         console.error('Error in getDueCards:', error);
         return [];

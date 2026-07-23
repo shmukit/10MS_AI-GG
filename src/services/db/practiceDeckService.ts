@@ -33,16 +33,17 @@ export const getMentorDecks = async (mentorId: string): Promise<PracticeDeck[]> 
 
 export const getAvailableDecks = async (userId: string, roadmapId?: string): Promise<PracticeDeck[]> => {
     try {
+        if (!roadmapId) {
+            return [];
+        }
+
         let query = supabase
             .from('practice_decks')
             .select('*');
 
         // Get public decks OR decks created by this user
         query = query.or(`is_public.eq.true,created_by.eq.${userId}`);
-
-        if (roadmapId) {
-            query = query.eq('roadmap_id', roadmapId);
-        }
+        query = query.eq('roadmap_id', roadmapId);
 
         const { data, error } = await query.order('created_at', { ascending: false });
 
