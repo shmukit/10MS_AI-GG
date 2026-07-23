@@ -12,6 +12,42 @@ Run these scripts in the **Supabase SQL Editor** in order:
    - [`sql/20260722_migrate_roadmap_resources_from_legacy.sql`](../sql/20260722_migrate_roadmap_resources_from_legacy.sql)
    - [`sql/20260722_roadmap_resource_rls.sql`](../sql/20260722_roadmap_resource_rls.sql)
 6. Optional: [`sql/20260722_workshop_resource_catalog_seed.sql`](../sql/20260722_workshop_resource_catalog_seed.sql) — 3 session deck placeholders + agentic tree
+7. If the **Decision Tree** tab is missing but slide decks exist: [`sql/20260723_agentic_decision_tree_catalog_fix.sql`](../sql/20260723_agentic_decision_tree_catalog_fix.sql)
+
+## Troubleshooting
+
+### Decision Tree tab missing (partial catalog migration)
+
+**Symptom:** Student roadmap loads sessions, but there is no **Decision Tree** tab even though `decision_tree_enabled = true`.
+
+**Cause:** Slide deck catalog rows exist (`roadmap_slide_decks`) but `roadmap_decision_trees` / `batch_decision_trees` rows were never seeded. The app skips legacy fallback when any catalog row exists.
+
+**Fix:** Run [`sql/20260723_agentic_decision_tree_catalog_fix.sql`](../sql/20260723_agentic_decision_tree_catalog_fix.sql), or enable the tree in **Mentor → Students → batch resources**.
+
+### URL slug vs cohort dropdown mismatch
+
+**Symptom:** URL shows one roadmap slug while the header dropdown shows a different cohort.
+
+**Fix:** Always navigate with matching `?batch_id=` (e.g. `/student/roadmap/become_a_manager_of_ai_agents?batch_id={uuid}`). Switch cohort from the dashboard dropdown before opening Roadmap.
+
+### Practice cards from another roadmap
+
+**Symptom:** Daily review shows unrelated cards (e.g. medical terminology).
+
+**Cause:** Spaced repetition mastery is global unless filtered by roadmap. Cards from other roadmaps appear if the student practiced them before.
+
+**Fix:** App now scopes due cards to the selected roadmap. Clear stale mastery rows in Supabase if demo seed data persists.
+
+## Manual QA checklist (multi-cohort student)
+
+| Scenario | Expected |
+|----------|----------|
+| Dashboard → select Agentic cohort → Roadmap card | URL includes `batch_id`; dropdown shows Agentic roadmap title |
+| Open `/student/roadmap/become_a_manager_of_ai_agents` with wrong `batch_id` | Resolves to Agentic enrollment, not Python cohort |
+| Dashboard dropdown open | Menu fully visible (portaled), not clipped by cards |
+| Agentic cohort → Practice | No unrelated review cards; decks scoped to roadmap |
+| Start daily review / deck | Full-screen overlay, body scroll locked, no flicker |
+| Agentic roadmap page | Decision Tree tab visible when enabled for cohort |
 
 ## Verify
 

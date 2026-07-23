@@ -674,6 +674,148 @@ export interface Database {
           updated_at?: string
         }
       }
+      roadmap_slide_decks: {
+        Row: {
+          id: string
+          roadmap_id: string
+          title: string
+          slides_url: string
+          sort_order: number
+          is_default_enabled: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          roadmap_id: string
+          title: string
+          slides_url: string
+          sort_order?: number
+          is_default_enabled?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          roadmap_id?: string
+          title?: string
+          slides_url?: string
+          sort_order?: number
+          is_default_enabled?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      roadmap_decision_trees: {
+        Row: {
+          id: string
+          roadmap_id: string
+          title: string
+          tree_key: string
+          sort_order: number
+          is_default_enabled: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          roadmap_id: string
+          title: string
+          tree_key: string
+          sort_order?: number
+          is_default_enabled?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          roadmap_id?: string
+          title?: string
+          tree_key?: string
+          sort_order?: number
+          is_default_enabled?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      batch_slide_decks: {
+        Row: {
+          batch_id: string
+          slide_deck_id: string
+          is_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          slide_deck_id: string
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          slide_deck_id?: string
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      batch_decision_trees: {
+        Row: {
+          batch_id: string
+          decision_tree_id: string
+          is_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          decision_tree_id: string
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          decision_tree_id?: string
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      student_card_mastery: {
+        Row: {
+          student_id: string
+          card_id: string
+          mastery_level: number | null
+          streak: number | null
+          last_practiced_at: string | null
+          next_review_at: string | null
+        }
+        Insert: {
+          student_id: string
+          card_id: string
+          mastery_level?: number | null
+          streak?: number | null
+          last_practiced_at?: string | null
+          next_review_at?: string | null
+        }
+        Update: {
+          student_id?: string
+          card_id?: string
+          mastery_level?: number | null
+          streak?: number | null
+          last_practiced_at?: string | null
+          next_review_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

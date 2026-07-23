@@ -59,7 +59,7 @@ export async function upsertSlideDeck(
   if (deck.id) {
     const { data, error } = await supabase
       .from('roadmap_slide_decks')
-      .update(payload)
+      .update(payload as unknown as never)
       .eq('id', deck.id)
       .select()
       .single();
@@ -73,7 +73,7 @@ export async function upsertSlideDeck(
 
   const { data, error } = await supabase
     .from('roadmap_slide_decks')
-    .insert(payload)
+    .insert(payload as unknown as never)
     .select()
     .single();
 
@@ -87,7 +87,7 @@ export async function upsertSlideDeck(
 export async function deleteSlideDeck(deckId: string): Promise<boolean> {
   const { error } = await supabase
     .from('roadmap_slide_decks')
-    .update({ is_active: false })
+    .update({ is_active: false } as unknown as never)
     .eq('id', deckId);
 
   if (error) {
@@ -112,7 +112,7 @@ export async function upsertDecisionTree(
   if (tree.id) {
     const { data, error } = await supabase
       .from('roadmap_decision_trees')
-      .update(payload)
+      .update(payload as unknown as never)
       .eq('id', tree.id)
       .select()
       .single();
@@ -126,7 +126,7 @@ export async function upsertDecisionTree(
 
   const { data, error } = await supabase
     .from('roadmap_decision_trees')
-    .insert(payload)
+    .insert(payload as unknown as never)
     .select()
     .single();
 
@@ -140,7 +140,7 @@ export async function upsertDecisionTree(
 export async function deleteDecisionTree(treeId: string): Promise<boolean> {
   const { error } = await supabase
     .from('roadmap_decision_trees')
-    .update({ is_active: false })
+    .update({ is_active: false } as unknown as never)
     .eq('id', treeId);
 
   if (error) {
@@ -190,6 +190,16 @@ function legacyFallbackResources(roadmap: Roadmap): BatchEnabledResources {
   return { slideDecks, decisionTrees, usesLegacyFallback: true };
 }
 
+export function mergeLegacyDecisionTrees(
+  decisionTrees: EnabledDecisionTree[],
+  roadmap: Roadmap
+): EnabledDecisionTree[] {
+  if (decisionTrees.length > 0 || !roadmap.decision_tree_enabled) {
+    return decisionTrees;
+  }
+  return legacyFallbackResources(roadmap).decisionTrees;
+}
+
 export async function getBatchEnabledResources(
   batchId: string | null | undefined,
   roadmap: Roadmap
@@ -208,9 +218,12 @@ export async function getBatchEnabledResources(
       slideDecks: catalogSlides
         .filter((deck) => deck.is_default_enabled)
         .map((deck) => ({ ...deck, is_enabled: true })),
-      decisionTrees: catalogTrees
-        .filter((tree) => tree.is_default_enabled)
-        .map((tree) => ({ ...tree, is_enabled: true })),
+      decisionTrees: mergeLegacyDecisionTrees(
+        catalogTrees
+          .filter((tree) => tree.is_default_enabled)
+          .map((tree) => ({ ...tree, is_enabled: true })),
+        roadmap
+      ),
       usesLegacyFallback: false,
     };
   }
@@ -240,12 +253,15 @@ export async function getBatchEnabledResources(
     }))
     .filter((deck) => deck.is_enabled);
 
-  const decisionTrees = catalogTrees
-    .map((tree) => ({
-      ...tree,
-      is_enabled: resolveEnabledState(tree.is_default_enabled, treeToggle.get(tree.id)),
-    }))
-    .filter((tree) => tree.is_enabled);
+  const decisionTrees = mergeLegacyDecisionTrees(
+    catalogTrees
+      .map((tree) => ({
+        ...tree,
+        is_enabled: resolveEnabledState(tree.is_default_enabled, treeToggle.get(tree.id)),
+      }))
+      .filter((tree) => tree.is_enabled),
+    roadmap
+  );
 
   return { slideDecks, decisionTrees, usesLegacyFallback: false };
 }
@@ -304,7 +320,7 @@ export async function saveBatchResourceSelection(
   if (slideRows.length > 0) {
     const { error } = await supabase
       .from('batch_slide_decks')
-      .upsert(slideRows, { onConflict: 'batch_id,slide_deck_id' });
+      .upsert(slideRows as unknown as never, { onConflict: 'batch_id,slide_deck_id' });
     if (error) {
       console.error('Error saving batch slide decks:', error);
       return false;
@@ -314,7 +330,7 @@ export async function saveBatchResourceSelection(
   if (treeRows.length > 0) {
     const { error } = await supabase
       .from('batch_decision_trees')
-      .upsert(treeRows, { onConflict: 'batch_id,decision_tree_id' });
+      .upsert(treeRows as unknown as never, { onConflict: 'batch_id,decision_tree_id' });
     if (error) {
       console.error('Error saving batch decision trees:', error);
       return false;

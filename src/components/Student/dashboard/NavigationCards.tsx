@@ -23,13 +23,14 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
         <div className="hidden md:grid grid-cols-2 gap-4">
             <div
                 onClick={() => {
+                    const batchQuery = batch?.id ? `?batch_id=${batch.id}` : '';
                     if (currentRoadmap) {
                         const roadmapSlug = DatabaseService.generateRoadmapSlug(currentRoadmap?.title || '');
-                        navigate(`/student/roadmap/${roadmapSlug}`);
+                        navigate(`/student/roadmap/${roadmapSlug}${batchQuery}`);
                     } else if (enrolledRoadmaps?.length > 0) {
                         const firstRoadmap = enrolledRoadmaps[0];
                         const roadmapSlug = DatabaseService.generateRoadmapSlug(firstRoadmap.title || '');
-                        navigate(`/student/roadmap/${roadmapSlug}`);
+                        navigate(`/student/roadmap/${roadmapSlug}${batchQuery}`);
                     } else {
                         console.warn('No roadmaps available for navigation');
                         info('No roadmaps available. Please contact your administrator.');
@@ -45,9 +46,10 @@ export const NavigationCards: React.FC<NavigationCardsProps> = ({
 
             <button
                 onClick={() => {
+                    const batchQuery = batch?.id ? `?batch_id=${batch.id}` : '';
                     if (currentRoadmap) {
                         const roadmapSlug = DatabaseService.generateRoadmapSlug(currentRoadmap?.title || '');
-                        navigate(`/student/community/${roadmapSlug}`);
+                        navigate(`/student/community/${roadmapSlug}${batchQuery}`);
                     } else if (enrolledRoadmaps?.length > 0) {
                         const firstRoadmap = enrolledRoadmaps[0];
                         const roadmapSlug = DatabaseService.generateRoadmapSlug(firstRoadmap.title || '');

@@ -38,6 +38,13 @@ export const DeckPlayer: React.FC<DeckPlayerProps> = ({
     const correctCount = React.useRef(0);
 
     useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, []);
+
+    useEffect(() => {
         loadCards();
     }, [deckId, initialCards]);
 

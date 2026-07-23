@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Map, ChevronDown } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -11,6 +12,15 @@ interface RoadmapDropdownProps {
     selectedBatchId: string;
 }
 
+function getBatchLabel(batch: any): { primary: string; secondary?: string } {
+    const roadmapTitle = batch?.roadmap?.title || batch?.title;
+    const batchName = batch?.name;
+    if (roadmapTitle && batchName && roadmapTitle !== batchName) {
+        return { primary: roadmapTitle, secondary: batchName };
+    }
+    return { primary: batchName || roadmapTitle || 'Select cohort' };
+}
+
 export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
     enrolledBatches,
     currentBatch,
@@ -20,15 +30,22 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
     selectedBatchId
 }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [menuStyle, setMenuStyle] = useState<{ top: number; left: number; minWidth: number } | null>(null);
     const batches = enrolledBatches || [];
     const hasMultiple = batches.length > 1;
-    const label = currentBatch?.name || currentBatch?.title || batches[0]?.name || 'Select cohort';
+    const { primary, secondary } = getBatchLabel(currentBatch || batches[0]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setShowDropdown(false);
+            const target = event.target as Node;
+            if (
+                dropdownRef.current?.contains(target) ||
+                (event.target as Element).closest('[data-roadmap-dropdown-menu]')
+            ) {
+                return;
             }
+            setShowDropdown(false);
         };
 
         if (showDropdown) {
@@ -39,24 +56,101 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
         };
     }, [showDropdown, setShowDropdown]);
 
-    // Always show current cohort context when at least one enrollment exists
+    useEffect(() => {
+        if (!showDropdown || !buttonRef.current) {
+            setMenuStyle(null);
+            return;
+        }
+
+        const updatePosition = () => {
+            const rect = buttonRef.current!.getBoundingClientRect();
+            setMenuStyle({
+                top: rect.bottom + 8,
+                left: rect.left,
+                minWidth: Math.max(rect.width, 224),
+            });
+        };
+
+        updatePosition();
+        window.addEventListener('scroll', updatePosition, true);
+        window.addEventListener('resize', updatePosition);
+        return () => {
+            window.removeEventListener('scroll', updatePosition, true);
+            window.removeEventListener('resize', updatePosition);
+        };
+    }, [showDropdown]);
+
     if (batches.length === 0 && !currentBatch) return null;
 
-    // Single batch: read-only label (still visible so students know which cohort they're in)
+    const labelContent = (
+        <span className="min-w-0 text-left">
+            <span className="block text-sm font-medium text-foreground truncate max-w-[220px] sm:max-w-[280px]">
+                {primary}
+            </span>
+            {secondary && (
+                <span className="block text-xs text-muted-foreground truncate max-w-[220px] sm:max-w-[280px]">
+                    {secondary}
+                </span>
+            )}
+        </span>
+    );
+
     if (!hasMultiple) {
         return (
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2">
                 <Map className="w-4 h-4 text-primary shrink-0" aria-hidden />
-                <span className="text-sm font-medium text-foreground truncate max-w-[200px] sm:max-w-none">
-                    {label}
-                </span>
+                {labelContent}
             </div>
         );
     }
 
+    const menuPortal =
+        showDropdown && menuStyle
+            ? createPortal(
+                  <div
+                      data-roadmap-dropdown-menu
+                      role="listbox"
+                      className="fixed z-[100] rounded-xl shadow-modal border border-border bg-card max-h-72 overflow-y-auto py-2"
+                      style={{
+                          top: menuStyle.top,
+                          left: menuStyle.left,
+                          minWidth: menuStyle.minWidth,
+                      }}
+                  >
+                      {batches.map((batch: any) => {
+                          const item = getBatchLabel(batch);
+                          return (
+                              <button
+                                  key={batch.id}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={selectedBatchId === batch.id}
+                                  onClick={() => handleBatchChange(batch.id)}
+                                  className={cn(
+                                      'w-full text-left px-4 py-2.5 text-sm transition-colors',
+                                      selectedBatchId === batch.id
+                                          ? 'bg-accent text-accent-foreground font-medium'
+                                          : 'text-foreground hover:bg-muted'
+                                  )}
+                              >
+                                  <span className="block truncate">{item.primary}</span>
+                                  {item.secondary && (
+                                      <span className="block text-xs text-muted-foreground truncate mt-0.5">
+                                          {item.secondary}
+                                      </span>
+                                  )}
+                              </button>
+                          );
+                      })}
+                  </div>,
+                  document.body
+              )
+            : null;
+
     return (
         <div className="relative roadmap-dropdown-container w-full sm:w-auto" ref={dropdownRef}>
             <button
+                ref={buttonRef}
                 type="button"
                 onClick={() => setShowDropdown(!showDropdown)}
                 aria-expanded={showDropdown}
@@ -64,9 +158,7 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
                 className="inline-flex w-full sm:w-auto items-center gap-2 rounded-full border border-border bg-card px-3 py-2 hover:bg-muted transition-colors"
             >
                 <Map className="w-4 h-4 text-primary shrink-0" aria-hidden />
-                <span className="text-sm font-medium text-foreground truncate max-w-[220px]">
-                    {label}
-                </span>
+                {labelContent}
                 <ChevronDown
                     className={cn(
                         'w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0',
@@ -74,38 +166,7 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
                     )}
                 />
             </button>
-
-            {showDropdown && (
-                <div
-                    role="listbox"
-                    className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 rounded-xl shadow-modal z-20 border border-border bg-card min-w-56 max-h-72 overflow-y-auto"
-                >
-                    <div className="py-2">
-                        {batches.map((batch: any) => (
-                            <button
-                                key={batch.id}
-                                type="button"
-                                role="option"
-                                aria-selected={selectedBatchId === batch.id}
-                                onClick={() => handleBatchChange(batch.id)}
-                                className={cn(
-                                    'w-full text-left px-4 py-2.5 text-sm transition-colors',
-                                    selectedBatchId === batch.id
-                                        ? 'bg-accent text-accent-foreground font-medium'
-                                        : 'text-foreground hover:bg-muted'
-                                )}
-                            >
-                                <span className="block truncate">{batch.name}</span>
-                                {batch.roadmap?.title && (
-                                    <span className="block text-xs text-muted-foreground truncate mt-0.5">
-                                        {batch.roadmap.title}
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {menuPortal}
         </div>
     );
 };
