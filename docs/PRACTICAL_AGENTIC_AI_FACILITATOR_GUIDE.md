@@ -623,6 +623,8 @@ Lock today’s pattern so people stop fantasizing about unfinished mega-systems.
 
 Volunteer process → roadmap Decision Tree live → read result card.
 
+**Printable decision tree (external handout):** Generate [`docs/AGENTIC_DECISION_TREE_PRINTABLE.md`](AGENTIC_DECISION_TREE_PRINTABLE.md) with `npm run generate:decision-tree-printable`. Human-first: sector/role lists, one table per role (no duplicates), plain “what to do next,” Mermaid only for overview / sector / follow-ups. Export PDF via Markdown preview; render Mermaid or paste the three charts from `docs/decision-tree-charts/` into [mermaid.live](https://mermaid.live) if needed.
+
 ### Participant activity (10 minutes)
 
 **1.** Complete Decision Tree for their process.  

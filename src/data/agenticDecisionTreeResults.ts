@@ -292,7 +292,7 @@ export const AGENTIC_RESULTS: Record<string, DecisionResultNode> = {
     title: 'Quality checker (score, then human decides)',
     facilitatorPatternName: 'Quality judge (Type 7)',
     plainSummary:
-      'Your job is to check AI or human outputs against a fixed checklist—support replies, marketing claims, graded homework, PR reviews. Fail closed to a person when unsure.',
+      'Your job is to check AI or human outputs against a fixed checklist—support replies, marketing claims, graded homework, PR reviews. When unsure, send it to a person—do not auto-pass.',
     summary: 'Pinned rubric + deterministic checks; can sit on top of any other pattern.',
     goodFor: [
       'Scoring agent replies before send',

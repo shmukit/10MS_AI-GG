@@ -1,0 +1,15 @@
+%%{init: {"flowchart": {"curve": "linear", "padding": 14}} }%%
+flowchart LR
+  q1{"When this job is finished, what do you have?"}
+  q1 -->|One message, doc, image, or answer| q2{"Does AI need company files?"}
+  q2 -->|No — paste in chat| t1(["Type 1 · Quick helper"])
+  q2 -->|Yes — read our PDFs / sheets / scans| t2(["Type 2 · Company brain"])
+  q1 -->|Several steps until sheet / inbox / status updates| q3{"How should it run?"}
+  q3 -->|I approve each step| t3(["Type 3 · Work buddy"])
+  q3 -->|Many similar items overnight| t6(["Type 6 · Batch"])
+  q3 -->|Two different roles hand off| t5(["Type 5 · Handoff"])
+
+  classDef q fill:#fef9c3,stroke:#ca8a04
+  classDef t fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+  class q1,q2,q3 q
+  class t1,t2,t3,t5,t6 t
