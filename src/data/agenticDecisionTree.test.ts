@@ -162,4 +162,14 @@ describe('agenticDecisionTree', () => {
       expect(scenarioKeys.has(key), `missing scenario ${key}`).toBe(true);
     }
   });
+
+  it('uses unique React keys per option on nodes with shared nextId targets', () => {
+    for (const node of Object.values(nodes)) {
+      if (node.type !== 'question') continue;
+      const keys = node.options.map(
+        (option, index) => `${node.id}-${option.contextValue ?? option.label}-${index}`
+      );
+      expect(new Set(keys).size, `${node.id} has duplicate option keys`).toBe(keys.length);
+    }
+  });
 });

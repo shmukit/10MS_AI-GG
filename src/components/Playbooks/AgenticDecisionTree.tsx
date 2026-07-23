@@ -23,6 +23,24 @@ function isResult(node: DecisionNode): node is DecisionResultNode {
   return node.type === 'result';
 }
 
+function progressStepLabel(
+  node: DecisionQuestionNode,
+  index: number,
+  path: string[],
+  treeKey: string
+): string {
+  const prevId = path[index - 1];
+  const prevNode = prevId ? getDecisionTreeNode(treeKey, prevId) : undefined;
+  if (prevNode && isQuestion(prevNode)) {
+    const chosen = prevNode.options.find((o) => o.nextId === node.id);
+    if (chosen?.label) {
+      const short = chosen.label.length > 28 ? `${chosen.label.slice(0, 28)}…` : chosen.label;
+      return short;
+    }
+  }
+  return node.stepLabel;
+}
+
 interface AgenticDecisionTreeProps {
   embedded?: boolean;
   treeKey?: string;
@@ -61,8 +79,21 @@ export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({
   }, [pathContext]);
 
   const goTo = (nextId: string) => {
-    setPath((prev) => [...prev, nextId]);
+    setPath((prev) => {
+      if (prev[prev.length - 1] === nextId) return prev;
+      return [...prev, nextId];
+    });
   };
+
+  // Single-answer steps (e.g. "tests green → Type 4") should not require another click.
+  useEffect(() => {
+    if (!currentNode || !isQuestion(currentNode) || currentNode.options.length !== 1) return;
+    const only = currentNode.options[0];
+    setPath((prev) => {
+      if (prev[prev.length - 1] === only.nextId) return prev;
+      return [...prev, only.nextId];
+    });
+  }, [currentId, currentNode]);
 
   const goBack = () => {
     if (path.length > 1) {
@@ -164,7 +195,7 @@ export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({
             const node = getDecisionTreeNode(treeKey, id);
             const label =
               node && isQuestion(node)
-                ? node.stepLabel
+                ? progressStepLabel(node, index, path, treeKey)
                 : node && isResult(node)
                   ? `Result · Type ${node.typeCode}`
                   : `${index + 1}`;
@@ -201,9 +232,11 @@ export const AgenticDecisionTree: React.FC<AgenticDecisionTreeProps> = ({
             </div>
 
             <div className="space-y-3">
-              {currentNode.options.map((option) => (
+              <p className="text-sm text-muted-foreground">Pick one option to continue.</p>
+              {currentNode.options.map((option, index) => (
                 <button
-                  key={option.nextId}
+                  key={`${currentId}-${option.contextValue ?? option.label}-${index}`}
+                  type="button"
                   onClick={() => goTo(option.nextId)}
                   className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors group"
                 >
