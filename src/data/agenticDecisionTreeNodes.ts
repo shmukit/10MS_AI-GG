@@ -619,9 +619,9 @@ const SHARED_QUESTIONS: Record<string, DecisionQuestionNode> = {
   ),
   'q-finished': q(
     'q-finished',
-    'Done means',
+    'Your output',
     'When this job is finished, what do you have?',
-    'Think about what you would show your manager—or what would let you go home without worry.',
+    'Pick one — the next screen will show your recommendation. You only need one answer here.',
     [
       {
         label: 'One message, doc, image, or answer I am happy with',
@@ -639,7 +639,7 @@ const SHARED_QUESTIONS: Record<string, DecisionQuestionNode> = {
   ),
   'q-finished-code': q(
     'q-finished-code',
-    'Done means',
+    'Code done',
     'When this coding job is finished, what proves it is done?',
     'For engineers, “done” should be objective—not vibes.',
     [
@@ -653,7 +653,7 @@ const SHARED_QUESTIONS: Record<string, DecisionQuestionNode> = {
   ),
   'q-finished-code-quality': q(
     'q-finished-code-quality',
-    'Done means',
+    'Quality done',
     'When this quality job is finished, what proves it is done?',
     'Your checklist is the contract—pin it so it does not drift.',
     [
@@ -667,7 +667,7 @@ const SHARED_QUESTIONS: Record<string, DecisionQuestionNode> = {
   ),
   'q-finished-batch': q(
     'q-finished-batch',
-    'Done means',
+    'Batch volume',
     'How much volume are you dealing with?',
     'Batch helpers are for many similar items—not one sensitive approval.',
     [
@@ -681,7 +681,7 @@ const SHARED_QUESTIONS: Record<string, DecisionQuestionNode> = {
   ),
   'q-finished-chain': q(
     'q-finished-chain',
-    'Done means',
+    'Multi-step',
     'This sounds like multi-step work. How should it run?',
     'You stay in control—especially for money, customers, or official records.',
     [
