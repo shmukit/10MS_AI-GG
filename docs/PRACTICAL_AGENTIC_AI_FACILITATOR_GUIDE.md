@@ -1,7 +1,13 @@
 # Practical Agentic AI for Productivity
 ## Build Your Personal AI Workforce in One Day — Facilitator Runbook
 
-This document is written for **you, the facilitator**. Read it as a step-by-step script for running the day. Every activity explains: what to say, what to show, what participants type, and how you know they are done.
+This document is written for **you, the facilitator**. Read it as a step-by-step script. Every activity explains: what you say, what you show, what participants type, and how you know they are done.
+
+**How to read each node**
+
+- **Facilitator demo** — You do this on the projector. Participants watch. They do not follow along yet.
+- **Participant activity** — They do this on their laptops (and sometimes pen and paper).
+- **Reflect / check** — Short share + what “done” looks like.
 
 ---
 
@@ -20,76 +26,98 @@ This document is written for **you, the facilitator**. Read it as a step-by-step
 **What “done” means at the end of the day:**  
 Each person (or small team) can **live-demonstrate one real work process** that runs like this:
 
-> Something starts the work (a form, an email, a checklist, a pasted note) → AI does a clear step → the result appears where work actually goes (Google Doc, Sheet, email draft, Slack, etc.) → a human still approves anything external or high-risk.
+> Something starts the work (a form, an email, a checklist, a pasted note) → AI does a clear step → the result appears where work actually goes (Google Doc, Sheet, email draft, Slack, Slides, etc.) → a human still approves anything external or high-risk.
 
-That running path is the product. A slide deck or a written plan alone is **not** enough.
+That running path is the product. Notes alone are **not** enough.
 
 ---
 
-## 2. How teaching works in this room
+## 2. The only three digital surfaces (keep it simple)
 
-You will **not** give long concept lectures. Three helpers share the load:
+Participants should mostly live in **three places**:
+
+| Surface | Purpose |
+| ------- | ------- |
+| **1. Workshop PPT / Google Slides (agenda deck)** | “Where we are” — you advance this on the projector |
+| **2. AI tools on their laptop** | Teacher Agent, Work EA, NotebookLM, automation, multimodal tools |
+| **3. Roadmap website** | Checklist, decision tree, mark tasks complete |
+
+**Working notes for maps / harness / roles:**  
+Each person (or team) gets a **personal copy of a Google Slides “Working Pack”** (File → Make a copy). They fill tables on those slides.  
+**Backup:** pen and paper using the same table layouts; photo the page at Demo Day if needed.
+
+**Do not use Miro or Mural.** Extra boards split attention and need paid features you may not have.
+
+---
+
+## 3. How teaching works in this room
 
 | Helper | What it does |
 | ------ | ------------ |
-| **Teacher Agent** | A ChatGPT Project or Claude Project each participant creates at the start. It explains ideas, drafts instructions, and critiques their work when they paste the prompts from this guide. |
-| **You (facilitator)** | Short live demos on the projector, walk the room, fix login/tool problems, keep time, raise the quality bar, run Demo Day. |
-| **Roadmap (website)** | The checklist of activities, links, and the decision tree. Participants mark tasks complete as they finish. |
+| **Teacher Agent** | A ChatGPT or Claude **Project** each person creates at the start. It explains ideas, drafts text, and critiques their work when they paste prompts from this guide. |
+| **You (facilitator)** | Short demos, walk the room, fix logins, keep time, quality bar, Demo Day. |
+| **Roadmap (website)** | Activity checklist + decision tree. |
 
-**Rule of thumb:** If someone asks “what is an agent?” — send them to ask their Teacher Agent first. If someone says “my Project won’t save” — that is your job.
+**Rule of thumb:** Theory question → ask the Teacher Agent first. Broken login / Project settings → you help.
 
-**Hands-on time:** More than half of every block should be participants typing and testing, not listening.
+**Hands-on:** More than half of every block should be them typing and testing.
 
-**One spine all day:** They create one Teacher Agent and choose **one business process**. Everything after that builds on that same process. Do not let them start five different toy projects.
-
----
-
-## 3. Before the workshop (you prepare)
-
-Send this to participants about **48 hours before**:
-
-1. Create an account on **ChatGPT** (with Projects) **or** **Claude** (with Projects). One is enough as the home base.
-2. Optionally create accounts for one more tool they may compare later: Gemini, Perplexity, or NotebookLM.
-3. Bring **1–3 work documents** they are allowed to use (policy excerpt, SOP, FAQ, report). No confidential data they cannot show on a laptop in class.
-4. Write one sentence naming a **painful, repetitive work process** (example: “Every Monday I collect status updates from three people and rewrite them into a client email”).
-5. Log into the workshop roadmap URL once so login problems are fixed early.
-6. Open the shared Miro/Mural link if you send one.
-
-**You should also prepare:**
-
-- Roadmap published with today’s sessions/tasks.
-- Shared Miro or Mural board with blank templates: process map, AI roles, harness card.
-- This guide’s prompts available as a shared doc or roadmap link (so people can copy-paste).
-- One **demo workflow you can run live** (example: a form response → AI summary → draft message → you click approve). Prefer a template people can clone later (n8n, Zapier, or Make) rather than building automation from an empty screen.
-- Backup plan if Wi‑Fi fails: phone hotspot; “ChatGPT + Claude only” track.
+**One spine:** One Teacher Agent + **one business process** all day. Do not let them start five toy projects.
 
 ---
 
-## 4. How you check work (whole day)
+## 4. Before the workshop
 
-After each activity, use this **30-second check** at a few desks:
+### Message to participants (~48 hours before)
+
+Ask them to complete **before the night of the workshop** (not during class):
+
+1. **Home base:** ChatGPT (Projects) **or** Claude (Projects).
+2. **Knowledge / research (pick at least one):** NotebookLM and/or Perplexity and/or Gemini.
+3. **Multimodal menu (create accounts now; they will only use 2–3 tomorrow):**  
+   Suggest a short menu you actually support, for example:
+   - Slides / docs: Gamma **or** Google Slides / Docs AI features  
+   - Image: ChatGPT images / Gemini images / one image tool you choose  
+   - Voice (optional): one voice tool you choose  
+   - Analysis: ChatGPT/Claude with a CSV **or** a spreadsheet AI add-on  
+   - UI / web mock (optional): one lightweight mock tool **or** “describe UI in ChatGPT + screenshot”  
+4. Bring **1–3 work documents** they are allowed to use.
+5. Write one sentence naming a **painful repetitive process**.
+6. Log into the roadmap URL once.
+7. Open the **Working Pack** Google Slides link and **Make a copy** titled `Agentic AI Working Pack — [Their Name]`.
+
+### What you prepare
+
+See **Appendix F — Facilitator toolkit & templates** at the end (accounts, demo scripts, template structures, Working Pack slides).
+
+---
+
+## 5. How you check work
+
+After each activity, at a few desks:
 
 1. “Show me what you built.”
 2. “What problem does this solve at work?”
 3. “What must a human still approve?”
-4. If those answers are clear: “Mark this roadmap task complete.”
+4. If clear → “Mark this roadmap task complete.”
 
-At mid-points, glance at the Miro board. At the end, they must **trigger the workflow live** (or show a recording from the last few minutes).
+Mid-day: glance at their Working Pack slides or paper.  
+End of day: they **trigger the workflow live** (or a recording from the last few minutes).
 
 ---
 
-## 5. Day schedule
+## 6. Day schedule
 
-| When | Block | Length | What participants leave with |
-| ---- | ----- | ------ | ---------------------------- |
-| Start | Opening — hire Teacher Agent | 25 min | Teacher Agent Project working |
-| Morning | Section 1 — Work WITH AI | 85 min | Better prompting + tool sense + **today’s process chosen** |
+| When | Block | Length | They leave with |
+| ---- | ----- | ------ | --------------- |
+| Start | Opening — hire Teacher Agent | 25 min | Teacher Agent working |
+| Morning | Section 1 — Work WITH AI | ~90 min | Prompting + tool stack (max 2–3) + process chosen |
 | | Break | 15 min | |
-| Mid | Section 2 — Work THROUGH AI | 100 min | Process map + pattern + assistant + first **running** automation path |
-| | Break or lunch | 15–60 min | |
-| Afternoon | Section 3 — Work BY AI | ~110 min | Workforce + harness + failure fixes + **shipped run** + Demo Day |
+| Mid | Section 2 — Work THROUGH AI | ~100 min | Map + pattern + assistant + first running path |
+| | Break / lunch | 15–60 min | |
+| Afternoon | Section 3 — Work BY AI | ~110 min | Workforce + harness + failure fixes + ship + Demo Day |
 
-**If you are running late:** Cut your talking first. Never cut Demo Day or the final live run.
+**If late:** Cut your talking first. Never cut Demo Day or the final live run.
 
 ---
 
@@ -97,28 +125,32 @@ At mid-points, glance at the Miro board. At the end, they must **trigger the wor
 
 ## Goal
 
-Every participant has a Project named something like **“Workshop Teacher — Agentic AI”**. That Project stays open all day. It is their private tutor. You are their build coach.
+Every participant has a Project named **`Workshop Teacher — Agentic AI`**. It stays open all day as their tutor. You are the build coach.
 
-## Minute 0–3 — What you say
+## Facilitator framing (3 minutes)
 
-Say something close to this:
+Say:
 
-> “I will not lecture agentic AI for an hour. You will hire a **Teacher Agent** that teaches you. I will help you build and fix things. The website roadmap is your checklist. By the end of today you should leave with **one real work process that actually runs** — not just notes.”
+> “I will not lecture agentic AI for an hour. You will hire a **Teacher Agent** that teaches you. I will help you build and fix things. The roadmap is your checklist. The agenda slides show where we are. By evening you leave with **one real work process that runs** — not just notes.”
 
-Open the roadmap on the projector and show where Session 1 starts. Show where the shared prompt document lives (if separate from this guide).
+Show: roadmap Session 1 + agenda PPT “You are here: Opening.”
 
-## Minute 3–21 — What participants do (you walk the room)
+## Participant activity (18 minutes) — you walk the room
 
-### Step 1 — Create the Project
+### Step 1 — Create the Teacher Project
 
-Ask everyone to open ChatGPT or Claude and create a **Project** (not a normal one-off chat).
+Open ChatGPT or Claude → create a **Project** (not a normal empty chat).
 
-- Name it: `Workshop Teacher — Agentic AI`
-- If someone cannot find Projects: help them. If their plan does not support Projects, use a Custom GPT / Gem, or a normal chat where they paste the instructions at the top of every important message. Prefer Projects when possible.
+- Name: `Workshop Teacher — Agentic AI`
+- If they cannot use Projects: Custom GPT / Gem, or a normal chat where they paste instructions at the top of important messages.
 
-### Step 2 — Give the Teacher its job description
+### Step 2 — Paste the Teacher’s job into Project **settings**
 
-Have them open **Project instructions** (sometimes called custom instructions / system prompt for the Project) and paste **exactly** this:
+This is **not** a chat message.
+
+1. Open the Project.  
+2. Find **Instructions** / **Project instructions** / custom instructions for that Project.  
+3. Paste the text below into that settings box and save.
 
 ```text
 You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
@@ -148,66 +180,54 @@ Pattern ladder (simplest → complex):
 Instruction-only chat → Knowledge assistant → Single workflow agent → Multi-agent workflow → Automation pipeline
 ```
 
-### Step 3 — Introduce themselves to the Teacher
+### Step 3 — First chat message to the Teacher
 
-In the Project chat, they paste this message (they fill the brackets):
+In the Project **chat** (not settings), paste:
 
 ```text
 I am starting the workshop now.
 My role: [e.g. HR Business Partner / Marketing Manager / Operations Lead]
-My organization type: [e.g. education company / fintech / agency / NGO]
-The painful process I might automate today: [1–2 sentences about a real repetitive task]
+My organization type: [e.g. education company / fintech / agency]
+The painful process I might automate today: [1–2 sentences]
 
 Confirm you understand your teaching role.
 Then explain in 6 bullets how today will grow from “work WITH AI” to “work BY AI.”
 Ask me 3 clarifying questions about my process so you can coach me all day.
 ```
 
-They should answer the Teacher’s three questions briefly.
+Answer the Teacher’s three questions briefly.
 
-### Step 4 — Quick understanding check
-
-They ask:
+### Step 4 — Quick check
 
 ```text
-Explain chat vs assistant vs agent in my job as [their role] in 5 short bullets.
+Explain chat vs assistant vs agent in my job as [role] in 5 short bullets.
 ```
 
-They bookmark / pin that answer if the tool allows.
+Pin/bookmark if possible. Mark roadmap task complete.
 
-### Step 5 — Mark progress
+## Reflect / checkpoint (4 minutes)
 
-They mark the roadmap task for Teacher Agent as complete.
+Two volunteers read one sentence their Teacher used to define “agent.”
 
-**While they work, you only rescue:** wrong account, cannot find Projects, paste failed, “I’m in a normal chat by mistake.” Do not start teaching theory from the front.
+You say:
 
-## Minute 21–25 — Checkpoint
-
-Ask two volunteers to read **one sentence** their Teacher used to define “agent.”
-
-Then say:
-
-> “Keep this Teacher Project open all day. When you need an explanation, ask the Teacher. When you need to build something that ships, I will help you.”
+> “Keep this Teacher Project open all day. Explanations → Teacher. Building and shipping → I help you.”
 
 ### Done when
 
-- Project exists with the long instructions pasted.
-- First conversation happened.
-- They can get a plain-language answer about chat vs assistant vs agent.
+Teacher Project exists, instructions are in settings, first chat happened, they can explain chat vs assistant vs agent in plain language.
 
 ---
 
-# SECTION 1 — Work WITH AI (about 85 minutes)
+# SECTION 1 — Work WITH AI (~90 minutes)
 
-## Section goal in plain language
+## Section goal
 
-By the end of this section, participants should:
-
-1. Know how to give AI a stable job (not only one-off questions).
-2. Improve a weak prompt into a stronger one.
-3. Compare tools for **fit**, without trying to master every product.
-4. Upload documents so AI answers from their material.
-5. **Choose the one work process** they will automate for the rest of the day.
+1. Give AI a stable job (not only one-off chats).  
+2. Improve a weak prompt.  
+3. See the wider tool landscape, then **commit to at most 2–3 tools** for their workflow.  
+4. Use documents as memory.  
+5. **Lock the one process** they will ship today.
 
 ---
 
@@ -215,14 +235,12 @@ By the end of this section, participants should:
 
 ### Goal
 
-Each person creates a second Project (or a clearly named mode) that acts like their **Executive Assistant** for daily coordination work — with rules so it does not invent facts.
+Create a second Project that acts like their **Executive Assistant**, with rules so it does not invent facts.
 
-### Demo — 5 minutes (what you actually show)
+### Facilitator demo (5 minutes) — projector only
 
-Do this on the projector so the difference is obvious.
-
-**Part A — Weak chat (the bad way many people work today)**  
-Open a normal empty chat. Paste a messy pile of notes that look like a real morning inbox, for example:
+**Part A — Weak chat (how many people work today)**  
+Open a normal empty chat. Paste messy morning notes:
 
 ```text
 - boss asked for Q2 hiring update, unclear deadline
@@ -232,14 +250,14 @@ Open a normal empty chat. Paste a messy pile of notes that look like a real morn
 - need to prep 1:1 with Rahim
 ```
 
-Ask the empty chat only: `Help me with my morning.`
+Ask only: `Help me with my morning.`
 
-The answer will usually be generic (“prioritize your tasks… stay organized…”). Point at the screen and say:
+The answer is usually generic. Say:
 
-> “This is weak chat. Same powerful model — but no job design. It does not know who you are, what ‘done’ looks like, or that it must not invent meetings.”
+> “Same powerful model — but no job design. It does not know who you are, what ‘done’ looks like, or that it must not invent meetings.”
 
-**Part B — Same messy notes, better job design**  
-Open (or quickly create) an Executive Assistant Project with short instructions such as:
+**Part B — Same notes, better job design**  
+Open your prepared **Work EA** Project with instructions like:
 
 ```text
 You are my executive assistant.
@@ -247,57 +265,74 @@ Priorities: people issues first, then client deadlines, then internal admin.
 Every morning: turn my pasted notes into a Top 5 action list with owner and next step.
 Tone: concise bullets.
 Never invent meetings, names, or deadlines.
-If information is missing, ask me one clarifying question instead of guessing.
+If information is missing, ask one clarifying question instead of guessing.
 Ask before drafting any external email.
 ```
 
-Paste the **same** messy notes. Show that the output is more useful — and then deliberately ask it to invent a meeting that was not in the notes, so the class sees why the “never invent” rule matters.
+Paste the **same** notes. Show a more useful Top 5. Then ask it to invent a meeting that was not in the notes — show why “never invent” matters.
 
 Say:
 
 > “You did not install new software. You hired a role. Job design beats hoping the model magically understands you.”
 
-### Participants — 14 minutes (exactly what they do)
+### Participant activity (14 minutes)
 
-**1.** Go back to the **Teacher Agent** Project and paste:
+**Important — two different Projects**
+
+| Project | Purpose |
+| ------- | ------- |
+| `Workshop Teacher — Agentic AI` | Tutor that **writes drafts** for you |
+| `My Work EA — [Name]` | The assistant you will **actually use** for morning work |
+
+**Step 1 — Ask the Teacher (chat message inside the Teacher Project)**
+
+Paste this into the Teacher **chat**:
 
 ```text
 Draft copy-paste Project instructions for my Executive Assistant.
-Role context: [paste 3–6 lines about their real job and priorities]
+Role context: [paste 3–6 lines about your real job and priorities]
 Must include: priorities, tone, output format, “never invent facts,” and when to ask before acting.
 Keep under 200 words.
 Then give me one sample morning input I can paste to test it.
 ```
 
-**2.** Create a **new** Project named like `My Work EA — [Name]`. Prefer a separate Project from the Teacher. Paste the Teacher’s drafted instructions into this new Project’s instructions. Edit anything that feels wrong for their real job.
+What happens: the Teacher replies with a block of text. That text is a **draft job description**. Participants are **not** done yet.
 
-**3.** Run one **real morning-style task**.  
-Explain to the room what this means (do not leave it vague):
+**Step 2 — Create the Work EA Project and paste into its settings**
 
-> “A real morning task means: paste something from your actual work life into the EA — today’s rough notes, a messy email thread summary, a Slack dump, or your calendar chaos — and ask the EA to produce a useful Top 5 action list. If you truly have nothing personal you can share, use the sample morning input the Teacher just gave you, then replace it with real notes after the break.”
+1. Create a **new** Project: `My Work EA — [Name]`.  
+2. Open **that** Project’s Instructions / settings field.  
+3. Paste the Teacher’s draft into **those** settings (edit anything that feels wrong).  
+4. Save.
 
-They should get one usable output on screen.
+**Step 3 — Run one real morning-style task**
 
-**4.** Return to the Teacher Agent and paste:
+Explain clearly:
+
+> “Paste something from your real work — today’s rough notes, a messy email summary, Slack dump, or calendar chaos — into the Work EA chat. Ask it for a Top 5 action list. If you cannot share real work, use the sample morning input the Teacher gave you, then switch to real notes after the break.”
+
+**Step 4 — Critique once**
+
+Back in the Teacher Project chat:
 
 ```text
 Here are my Executive Assistant instructions:
-[paste]
+[paste what you put in Work EA settings]
 
 Critique them for reliability.
 What is missing?
 Rewrite only the weak parts.
 ```
 
-They apply one improvement.
+Apply one improvement to the Work EA settings.
 
-### Reflect — 3 minutes
+### Reflect (3 minutes)
 
-Pairs show each other one bullet from the EA output. Mark roadmap complete.
+Pairs show one bullet of EA output. Mark roadmap complete.
 
-### You check
+### Done when
 
-Instructions mention role/priorities, tone, “never invent,” and when to ask before acting. They have at least one successful test run.
+Work EA settings include role, tone, never-invent, approval rule; at least one successful test run.
 
 ---
 
@@ -305,17 +340,13 @@ Instructions mention role/priorities, tone, “never invent,” and when to ask 
 
 ### Goal
 
-Participants feel the difference between a lazy prompt and a structured prompt — by rewriting one example and running both.
+Feel the difference between a lazy prompt and a structured prompt.
 
-### Demo — 4 minutes
+### Facilitator demo (4 minutes) — projector only
 
-On the projector, run these two prompts on the same tool and compare.
+Run both on the same tool:
 
-**Weak:**
-
-```text
-Write feedback for my team member.
-```
+**Weak:** `Write feedback for my team member.`
 
 **Stronger:**
 
@@ -328,74 +359,100 @@ Constraints: under 120 words, no clichés, no invented metrics.
 If details are missing, ask me before drafting.
 ```
 
-Stop after the comparison. Do not lecture five prompt frameworks verbally — the Teacher will do that in the exercise.
+Compare. Stop. No long lecture.
 
-### Participants — 12 minutes
+### Participant activity (12 minutes)
 
-**1.** In the Teacher Agent, paste:
+**1.** In Teacher chat:
 
 ```text
-Here is a weak prompt: [paste one weak prompt from their work, or use: “Write a weekly update for my client.”]
+Here is a weak prompt: [paste one weak prompt from work, or: “Write a weekly update for my client.”]
 Rewrite it using: role + context + task + format + constraints + verify step.
 Show BEFORE vs AFTER.
 Tell me which single change will improve quality most.
 ```
 
-**2.** Run the **before** prompt and the **after** prompt in their EA or a normal chat. Notice the difference.
+**2.** Run before and after in Work EA or chat.  
+**3.** Save both in Working Pack slide “Prompt bake-off” or paper.
 
-**3.** Save both versions in their notes or roadmap task notes.
+### Reflect (2 minutes)
 
-### Reflect — 2 minutes
+Poll: “Which line changed the output most — role, format, or constraints?”
 
-Quick poll: “Which one line changed the output most — role, format, or constraints?”
+### Done when
 
-### You check
-
-They have one before/after pair. The “after” includes role, task, and format or constraints.
+One before/after pair exists; “after” has role + task + format/constraints.
 
 ---
 
-## Node 3 — Tool fit sprint (20 minutes)
+## Node 3 — Tool landscape + fit sprint (25 minutes)
 
 ### Goal
 
-Participants learn that tools have different strengths. They do **not** need to master five products. They browse briefly, then commit to a small stack for the rest of the day.
+1. See what kinds of AI tools exist for daily ops (including multimodal).  
+2. For **their** workflow, pick **at most 2–3 tools** and try those — not the whole internet.
 
-### What you say before they start
+Accounts should already exist from pre-work. Class time is for **choosing and trying**, not signing up.
 
-> “For about fifteen minutes you may compare tools. For the rest of the day you will ship with at most two or three. Demo Day is not a tool zoo. It is a re-run of the stack you already used for your process.”
+### Facilitator demo — landscape overview (8 minutes) — projector only
 
-### Demo — 4 minutes
+Walk five “lanes” quickly (one example each). Do **not** make everyone open every tool.
 
-Take **one** short prompt and run it in **two** tools only (for example ChatGPT and Perplexity). Ask the class what differed: tone, citations, length, confidence. Say: “There is no permanent winner — only fit for the task.”
+| Lane | Example use | Example tools (pick what you support) |
+| ---- | ----------- | -------------------------------------- |
+| Chat / reasoning | Draft, plan, critique | ChatGPT, Claude |
+| Knowledge / research | Docs Q&A, web with citations | NotebookLM, Perplexity, Gemini |
+| Slides / docs | Deck or one-pager from outline | Gamma, Google Slides/Docs AI |
+| Image / visual | Diagram, social visual, mock poster | ChatGPT/Gemini images (or your pick) |
+| Voice / analysis / UI (light touch) | Voice note → text; CSV ask; UI description | One voice tool; Claude/ChatGPT + CSV; text UI mock |
 
-### Participants — 14 minutes
+Say:
 
-**1.** In the Teacher Agent, paste:
+> “This is a map of the city. Today you will only drive on the streets that match **your** process. Maximum two or three tools for the workflow you will ship.”
+
+### Facilitator demo — fit, not winners (3 minutes)
+
+Same short prompt in **two** tools. Ask what differed. Say: no permanent winner — only fit.
+
+### Participant activity (12 minutes)
+
+**1.** In Teacher chat (tool picker for **their** process):
 
 ```text
-Task I need to do: [paste one concrete task from their work]
-Recommend exactly 2 tools from: ChatGPT, Claude, Gemini, Perplexity, NotebookLM.
-For each: best for / weak for / 1 risk.
-Give me one identical test prompt to run in both.
+My work process for today: [paste one sentence]
+The kind of outputs I need (e.g. email draft, slide outline, summary from PDFs, image, sheet analysis): [paste]
+
+From this menu, recommend EXACTLY 2 tools I should try today (3 only if clearly needed):
+- ChatGPT
+- Claude
+- Gemini
+- Perplexity
+- NotebookLM
+- Gamma or Google Slides AI (slides/docs)
+- Image generation in ChatGPT or Gemini
+- [optional tools you listed in pre-work]
+
+For each tool: best for / weak for / 1 risk.
+Give me ONE identical test task I can run in both/all chosen tools.
+Remind me: I must not try more than 3 tools today for this process.
 ```
 
-**2.** Run that identical test prompt in the two recommended tools (optional third if they are fast).
+**2.** Run that identical test in only the recommended 2 (max 3) tools.  
+**3.** Fill Working Pack slide “Tool scorecard”:
 
-**3.** Fill a tiny scorecard (Miro sticky or notes):
+| Tool | Speed | Quality | Fit to my process | Ease | Keep for today? Y/N |
+| ---- | ----- | ------- | ----------------- | ---- | ------------------- |
 
-| Tool | Speed | Quality | Citations / grounding | Ease |
-| ---- | ----- | ------- | --------------------- | ---- |
-| A | | | | |
-| B | | | | |
+**4.** Write locked stack on the same slide: `Today’s stack (max 3): …`
 
-### Reflect — 2 minutes
+### Reflect (2 minutes)
 
-Ask: “Would your winning tool win for every task?” The honest answer should be no.
+> “Would your winning tool win for every task?” → No.  
+> “Did anyone open a fourth tool?” → Close it.
 
-### You check
+### Done when
 
-They scored at least two tools on one task. They are not trying to use five tools for the final product.
+Scorecard filled; stack locked at ≤3 tools; those tools match the process they will ship.
 
 ---
 
@@ -403,658 +460,36 @@ They scored at least two tools on one task. They are not trying to use five tool
 
 ### Goal
 
-1. Experience AI grounded in **their documents**.  
-2. Lock the **one process** they will build for the rest of the day.
+Ground AI in documents; lock the process for the rest of the day.
 
-### Demo — 4 minutes
+### Facilitator demo (4 minutes) — projector only
 
-On the projector:
+1. NotebookLM (or Project with files) + short PDF.  
+2. Ask a question **in** the doc → grounded answer.  
+3. Ask a trap question **not** in the doc → should refuse or say not in sources.
 
-1. Open NotebookLM (or a Project with file upload).
-2. Upload a short sample PDF (handbook excerpt or FAQ).
-3. Ask a question that **is** in the document. Show a grounded answer.
-4. Ask a trap question that is **not** in the document. Show that a good setup admits “not in sources” instead of inventing policy.
+> “Memory is documents + instructions + noticing ungrounded answers — not magic.”
 
-Say:
+### Participant activity (18 minutes)
 
-> “Memory is not magic. Memory is documents plus instructions plus the discipline to notice when the answer is ungrounded.”
-
-### Participants — 18 minutes
-
-**1.** Upload 1–2 allowed work documents into NotebookLM or into a Project with files.
-
-**2.** Ask two questions that should be answerable from the docs, and one trap question that should not. Note what happened.
-
-**3.** Choose today’s process and post it on Miro using this format:
+**1.** Upload 1–2 allowed docs to NotebookLM or a Project with files.  
+**2.** Two grounded questions + one trap.  
+**3.** Lock today’s process on Working Pack slide “Process lock” (or paper):
 
 ```text
-Process name: …
-Why it is painful: …
-Who owns it: …
-Success today looks like: …
+Process name:
+Why it is painful:
+Who owns it:
+Success today looks like:
+Tools I will use (max 3):
 ```
 
-Help them slice. Bad: “Automate all of HR.” Good: “Turn weekly team bullets into a client status email draft I still approve.”
+Force slices. Bad: “Automate all of HR.” Good: “Turn weekly team bullets into a client status email draft I still approve.”
 
-**4.** Ask the Teacher Agent:
-
-```text
-Process I want to automate today: [paste the Miro text]
-Docs I can use: [list filenames or say “none yet”]
-Answer:
-1) Good one-day candidate? Yes/No
-2) If No, propose a smaller slice
-3) Simplest pattern on the ladder
-4) What must stay human (Limits)
-5) How we’ll validate done (Validation)
-```
-
-If the Teacher says the process is too big, they must accept a smaller slice before the break.
-
-### Reflect — 3 minutes
-
-Everyone’s process is visible on Miro. You scan for monsters and force slices out loud if needed.
-
-### Break — 15 minutes
-
----
-
-# SECTION 2 — Work THROUGH AI (about 100 minutes)
-
-## Section goal in plain language
-
-They take the process chosen in Section 1 and:
-
-1. Map the steps on Miro.
-2. Choose the simplest AI pattern (using the roadmap decision tree).
-3. Build the “brain” — reusable instructions and output format.
-4. Connect a **running** path: trigger → AI → output → approval.
-
----
-
-## Framing — 5 minutes
-
-### You — 2 minutes
-
-Draw or show this ladder once:
+**4.** Teacher chat:
 
 ```text
-Instruction-only chat
-   → Knowledge assistant (answers from your docs)
-   → Single workflow agent (multi-step, one job)
-   → Multi-agent workflow (handoffs between roles)
-   → Automation pipeline (trigger + systems)
-```
-
-Say:
-
-> “Climb only as high as your process needs. Most people today should ship around knowledge assistant or single workflow, plus a light automation path.”
-
-### Participants — 3 minutes
-
-In the Teacher Agent:
-
-```text
-Using MY process: [paste]
-Explain the pattern ladder with one example at each level for THIS process.
-Recommend the level I should build today and why not higher.
-```
-
-No long lecture from you.
-
----
-
-## Node 1 — Map the process on Miro (18 minutes)
-
-### Goal
-
-A simple map of 6–8 steps for their process, tagged by who/what should do each step, plus first answers to the ETCSLV checklist.
-
-### What the colored tags mean (explain once)
-
-- **Green (LLM thinking):** drafting, summarizing, brainstorming, rewriting.
-- **Blue (rules / automation):** forms, reminders, moving data, triggers.
-- **Red (human only):** legal judgment, people conflicts, money, sending to a client/boss without review.
-
-### Demo — 3 minutes
-
-On Miro, quickly map “Weekly client report” in 6–8 boxes. Tag each box green/blue/red. Say one sentence for Limits (“manager approves before send”) and Validation (“checklist before publish”).
-
-### Participants — 14 minutes
-
-**1.** Duplicate the Miro template. Map **their** process in at most 8 steps.  
-**2.** Tag each step green / blue / red.  
-**3.** Paste the map as text into the Teacher Agent:
-
-```text
-Here is my workflow map (steps + green/blue/red tags):
-[paste]
-
-Produce ETCSLV answers as 6 short bullets (E, T, C, S, L, V).
-Flag anything vague and ask me to tighten Limits and Validation.
-```
-
-They edit the Teacher’s draft until Limits and Validation are specific (not “be careful”).
-
-### Reflect — 1 minute
-
-Sticky note: “Hardest ETCSLV letter was ___.”
-
-### You check
-
-Map exists. At least one green and one red step. Limits and Validation are not generic fluff.
-
----
-
-## Node 2 — Choose the pattern with the decision tree (15 minutes)
-
-### Goal
-
-Lock today’s build pattern so people stop fantasizing about giant multi-agent systems they cannot finish today.
-
-### Demo — 3 minutes
-
-Pick one volunteer’s process. On the projector, open the roadmap **Decision Tree**, answer the questions live, and read the result card (pattern + recommendation).
-
-### Participants — 10 minutes
-
-**1.** Open the roadmap Decision Tree and complete it for **their** process.  
-**2.** Paste the result into the Teacher Agent:
-
-```text
-Decision tree result: [paste the type and recommendation]
-My process: [paste]
-Defend or challenge the result.
-State the simplest build plan for the next 90 minutes in 5 steps.
-```
-
-**3.** Put a Miro sticky: `Today we build: [pattern name]`.
-
-### Reflect — 2 minutes
-
-Celebrate anyone told to build something **simpler** than they expected.
-
-### You check
-
-Pattern is locked and realistic for one afternoon.
-
----
-
-## Node 3 — Build the workflow brain (28 minutes)
-
-### Goal
-
-Create the reusable assistant/instructions that will power today’s process — fixed input expectations and fixed output shape. This is not a new random toy; it is the brain of the process they already chose.
-
-### Demo — 4 minutes
-
-Build (or open) a “Weekly Status Report Assistant” with:
-
-- fixed sections such as Done / Blocked / Next week,
-- one example of a good past report uploaded or pasted,
-- a rule: if bullets are missing, ask before drafting.
-
-Run it once with sample bullets.
-
-### Participants — 22 minutes
-
-**1.** Ask the Teacher Agent:
-
-```text
-Locked pattern: [paste]
-Process: [paste]
-ETCSLV: [paste their six bullets]
-
-Write:
-1) System instructions (copy-paste ready)
-2) Input contract (what I must provide each time)
-3) Output contract (exact format)
-4) Failure behavior (missing info, out-of-scope, low confidence)
-Keep it maintainable by a non-engineer.
-```
-
-**2.** Put those instructions into the right place for their pattern:
-
-- reusable Project / Custom GPT, and/or
-- NotebookLM notebook if the pattern is knowledge-heavy.
-
-**3.** Test twice:
-
-- **Happy path:** clean, complete input.
-- **Messy path:** missing details — does it ask instead of inventing?
-
-**4.** Ask the Teacher to critique once, then apply one fix.
-
-### Reflect — 2 minutes
-
-On Miro, write: “Still requires a human: ___.” This feeds Limits later.
-
-### You check
-
-Assistant runs twice. Output format is stable. A human gate is named.
-
----
-
-## Node 4 — Automation path that can run (34 minutes)
-
-### Goal
-
-Move from “I have a good assistant” to “I can start the work, get an AI result, and land it somewhere useful — with approval.”
-
-### Demo — 6 minutes
-
-Run your prepared example on the projector:
-
-1. Trigger (Google Form, email, or sheet row).
-2. AI step (summary or draft using a clear prompt).
-3. Output (Slack message, email draft, or Doc).
-4. Human approval before anything external is final.
-
-Name which tool you are using today (n8n / Zapier / Make / simpler sheet-based path). Prefer showing a **cloneable template**, not building from a blank canvas.
-
-### Also introduce cost awareness here (2 minutes inside the demo if needed)
-
-Say:
-
-> “Do not use an expensive high-reasoning model for a cheap formatting job. Mark easy steps as low cost and hard judgment steps as high cost. If you use API keys later at work, keep them in a secret store — never in Miro, chat, or the roadmap.”
-
-Optional table on a slide or Miro:
-
-| Kind of step | Model choice |
-| ------------ | ------------ |
-| Format, extract, tag, clear classify | Smaller / faster / cheaper |
-| Ambiguous planning or hard synthesis | Stronger / costlier |
-| External or high-stakes message | Stronger model + human approval |
-
-### Participants — 24 minutes — choose a track
-
-#### Track A — Preferred: no-code automation
-
-1. Clone your template, or build the minimum path: Trigger → AI step → Output.
-2. Put their workflow-brain instructions into the AI step (or have the automation drop text into a place their assistant already understands).
-3. Run once with sample/dummy data end-to-end.
-4. Ask the Teacher Agent:
-
-```text
-My automation path:
-Trigger = [what starts it]
-AI step = [what the model does]
-Output = [where the result goes]
-Approval = [who approves what]
-
-List Tools (T), Limits (L), Validation (V).
-List top 3 ways this breaks on Monday and one fix each.
-```
-
-#### Track B — If automation tools are blocked
-
-This still counts if they can **live-run** it:
-
-1. Write the trigger checklist on Miro (“Every Monday at 10:00 I gather X”).
-2. Run the assistant to produce the artifact.
-3. Human copies/sends only after review.
-4. Optional: a form or sheet that only collects inputs.
-
-### Reflect — 4 minutes
-
-Three volunteers show the **run on screen**, not an architecture diagram.
-
-### You check
-
-You saw evidence of a run. Limits and Validation are written.
-
-### Break or lunch
-
----
-
-# SECTION 3 — Work BY AI (about 110 minutes)
-
-## Section goal in plain language
-
-They manage the same workflow like a small AI team: minimum roles, a harness (operating rules), intentional failure tests, then ship and demo the live run.
-
----
-
-## Framing — 4 minutes
-
-Say:
-
-> “You are the manager. AI roles are workers. The Harness Card is the job description. Failure Lab is what Monday will feel like. Then we ship.”
-
-Participants ask the Teacher Agent:
-
-```text
-In 5 bullets: what it means to manage AI workers for my process (not merely to “prompt better”).
-Include: role design, handoffs, approvals, evaluation.
-```
-
----
-
-## Node 1 — AI workforce on Miro (15 minutes)
-
-### Goal
-
-A simple Miro roster of AI roles for **this** process — fewer roles is better — plus one human approval point.
-
-### Demo — 2 minutes
-
-Show an example chain on Miro:
-
-`Planner → Researcher → Writer → Reviewer → Human approval`
-
-### Participants — 11 minutes
-
-**1.** On Miro, place 3–5 AI roles for their process and mark where the human sits.  
-**2.** Ask the Teacher Agent:
-
-```text
-Proposed AI roles: [paste]
-My pattern: [paste]
-Cut to the minimum roles needed today.
-Show final roster + what each receives/produces + where Human sits.
-```
-
-**3.** Update Miro to the smaller roster.
-
-### You check
-
-Handoffs are clear. External or high-risk steps have a human.
-
----
-
-## Node 2 — Harness Card (15 minutes)
-
-### Goal
-
-Complete an operating card so Monday is not vibes-based.
-
-### What each field means (say this while they fill)
-
-| Field | Plain meaning |
-| ----- | ------------- |
-| Workflow | What process is this? |
-| Execution (E) | Does it need multiple reasoning steps or loops? |
-| Tools (T) | Which systems and which model cost tier ($ vs $$$)? |
-| Context (C) | What must the AI always know (docs, tone, audience)? |
-| State (S) | What must persist beyond one chat (files, sheet, memory)? |
-| Limits (L) | What must it never do? Who approves external actions? |
-| Validation (V) | How do we know the output is acceptable? |
-
-### Demo — 2 minutes
-
-Fill one example harness on Miro for “Weekly competitor brief.”
-
-### Participants — 11 minutes
-
-Fill their harness on Miro (or a linked doc). Then ask the Teacher:
-
-```text
-Here is my Harness Card: [paste all fields]
-Critique Limits and Validation first.
-Rewrite weak fields to be specific and testable.
-```
-
-Apply the rewrite.
-
-### You check
-
-Limits and Validation are specific enough to test.
-
----
-
-## Node 3 — Failure Lab (18 minutes)
-
-### Goal
-
-Break their own workflow on purpose, then harden it. This builds trust more than another happy-path demo.
-
-### The five failure types (explain once)
-
-1. **Missing context** — run it with empty or incomplete input.  
-2. **Hallucination** — ask for facts not in the sources.  
-3. **Wrong tool** — force a spreadsheet-style job into chat-only.  
-4. **No approval** — imagine sending externally with no human gate.  
-5. **Doom loop** — a step that retriggers itself forever.
-
-### Demo — 3 minutes
-
-Break your own demo once (missing context is easiest). Show what a good fix looks like in instructions (“If input is empty, stop and ask”).
-
-### Participants — 12 minutes
-
-On **their** running workflow, trigger **two** failures. For each, write on Miro:
-
-```text
-What broke:
-Why:
-Fix we applied:
-```
-
-If stuck, ask the Teacher:
-
-```text
-I will break my workflow with: [failure type]
-Give me exact steps to trigger it, what I should observe, and how to fix instructions or automation.
-```
-
-Update Harness Limits/Validation after the fixes.
-
-### You check
-
-At least one fix is visible in instructions or in the automation path.
-
----
-
-## Node 4 — Capstone: ship the real workflow (38 minutes)
-
-### Goal
-
-Finish and re-run the **same** business process end-to-end.  
-This is **not** “make a PowerPoint about the idea.”  
-This is “make it run twice on your machine.”
-
-### Post this definition of done on Miro / projector
-
-- [ ] Trigger is defined and was used at least once  
-- [ ] AI step uses their instructions and context  
-- [ ] Output lands where real work goes (Doc, Sheet, email draft, Slack, ticket, etc.)  
-- [ ] Human approval exists before external send when relevant  
-- [ ] Harness Limits and Validation match what they built  
-- [ ] They can re-run without you standing beside them  
-
-### Participants — about 32 minutes
-
-1. Close gaps found in Failure Lab.  
-2. Re-run the happy path **twice**.  
-3. Ask the Teacher Agent for a spoken demo script:
-
-```text
-Write a 60-second spoken script for Demo Day.
-I must: name the pain, trigger the run, show output, name the human approval, name one failure we fixed.
-No slide language. Sound like a manager, not a vendor.
-```
-
-4. Optional: one Miro frame with a screenshot of the run (before → after). Slides are optional support only.
-
-### What you do
-
-Walk desks only. Kill scope creep with:
-
-> “Ship the slice you can re-run in the next ten minutes.”
-
-### You check
-
-Live re-run works. Most definition-of-done boxes are green.
-
----
-
-## Node 5 — Demo Day (20–25 minutes)
-
-### Goal
-
-Public proof. Show the run, not a presentation performance.
-
-### Timing
-
-| Time | What happens |
-| ---- | ------------ |
-| 2 min | Rules: about 3 minutes per team; must trigger live or show a recording from the last 10 minutes |
-| ~3 min × teams | Pain → live run → who approves → one risk fixed |
-| 3 min | Peer votes: Most practical · Safest · Best time saved |
-| 3 min | Your closing + 30-day challenge |
-
-If there are too many teams: gallery walk + 90-second lightning runs + vote.
-
-### Closing — what you say
-
-> “On Monday, run this workflow once without this room. Keep the Teacher Agent as your coach. Improve Validation next. Only add more complexity when the decision tree says you need it.”
-
-Optional Teacher prompt for take-home:
-
-```text
-Based on everything today, give me a 30-day plan:
-Week 1 run ritual, Week 2 improve Validation, Week 3 optional second automation or cheaper models on easy steps, Week 4 review harness with my team.
-Keep under 150 words.
-```
-
-Mark Demo Day and workshop complete on the roadmap.
-
----
-
-# Appendix A — Quick timing map
-
-| Block | Approx. time | Bias |
-| ----- | ------------ | ---- |
-| Opening — Teacher Agent | 25 min | Hands-on |
-| Section 1 — WITH | 85 min | Hands-on |
-| Section 2 — THROUGH | 100 min | Hands-on |
-| Section 3 — BY + Demo | 110 min | Hands-on |
-| Breaks | 2 × 15 min (+ lunch if scheduled) | |
-
----
-
-# Appendix B — Suggested roadmap node titles
-
-| Session | Title | Nodes |
-| ------- | ----- | ----- |
-| 1 | Work WITH AI | Teacher Agent · First Worker · Prompt Bake-Off · Tool Fit · Memory + Process Choice |
-| 2 | Work THROUGH AI | Miro Map · Decision Tree · Workflow Brain · Automation Path |
-| 3 | Work BY AI | Workforce (Miro) · Harness · Failure Lab · Ship Workflow · Demo Day |
-
-Use task type `project` for builds, `attend` for Demo Day, and short `written` notes only for harness/ETCSLV.
-
----
-
-# Appendix C — Facilitator do / don’t
-
-**Do**
-
-- Send theory questions to the Teacher Agent first.
-- Keep demos short; spend time unblocking people.
-- Force process slices that can ship today.
-- Require a live run before calling something “done.”
-- Keep maps, workforce, and harness on Miro/Mural.
-
-**Don’t**
-
-- Restart a new toy project in Section 2 — escalate the same process.
-- Accept a slide deck as the capstone without a run.
-- Teach automation from a blank canvas unless someone is clearly advanced.
-- Turn Demo Day into slide theater.
-
----
-
-# Appendix D — If things go wrong
-
-| Problem | What you do |
-| ------- | ----------- |
-| Wi‑Fi or tool blocked | Use Track B semi-automation; still require a live assistant run |
-| Process too big | Slice to one trigger, one AI step, one output |
-| Automation clone fails | Form/sheet collects input → assistant drafts → human sends; that can still count as a run |
-| Too many teams for Demo Day | 90-second lightning demos |
-| Teacher Agent answers poorly | Re-paste the Opening system instructions; ask again more specifically |
-
----
-
-# Appendix E — All Teacher prompts in one place
-
-These are the same prompts already written into the sections above. Keep this appendix as a single copy-paste sheet for the shared participant doc.
-
-### E1 — Teacher system instructions (Project instructions)
-
-```text
-You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
-
-Audience: working professionals (not software engineers).
-Your job: teach agentic AI concepts clearly, sequentially, and practically.
-The human instructor handles live demos and tool troubleshooting. You handle explanation, critique, and drafting.
-
-Rules:
-1) Use plain language. No jargon without a one-line meaning.
-2) Prefer the simplest pattern that works.
-3) Always keep Human-in-the-loop for external actions, legal, people decisions, and money.
-4) When asked to draft prompts or instructions, make them copy-paste ready.
-5) Grow complexity across the day: chat → assistant → knowledge → single workflow → light automation → managed roles/harness.
-6) If the learner’s process is too big for one day, propose a smaller slice.
-7) End important answers with: “Next build step: …” (one concrete action).
-
-ETCSLV (learner’s harness checklist):
-E Execution — multiple reasoning steps or loops?
-T Tools — interact with external systems?
-C Context — what must AI always know?
-S State — what must persist beyond one chat?
-L Limits — boundaries, approvals, safeguards?
-V Validation — how do we know it’s correct?
-
-Pattern ladder (simplest → complex):
-Instruction-only chat → Knowledge assistant → Single workflow agent → Multi-agent workflow → Automation pipeline
-```
-
-### E2 — Day contract
-
-```text
-I am starting the workshop now.
-My role: [ROLE]
-My organization type: [e.g. HR / marketing / ops / founder]
-The painful process I might automate today: [1–2 sentences]
-
-Confirm you understand your teaching role.
-Then explain in 6 bullets how today will grow from “work WITH AI” to “work BY AI.”
-Ask me 3 clarifying questions about my process so you can coach me all day.
-```
-
-### E3 — Executive Assistant draft
-
-```text
-Draft copy-paste Project instructions for my Executive Assistant.
-Role context: [paste]
-Must include: priorities, tone, output format, “never invent facts,” and when to ask before acting.
-Keep under 200 words.
-Then give me one sample morning input I can paste to test it.
-```
-
-### E4 — Prompt rewrite
-
-```text
-Here is a weak prompt: [paste]
-Rewrite it using: role + context + task + format + constraints + verify step.
-Show BEFORE vs AFTER.
-Tell me which single change will improve quality most.
-```
-
-### E5 — Tool fit
-
-```text
-Task I need to do: [paste]
-Recommend exactly 2 tools from: ChatGPT, Claude, Gemini, Perplexity, NotebookLM.
-For each: best for / weak for / 1 risk.
-Give me one identical test prompt to run in both.
-```
-
-### E6 — Process candidate check
-
-```text
-Process I want to automate today: [paste]
+Process I want to automate today: [paste Process lock text]
 Docs I can use: [list]
 Answer:
 1) Good one-day candidate? Yes/No
@@ -1064,7 +499,43 @@ Answer:
 5) How we’ll validate done (Validation)
 ```
 
-### E7 — Ladder in my context
+Accept a smaller slice if the Teacher says so.
+
+### Reflect (3 minutes)
+
+2–3 people read their process aloud. You kill overscoped monsters.
+
+### Break — 15 minutes
+
+---
+
+# SECTION 2 — Work THROUGH AI (~100 minutes)
+
+## Section goal
+
+Same process → map → pattern → reusable brain → running path (trigger → AI → output → approval).
+
+---
+
+## Framing (5 minutes)
+
+### Facilitator (2 minutes)
+
+Show the ladder once on a PPT slide:
+
+```text
+Instruction-only chat
+→ Knowledge assistant (your docs)
+→ Single workflow agent
+→ Multi-agent workflow
+→ Automation pipeline
+```
+
+> “Climb only as high as your process needs. Most people ship at knowledge assistant or single workflow, plus a light run path.”
+
+### Participant activity (3 minutes)
+
+Teacher chat:
 
 ```text
 Using MY process: [paste]
@@ -1072,17 +543,90 @@ Explain the pattern ladder with one example at each level for THIS process.
 Recommend the level I should build today and why not higher.
 ```
 
-### E8 — ETCSLV from map
+---
+
+## Node 1 — Map the process + learn ETCSLV (22 minutes)
+
+### Goal
+
+1. Understand ETCSLV **before** using it.  
+2. Map 6–8 steps for their process.  
+3. Fill ETCSLV in their Working Pack; Teacher only critiques.
+
+### What the step tags mean (say once)
+
+- **Green — LLM thinking:** draft, summarize, brainstorm, rewrite.  
+- **Blue — rules / automation:** forms, reminders, moving data, triggers.  
+- **Red — human only:** legal, people conflict, money, send-to-client without review.
+
+### Facilitator demo — teach ETCSLV first (5 minutes) — projector only
+
+Show the table on a PPT slide and walk **one fully filled example** (“Weekly client report”):
+
+| Letter | Meaning | Core question | Example answer for weekly client report |
+| ------ | ------- | ------------- | ---------------------------------------- |
+| **E** | Execution | Multiple reasoning steps or loops? | Yes — gather bullets, rewrite, adjust tone |
+| **T** | Tools | External systems needed? | Email + Doc; optional sheet of inputs |
+| **C** | Context | What must AI always know? | Client name, offer, forbidden claims |
+| **S** | State | What persists beyond one chat? | Last week’s report file; client prefs |
+| **L** | Limits | Boundaries / approvals? | No send without manager approval; no invented metrics |
+| **V** | Validation | How do we know it’s correct? | Checklist: facts cited, tone OK, human signed off |
+
+Say:
+
+> “ETCSLV is your operating checklist for any AI workflow. We fill it after we map steps — not before we understand the letters.”
+
+Then quickly draw 6–8 steps for the same example on a PPT slide or paper under the document camera; tag green/blue/red; point at L and V again.
+
+### Participant activity (14 minutes)
+
+**1.** On Working Pack slide “Process map” (or paper), list **at most 8 steps** for their process.  
+**2.** Tag each step green / blue / red.  
+**3.** On Working Pack slide “ETCSLV,” fill all six letters in their own words first (empty boxes in the template).  
+**4.** Only then, Teacher chat:
 
 ```text
 Here is my workflow map (steps + green/blue/red tags):
 [paste]
 
-Produce ETCSLV answers as 6 short bullets (E, T, C, S, L, V).
-Flag anything vague and ask me to tighten Limits and Validation.
+Here is my first ETCSLV draft:
+E: …
+T: …
+C: …
+S: …
+L: …
+V: …
+
+Critique vague answers — especially Limits and Validation.
+Rewrite only the weak lines so they are specific and testable.
 ```
 
-### E9 — Decision tree challenge
+Update the Working Pack with the improved L and V.
+
+### Reflect (3 minutes)
+
+“Hardest letter was ___.” Spot-check that L and V are not “be careful.”
+
+### Done when
+
+Map exists; ETCSLV filled; L and V are specific.
+
+---
+
+## Node 2 — Choose the pattern with the decision tree (15 minutes)
+
+### Goal
+
+Lock today’s pattern so people stop fantasizing about unfinished mega-systems.
+
+### Facilitator demo (3 minutes) — projector only
+
+Volunteer process → roadmap Decision Tree live → read result card.
+
+### Participant activity (10 minutes)
+
+**1.** Complete Decision Tree for their process.  
+**2.** Teacher chat:
 
 ```text
 Decision tree result: [paste type and recommendation]
@@ -1091,7 +635,27 @@ Defend or challenge the result.
 State the simplest build plan for the next 90 minutes in 5 steps.
 ```
 
-### E10 — Workflow brain
+**3.** Working Pack slide “Pattern lock”: `Today we build: [pattern]`.
+
+### Reflect (2 minutes)
+
+Celebrate anyone told to build **simpler** than expected.
+
+---
+
+## Node 3 — Build the workflow brain (28 minutes)
+
+### Goal
+
+Reusable instructions + input/output contract for **this** process (not a new toy).
+
+### Facilitator demo (4 minutes) — projector only
+
+Show a “Weekly Status Report Assistant”: fixed sections (Done / Blocked / Next week), example past report, rule “ask if bullets missing.” Run once.
+
+### Participant activity (22 minutes)
+
+**1.** Teacher chat:
 
 ```text
 Locked pattern: [paste]
@@ -1099,14 +663,50 @@ Process: [paste]
 ETCSLV: [paste]
 
 Write:
-1) System instructions (copy-paste)
-2) Input contract (what I must provide)
+1) System instructions (copy-paste ready)
+2) Input contract (what I must provide each time)
 3) Output contract (exact format)
 4) Failure behavior (missing info, out-of-scope, low confidence)
 Keep it maintainable by a non-engineer.
 ```
 
-### E11 — Automation T / L / V
+**2.** Put instructions into the right place (Project / GPT / NotebookLM as fits the pattern).  
+**3.** Test happy path + messy path.  
+**4.** One Teacher critique, one fix.
+
+### Reflect (2 minutes)
+
+Working Pack: “Still requires a human: ___.”
+
+---
+
+## Node 4 — Automation path that can run (34 minutes)
+
+### Goal
+
+Trigger → AI → output → approval — **live once**, not paper architecture.
+
+### Facilitator demo (6 minutes) — projector only
+
+Your prebuilt path: form/email/sheet → AI step → Doc/Slack/email draft → human approve. Prefer a **cloneable** Zapier/Make/n8n template.
+
+Also say (cost routing, 1–2 minutes):
+
+> “Do not use an expensive high-reasoning model for a cheap formatting job. Mark easy steps `$` and hard judgment `$$$` on your process map. API keys at work belong in a secret store — never in chat, slides, or the roadmap.”
+
+| Kind of step | Model choice |
+| ------------ | ------------ |
+| Format, extract, tag, clear classify | Smaller / faster / cheaper |
+| Ambiguous planning or hard synthesis | Stronger / costlier |
+| External / high-stakes message | Stronger model + human approval |
+
+### Participant activity (24 minutes)
+
+**Track A — Preferred: no-code automation**  
+1. Clone your template or build minimum: Trigger → AI → Output.  
+2. Wire their workflow-brain prompt into the AI step.  
+3. Run once with sample data.  
+4. Teacher chat:
 
 ```text
 My automation path:
@@ -1119,14 +719,54 @@ List Tools (T), Limits (L), Validation (V).
 List top 3 ways this breaks on Monday and one fix each.
 ```
 
-### E12 — Manager mindset
+**Track B — If automation is blocked**  
+Still valid if live-runnable: checklist trigger on Working Pack / paper → assistant produces artifact → human sends after review. Optional form/sheet for inputs only.
+
+### Reflect (4 minutes)
+
+Three people show the **run on screen**.
+
+### Break or lunch
+
+---
+
+# SECTION 3 — Work BY AI (~110 minutes)
+
+## Section goal
+
+Same workflow → minimum AI roles → harness → break it → ship → demo the run.
+
+---
+
+## Framing (4 minutes)
+
+Facilitator:
+
+> “You are the manager. AI roles are workers. The Harness Card is the job description. Failure Lab is Monday. Then we ship.”
+
+Participant — Teacher chat:
 
 ```text
 In 5 bullets: what it means to manage AI workers for my process (not merely to “prompt better”).
 Include: role design, handoffs, approvals, evaluation.
 ```
 
-### E13 — Cut the roster
+---
+
+## Node 1 — AI workforce (15 minutes)
+
+### Goal
+
+Minimum role roster for **this** process + one human gate. Use Working Pack slide or pen and paper.
+
+### Facilitator demo (2 minutes) — projector only
+
+On a PPT slide: `Planner → Researcher → Writer → Reviewer → Human approval`
+
+### Participant activity (11 minutes)
+
+**1.** Working Pack “Workforce” table: 3–5 AI roles + human.  
+**2.** Teacher chat:
 
 ```text
 Proposed AI roles: [paste]
@@ -1135,7 +775,39 @@ Cut to the minimum roles needed today.
 Show final roster + what each receives/produces + where Human sits.
 ```
 
-### E14 — Harness critique
+**3.** Shrink the table.
+
+### Done when
+
+Handoffs clear; human on external/high-risk steps.
+
+---
+
+## Node 2 — Harness Card (15 minutes)
+
+### Goal
+
+Operating card that matches what they built (ETCSLV already learned).
+
+### Facilitator demo (2 minutes) — projector only
+
+Fill one example harness on a PPT slide (“Weekly competitor brief”).
+
+### Participant activity (11 minutes)
+
+Complete Working Pack “Harness” slide:
+
+| Field | ETCSLV |
+| ----- | ------ |
+| Workflow | — |
+| Execution | E |
+| Tools (+ $ / $$$ models) | T |
+| Context | C |
+| State | S |
+| Limits | L |
+| Validation | V |
+
+Teacher chat:
 
 ```text
 Here is my Harness Card: [paste]
@@ -1143,14 +815,72 @@ Critique Limits and Validation first.
 Rewrite weak fields to be specific and testable.
 ```
 
-### E15 — Failure lab coach
+### Done when
+
+L and V are specific enough to test.
+
+---
+
+## Node 3 — Failure Lab (18 minutes)
+
+### Goal
+
+Break their workflow on purpose; harden it.
+
+### Failure types (facilitator explains once)
+
+1. Missing context  
+2. Hallucination  
+3. Wrong tool  
+4. No approval  
+5. Doom loop  
+
+### Facilitator demo (3 minutes) — projector only
+
+Break your demo once (empty input is easiest). Show the fix in instructions.
+
+### Participant activity (12 minutes)
+
+Trigger **two** failures on their running workflow. Log on Working Pack / paper:
+
+```text
+What broke:
+Why:
+Fix we applied:
+```
+
+If stuck — Teacher chat:
 
 ```text
 I will break my workflow with: [failure type]
 Give me exact steps to trigger it, what I should observe, and how to fix instructions or automation.
 ```
 
-### E16 — Demo Day script
+Update Harness L/V.
+
+---
+
+## Node 4 — Capstone: ship the real workflow (38 minutes)
+
+### Goal
+
+**Not** “make a presentation about the idea.”  
+**Yes** — make **this** process run twice on their machine.
+
+### Definition of done (show on agenda PPT)
+
+- [ ] Trigger defined and used  
+- [ ] AI step uses their instructions/context  
+- [ ] Output lands where real work goes  
+- [ ] Human approval before external send when relevant  
+- [ ] Harness L + V match the build  
+- [ ] They can re-run without you beside them  
+
+### Participant activity (~32 minutes)
+
+1. Close Failure Lab gaps.  
+2. Re-run happy path twice.  
+3. Teacher chat for spoken script:
 
 ```text
 Write a 60-second spoken script for Demo Day.
@@ -1158,7 +888,34 @@ I must: name the pain, trigger the run, show output, name the human approval, na
 No slide language. Sound like a manager, not a vendor.
 ```
 
-### E17 — 30-day plan
+4. Optional: one screenshot on Working Pack. Agenda PPT is for orientation — not the capstone.
+
+### Facilitator
+
+Walk desks. Kill scope creep: “Ship the slice you can re-run in ten minutes.”
+
+---
+
+## Node 5 — Demo Day (20–25 minutes)
+
+### Goal
+
+Show the **run**, not slide theater.
+
+| Time | What happens |
+| ---- | ------------ |
+| 2 min | Rules: ~3 min/team; live trigger or recording from last 10 min |
+| ~3 min × teams | Pain → run → who approves → one risk fixed |
+| 3 min | Votes: Most practical · Safest · Best time saved |
+| 3 min | Close + 30-day challenge |
+
+Too many teams → 90-second lightning runs.
+
+### Closing — say this
+
+> “Monday: run this once without this room. Keep the Teacher Agent. Improve Validation next. Add complexity only when the decision tree says so.”
+
+Optional Teacher prompt:
 
 ```text
 Based on everything today, give me a 30-day plan:
@@ -1166,6 +923,198 @@ Week 1 run ritual, Week 2 improve Validation, Week 3 optional second automation 
 Keep under 150 words.
 ```
 
+Mark Demo Day + workshop complete on the roadmap.
+
 ---
 
-*Document version: 2026-07-23 · Facilitator-facing runbook · Teacher-Agent–led · Product of the day: one running workflow*
+# Appendix A — Timing map
+
+| Block | ~Time | Bias |
+| ----- | ----- | ---- |
+| Opening | 25 | Hands-on |
+| Section 1 (incl. landscape) | ~90 | Hands-on |
+| Section 2 | ~100 | Hands-on |
+| Section 3 + Demo | ~110 | Hands-on |
+| Breaks | 2×15 (+ lunch) | |
+
+---
+
+# Appendix B — Roadmap node titles
+
+| Session | Title | Nodes |
+| ------- | ----- | ----- |
+| 1 | Work WITH AI | Teacher Agent · First Worker · Prompt Bake-Off · Tool Landscape + Fit · Memory + Process Choice |
+| 2 | Work THROUGH AI | Process Map + ETCSLV · Decision Tree · Workflow Brain · Automation Path |
+| 3 | Work BY AI | Workforce · Harness · Failure Lab · Ship Workflow · Demo Day |
+
+---
+
+# Appendix C — Do / don’t
+
+**Do**
+
+- Send theory to the Teacher Agent.  
+- Demo short; rescue long.  
+- Force slices that ship today.  
+- Require a live run.  
+- Keep work in Working Pack slides / paper + AI tools + roadmap.
+
+**Don’t**
+
+- Add Miro/Mural.  
+- Let people try more than 3 tools for the shipping stack.  
+- Accept a deck as capstone without a run.  
+- Teach automation from a blank canvas unless someone is clearly advanced.  
+- Introduce ETCSLV only via a Teacher prompt with no explanation.
+
+---
+
+# Appendix D — If things go wrong
+
+| Problem | Fix |
+| ------- | --- |
+| Wi‑Fi / tool blocked | Track B semi-auto; still require live assistant run |
+| Process too big | One trigger, one AI step, one output |
+| Automation clone fails | Sheet/form → assistant → human send still counts if live |
+| Too many Demo Day teams | 90-second lightning |
+| Teacher Agent weak | Re-paste Opening system instructions |
+| Someone opens a 4th tool | Remind locked stack; close it |
+
+---
+
+# Appendix E — Teacher prompts (quick copy sheet)
+
+Same prompts as in the sections. Use this when projecting a shared doc.
+
+**E1 — Teacher system instructions** → Opening Step 2 (Project **settings**)  
+**E2 — Day contract** → Opening Step 3 (Teacher **chat**)  
+**E3 — EA draft** → Node 1 Step 1 (Teacher **chat**; result goes into Work EA **settings**)  
+**E4 — Prompt rewrite** → Node 2  
+**E5 — Tool picker (max 2–3)** → Node 3  
+**E6 — Process candidate** → Node 4  
+**E7 — Ladder** → Section 2 framing  
+**E8 — ETCSLV critique** → Section 2 Node 1 (only after they filled a draft themselves)  
+**E9 — Decision tree challenge** → Section 2 Node 2  
+**E10 — Workflow brain** → Section 2 Node 3  
+**E11 — Automation T/L/V** → Section 2 Node 4  
+**E12 — Manager mindset** → Section 3 framing  
+**E13 — Cut roster** → Section 3 Node 1  
+**E14 — Harness critique** → Section 3 Node 2  
+**E15 — Failure coach** → Section 3 Node 3  
+**E16 — Demo script** → Capstone  
+**E17 — 30-day plan** → Closing  
+
+(Full prompt text appears in the matching sections above — do not invent shorter versions.)
+
+---
+
+# Appendix F — Facilitator toolkit & templates
+
+This is your prep checklist. Do this **before** workshop day.
+
+## F1 — Accounts and tools you must have ready
+
+| Need | What to set up |
+| ---- | -------------- |
+| Home LLM | ChatGPT and/or Claude with Projects — Teacher + Work EA demos pre-created |
+| Knowledge demo | NotebookLM (or Project files) + 1–2 safe PDFs |
+| Compare demo | One second chat/research tool (e.g. Perplexity) |
+| Automation | **One** platform you will support live: Zapier **or** Make **or** n8n — with a **clone link** |
+| Multimodal tour | Accounts for every lane you will show on projector (you demo; they already signed up) |
+| Agenda deck | Google Slides / PPT with section “You are here” markers |
+| Working Pack | Google Slides template participants duplicate |
+| Roadmap | Batch enrolled; decision tree on; prompt pack linked |
+| Backup | Hotspot; ChatGPT+Claude-only track; paper printouts of Working Pack tables |
+
+**Try every demo once the day before** with the same Wi‑Fi quality you expect in the room.
+
+## F2 — Pre-built demos you should be able to run cold
+
+| Demo | What “ready” means |
+| ---- | ------------------ |
+| Weak chat vs Work EA | Messy inbox text saved; EA Project instructions already filled |
+| Prompt before/after | Two prompts saved in a note |
+| Tool landscape | 5 lanes on one agenda slide; one live flash per lane max |
+| NotebookLM trap question | PDF uploaded; two questions written |
+| Decision tree | One sample process with known answers |
+| Workflow brain | Status assistant Project ready |
+| Automation | Cloneable scenario with dummy trigger data |
+| Failure | One intentional break + known fix |
+| Cost $ / $$$ | Same sample map with two steps marked |
+
+## F3 — Working Pack (Google Slides) — structure for participants
+
+Create one template. Share view-only. Instruction: **File → Make a copy**.
+
+Suggested slides:
+
+1. **Cover** — Name, role, date  
+2. **Process lock** — name, pain, owner, success, tools (max 3)  
+3. **Prompt bake-off** — before / after  
+4. **Tool scorecard** — table + locked stack  
+5. **Process map** — rows: Step # · Description · Green/Blue/Red · Notes  
+6. **ETCSLV** — six empty answer boxes with letter + meaning as labels  
+7. **Pattern lock** — decision tree result + “today we build”  
+8. **Workforce** — Role · Receives · Produces · Human?  
+9. **Harness** — Workflow, E, T (with $/$$$), C, S, L, V  
+10. **Failure log** — two rows  
+11. **Definition of done** — checklist  
+12. **Demo script** — paste Teacher’s 60-second script  
+
+**Pen-and-paper backup:** print slides 2, 5, 6, 8, 9, 10 as one double-sided handout.
+
+## F4 — Agenda PPT / Google Slides (facilitator projector deck)
+
+Keep sparse (see also `PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md`). Must include:
+
+- Day map with YOU ARE HERE  
+- Three surfaces reminder  
+- Chat vs Assistant vs Agent  
+- Tool landscape 5 lanes + “max 2–3 for your workflow”  
+- Green / Blue / Red tags  
+- ETCSLV table with one filled example  
+- Pattern ladder  
+- Cost $ vs $$$  
+- Definition of done  
+- Demo Day rules  
+- 30-day challenge + links  
+
+Use **your** agenda deck to demo maps/roles/harness live if helpful (edit one example slide). Participants do **not** collaboratively edit your agenda deck.
+
+## F5 — Automation template structure (Zapier / Make / n8n)
+
+Build one scenario participants can clone:
+
+1. **Trigger** — Google Form submit **or** new Sheet row **or** email labeled X  
+2. **Normalize** — map fields to: `raw_input`, `requester`, `date`  
+3. **AI step** — prompt placeholder: paste “workflow brain” instructions + `{{raw_input}}`  
+4. **Write output** — Google Doc body / Sheet column / Slack draft message / Gmail draft  
+5. **Approval note** — branch or final step: “Do not send externally until human checks” (even if only a checklist field)  
+6. **Dummy data** — 3 sample form responses for the live demo  
+
+Document in one page: clone link, required connections, where to paste their prompt.
+
+## F6 — Sample content packs to pre-write
+
+| Pack | Contents |
+| ---- | -------- |
+| Messy inbox | The morning bullets used in Node 1 |
+| EA instructions | Final text for your demo Work EA |
+| Client-report map | 6–8 steps + tags + full ETCSLV answers |
+| Trap PDF | Short fake policy PDF for NotebookLM |
+| Bad/good prompts | Node 2 pair |
+| Multimodal one-liners | One sentence per lane for the tour |
+
+## F7 — Night-before facilitator checklist
+
+- [ ] All your demo Projects open and tested  
+- [ ] Automation clone works on a second browser/profile  
+- [ ] Working Pack link + “Make a copy” instruction in email/roadmap  
+- [ ] Agenda deck on the workshop laptop + backup PDF  
+- [ ] Participant pre-work list includes multimodal signups  
+- [ ] Room Wi‑Fi + hotspot verified  
+- [ ] Printed paper Working Pack for 20% of seats  
+
+---
+
+*Document version: 2026-07-23b · No Miro · Google Slides Working Pack + pen/paper · Multimodal landscape with max 2–3 tools · Facilitator demos labeled · ETCSLV taught before use · Product of the day: one running workflow*
