@@ -114,9 +114,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                             Task details / student prompt
                         </label>
                         <p className="text-xs text-muted-foreground mb-2">
-                            Students see this when they click the task. Use <span className="font-mono">——— COPY BELOW ———</span> …
-                            <span className="font-mono">——— END ———</span> around text they should Copy into AI.
-                            Leave blank only if the task needs no prompt.
+                            Students see instructions as normal text. Anything between the markers below becomes a
+                            <strong> code snippet with a Copy button</strong> (markers are hidden from students).
+                            Or use a markdown code fence <span className="font-mono">```</span> … <span className="font-mono">```</span>.
                         </p>
                         <textarea
                             value={taskData.taskDetails || ''}

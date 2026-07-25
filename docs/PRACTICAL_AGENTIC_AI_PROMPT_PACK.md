@@ -35,7 +35,34 @@
 
 ---
 
-# SESSION 0 — Housekeeping + Opening (~27 min)
+# SESSION 0 — Housekeeping + Opening (~33 min)
+
+## Task 0.0 — What is AI? What to expect / not expect (6 min)
+
+**You do (mostly listen — no AI yet)**
+
+1. Follow the instructor / agenda slide for **Task 0.0**.
+2. On paper or a blank note, write:
+   - **Expect:** one sentence you will get from today
+   - **Don’t expect:** one sentence you will *not* get from today
+3. Mark roadmap **0.0** complete.
+
+**Remember (from the slide)**
+
+| AI *is* (for this room) | AI is *not* |
+| ----------------------- | ----------- |
+| Pattern-based software that drafts, summarizes, classifies, suggests | Magic, consciousness, or a guaranteed truth engine |
+| Useful when you brief it, check it, and limit it | A replacement for your judgment on legal, people, money, or external sends |
+| A teammate you **manage** | Something you set and forget with no approval |
+
+| Expect today | Don’t expect today |
+| ------------ | ------------------ |
+| One **running** workflow for a real process | Learning to code |
+| Practice managing AI (brief → check → limit → validate) | Mastering every vendor |
+| Shared vocabulary: chat / assistant / agent | A perfect autonomous agent with zero human |
+| Hands-on most of the day | Building a 16-agent swarm |
+
+---
 
 ## Task 0.1 — Open your tools (5 min)
 
@@ -50,9 +77,13 @@
 
 ## Task 0.2 — Create Teacher Agent + paste instructions (10 min)
 
+**Because you just…** opened your desk — hire the coach.  
+**Analogy:** Settings = joining letter / handbook · Chat = today’s conversation at the desk.
+
 1. Create a **Project** named: `Workshop Teacher — Agentic AI`
 2. Open that Project’s **Settings / Instructions** (not the chat box)
-3. Paste the block below **once** → Save
+3. Paste the block below **once** → Save  
+4. If you see acronyms like **ETCSLV** or a “pattern ladder” in the Settings text: **ignore for now** — you learn them in Session 2 when you need them.
 
 ```
 You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
@@ -108,19 +139,26 @@ Ask me 3 clarifying questions about my process so you can coach me all day.
 
 ## Task 0.4 — Chat vs assistant vs agent (5 min)
 
+**Because you just…** used a Project with Settings — name what you lived.  
+**Analogy:** Hallway question vs hired desk EA vs routed office process (intake → desk → stamp).
+
 **Paste into:** same Teacher chat
 
 ```
 Explain chat vs assistant vs agent in my job in 5 short bullets.
+Use a workplace analogy I will remember (desk / hallway / approval stamp is fine).
 ```
 
-**Review:** Pick the one sentence you will remember. Mark roadmap complete.
+**Review:** Pick the one sentence you will remember. Next you will **hire an assistant** (Work EA). Mark roadmap complete.
 
 ---
 
 # SESSION 1 — Work WITH AI (~90 min)
 
 ## Task 1.1 — Fill your Work EA brief (6 min)
+
+**Because you just…** named “assistant” — write the job brief before hiring.  
+**Analogy:** Write the secretary’s joining letter before their first day.
 
 **Think first.** Do this on paper or a blank note — **not** in Teacher yet.
 
@@ -224,42 +262,11 @@ Mark **1.3**. Stay in Teacher for the rest of Session 1 unless told otherwise.
 
 ---
 
-## Task 1.4 — Tool landscape + fit (max 2–3) (25 min)
+## Task 1.4 — Lock today’s process (11 min)
 
-Watch the facilitator’s short landscape tour first.
+**Because you just…** felt WITH AI on real work — **commit one job** before shopping for tools.
 
-**Then paste into:** Teacher chat
-
-```
-Using my process from earlier today, and the kind of outputs I need: [e.g. email draft / PDF Q&A / slide outline / sheet summary]
-
-Recommend EXACTLY 2 tools I should try today (3 only if clearly needed) from:
-ChatGPT, Claude, Gemini, Perplexity, NotebookLM, Gamma or Google Slides AI, image gen in ChatGPT/Gemini.
-
-For each: best for / weak for / 1 risk.
-Give me ONE identical test task to run in those tools.
-Remind me: max 3 tools for today’s process.
-```
-
-**You do:** Run that **one** test in only the recommended tools.  
-**Review:** Which tool fit *this* process? Write your locked stack in one line (paper or note is fine): `Today’s stack: …`  
-Do **not** open a fourth tool.
-
----
-
-## Task 1.5 — Memory — docs + grounded questions (10 min)
-
-**You do** (no Teacher required)
-1. Upload 1–2 allowed work docs to NotebookLM or a Project with files.
-2. Ask two questions answerable from the docs.
-3. Ask one trap question that should **not** be in the docs.
-4. **Review:** Did it refuse or invent on the trap?
-
-Mark **1.5**.
-
----
-
-## Task 1.6 — Lock today’s process (11 min)
+**Analogy:** Choose one customer journey for today — not the whole company.
 
 **Think first** (paper or note — 3 minutes):
 
@@ -267,7 +274,8 @@ Mark **1.5**.
 Process name:
 Why painful:
 Success today looks like:
-Tools (max 3):
+Human must still approve:
+(Optional light tags — full teach at 2.1) steps that feel 🟢 thinking / 🔵 rules / 🔴 human:
 ```
 
 **Then one short message** in Teacher chat (no big paste dump):
@@ -277,15 +285,59 @@ Here is the process I want to ship today:
 Name: […]
 Pain: […]
 Success today: […]
-Tools: […]
+What must stay human: […]
 
 Is this a good one-day slice? Yes/No.
 If No, propose a smaller slice in one sentence.
-What must stay human?
 How will I know it worked?
+Remind me: I will pick tools NEXT (max 3) for THIS process only.
 ```
 
-**Review:** If Teacher says too big, **accept the smaller slice**. Mark **1.6**.
+**Review:** If Teacher says too big, **accept the smaller slice**. Mark **1.4**.  
+Do **not** open a tool zoo yet — that is Task **1.5**.
+
+---
+
+## Task 1.5 — Tool landscape + fit (max 2–3) for the locked process (25 min)
+
+**Because you just…** locked the process — equip only what **that** job needs.
+
+**Analogy:** Don’t open every stall in the market — pick two that serve today’s meal.
+
+Watch the facilitator’s short landscape tour first.
+
+**Then paste into:** Teacher chat
+
+```
+Using my LOCKED process from task 1.4 (use what I already told you — do not ask me to re-paste the whole thing), and the kind of outputs I need: [e.g. email draft / PDF Q&A / slide outline / sheet summary]
+
+Recommend EXACTLY 2 tools I should try today (3 only if clearly needed) from:
+ChatGPT, Claude, Gemini, Perplexity, NotebookLM, Gamma or Google Slides AI, image gen in ChatGPT/Gemini.
+
+For each: best for / weak for / 1 risk.
+Give me ONE identical test task to run in those tools.
+Remind me: max 3 tools for today’s locked process.
+```
+
+**You do:** Run that **one** test in only the recommended tools.  
+**Review:** Which tool fit *this* process? Write your locked stack in one line (paper or note is fine): `Today’s stack: …`  
+Do **not** open a fourth tool. Mark **1.5**.
+
+---
+
+## Task 1.6 — Memory — docs + grounded questions for that process (10 min)
+
+**Because you just…** chose the stack — ground it with the right files (not random PDFs).
+
+**Analogy:** Give the junior the company file — not corridor rumors.
+
+**You do** (no Teacher required)
+1. Upload 1–2 allowed work docs **relevant to your locked process** to NotebookLM or a Project with files.
+2. Ask two questions answerable from the docs.
+3. Ask one trap question that should **not** be in the docs.
+4. **Review:** Did it refuse or invent on the trap?
+
+Mark **1.6**.
 
 ---
 
@@ -295,12 +347,16 @@ Stay in the **same Teacher chat**. Prefer “above / earlier” over re-pasting.
 
 ## Task 2.0 — Pattern ladder (5 min)
 
+**Because you just…** locked one job + stack — ask how much structure *that* job needs.  
+**Analogy:** Bicycle → scooter → one van → small fleet → factory conveyor — climb only as high as this route needs.
+
 ```
 Using my locked process from earlier, explain the pattern ladder with one example at each level for THIS process.
+I already practiced chat + assistant this morning — connect the ladder to that.
 Recommend the level I should build today and why not higher.
 ```
 
-**Review:** Say the recommended level out loud to yourself.
+**Review:** Say the recommended level out loud to yourself. Multi-agent (level 4) waits until something already runs (Session 3).
 
 ---
 
@@ -512,6 +568,7 @@ Week 4: 15-minute harness review with myself or a teammate
 
 | # | Min | Where |
 | - | --- | ----- |
+| 0.0 | 6 | Instructor slide + paper reflection (no AI) |
 | 0.1 | 5 | Roadmap + Prompt Pack + AI tool |
 | 0.2 | 10 | Teacher **Settings** (once) |
 | 0.3 | 7 | Teacher **Chat** (start all-day thread) |
@@ -519,9 +576,9 @@ Week 4: 15-minute harness review with myself or a teammate
 | 1.1 | 6 | Paper / blank note (think) |
 | 1.2 | 22 | Work EA Settings once + **3** chat runs |
 | 1.3 | 16 | Teacher once → Work EA Settings once → re-run once |
-| 1.4 | 25 | Teacher → try ≤3 tools |
-| 1.5 | 10 | NotebookLM / Project files |
-| 1.6 | 11 | Think → one Teacher check |
+| 1.4 | 11 | Think → one Teacher check (**lock process**) |
+| 1.5 | 25 | Teacher → try ≤3 tools **for locked process** |
+| 1.6 | 10 | NotebookLM / Project files **for that process** |
 | 2.0–2.3 | — | Same Teacher thread (type, don’t re-paste) |
 | 2.4 | 15 | Roadmap tree → one Teacher ask |
 | 2.5 | 28 | One Teacher ask → Settings once → test |
