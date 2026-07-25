@@ -93,10 +93,13 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 - **Duplicate roadmap**: Copy curriculum + weeks + tasks + resource catalog to a new roadmap
 - **Workshop slides**: Slide deck catalog; students see **View Slides** for cohort-enabled decks
 - **Decision trees**: Enable AI agent decision tree(s) per roadmap; cohort toggles in batch edit
-- **Task Management**: Create and edit tasks with different types
+- **Task Management**: Create and edit tasks with different types; optional `sort_order` for curriculum sequence
+- **Task list order (mentor dashboard)**: Weeks and tasks display by **`sort_order`**, then title — not by creation time — so Session 1 → 2 → 3 → 4 and task numbers stay stable
+- **Hands-on / Project tasks**: Student UI labels Project type as **Hands-on** (project badge + Hands-on chip)
 - **Content Upload**: Add relevant links, resources, and materials
 - **Progress Monitoring**: Track completion rates across batches
 - **Status Updates**: Modify week and task statuses
+- **Discussions (student surface)**: Mentors using the student roadmap view can read/post on the same **Discussions** board (top-level + one reply layer; Reddit-style collapse; authors can **Edit** / **Delete** their own replies via CTAs). Mentors are not blocked by “complete all tasks first” for posting when signed in.
 
 ### 📝 Notice Board
 - **Create Notices**: Send announcements to specific batches
@@ -105,9 +108,10 @@ Dashboard → Notices Tab → Create Notice → Select Batch → Set Priority �
 - **Notice History**: View all sent notices
 
 ### 📚 Content Management
-- **Task Types**: Create watch, read, project, attend, MCQ, written tasks
+- **Task Types**: Create watch, read, project (hands-on), attend, MCQ, written tasks
 - **Resource Links**: Add external resources and learning materials
 - **Deadline Setting**: Configure task deadlines and time estimates
+- **Curriculum sequencing**: Prefer `sort_order` on weeks/tasks when refreshing workshop curricula (see `sql/20260725_agentic_roadmap_tasks_refresh.sql` pattern)
 
 ### 📈 Analytics & Reporting
 - **Batch Performance**: Overall completion rates and statistics

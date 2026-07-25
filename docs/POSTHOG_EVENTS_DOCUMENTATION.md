@@ -552,9 +552,49 @@ This document provides a comprehensive guide to all PostHog events being tracked
 
 #### 3. `discussion_reply_created`
 **Location**: `src/components/Discussion/DiscussionThread.tsx`
-**Trigger**: When a user replies to a discussion thread
+**Trigger**: When a user replies to a discussion thread (always attached to a root question)
 **Properties**:
-- `parent_id`: string
+- `entity_type`: string
+- `entity_id`: string
+- `parent_id`: string (root question id)
+- `content_length`: number
+
+#### 4. `discussion_reply_edited`
+**Location**: `src/components/Discussion/DiscussionThread.tsx`
+**Trigger**: Author saves an edit to their own reply
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+- `reply_id`: string
+- `parent_id`: string | null
+- `content_length`: number
+
+#### 5. `discussion_reply_deleted`
+**Location**: `src/components/Discussion/DiscussionThread.tsx`
+**Trigger**: Author deletes their own reply via the Delete CTA
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+- `reply_id`: string
+- `parent_id`: string | null
+
+#### 6. `discussion_thread_collapsed`
+**Location**: `src/components/Discussion/DiscussionThread.tsx`
+**Trigger**: User collapses a root question’s reply list (Reddit-style)
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+- `thread_id`: string
+- `reply_count`: number
+
+#### 7. `discussion_thread_expanded`
+**Location**: `src/components/Discussion/DiscussionThread.tsx`
+**Trigger**: User expands a previously collapsed thread
+**Properties**:
+- `entity_type`: string
+- `entity_id`: string
+- `thread_id`: string
+- `reply_count`: number
 
 ## Gamification Events (Certificates/Profile)
 

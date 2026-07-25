@@ -13,6 +13,13 @@ Run these scripts in the **Supabase SQL Editor** in order:
    - [`sql/20260722_roadmap_resource_rls.sql`](../sql/20260722_roadmap_resource_rls.sql)
 6. Optional: [`sql/20260722_workshop_resource_catalog_seed.sql`](../sql/20260722_workshop_resource_catalog_seed.sql) — 3 session deck placeholders + agentic tree
 7. If the **Decision Tree** tab is missing but slide decks exist: [`sql/20260723_agentic_decision_tree_catalog_fix.sql`](../sql/20260723_agentic_decision_tree_catalog_fix.sql)
+8. **Curriculum sync (Sessions 0–4):** [`sql/20260725_agentic_curriculum_sync_sessions_0_to_4.sql`](../sql/20260725_agentic_curriculum_sync_sessions_0_to_4.sql)  
+9. **Less-paste curriculum (Session 1 = 1.1–1.6, no Working Pack):** [`sql/20260725_agentic_curriculum_less_paste_v2.sql`](../sql/20260725_agentic_curriculum_less_paste_v2.sql)  
+10. **Embed prompts into roadmap tasks (Copy modal):** [`sql/20260725_agentic_task_prompts_in_roadmap_fix.sql`](../sql/20260725_agentic_task_prompts_in_roadmap_fix.sql)  
+   *(Skip the broken `…_task_prompts_in_roadmap.sql` — it errors on `GET DIAGNOSTICS`.)*  
+   Master: [`docs/PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md)
+
+**Edit prompts later (mentors):** Mentor → Roadmap → edit task → **Task details / student prompt**. That field is what students Copy. Optional **Relevant link** = PPT / decision tree / reading only.
 
 ## Troubleshooting
 
@@ -49,21 +56,27 @@ Run these scripts in the **Supabase SQL Editor** in order:
 | Start daily review / deck | Full-screen overlay, body scroll locked, no flicker |
 | Agentic roadmap page | Decision Tree tab visible when enabled for cohort |
 
-## Verify
+## Verify (after curriculum sync)
 
 ```sql
 SELECT id, title, node_unit_label, total_weeks, decision_tree_enabled
 FROM roadmaps
 WHERE title = 'Become a Manager of AI Agents';
 
-SELECT sd.title, sd.slides_url, dt.title AS tree_title, dt.tree_key
-FROM roadmaps r
-LEFT JOIN roadmap_slide_decks sd ON sd.roadmap_id = r.id
-LEFT JOIN roadmap_decision_trees dt ON dt.roadmap_id = r.id
-WHERE r.title = 'Become a Manager of AI Agents';
+SELECT week_number, title FROM roadmap_weeks w
+JOIN roadmaps r ON r.id = w.roadmap_id
+WHERE r.title = 'Become a Manager of AI Agents'
+ORDER BY week_number;
+
+SELECT w.week_number, t.sort_order, t.task_name, t.estimated_hours AS minutes
+FROM roadmap_tasks t
+JOIN roadmap_weeks w ON w.id = t.week_id
+JOIN roadmaps r ON r.id = w.roadmap_id
+WHERE r.title = 'Become a Manager of AI Agents'
+ORDER BY w.week_number, t.sort_order;
 ```
 
-Expected: **3 sessions**, **20 tasks**, resource catalog rows after optional seed.
+Expected after **less_paste_v2** SQL: **`total_weeks = 5`**, sessions **`week_number` 0–4**, Session 1 tasks **`1.1`…`1.6`** only (no 1.7/1.8). See curriculum master.
 
 Student URL: `/student/roadmap/become_a_manager_of_ai_agents?batch_id={batch_uuid}`
 
@@ -89,5 +102,9 @@ Replace task placeholder URLs via **Mentor dashboard → Roadmaps** or forward-f
 
 ## Related docs
 
+- [PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md) — task IDs + times (source of truth)
+- [PRACTICAL_AGENTIC_AI_FACILITATOR_GUIDE.md](./PRACTICAL_AGENTIC_AI_FACILITATOR_GUIDE.md)
+- [PRACTICAL_AGENTIC_AI_PROMPT_PACK.md](./PRACTICAL_AGENTIC_AI_PROMPT_PACK.md)
+- [PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md](./PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md)
 - [ROADMAP_SLIDES.md](./ROADMAP_SLIDES.md) — slides + cohort toggles
 - [MENTOR_FEATURES.md](./MENTOR_FEATURES.md) — duplicate roadmap, resource library

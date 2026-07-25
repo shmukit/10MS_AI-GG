@@ -9,7 +9,7 @@
 
 > Using only these sources, create a participant-facing slide deck for the one-day workshop. Follow the slide plan exactly (slide numbers, titles, and on-slide bullets). Keep slides sparse: max 6 bullets, large readable text, no walls of prose. Tone: professional, practical, non-engineer. Do not invent tools, timings, or frameworks not in the sources. Include a short speaker-note line for each slide under “Instructor cue.” Export as a presentation outline I can paste into Google Slides / PowerPoint. Also produce a 2-page PDF take-home summary from slides 1, 3–5, 8–11, 14–16, 20–22.
 
-1. After generation: replace placeholders (`[Roadmap URL]`, `[Miro URL]`, `[Prompt Pack link]`) with real links.
+1. After generation: replace placeholders (`[Roadmap URL]`, `[Prompt Pack link]`) with real links.
 
 ---
 
@@ -26,7 +26,7 @@
 | Take-home PDF reference            | A lecture you read for 40 minutes              |
 
 
-**In-room rule:** Leave the current “You are here” section slide up while people work. Only advance at transitions. Hands-on time > slide time.
+**In-room rule:** Leave the current “You are here” session slide up while people work. Only advance at transitions. Hands-on time > slide time.
 
 **Visual style for NotebookLM:** Clean, high contrast, minimal icons, one idea per slide, tables OK when specified, avoid dense paragraphs.
 
@@ -41,8 +41,8 @@
 ## Full day map (for NotebookLM context)
 
 ```
-OPEN (25) → Section 1 WITH (85) → break → Section 2 THROUGH (100)
-→ break/lunch → Section 3 BY (110) → Demo Day
+Session 0 OPEN (~27) → Session 1 WITH (~90) → break → Session 2 THROUGH (~104)
+→ break/lunch → Session 3 BY (~120, includes Demo Day + short 30-day) → Session 4 Reference (async)
 ```
 
 Arc: **Work WITH AI → Work THROUGH AI → Work BY AI**
@@ -126,12 +126,13 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 | When | Block (say it out loud) | What you will actually do |
 | ---- | ----------------------- | ------------------------- |
-| 25 min | Open · Hire your Teacher Agent | Make one AI coach you will use all day |
-| 85 min | **1 · Work WITH AI** = AI helps *you* | Ask clearer · pick a few tools · choose **one real job** from your week |
+| ~27 min | **0 · Opening** · Hire your Teacher Agent | Surfaces open · one AI coach for the whole day |
+| ~90 min | **1 · Work WITH AI** = AI helps *you* | Ask clearer · pick ≤3 tools · lock **one real job** |
 | 15 min | Break | |
-| 100 min | **2 · Work THROUGH AI** = AI helps run *the job* | Draw the steps · pick the simplest AI setup · build it and run it once |
+| ~104 min | **2 · Work THROUGH AI** = AI helps run *the job* | Map · ETCSLV · decision tree · build · **run once** |
 | as scheduled | Break / lunch | |
-| ~110 min | **3 · Work BY AI** = AI as a *small team* | Split roles · write rules · try to break it · **ship live** · short demo |
+| ~120 min | **3 · Work BY AI** = AI as a *small team* | Roles · harness · break it · **ship live** · Demo Day |
+| later | **4 · Reference** (optional) | Short reads / video at home |
 
 
 - Bottom banner: **Same job all day.** We only add structure — we do not start a new project at lunch.
@@ -160,7 +161,7 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 **Instructor cue:** One breath. No deep dive — Teacher Agent explains in their context later.
 
-**Show when:** Opening (30 sec) + Section 2 framing
+**Show when:** Opening (30 sec) + Session 2 framing
 
 ---
 
@@ -188,22 +189,22 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 
 
-### Slide 7 — Section 1 marker · Work WITH AI
+### Slide 7 — Session 1 marker · Work WITH AI
 
 **On slide**
 
-- Banner: **YOU ARE HERE — Section 1: Work WITH AI** (~85 min)
-- Outcome: Confident collaborator + **today’s process chosen**
-- Nodes (short):
-  1. Brief your first worker (EA)
-  2. Prompt bake-off
-  3. Tool fit sprint (browse many, commit few)
-  4. Memory + choose process
-- Reminder: Learn tool **fit**, not every tool forever
+- Banner: **YOU ARE HERE — Session 1: Work WITH AI** (~90 min) · tasks 1.1–1.6
+- Outcome: Work EA hired (3 runs) + one coach loop + process locked
+- Flow (short):
+  1. Fill EA brief → 3 Work EA runs
+  2. Teacher critiques **once** → re-run once
+  3. Tools ≤3 + memory
+  4. Lock today’s process
+- Reminder: Same Teacher chat all day · Stop → Read → Decide
 
-**Instructor cue:** Leave this slide up during Section 1 work.
+**Instructor cue:** Leave this slide up during Session 1 work.
 
-**Show when:** Start of Section 1
+**Show when:** Start of Session 1
 
 ---
 
@@ -236,32 +237,32 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 - 🟢 LLM thinking — draft, summarize, brainstorm  
 - 🔵 Rules / automation — forms, reminders, filters, triggers  
 - 🔴 Human only — legal, people conflict, money, external send approval  
-- End of Section 1: pick **one** process that has clear 🟢 + 🔴
+- End of Session 1: pick **one** process that has clear 🟢 + 🔴
 
-**Instructor cue:** Use when they choose today’s process on Miro.
+**Instructor cue:** Use when they choose today’s process in Teacher chat.
 
-**Show when:** Section 1 Node 4
+**Show when:** Session 1 Node 4
 
 ---
 
 
 
-### Slide 10 — Section 2 marker · Work THROUGH AI
+### Slide 10 — Session 2 marker · Work THROUGH AI
 
 **On slide**
 
-- Banner: **YOU ARE HERE — Section 2: Work THROUGH AI** (~100 min)
+- Banner: **YOU ARE HERE — Session 2: Work THROUGH AI** (~104 min) · tasks 2.0–2.6
 - Outcome: Mapped process + locked pattern + workflow brain + **automation path that can run**
 - Nodes:
-  1. Map on Miro/Mural
+  1. Map on Teacher chat or paper
   2. Decision tree → lock pattern
   3. Build workflow brain (assistant/agent core)
   4. Automation path (clone template preferred)
-- Same process as Section 1 — escalate, don’t rebuild toys
+- Same process as Session 1 — escalate, don’t rebuild toys
 
-**Instructor cue:** Leave up during Section 2.
+**Instructor cue:** Leave up during Session 2.
 
-**Show when:** Start of Section 2
+**Show when:** Start of Session 2
 
 ---
 
@@ -284,9 +285,9 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 - Most teams fail by picking a tool before answering **C, S, L, V**
 
-**Instructor cue:** Vocabulary wall. Teacher Agent fills bullets from their Miro map.
+**Instructor cue:** Vocabulary wall. Teacher Agent fills bullets from their Teacher chat map.
 
-**Show when:** Section 2 framing / map node; again at Harness
+**Show when:** Session 2 framing / map node; again at Harness
 
 ---
 
@@ -308,12 +309,12 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 
 - Route by **Execution (E)** difficulty, not brand loyalty
-- Mark Miro steps: `$` vs `$$$`
-- API keys (if used): secrets only — never in Miro, chat, or roadmap
+- Mark process steps: `$` vs `$$$`
+- API keys (if used): secrets only — never in notes, chat, or roadmap
 
 **Instructor cue:** 60–90 sec talk + point to dual-model idea in automation. Optional micro-exercise with Teacher Agent.
 
-**Show when:** Section 2 before/during Automation Path
+**Show when:** Session 2 before/during Automation Path
 
 ---
 
@@ -339,22 +340,22 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 
 
 
-### Slide 14 — Section 3 marker · Work BY AI
+### Slide 14 — Session 3 marker · Work BY AI
 
 **On slide**
 
-- Banner: **YOU ARE HERE — Section 3: Work BY AI** (~110 min)
+- Banner: **YOU ARE HERE — Session 3: Work BY AI** (~120 min) · tasks 3.0–3.6
 - Outcome: Manage the workforce around **the same** workflow → ship → demo the run
 - Nodes:
-  1. AI workforce on Miro (minimum roles)
+  1. AI workforce in Teacher chat (minimum roles)
   2. Harness Card (ETCSLV)
   3. Failure Lab (break it on purpose)
   4. Capstone: **ship the running workflow** (not a PPT)
   5. Demo Day: show the run
 
-**Instructor cue:** Leave up during Section 3.
+**Instructor cue:** Leave up during Session 3.
 
-**Show when:** Start of Section 3
+**Show when:** Start of Session 3
 
 ---
 
@@ -367,9 +368,9 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 - Example roster (cut to minimum): Planner · Researcher · Writer · Reviewer · **Human**
 - Specialists beat one mega-prompt
 - Human owns outcomes and external actions
-- Org chart lives on **Miro/Mural**, not as the final deliverable
+- Org chart lives on **Teacher chat or paper**, not as the final deliverable
 
-**Instructor cue:** 60 sec; then they build on Miro with Teacher Agent cutting overkill.
+**Instructor cue:** 60 sec; then they build in Teacher chat with Teacher Agent cutting overkill.
 
 **Show when:** Workforce node
 
@@ -486,8 +487,7 @@ Plain language first. Keep the WITH / THROUGH / BY labels (day arc), but never l
 **On slide**
 
 - Roadmap: `[Roadmap URL]`
-- Miro/Mural: `[Miro URL]`
-- Teacher Agent Prompt Pack: `[Prompt Pack link]`
+- Prompt Pack: `[Prompt Pack link]`
 - Decision tree: inside roadmap
 - Take home: this PDF + your running workflow + Teacher Agent Project
 
@@ -524,7 +524,7 @@ Use only if you explicitly ask NotebookLM to append them. Default deck = **22 sl
 
 **On slide**
 
-- Keys in secret store / automation credentials — never chat, Miro, Git, roadmap  
+- Keys in secret store / automation credentials — never chat, Git, roadmap  
 - Prefer company vault Monday; avoid personal keys in workshop  
 - Log tokens ≈ cost; set spend limits  
 - Rotate if exposed
@@ -579,9 +579,9 @@ Include footer: “Teacher Agent + roadmap teach; this PDF is the map.”
 | ------------------ | ----------------------------------------------- |
 | Start              | 1 → 2 → 3 → 4 → 5                               |
 | Teacher Agent live | 6                                               |
-| Section 1          | 7 (park) → 8 before tools → 9 at process choice |
-| Section 2          | 10 (park) → 11 → 12 → 13                        |
-| Section 3          | 14 (park) → 15 → 16 → 17 → 18                   |
+| Session 1          | 7 (park) → 8 before tools → 9 at process choice |
+| Session 2          | 10 (park) → 11 → 12 → 13                        |
+| Session 3          | 14 (park) → 15 → 16 → 17 → 18                   |
 | Demo + close       | 19 → 20 → 21 → 22                               |
 
 

@@ -49,7 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[80] flex items-center justify-center p-4"
       style={{ background: 'var(--overlay)' }}
       onClick={onClose}
       aria-hidden={!open}

@@ -22,44 +22,61 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
 
     const fetchDiscussions = async () => {
         try {
-            // Fetch ALL discussions for this entity
             const allPosts = await discussionService.getAllDiscussionsForEntity(entityType, entityId);
 
-            // Organize into tree structure
+            // One nest layer only: root questions + flat replies under each root.
+            // If older data nested reply→reply, hoist onto the top-level ancestor.
             const postMap = new Map<string, RoadmapDiscussion>();
             const roots: RoadmapDiscussion[] = [];
 
-            // First pass: map all ID -> Post and init replies
-            allPosts.forEach(post => {
+            allPosts.forEach((post) => {
                 post.replies = [];
                 postMap.set(post.id, post);
             });
 
-            // Second pass: link children to parents
-            allPosts.forEach(post => {
-                if (post.parent_id) {
-                    const parent = postMap.get(post.parent_id);
-                    if (parent && parent.replies) {
-                        parent.replies.push(post);
-                    } else {
-                        // Parent missing or not loaded (orphan? or logic error). 
-                        // Ideally handle gracefully. For now, maybe just treat as root if parent strictness isn't ignored.
-                        // But let's assume valid data.
-                    }
+            const resolveRootId = (post: RoadmapDiscussion): string | null => {
+                let parentId = post.parent_id;
+                let guard = 0;
+                while (parentId && guard < 20) {
+                    const parent = postMap.get(parentId);
+                    if (!parent) return parentId;
+                    if (!parent.parent_id) return parent.id;
+                    parentId = parent.parent_id;
+                    guard += 1;
+                }
+                return null;
+            };
+
+            allPosts.forEach((post) => {
+                if (!post.parent_id) {
+                    roots.push(post);
+                    return;
+                }
+                const rootId = resolveRootId(post);
+                const root = rootId ? postMap.get(rootId) : undefined;
+                if (root?.replies) {
+                    root.replies.push(post);
                 } else {
+                    // Orphan reply — show as its own question rather than drop it
                     roots.push(post);
                 }
             });
 
-            // Sort: Pinned first, then Newest first
+            roots.forEach((root) => {
+                root.replies?.sort(
+                    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                );
+            });
+
             roots.sort((a, b) => {
-                if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+                if (Boolean(a.is_pinned) !== Boolean(b.is_pinned)) return a.is_pinned ? -1 : 1;
                 return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
             });
 
             setDiscussions(roots);
         } catch (error) {
             console.error('Error fetching discussions:', error);
+            toastError('Could not load discussions. Please refresh and try again.');
         } finally {
             setLoading(false);
         }
@@ -71,34 +88,44 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
     };
 
     useEffect(() => {
+        setLoading(true);
         fetchUser();
         fetchDiscussions();
-        
+
         posthog?.capture('discussion_board_viewed', {
             entity_type: entityType,
-            entity_id: entityId
+            entity_id: entityId,
         });
     }, [entityType, entityId]);
 
     const handlePostSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newPostContent.trim() || !currentUserId) return;
+        if (!newPostContent.trim()) return;
+
+        if (!currentUserId) {
+            toastError('You must be signed in to post a question.');
+            return;
+        }
 
         setIsPosting(true);
         try {
             await discussionService.createPost(entityType, entityId, newPostContent, currentUserId);
-            
+
             posthog?.capture('discussion_post_created', {
                 entity_type: entityType,
                 entity_id: entityId,
-                content_length: newPostContent.length
+                content_length: newPostContent.length,
             });
-            
+
             setNewPostContent('');
-            fetchDiscussions(); // Refresh list
-        } catch (error) {
+            await fetchDiscussions();
+        } catch (error: unknown) {
             console.error('Error creating post:', error);
-            toastError('Failed to post');
+            const message =
+                error && typeof error === 'object' && 'message' in error
+                    ? String((error as { message: string }).message)
+                    : 'Failed to post question';
+            toastError(message);
         } finally {
             setIsPosting(false);
         }
@@ -124,10 +151,10 @@ export const DiscussionBoard: React.FC<DiscussionBoardProps> = ({ entityType, en
                 <div className="mt-2 flex justify-end">
                     <button
                         type="submit"
-                        disabled={isPosting || !newPostContent.trim()}
+                        disabled={isPosting || !newPostContent.trim() || !currentUserId}
                         className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                     >
-                        {isPosting ? 'Posting...' : 'Post Question'}
+                        {isPosting ? 'Posting...' : !currentUserId ? 'Sign in to post' : 'Post Question'}
                     </button>
                 </div>
             </form>

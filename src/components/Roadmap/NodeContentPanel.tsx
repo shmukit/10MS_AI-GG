@@ -8,6 +8,7 @@ import { DiscussionBoard } from '../Discussion/DiscussionBoard';
 import { posthog } from '../../lib/posthog';
 import { isDecisionTreeResourceUrl } from '../Playbooks/AgenticDecisionTree';
 import { useToast } from '../ui/ToastProvider';
+import { TaskDetailModal } from './TaskDetailModal';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
@@ -34,6 +35,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   const [showTaskConfirmation, setShowTaskConfirmation] = useState(false);
   const [showTaskUncheckConfirmation, setShowTaskUncheckConfirmation] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1);
+  const [detailTaskIndex, setDetailTaskIndex] = useState<number>(-1);
+  const [isCompletingFromModal, setIsCompletingFromModal] = useState(false);
   const [studentCompletions, setStudentCompletions] = useState<StudentCompletion[]>([]);
   const [loadingCompletions, setLoadingCompletions] = useState(false);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
@@ -228,6 +231,67 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
     return null;
   };
 
+  const openTaskDetail = (index: number) => {
+    setDetailTaskIndex(index);
+  };
+
+  const closeTaskDetail = () => {
+    setDetailTaskIndex(-1);
+  };
+
+  const handleCompleteFromModal = async () => {
+    if (detailTaskIndex < 0) return;
+    if (node.status === 'locked' || node.status === 'completed') return;
+    if (completedTasks[detailTaskIndex]) return;
+    if (!databaseUserId) {
+      toastError('User ID missing. Please log in again.');
+      return;
+    }
+
+    const taskIndex = detailTaskIndex;
+    const task = node.tasks[taskIndex];
+    setIsCompletingFromModal(true);
+    try {
+      const success = await DatabaseService.updateTaskProgress(
+        databaseUserId,
+        task.id,
+        'completed'
+      );
+
+      if (success) {
+        posthog?.capture('task_completed', {
+          task_id: task.id,
+          task_name: task.title,
+          task_type: task.type,
+          roadmap_id: node.id,
+          source: 'task_detail_modal',
+        });
+        setCompletedTasks((prev) => {
+          const next = [...prev];
+          next[taskIndex] = true;
+          return next;
+        });
+        if (onRefresh) onRefresh();
+        closeTaskDetail();
+      } else {
+        toastError('Failed to mark task as completed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error marking task as completed:', error);
+      toastError('Error marking task as completed. Please try again.');
+    } finally {
+      setIsCompletingFromModal(false);
+    }
+  };
+
+  const detailTask =
+    detailTaskIndex >= 0 && detailTaskIndex < node.tasks.length
+      ? {
+          ...node.tasks[detailTaskIndex],
+          completed: completedTasks[detailTaskIndex],
+        }
+      : null;
+
   return (
     <>
       <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
@@ -317,11 +381,28 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
 
             <div className="space-y-3">
               {node.tasks.map((task, index) => (
-                <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/50">
+                <div
+                  key={task.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openTaskDetail(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openTaskDetail(index);
+                    }
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/50 cursor-pointer hover:bg-muted/80 hover:border-primary/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
                   <button
-                    onClick={() => toggleTaskCompletion(index)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleTaskCompletion(index);
+                    }}
                     disabled={node.status === 'locked' || node.status === 'completed'}
                     className="flex-shrink-0"
+                    aria-label={completedTasks[index] ? 'Mark task incomplete' : 'Mark task complete'}
                   >
                     {completedTasks[index] ? (
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
@@ -346,7 +427,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     isDecisionTreeResourceUrl(task.url) && onOpenDecisionTree ? (
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           posthog?.capture('task_started', {
                             task_id: task.id,
                             task_name: task.title,
@@ -355,8 +437,9 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                           });
                           onOpenDecisionTree();
                         }}
-                        className="p-1 rounded hover:bg-accent"
+                        className="p-1.5 rounded-lg border border-border hover:bg-accent shrink-0"
                         title="Open decision tree"
+                        aria-label="Open decision tree"
                       >
                         <ExternalLink className="w-4 h-4 text-muted-foreground" />
                       </button>
@@ -365,7 +448,8 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                         href={task.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           posthog?.capture('task_started', {
                             task_id: task.id,
                             task_name: task.title,
@@ -373,6 +457,9 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                             roadmap_id: node.id,
                           });
                         }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-accent shrink-0"
+                        title="Open link"
+                        aria-label="Open external link"
                       >
                         <ExternalLink className="w-4 h-4 text-muted-foreground" />
                       </a>
@@ -459,6 +546,14 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
         onConfirm={handleConfirmTaskUncheck}
         title="Confirm Task Uncheck"
         message={`Mark task "${getSelectedTask()?.title}" as incomplete?`}
+      />
+      <TaskDetailModal
+        open={detailTaskIndex >= 0}
+        task={detailTask}
+        onClose={closeTaskDetail}
+        onComplete={handleCompleteFromModal}
+        canComplete={node.status === 'active'}
+        isCompleting={isCompletingFromModal}
       />
     </>
   );
