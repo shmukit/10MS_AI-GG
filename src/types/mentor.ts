@@ -8,6 +8,8 @@ export interface RoadmapItem {
     relevantLinks: string;
     deadline: string;
     meetingTime?: string;
+    /** Stable order within the session/week */
+    sortOrder?: number;
 }
 
 export interface Batch {

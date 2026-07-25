@@ -73,10 +73,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                 onChange={(e) => setTaskData({ ...taskData, taskType: e.target.value as any })}
                                 className={inputClass}
                             >
-                                <option value="Watch">Watch</option>
+                                <option value="Watch">Watch (optional materials)</option>
                                 <option value="Read">Read</option>
-                                <option value="Project">Project</option>
-                                <option value="Attend">Attend</option>
+                                <option value="Project">Hands-on</option>
+                                <option value="Attend">Attend / discuss</option>
                                 <option value="MCQ">MCQ</option>
                                 <option value="Written">Written</option>
                             </select>

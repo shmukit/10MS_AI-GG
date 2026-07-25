@@ -78,71 +78,87 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
   };
 
   const handleConfirmTaskCompletion = async () => {
-    if (selectedTaskIndex >= 0 && databaseUserId) {
-      const task = node.tasks[selectedTaskIndex];
+    if (selectedTaskIndex < 0) return;
 
-      try {
-        const success = await DatabaseService.updateTaskProgress(
-          databaseUserId,
-          task.id,
-          'completed'
-        );
+    if (!databaseUserId) {
+      toastError('User ID missing. Please log in again.');
+      setShowTaskConfirmation(false);
+      setSelectedTaskIndex(-1);
+      return;
+    }
 
-        if (success) {
-          posthog?.capture('task_completed', {
-            task_id: task.id,
-            task_name: task.title,
-            task_type: task.type,
-            roadmap_id: node.id
-          });
-          
-          setCompletedTasks(prev => {
-            const newCompleted = [...prev];
-            newCompleted[selectedTaskIndex] = true;
-            return newCompleted;
-          });
-          if (onRefresh) onRefresh();
-        } else {
-          toastError('Failed to mark task as completed. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error marking task as completed:', error);
-        toastError('Error marking task as completed. Please try again.');
-      } finally {
-        setShowTaskConfirmation(false);
-        setSelectedTaskIndex(-1);
+    const taskIndex = selectedTaskIndex;
+    const task = node.tasks[taskIndex];
+
+    try {
+      const success = await DatabaseService.updateTaskProgress(
+        databaseUserId,
+        task.id,
+        'completed'
+      );
+
+      if (success) {
+        posthog?.capture('task_completed', {
+          task_id: task.id,
+          task_name: task.title,
+          task_type: task.type,
+          roadmap_id: node.id
+        });
+
+        setCompletedTasks(prev => {
+          const newCompleted = [...prev];
+          newCompleted[taskIndex] = true;
+          return newCompleted;
+        });
+        if (onRefresh) onRefresh();
+      } else {
+        toastError('Failed to mark task as completed. Please try again.');
       }
+    } catch (error) {
+      console.error('Error marking task as completed:', error);
+      toastError('Error marking task as completed. Please try again.');
+    } finally {
+      setShowTaskConfirmation(false);
+      setSelectedTaskIndex(-1);
     }
   };
 
   const handleConfirmTaskUncheck = async () => {
-    if (selectedTaskIndex >= 0 && databaseUserId) {
-      const task = node.tasks[selectedTaskIndex];
+    if (selectedTaskIndex < 0) return;
 
-      try {
-        const success = await DatabaseService.updateTaskProgress(
-          databaseUserId,
-          task.id,
-          'not_started'
-        );
+    if (!databaseUserId) {
+      toastError('User ID missing. Please log in again.');
+      setShowTaskUncheckConfirmation(false);
+      setSelectedTaskIndex(-1);
+      return;
+    }
 
-        if (success) {
-          setCompletedTasks(prev => {
-            const newCompleted = [...prev];
-            newCompleted[selectedTaskIndex] = false;
-            return newCompleted;
-          });
-          if (onRefresh) onRefresh();
-        } else {
-          toastError('Failed to update task status. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error updating task status:', error);
-        toastError('Error updating task status. Please try again.');
-      } finally {
-        setShowTaskUncheckConfirmation(false);
-        setSelectedTaskIndex(-1);
+    const taskIndex = selectedTaskIndex;
+    const task = node.tasks[taskIndex];
+
+    try {
+      const success = await DatabaseService.updateTaskProgress(
+        databaseUserId,
+        task.id,
+        'not_started'
+      );
+
+      if (success) {
+        setCompletedTasks(prev => {
+          const newCompleted = [...prev];
+          newCompleted[taskIndex] = false;
+          return newCompleted;
+        });
+        if (onRefresh) onRefresh();
+      } else {
+        toastError('Failed to update task status. Please try again.');
       }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toastError('Error updating task status. Please try again.');
+    } finally {
+      setShowTaskUncheckConfirmation(false);
+      setSelectedTaskIndex(-1);
     }
   };
 
@@ -315,9 +331,16 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                       <div className="w-5 h-5 rounded-full border-2 border-border" />
                     )}
                   </button>
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     {getTaskIcon(task.type)}
-                    <span className={`text-sm ${completedTasks[index] ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</span>
+                    <span className={`text-sm min-w-0 ${completedTasks[index] ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                      {task.title}
+                    </span>
+                    {task.type === 'project' && !/hands-on/i.test(task.title) && (
+                      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                        Hands-on
+                      </span>
+                    )}
                   </div>
                   {task.url && (
                     isDecisionTreeResourceUrl(task.url) && onOpenDecisionTree ? (

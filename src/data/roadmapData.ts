@@ -14,7 +14,9 @@ export const generateRoadmapData = (
   studentProgress?: any[],
   batchId?: string
 ): { nodes: RoadmapNodeData[] } => {
-  const nodes = weeks.map((week, index) => {
+  const orderedWeeks = [...weeks].sort((a, b) => a.week_number - b.week_number);
+
+  const nodes = orderedWeeks.map((week, index) => {
     // Determine status based on actual student progress, not hardcoded
     let status: 'completed' | 'active' | 'locked' = 'locked';
     
@@ -34,7 +36,7 @@ export const generateRoadmapData = (
         status = 'active';
       } else {
         // Check if previous week is completed to unlock this week
-        const previousWeek = weeks[index - 1];
+        const previousWeek = orderedWeeks[index - 1];
         if (previousWeek) {
           const previousWeekTasks = tasks.filter(task => task.week_id === previousWeek.id);
           const previousWeekCompletedTasks = previousWeekTasks.filter(task => 
@@ -52,8 +54,16 @@ export const generateRoadmapData = (
       if (index === 0) status = 'active';
     }
     
-    // Get tasks for this week
-    const weekTasks = tasks.filter(task => task.week_id === week.id);
+    // Get tasks for this week — stable curriculum order (never by completion)
+    const weekTasks = tasks
+      .filter(task => task.week_id === week.id)
+      .slice()
+      .sort((a, b) => {
+        const ao = a.sort_order ?? Number.MAX_SAFE_INTEGER;
+        const bo = b.sort_order ?? Number.MAX_SAFE_INTEGER;
+        if (ao !== bo) return ao - bo;
+        return (a.created_at || '').localeCompare(b.created_at || '');
+      });
     const totalMinutes = sumTaskMinutes(weekTasks);
     
     return {

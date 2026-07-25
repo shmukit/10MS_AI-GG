@@ -40,26 +40,28 @@ export const updateTaskProgress = async (
     feedback?: string
 ): Promise<boolean> => {
     try {
+        // PK is `id`, but uniqueness is (student_id, task_id). Without onConflict,
+        // upsert always INSERTs and uncheck/re-check fails with a unique violation.
         const upsertData: ProgressUpsert = {
             student_id: userId,
             task_id: taskId,
             status,
-            score,
-            feedback,
             completed_at: status === 'completed' ? new Date().toISOString() : null,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
         };
+        if (score !== undefined) upsertData.score = score;
+        if (feedback !== undefined) upsertData.feedback = feedback;
 
         const { error } = await supabase
             .from('student_progress')
-            .upsert(upsertData as unknown as never);
+            .upsert(upsertData as unknown as never, { onConflict: 'student_id,task_id' });
 
         if (error) {
             console.error('Error updating task progress:', error);
             return false;
         }
 
-        // Award XP and sync progress if completed
+        // Award XP only when completing
         if (status === 'completed') {
             const { data: assignments } = await supabase
                 .from('student_batch_assignments')
@@ -69,7 +71,6 @@ export const updateTaskProgress = async (
 
             if (assignments && assignments.length > 0) {
                 const { awardTaskCompletionXP } = await import('./gamificationService');
-                // Parallelize XP awarding and filter out null batch_ids
                 const activeAssignments = assignments as { batch_id: string | null }[];
                 await Promise.all(
                     activeAssignments
@@ -77,11 +78,11 @@ export const updateTaskProgress = async (
                         .map(a => awardTaskCompletionXP(userId, a.batch_id!))
                 );
             }
-
-            // Sync progress to student_profiles and student_batch_assignments
-            const { ProgressSyncService } = await import('../progressSync');
-            await ProgressSyncService.syncStudentProgress(userId);
         }
+
+        // Always sync so uncheck also updates % complete
+        const { ProgressSyncService } = await import('../progressSync');
+        await ProgressSyncService.syncStudentProgress(userId);
 
         return true;
     } catch (error) {
@@ -110,7 +111,9 @@ export const markWeekAsComplete = async (
                 completed_at: now,
                 updated_at: now
             };
-            return supabase.from('student_progress').upsert(upsertData as unknown as never);
+            return supabase
+                .from('student_progress')
+                .upsert(upsertData as unknown as never, { onConflict: 'student_id,task_id' });
         }));
 
         const hasError = results.some(r => r.error);

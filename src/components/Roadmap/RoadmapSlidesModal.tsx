@@ -224,9 +224,17 @@ export const RoadmapSlidesModal: React.FC<RoadmapSlidesModalProps> = ({
         </div>
 
         {mode === 'embed' && (
-          <p className="text-xs text-center text-muted-foreground px-4 py-2 border-t border-border shrink-0">
-            Use the controls inside the presentation to move between slides. Zoom uses the buttons above.
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground px-4 py-2 border-t border-border shrink-0">
+            <span>Use the controls inside the presentation to move between slides.</span>
+            <a
+              href={slidesUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary hover:underline font-medium"
+            >
+              Open in new tab
+            </a>
+          </div>
         )}
       </div>
     </div>

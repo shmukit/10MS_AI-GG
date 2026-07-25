@@ -13,7 +13,7 @@ export interface RoadmapNodeData {
   tasks: Array<{
     id: string;
     title: string;
-    type: 'video' | 'exercise' | 'reading' | 'project';
+    type: string;
     url?: string;
     completed: boolean;
   }>;

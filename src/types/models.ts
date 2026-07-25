@@ -120,6 +120,8 @@ export interface RoadmapTask {
     relevant_links?: string[];
     deadline?: string;
     estimated_hours?: number;
+    /** Display order within a session/week. Lower = earlier. */
+    sort_order?: number;
     points: number;
     is_required: boolean;
     created_at: string;
