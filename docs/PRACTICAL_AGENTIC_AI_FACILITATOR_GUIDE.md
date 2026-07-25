@@ -5,6 +5,9 @@ This document is written for **you, the facilitator**. Read it as a step-by-step
 
 **Curriculum IDs (source of truth):** [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md)  
 **SQL sync (latest):** [`sql/20260725_agentic_curriculum_less_paste_v2.sql`](../sql/20260725_agentic_curriculum_less_paste_v2.sql)  
+**Then run (in order):**
+1. [`sql/20260725_agentic_add_task_0_0_what_is_ai.sql`](../sql/20260725_agentic_add_task_0_0_what_is_ai.sql) — Task **0.0**
+2. [`sql/20260725_agentic_session1_lock_before_tools.sql`](../sql/20260725_agentic_session1_lock_before_tools.sql) — Session 1 lock → tools → memory  
 **Prompts:** Live on the roadmap — click task → **Copy** → paste into AI → **Mark complete**. Backup doc: [`PRACTICAL_AGENTIC_AI_PROMPT_PACK.md`](./PRACTICAL_AGENTIC_AI_PROMPT_PACK.md). Call tasks by number (e.g. “Task **1.3**”).
 
 **Room rule:** Copy-paste less. Same Teacher chat all day. Teacher ↔ Work EA switch **once**. Answers live in the chat thread — not a second slide deck.
@@ -130,7 +133,7 @@ End of day: they **trigger the workflow live** (or a recording from the last few
 
 | When | Session | Length | They leave with |
 | ---- | ------- | ------ | --------------- |
-| Start | **0** Housekeeping + Opening | ~27 min | Surfaces open + Teacher Agent live |
+| Start | **0** Housekeeping + Opening | ~33 min | What is AI / expect → surfaces → Teacher Agent live |
 | Morning | **1** Work WITH AI | ~90 min | Work EA (3 runs) + one coach loop + tools ≤3 + process locked |
 | | Break | 15 min | |
 | Mid | **2** Work THROUGH AI | ~104 min | Map + ETCSLV + pattern + brain + **running** path |
@@ -144,13 +147,13 @@ Full task list with minutes: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRA
 
 ---
 
-# SESSION 0 — Housekeeping + Opening (~27 minutes)
+# SESSION 0 — Housekeeping + Opening (~33 minutes)
 
-**Roadmap / Prompt Pack:** `0.1` → `0.4`
+**Roadmap / Prompt Pack:** `0.0` → `0.4`
 
 ## Goal
 
-Surfaces open; every participant has Project **`Workshop Teacher — Agentic AI`**. It stays open all day as their tutor. You are the build coach.
+Shared mental model of AI + expectations; surfaces open; every participant has Project **`Workshop Teacher — Agentic AI`**. It stays open all day as their tutor. You are the build coach.
 
 ## Facilitator framing (3 minutes)
 
@@ -161,6 +164,16 @@ Say:
 Show: roadmap **Session 0** + agenda PPT “You are here: Session 0.”
 
 ## Participant activity — you walk the room
+
+### Task 0.0 — What is AI? What to expect / not expect (6 min)
+
+**Projector:** Task **0.0** slide (concept + expect / don’t-expect table). This is the live framing — Session 4’s optional “What is AI?” video is a later refresher only.
+
+Say in plain language (~3–4 min):
+
+> “AI in this room means software that predicts useful next text or actions from patterns — drafts, summaries, classifications, suggestions. It is not magic and it is not always right. You will **manage** it: brief it, check it, limit it. Today you will leave with one workflow that runs. You will not learn to code, master every tool, or build a no-human autonomous swarm.”
+
+**Participant (2 min):** On paper/note — one line they **will** expect, one line they **won’t**. Mark roadmap **0.0**.
 
 ### Task 0.1 — Housekeeping (5 min)
 
@@ -175,11 +188,13 @@ Open ChatGPT or Claude → create a **Project** (not a normal empty chat).
 
 ### Still Task 0.2 — Paste the Teacher’s job into Project **settings**
 
-This is **not** a chat message. Prompt Pack **0.2**.
+This is **not** a chat message. Prompt Pack **0.2**.  
+**Analogy:** Settings = joining letter / handbook · Chat = today’s conversation.
 
 1. Open the Project.  
 2. Find **Instructions** / **Project instructions** / custom instructions for that Project.  
-3. Paste the text below into that settings box and save.
+3. Paste the text below into that settings box and save.  
+4. Say aloud: “If you see **ETCSLV** or a ladder in this text — **ignore until Session 2**. Don’t decode now.”
 
 ```text
 You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
@@ -247,7 +262,7 @@ You say:
 
 ### Done when
 
-Teacher Project exists, instructions are in settings, first chat happened, they can explain chat vs assistant vs agent in plain language.
+They can state one expect + one don’t-expect (Task **0.0**); Teacher Project exists; instructions are in settings; first chat happened; they can explain chat vs assistant vs agent in plain language.
 
 ---
 
@@ -259,12 +274,16 @@ Teacher Project exists, instructions are in settings, first chat happened, they 
 
 1. Hire one Work EA (Settings once) and **use it three times**.  
 2. Switch Teacher ↔ EA **once** to learn good prompts + dual-Project critique.  
-3. Lock ≤3 tools + one process for the rest of the day.  
+3. **Lock one process**, then fit ≤3 tools, then ground memory — in that order.  
 4. Think and review more than copy-paste.
 
 **Wall script for you:**
 
-> “1) Fill a brief. 2) Hire the EA — three runs. 3) Ask the coach once — fix — re-run once. 4) Tools, memory, lock process. Stay in one Project until I say switch.”
+> “1) Fill a brief. 2) Hire the EA — three runs. 3) Ask the coach once — fix — re-run once. 4) **Lock the job.** 5) Pick tools for *that* job. 6) Ground with the right files. Stay in one Project until I say switch.”
+
+**Progression bridge into Session 1:**
+
+> “You named *assistant* at 0.4. Now you hire one — like writing a secretary’s joining letter, then putting them to work.”
 
 ---
 
@@ -321,25 +340,38 @@ Poll: “Did the re-run get better?”
 
 ---
 
-## Task 1.4 — Tool landscape + fit (25 min)
+## Task 1.4 — Lock today’s process (11 min)
 
-Same landscape demo as before (five lanes, projector). Max **2–3 tools** for their process.
+**Bridge:** They felt WITH AI — now commit **one** job before any tool shopping.
 
-Participant: Prompt Pack **1.4** in Teacher → one identical test in recommended tools only → lock stack in one line (paper/note fine). Close a fourth tool if open.
+**Analogy:** One customer journey today — not the whole company.
+
+Think first (3 min) on paper/note. Then **one short** Teacher check — Prompt Pack **1.4**. Accept smaller slice. Light 🟢/🔵/🔴 tease only; full teach at **2.1**.
+
+2–3 people read process aloud. Kill overscoped monsters.  
+Say: “Tools wait until the job is locked.”
 
 ---
 
-## Task 1.5 — Memory (10 min)
+## Task 1.5 — Tool landscape + fit (25 min)
+
+**Bridge:** Process locked — equip only what **that** job needs.
+
+**Analogy:** Don’t open every stall — pick two for today’s meal.
+
+Same landscape demo as before (five lanes, projector). Max **2–3 tools** for the **1.4** process.
+
+Participant: Prompt Pack **1.5** in Teacher → one identical test in recommended tools only → lock stack in one line (paper/note fine). Close a fourth tool if open.
+
+---
+
+## Task 1.6 — Memory (10 min)
+
+**Bridge:** Stack chosen — ground with files for **this** process.
+
+**Analogy:** Company file, not corridor rumors.
 
 NotebookLM / Project files: 2 grounded + 1 trap. **Review** refuse vs invent. Teacher optional.
-
----
-
-## Task 1.6 — Lock today’s process (11 min)
-
-Think first (3 min) on paper/note. Then **one short** Teacher check — Prompt Pack **1.6**. Accept smaller slice.
-
-2–3 people read process aloud. Kill overscoped monsters.
 
 ### Break — 15 minutes
 
@@ -352,6 +384,10 @@ Think first (3 min) on paper/note. Then **one short** Teacher check — Prompt P
 ## Session goal
 
 Same process → map → pattern → reusable brain → running path (trigger → AI → output → approval).
+
+**Bridge into Session 2:**
+
+> “WITH = a junior at your elbow. THROUGH = the **job** runs on a path — reception → desk → stamp. Same process you locked at **1.4**. We only add structure.”
 
 ---
 
@@ -369,7 +405,9 @@ Instruction-only chat
 → Automation pipeline
 ```
 
-> “Climb only as high as your process needs. Most people ship at knowledge assistant or single workflow, plus a light run path.”
+> “Climb only as high as your process needs. Most people ship at knowledge assistant or single workflow, plus a light run path. You already lived chat + assistant this morning — the ladder only asks how high for *this* job. Multi-agent waits until something runs.”
+
+**Analogy:** Bicycle → scooter → one van → small fleet → factory conveyor.
 
 ### Participant activity (3 minutes)
 
@@ -385,13 +423,18 @@ Same Teacher thread — Prompt Pack **2.0** (“using my locked process from ear
 2. Map steps **in Teacher chat** (typed once — that message is the map).  
 3. They draft ETCSLV; Teacher critiques in the **same thread** (no re-paste).
 
-### What the step tags mean (say once)
+### What the step tags mean (say once) — full teach here
+
+**Analogy (kitchen):** chef inventing a special (🟢) · oven timer / ticket printer (🔵) · manager tasting before the plate leaves (🔴).
 
 - **Green — LLM thinking:** draft, summarize, brainstorm, rewrite.  
 - **Blue — rules / automation:** forms, reminders, moving data, triggers.  
 - **Red — human only:** legal, people conflict, money, send-to-client without review.
 
 ### Facilitator demo — teach ETCSLV first (5 minutes) — projector only
+
+**Bridge:** Map is the floor plan; ETCSLV is the checklist before the counter opens.  
+**Analogy:** How hard · which systems · what they must know · what files stay · what they may never do alone · how you check quality.
 
 Show the table on a PPT slide and walk **one fully filled example** (“Weekly client report”):
 
@@ -432,6 +475,9 @@ Map exists in Teacher chat; L and V are specific.
 
 Lock today’s pattern. **One** short Teacher ask — result phrase only, not a process dump.
 
+**Bridge:** You already have map + ETCSLV — the tree **narrows** the room; it is not a third religion.  
+**Analogy:** Clinic triage — a few questions → the right room, not the whole hospital.
+
 ### Facilitator demo (3 minutes) — projector only
 
 Volunteer process → roadmap Decision Tree live → read result card.
@@ -455,6 +501,9 @@ Celebrate anyone told to build **simpler** than expected.
 ### Goal
 
 One Teacher ask (uses earlier ETCSLV) → **one** Settings paste → test happy + messy. Review the output; fix Settings yourself.
+
+**Bridge / identity:** Brain = standing brief for **this** locked job. Extend **Work EA** or create **one** new Project — not a new Teacher, not five surfaces.  
+**Analogy:** Standing brief for the weekly client update — not the whole company handbook.
 
 ### Facilitator demo (4 minutes) — projector only
 
@@ -521,13 +570,19 @@ Three people show the **run on screen**.
 Same workflow → minimum AI roles → harness → break it → ship → demo the run.  
 Keep answers in the **Teacher chat** — no workforce/harness slide deck.
 
+**Bridge into Session 3:**
+
+> “Your path already runs. BY is not a new product — it is managing the counter for Monday: roles, rules, fire drills. You are the floor manager.”
+
 ---
 
 ## Task 3.0 — Framing: manager of agents (4 minutes)
 
 Facilitator:
 
-> “You are the manager. AI roles are workers. The harness is the job description. Failure Lab is Monday. Then we ship.”
+> “You are the manager. AI roles are workers. The harness is the job description — **same ETCSLV letters**, shipping name. Failure Lab is Monday. Then we ship.”
+
+**Analogy:** Staff a counter that already serves customers — don’t design a new mall.
 
 Participant — Prompt Pack **3.0** in Teacher chat.
 
@@ -537,7 +592,7 @@ Participant — Prompt Pack **3.0** in Teacher chat.
 
 ### Goal
 
-Minimum role roster + one human gate — **typed in Teacher chat**.
+Minimum role roster + one human gate — **typed in Teacher chat** — around the **same** running workflow.
 
 ### Facilitator demo (2 minutes) — projector only
 
@@ -557,7 +612,10 @@ Handoffs clear; human on external/high-risk steps.
 
 ### Goal
 
-Same ETCSLV, answered **in the Teacher chat** one letter at a time — no paste of a filled card.
+Same ETCSLV, answered **in the Teacher chat** one letter at a time — no paste of a filled card.  
+Say explicitly: “Harness ≠ new framework. Harness = ETCSLV with a shipping name.”
+
+**Analogy:** Job description + SOPs + approval stamp on the desk.
 
 ### Facilitator demo (2 minutes) — projector only
 
@@ -662,7 +720,8 @@ Prompt Pack **3.6** (short). Mark **3.5** and **3.6** complete.
 
 # SESSION 4 — Reference (optional, async)
 
-**Roadmap:** `4.1` → `4.3`. Not required live. Link in follow-up email.
+**Roadmap:** `4.1` → `4.3`. Not required live. Link in follow-up email.  
+Note: Task **4.3** (What is AI? video) is an optional refresher — the live framing is Task **0.0** at the start of the day.
 
 ---
 
@@ -672,7 +731,7 @@ Full minutes per task: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL
 
 | Session | ~Time | Bias |
 | ------- | ----- | ---- |
-| 0 Opening | ~27 | Hands-on |
+| 0 Opening | ~33 | Hands-on |
 | 1 WITH | ~90 | Hands-on |
 | 2 THROUGH | ~104 | Hands-on |
 | 3 BY + Demo | ~120 | Hands-on |
@@ -685,7 +744,7 @@ Full minutes per task: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL
 
 | week_number | Title | Task IDs |
 | ----------- | ----- | -------- |
-| 0 | Session 0: Housekeeping + Opening | 0.1–0.4 |
+| 0 | Session 0: Housekeeping + Opening | 0.0–0.4 |
 | 1 | Session 1: Work WITH AI | 1.1–1.6 |
 | 2 | Session 2: Work THROUGH AI | 2.0–2.6 |
 | 3 | Session 3: Work BY AI | 3.0–3.6 |
