@@ -39,6 +39,11 @@ Dashboard → Community → View Batch Members → Access Communication Links �
 Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Complete → Update Progress
 ```
 
+### 5. Session discussion (per roadmap node)
+```
+Roadmap → Open session → Discussion Board → Post question → Peers reply (1 nest) → Collapse/expand thread
+```
+
 ## Database Tables Used
 
 ### Core User Tables
@@ -55,6 +60,7 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 ### Communication Tables
 - **`notices`**: Announcements and updates (title, content, batch_id, priority)
 - **`batches`**: Group information (name, roadmap_id, whatsapp_link, discord_link)
+- **`roadmap_discussions`**: Per-session Q&A threads (`entity_type` = week/session, `entity_id` = week id; `parent_id` null = root question, set = reply)
 
 ### Session Management
 - **`user_sessions`**: Authentication session tracking (session_token, expires_at)
@@ -72,14 +78,34 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 - **Mentor Information**: View assigned mentors and their expertise
 
 ### 🗺️ Roadmap
-- **Week-by-Week Progress**: Visual representation of learning journey
-- **Workshop slides**: When the mentor adds a slides URL, a **View Slides** button appears at the top of the roadmap page; opens a modal with prev/next (PDF), zoom in/out, and close
+- **Week-by-Week Progress**: Visual representation of learning journey (label may be Session/Week/etc. via `node_unit_label`)
+- **Workshop slides**: When slides are enabled for the batch/roadmap, a **Slides** control opens the deck (Google Slides embed or PDF viewer)
 - **Decision tree tab**: Interactive AI pattern finder on roadmaps that include it (e.g. workshop)
-- **Task Management**: Mark individual tasks as complete
+- **Task Management**: Mark individual tasks complete or incomplete; order stays fixed (`sort_order`) — checking a task does **not** move it to the bottom
+- **Hands-on tasks**: `project` type shown with a **Hands-on** badge (and often titled `Hands-on: …`)
 - **Progress Tracking**: Real-time completion statistics
-- **Status Indicators**: Locked, Active, and Completed week states
-- **Task Types**: Different icons for watch, read, project, attend, MCQ, written tasks
-- **Week Completion**: Mark entire weeks as complete when all tasks done
+- **Status Indicators**: Locked, Active, and Completed node states
+- **Task Types**: watch, read, project (hands-on), attend, MCQ, written
+- **Node Completion**: Mark entire session/week complete when all required tasks are done
+
+### 💬 Discussion Board (on each roadmap session/week panel)
+Per-session Q&A attached to the open roadmap node (`DiscussionBoard` + `roadmap_discussions`).
+
+**UACs**
+- Signed-in students can **post a root question** (“Post Question”)
+- Other students (and the author) can **reply** to that question
+- Nesting is **exactly one layer**: root question → flat replies (no reply-to-reply trees)
+- Authors can **delete** their own root question (cascades replies)
+- Authors can **edit** or **delete** their own replies via **Edit** / **Delete** CTA buttons on the reply row
+- Threads with replies are **collapsible like Reddit**:
+  - Click the **chevron**, the **root comment header/body**, the **Collapse/Expand** control, or the **vertical line** beside replies
+  - Collapsed state shows `[N replies hidden — click to expand]`
+- Must be signed in to post/reply; clear error if the session user id is missing
+
+**Technical notes**
+- Authors loaded from `public.users` (not a broken PostgREST embed on `auth.users`)
+- Replies always attach to the top-level question (`createPost` hoists if a nested parent is passed)
+- Older multi-level data is flattened under the root when rendering
 
 ### 👥 Community
 - **Batch Information**: View batch details and member count
@@ -96,12 +122,12 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 - **Professional UI**: Modern, polished interface with smooth animations
 
 ## Task Types
-- **Watch**: Video content and tutorials
+- **Watch**: Optional video materials (e.g. Session 4 go-deeper)
 - **Read**: Documentation and articles
-- **Project**: Hands-on coding assignments
-- **Attend**: Live sessions and meetings
+- **Project / Hands-on**: Practice activities (prompting, tools, builds) — UI label **Hands-on**
+- **Attend**: Live / facilitated discussion blocks
 - **MCQ**: Multiple choice assessments
-- **Written**: Essay and written assignments
+- **Written**: Reflections and written assignments
 
 ## Navigation
 - **Dashboard**: `/student/dashboard`
@@ -110,15 +136,16 @@ Dashboard → Roadmap → View Week Progress → Complete Tasks → Mark Week Co
 - **Profile**: Accessible via header dropdown
 
 ## Limitations
-- **No Direct Messaging**: Students cannot directly message each other
-- **No Resource Sharing**: No built-in file or resource sharing system
-- **No Discussion Forums**: Community is primarily informational, not interactive
-- **Task Management**: Tasks can only be marked complete from roadmap, not dashboard
+- **No Direct Messaging**: Students cannot DM each other in-app
+- **No Resource Sharing**: No built-in file upload for peer sharing
+- **Discussion depth**: Only one reply layer under each root question (by design)
+- **Task Management**: Tasks are marked complete from the roadmap session panel (not the dashboard task list)
 
 ## Data Relationships
 - **User → Student Profile**: One-to-one relationship
 - **Student → Batch Assignments**: One-to-many relationship (can be in multiple batches)
 - **Batch → Roadmap**: Many-to-one relationship
-- **Roadmap → Weeks**: One-to-many relationship
-- **Week → Tasks**: One-to-many relationship
+- **Roadmap → Weeks/Sessions**: One-to-many relationship
+- **Week → Tasks**: One-to-many relationship (`sort_order` within week)
 - **Student → Progress**: One-to-many relationship (one record per task)
+- **Week → Discussions**: One-to-many root questions; each root → many flat replies
