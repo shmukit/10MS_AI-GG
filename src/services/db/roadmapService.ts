@@ -162,7 +162,9 @@ export const getRoadmapTasks = async (weekId: string, batchId?: string): Promise
             `)
             .eq('week_id', weekId);
 
-        const { data, error } = await query.order('created_at');
+        const { data, error } = await query
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true });
 
         if (error) {
             console.error('Error fetching roadmap tasks:', error);
@@ -193,6 +195,7 @@ export const getRoadmapTasks = async (weekId: string, batchId?: string): Promise
                 relevant_links: task.relevant_links,
                 deadline: finalDeadline,
                 estimated_hours: task.estimated_hours,
+                sort_order: task.sort_order ?? 0,
                 points: task.points,
                 is_required: task.is_required,
                 created_at: task.created_at,

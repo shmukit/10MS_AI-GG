@@ -1,0 +1,12 @@
+%%{init: {"flowchart": {"curve": "linear", "padding": 16}} }%%
+flowchart LR
+  start(["Start"]) --> s1["① Sector"]
+  s1 --> s2["② Role"]
+  s2 --> s3["③ One task"]
+  s3 --> s4["④ Follow-ups"]
+  s4 --> s5(["⑤ Your Type 1–7"])
+
+  classDef step fill:#e8f4fc,stroke:#2563eb,stroke-width:2px
+  classDef end fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+  class s1,s2,s3,s4 step
+  class s5 end

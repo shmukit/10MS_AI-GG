@@ -1,7 +1,7 @@
 import React from 'react';
 import { Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { RoadmapItem } from '../../../../types/mentor';
-import { getTaskTypeColor } from '../../../../utils/mentorUtils';
+import { formatTaskTypeLabel, getTaskTypeColor } from '../../../../utils/mentorUtils';
 
 interface TasksTableProps {
     currentRoadmapTitle: string;
@@ -28,7 +28,7 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                 <table className="w-full">
                     <thead className="bg-muted transition-colors duration-200">
                         <tr>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Week</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Session</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Domain</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Type</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Task Name</th>
@@ -42,14 +42,14 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                         {filteredTasks.map((task) => (
                             <tr key={task.id} className="border-t border-border transition-colors duration-200">
                                 <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
-                                    Week {task.weekNumber}
+                                    Session {task.weekNumber}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
                                     {task.domain}
                                 </td>
                                 <td className="px-4 py-3">
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(task.taskType)}`}>
-                                        {task.taskType}
+                                        {formatTaskTypeLabel(task.taskType)}
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">

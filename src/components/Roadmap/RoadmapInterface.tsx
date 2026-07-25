@@ -220,7 +220,8 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
             .from('roadmap_tasks')
             .select(`*, batch_task_deadlines!left(deadline, batch_id)`)
             .in('week_id', weekIds)
-            .order('created_at');
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true });
 
           if (!tasksError && allTasks) {
             const transformedTasks = allTasks.map((task: any) => {

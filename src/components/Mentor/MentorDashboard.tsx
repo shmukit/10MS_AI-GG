@@ -149,10 +149,16 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
             taskDetails: task.task_details || '',
             relevantLinks: Array.isArray(task.relevant_links) ? task.relevant_links[0] || '' : task.relevant_links || '',
             deadline: task.deadline || '',
-            meetingTime: task.meeting_time || ''
+            meetingTime: task.meeting_time || '',
+            sortOrder: typeof task.sort_order === 'number' ? task.sort_order : 0,
           });
         }
       }
+
+      allTasks.sort((a, b) => {
+        if (a.weekNumber !== b.weekNumber) return a.weekNumber - b.weekNumber;
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      });
 
       console.log('✅ Total tasks fetched:', allTasks.length);
       setRoadmapData(allTasks);

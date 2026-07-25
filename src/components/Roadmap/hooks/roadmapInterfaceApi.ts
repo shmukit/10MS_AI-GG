@@ -16,7 +16,8 @@ export async function fetchRoadmapTasksForWeeks(weekIds: string[], batchId: stri
     .from('roadmap_tasks')
     .select(`*, batch_task_deadlines!left(deadline, batch_id)`)
     .in('week_id', weekIds)
-    .order('created_at');
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
 
   if (tasksError || !allTasks) {
     return [];

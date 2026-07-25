@@ -3,6 +3,13 @@ import { RoadmapItem } from '../../../../../types/mentor';
 import type { NewTaskForm } from './types';
 
 export async function insertRoadmapTask(weekId: string, task: NewTaskForm) {
+    const { data: existing } = await (supabase.from('roadmap_tasks') as any)
+        .select('sort_order')
+        .eq('week_id', weekId)
+        .order('sort_order', { ascending: false })
+        .limit(1);
+    const nextOrder = (existing?.[0]?.sort_order ?? 0) + 1;
+
     return (supabase.from('roadmap_tasks') as any)
         .insert([{
             week_id: weekId,
@@ -14,6 +21,7 @@ export async function insertRoadmapTask(weekId: string, task: NewTaskForm) {
             meeting_time: task.meetingTime || null,
             is_active: true,
             domain: task.domain || 'General',
+            sort_order: nextOrder,
         }])
         .select()
         .single();
