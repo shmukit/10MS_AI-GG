@@ -14,6 +14,9 @@ export interface RoadmapNodeData {
     id: string;
     title: string;
     type: string;
+    /** Participant prompt / instructions shown in task detail modal */
+    details?: string;
+    /** External resource (PPT, decision tree, reading). Omit when none. */
     url?: string;
     completed: boolean;
   }>;
@@ -35,9 +38,10 @@ interface RoadmapNodeProps {
 }
 
 export const RoadmapNode: React.FC<RoadmapNodeProps> = ({ node, onClick, nodeUnitLabel = 'Week' }) => {
-  const prevLabel = node.weekNumber && node.weekNumber > 1
-    ? `${nodeUnitLabel} ${node.weekNumber - 1}`
-    : `previous ${nodeUnitLabel.toLowerCase()}`;
+  const prevLabel =
+    node.weekNumber != null && node.weekNumber > 0
+      ? `${nodeUnitLabel} ${node.weekNumber - 1}`
+      : `previous ${nodeUnitLabel.toLowerCase()}`;
 
   const getNodeStyles = () => {
     const baseStyles =

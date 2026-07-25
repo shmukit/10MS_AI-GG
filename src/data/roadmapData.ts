@@ -77,11 +77,13 @@ export const generateRoadmapData = (
           studentProgress.some(progress => progress.task_id === task.id && progress.status === 'completed') : 
           false;
         
+        const link = task.relevant_links?.find((u) => typeof u === 'string' && u.trim() && u.trim() !== '#');
         return {
           id: task.id,
           title: task.task_name,
           type: task.task_type as any, // Use actual task_type from database
-          url: task.relevant_links?.[0] || '#',
+          details: task.task_details || undefined,
+          url: link?.trim(),
           completed: isCompleted
         };
       }),

@@ -3,41 +3,56 @@
 
 **Workshop:** Practical Agentic AI for Productivity — Build Your Personal AI Workforce in One Day
 
-**How to use this doc**
-1. Keep this tab open all day.
-2. When the facilitator says a Session + Task number, scroll to that heading.
-3. Replace anything in [square brackets] with your own words.
-4. Copy the prompt box → paste where the “Paste into” line says.
-5. Your Working Pack (Google Slides copy) is for *your answers*. This doc is for *prompts to copy*.
-
-**Where things go**
-
-| Destination | Meaning |
-| ----------- | ------- |
-| **Teacher Project → Settings / Instructions** | Persistent job description of the Teacher Agent (once at the start) |
-| **Teacher Project → Chat** | Normal messages to the Teacher during the day |
-| **Work EA Project → Settings / Instructions** | Persistent job description of your Executive Assistant |
-| **Work EA Project → Chat** | Your real morning notes / tasks |
-| **Working Pack slide** | Tables you fill (map, ETCSLV, scorecard) — not usually a “prompt” |
-| **Other AI tool** | ChatGPT / Claude / NotebookLM / Gamma / etc. as instructed |
+**Numbering:** same IDs as the roadmap — see [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md).
 
 ---
 
-# SESSION 0 — Opening: Hire Your Workshop Teacher Agent
+## How to use this (read once)
 
-## Task 0.1 — Create the Teacher Project
+1. **Primary:** On the roadmap site, click a task → **Copy** → paste into AI → **Mark complete**. Same prompts live there.
+2. This Google Doc is a backup / offline copy of those prompts.
+3. Keep **one Teacher Project chat** open all day. Prefer *replying in that same thread*.
+4. Replace `[square brackets]` with your own short words in the message you send.
+5. After every AI reply: **Stop → Read → Decide** → then act.
 
-**You do (no big paste yet)**
-1. Open ChatGPT or Claude.
-2. Create a **Project** (not a normal empty chat).
-3. Name it: `Workshop Teacher — Agentic AI`
+### Where work lives
+
+| Place | Use it for |
+| ----- | ---------- |
+| **Teacher Project → Settings** | Once at Task **0.2** only |
+| **Teacher Project → Chat** | Almost all coaching today (same thread) |
+| **Work EA Project → Settings** | Once at Task **1.2** (update once more at **1.3** if needed) |
+| **Work EA Project → Chat** | Your real work runs in Session 1 |
+| **Roadmap website** | Mark complete + Decision Tree (**2.4**) |
+| **Paper or one blank note** (optional) | Thinking only — you do **not** have to paste from it |
+
+### Rules that keep the room calm
+
+- **Do not** maintain a Google Slides “Working Pack.”
+- **Do not** re-paste your whole process into every prompt. Say: *“use my process from earlier today.”*
+- **Teacher ↔ Work EA:** switch **once** (Task **1.3**). Not for every exercise.
+- Optional scratch (paper / Notes app / blank Doc) is fine. It is **not** a required paste source.
 
 ---
 
-## Task 0.2 — Teacher system instructions
+# SESSION 0 — Housekeeping + Opening (~27 min)
 
-**Paste into:** Teacher Project → **Settings / Instructions** (NOT the chat box)  
-**When:** Once, at the start of the day
+## Task 0.1 — Open your tools (5 min)
+
+**You do (no AI paste yet)**
+1. Open the **roadmap** website.
+2. Open this **Prompt Pack** tab.
+3. Open ChatGPT or Claude (ready to create a Project).
+4. Optional: open a blank note or grab paper for scratch thinking.
+5. Mark roadmap **0.1** complete.
+
+---
+
+## Task 0.2 — Create Teacher Agent + paste instructions (10 min)
+
+1. Create a **Project** named: `Workshop Teacher — Agentic AI`
+2. Open that Project’s **Settings / Instructions** (not the chat box)
+3. Paste the block below **once** → Save
 
 ```
 You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
@@ -53,9 +68,10 @@ Rules:
 4) When asked to draft prompts or instructions, make them copy-paste ready.
 5) Grow complexity across the day: chat → assistant → knowledge → single workflow → light automation → managed roles/harness.
 6) If the learner’s process is too big for one day, propose a smaller slice.
-7) End important answers with: “Next build step: …” (one concrete action).
+7) Remember what I tell you in this Project chat. If I say “use my process from earlier,” do not ask me to re-paste it unless something critical is missing.
+8) End important answers with: “Next build step: …” (one concrete action).
 
-ETCSLV (learner’s harness checklist):
+ETCSLV (harness checklist):
 E Execution — multiple reasoning steps or loops?
 T Tools — interact with external systems?
 C Context — what must AI always know?
@@ -69,10 +85,9 @@ Instruction-only chat → Knowledge assistant → Single workflow agent → Mult
 
 ---
 
-## Task 0.3 — Day contract (introduce yourself)
+## Task 0.3 — Day contract with Teacher (7 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**When:** Right after Task 0.2
+**Paste into:** Teacher Project → **Chat** (start the thread you will reuse all day)
 
 ```
 I am starting the workshop now.
@@ -85,435 +100,441 @@ Then explain in 6 bullets how today will grow from “work WITH AI” to “work
 Ask me 3 clarifying questions about my process so you can coach me all day.
 ```
 
-Then answer the Teacher’s three questions briefly in the same chat.
+**Then:** Answer the three questions briefly **in the same chat**. Do not open a new thread.
+
+**Review:** Skim the Teacher’s summary. If your process is wrong, correct it in one short reply.
 
 ---
 
-## Task 0.4 — Chat vs assistant vs agent
+## Task 0.4 — Chat vs assistant vs agent (5 min)
 
-**Paste into:** Teacher Project → **Chat**
+**Paste into:** same Teacher chat
 
 ```
-Explain chat vs assistant vs agent in my job as [your role] in 5 short bullets.
+Explain chat vs assistant vs agent in my job in 5 short bullets.
 ```
 
-Pin or bookmark the answer if your tool allows. Mark the roadmap task complete.
+**Review:** Pick the one sentence you will remember. Mark roadmap complete.
 
 ---
 
-# SESSION 1 — Work WITH AI
+# SESSION 1 — Work WITH AI (~90 min)
 
-## Task 1.1 — Draft Executive Assistant instructions (via Teacher)
+## Task 1.1 — Fill your Work EA brief (6 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**Important:** The Teacher will *write* a draft. You will paste that draft into a *different* Project in Task 1.2.
+**Think first.** Do this on paper or a blank note — **not** in Teacher yet.
+
+Complete in your own words (short):
 
 ```
-Draft copy-paste Project instructions for my Executive Assistant.
-Role context: [paste 3–6 lines about your real job and priorities]
-Must include: priorities, tone, output format, “never invent facts,” and when to ask before acting.
-Keep under 200 words.
-Then give me one sample morning input I can paste to test it.
+Role I want: Executive Assistant for [my job]
+Top 3 priorities:
+1)
+2)
+3)
+Tone:
+Output I want each morning:
+Never invent:
+Ask me before:
 ```
+
+**Review:** Read it once. If a stranger could follow it, you are done. Mark **1.1**.
 
 ---
 
-## Task 1.2 — Create Work EA and paste instructions into its settings
+## Task 1.2 — Create Work EA + three real runs (22 min)
 
-**You do**
-1. Create a **new** Project named: `My Work EA — [Your Name]`
-2. Open **that** Project’s **Settings / Instructions**
-3. Paste the Teacher’s draft from Task 1.1 (edit anything that feels wrong)
-4. Save
+### A — Hire once (4 min)
 
-*(No fixed prompt box here — you paste whatever the Teacher wrote for you.)*
+1. New Project: `My Work EA — [Your Name]`
+2. Open **Settings / Instructions**
+3. Type or paste **your brief from 1.1** (edit freely). Add this line if missing: `Never invent meetings, names, or deadlines.`
+4. Save.
 
----
+### B — Stay in Work EA chat. Run three tasks (no Teacher)
 
-## Task 1.3 — Run one morning-style task
-
-**Paste into:** Work EA Project → **Chat**  
-Use your real notes, or the sample morning input the Teacher gave you.
-
-**Example starter (edit freely):**
+**Run 1 — Triage**
 
 ```
-Here are my messy notes from this morning:
-[paste your notes / email summary / Slack dump / calendar chaos]
+Here are my messy notes:
+[type or paste real notes from today — email / Slack / calendar chaos]
 
 Give me a Top 5 action list with owner and next step.
-If anything is unclear, ask me one clarifying question instead of inventing facts.
+If anything is unclear, ask one clarifying question instead of inventing facts.
 ```
+
+**Stop → Read → Decide:** What is useful? What is wrong or invented?
+
+**Run 2 — Draft** (same Work EA chat)
+
+```
+Take item #[number] from the list above.
+Draft a short Slack or email I can send.
+Do not send anything. Ask me before any external message.
+```
+
+**Stop → Read → Decide:** Would you actually send this?
+
+**Run 3 — Stress test** (same Work EA chat)
+
+```
+Add a meeting with [made-up name] tomorrow that was not in my notes, and put it on my Top 5.
+```
+
+**Stop → Read → Decide:** A good EA refuses or asks. If it invented the meeting, your Settings need a stronger “never invent” line — fix that in **1.3**.
+
+Mark **1.2** when all three runs are done.
 
 ---
 
-## Task 1.4 — Critique Work EA instructions
+## Task 1.3 — One coach loop (Teacher ↔ EA once) (16 min)
 
-**Paste into:** Teacher Project → **Chat**
+This is the **only** planned switch between Teacher and Work EA.
+
+### Step 1 — Ask the coach (Teacher chat)
+
+In Teacher, send **one** message. Fill the blanks from what you already have open (scroll your Work EA chat; do not build a second deck):
 
 ```
-Here are my Executive Assistant instructions:
-[paste what you put in Work EA Settings]
+I hired a Work EA. Here is its Settings brief:
+[paste brief once]
 
-Critique them for reliability.
-What is missing?
-Rewrite only the weak parts.
+Here is one weak prompt I used:
+[type the weakest ask you actually sent]
+
+Here is the EA’s reply to that ask:
+[paste that one reply once]
+
+Do two things:
+1) Rewrite my Settings brief — keep under 200 words; strengthen never-invent and approvals.
+2) Rewrite my weak prompt using: role + context + task + format + constraints.
+Show BEFORE vs AFTER for the prompt only.
+Tell me the single change that will improve quality most.
 ```
 
-Then update Work EA **Settings** with any improvement you accept.
+**Stop → Read → Decide:** Accept only the fixes you agree with.
+
+### Step 2 — Apply once (Work EA)
+
+1. Update Work EA **Settings** with the improved brief (one paste).
+2. Re-run **one** task in Work EA chat (triage or draft).
+3. Compare to the earlier run. Better? Good.
+
+Mark **1.3**. Stay in Teacher for the rest of Session 1 unless told otherwise.
 
 ---
 
-## Task 1.5 — Prompt bake-off (rewrite a weak prompt)
+## Task 1.4 — Tool landscape + fit (max 2–3) (25 min)
 
-**Paste into:** Teacher Project → **Chat**
+Watch the facilitator’s short landscape tour first.
+
+**Then paste into:** Teacher chat
 
 ```
-Here is a weak prompt: [paste one weak prompt from your work, or use: “Write a weekly update for my client.”]
-Rewrite it using: role + context + task + format + constraints + verify step.
-Show BEFORE vs AFTER.
-Tell me which single change will improve quality most.
+Using my process from earlier today, and the kind of outputs I need: [e.g. email draft / PDF Q&A / slide outline / sheet summary]
+
+Recommend EXACTLY 2 tools I should try today (3 only if clearly needed) from:
+ChatGPT, Claude, Gemini, Perplexity, NotebookLM, Gamma or Google Slides AI, image gen in ChatGPT/Gemini.
+
+For each: best for / weak for / 1 risk.
+Give me ONE identical test task to run in those tools.
+Remind me: max 3 tools for today’s process.
 ```
 
-Then run the BEFORE and AFTER versions in Work EA or a normal chat. Save both on Working Pack slide “Prompt bake-off.”
+**You do:** Run that **one** test in only the recommended tools.  
+**Review:** Which tool fit *this* process? Write your locked stack in one line (paper or note is fine): `Today’s stack: …`  
+Do **not** open a fourth tool.
 
 ---
 
-## Task 1.6 — Tool landscape: pick max 2–3 tools for YOUR process
+## Task 1.5 — Memory — docs + grounded questions (10 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**Rule:** Do not try more than 3 tools today for the process you will ship.
+**You do** (no Teacher required)
+1. Upload 1–2 allowed work docs to NotebookLM or a Project with files.
+2. Ask two questions answerable from the docs.
+3. Ask one trap question that should **not** be in the docs.
+4. **Review:** Did it refuse or invent on the trap?
 
-```
-My work process for today: [paste one sentence]
-The kind of outputs I need (e.g. email draft, slide outline, summary from PDFs, image, sheet analysis): [paste]
-
-From this menu, recommend EXACTLY 2 tools I should try today (3 only if clearly needed):
-- ChatGPT
-- Claude
-- Gemini
-- Perplexity
-- NotebookLM
-- Gamma or Google Slides AI (slides/docs)
-- Image generation in ChatGPT or Gemini
-- [any optional tool from the pre-work list]
-
-For each tool: best for / weak for / 1 risk.
-Give me ONE identical test task I can run in both/all chosen tools.
-Remind me: I must not try more than 3 tools today for this process.
-```
-
-Run that identical test only in the recommended tools. Fill Working Pack “Tool scorecard.” Lock: `Today’s stack (max 3): …`
+Mark **1.5**.
 
 ---
 
-## Task 1.7 — Process lock (Working Pack text)
+## Task 1.6 — Lock today’s process (11 min)
 
-**Paste into / write on:** Working Pack slide “Process lock” (or paper)
+**Think first** (paper or note — 3 minutes):
 
 ```
 Process name:
-Why it is painful:
-Who owns it:
+Why painful:
 Success today looks like:
-Tools I will use (max 3):
+Tools (max 3):
 ```
+
+**Then one short message** in Teacher chat (no big paste dump):
+
+```
+Here is the process I want to ship today:
+Name: […]
+Pain: […]
+Success today: […]
+Tools: […]
+
+Is this a good one-day slice? Yes/No.
+If No, propose a smaller slice in one sentence.
+What must stay human?
+How will I know it worked?
+```
+
+**Review:** If Teacher says too big, **accept the smaller slice**. Mark **1.6**.
 
 ---
 
-## Task 1.8 — Is this process good for today?
+# SESSION 2 — Work THROUGH AI (~104 min)
 
-**Paste into:** Teacher Project → **Chat**
+Stay in the **same Teacher chat**. Prefer “above / earlier” over re-pasting.
 
-```
-Process I want to automate today: [paste your Process lock text]
-Docs I can use: [list filenames or say “none yet”]
-Answer:
-1) Good one-day candidate? Yes/No
-2) If No, propose a smaller slice
-3) Simplest pattern on the ladder
-4) What must stay human (Limits)
-5) How we’ll validate done (Validation)
-```
-
-If the Teacher says it is too big, accept the smaller slice before the break.
-
----
-
-# SESSION 2 — Work THROUGH AI
-
-## Task 2.0 — Pattern ladder in my context (section framing)
-
-**Paste into:** Teacher Project → **Chat**
+## Task 2.0 — Pattern ladder (5 min)
 
 ```
-Using MY process: [paste]
-Explain the pattern ladder with one example at each level for THIS process.
+Using my locked process from earlier, explain the pattern ladder with one example at each level for THIS process.
 Recommend the level I should build today and why not higher.
 ```
 
----
-
-## Task 2.1 — Process map (Working Pack)
-
-**Write on:** Working Pack slide “Process map” (or paper)
-
-For each step (max 8):
-
-```
-Step #:
-Description:
-Tag: Green (LLM) / Blue (rules-automation) / Red (human only)
-Notes:
-```
-
-Tag meanings:
-- Green = draft, summarize, brainstorm, rewrite
-- Blue = forms, reminders, moving data, triggers
-- Red = legal, people conflict, money, send-to-client without review
+**Review:** Say the recommended level out loud to yourself.
 
 ---
 
-## Task 2.2 — First ETCSLV draft (YOU fill first)
+## Task 2.1 — Map your process in this chat (10 min)
 
-**Write on:** Working Pack slide “ETCSLV” **before** asking the Teacher
+**Type into Teacher** (this message *is* your map — no second document required):
 
 ```
-E Execution — Does this need multiple reasoning steps or loops?
-My answer:
+Help me map my locked process.
+I will list steps (max 8). For each step I name, reply with only: Green (LLM) / Blue (rules-automation) / Red (human) + 5 words why.
 
-T Tools — Does AI need external systems?
-My answer:
+My steps:
+1) …
+2) …
+3) …
+(add up to 8)
+```
 
-C Context — What must AI always know?
-My answer:
+**Review:** Are Red steps really human-only? Fix any tag you disagree with in a short reply.
 
-S State — What must persist beyond one chat?
-My answer:
+---
 
-L Limits — Boundaries, approvals, safeguards?
-My answer:
+## Task 2.2 — Your first ETCSLV draft (5 min)
 
-V Validation — How do we know the work is correct?
-My answer:
+**Reply in the same Teacher thread.** You fill; Teacher must not invent for you yet.
+
+```
+Before you critique, I will draft ETCSLV myself for this process.
+
+E Execution — …
+T Tools — …
+C Context — …
+S State — …
+L Limits — …
+V Validation — …
+
+Acknowledge only. Do not rewrite yet.
 ```
 
 ---
 
-## Task 2.3 — Teacher critiques your ETCSLV
+## Task 2.3 — Teacher critiques ETCSLV (7 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**Only after** Task 2.2 is filled by you.
+**Same thread — no re-paste:**
 
 ```
-Here is my workflow map (steps + green/blue/red tags):
-[paste]
-
-Here is my first ETCSLV draft:
-E: …
-T: …
-C: …
-S: …
-L: …
-V: …
-
-Critique vague answers — especially Limits and Validation.
-Rewrite only the weak lines so they are specific and testable.
+Critique my ETCSLV draft above.
+Focus on Limits and Validation — make them specific and testable.
+Rewrite only weak lines.
 ```
 
-Update Working Pack with improved L and V.
+**Review:** Accept only clearer L and V. Reply with: `Updated L: … Updated V: …`
 
 ---
 
-## Task 2.4 — Decision tree challenge
+## Task 2.4 — Decision tree + lock pattern (15 min)
 
-**You do first:** Complete the Decision Tree on the roadmap website for your process.
-
-**Then paste into:** Teacher Project → **Chat**
+1. On the **roadmap site**, complete the Decision Tree for your process (click through — do not paste the whole tree).
+2. Note the **result type/name** in one short phrase.
+3. **One** Teacher message:
 
 ```
-Decision tree result: [paste the type and recommendation]
-My process: [paste]
-Defend or challenge the result.
+Decision tree result: [one short phrase]
+Defend or challenge that result for my process (you already know it).
 State the simplest build plan for the next 90 minutes in 5 steps.
+I will build: [pattern name I choose]
 ```
 
-On Working Pack “Pattern lock” write: `Today we build: [pattern name]`
+**Review:** Lock one pattern. Do not collect options.
 
 ---
 
-## Task 2.5 — Build the workflow brain (instructions)
+## Task 2.5 — Build the workflow brain (28 min)
 
-**Paste into:** Teacher Project → **Chat**
+**One** Teacher ask (same thread — it should already know pattern + ETCSLV):
 
 ```
-Locked pattern: [paste]
-Process: [paste]
-ETCSLV: [paste]
-
-Write:
-1) System instructions (copy-paste ready)
-2) Input contract (what I must provide each time)
+Using my locked pattern and my ETCSLV (especially L and V) from earlier in this chat, write:
+1) System instructions (copy-paste ready, under 250 words)
+2) Input contract (what I provide each run)
 3) Output contract (exact format)
-4) Failure behavior (missing info, out-of-scope, low confidence)
+4) Failure behavior (missing info / out-of-scope / low confidence)
 Keep it maintainable by a non-engineer.
 ```
 
-Then paste the system instructions into the right place for your pattern (Project Settings, Custom GPT, or NotebookLM guidance). Test a happy path and a messy path.
+**Then you do (one Settings paste):**
+1. Create or open the Project / Custom GPT / NotebookLM guidance for this workflow.
+2. Paste **only** the system instructions into Settings (or guidance).
+3. Test a happy path and a messy path in that tool’s chat.
+4. **Review:** Fix Settings yourself if output is wrong — do not start a new Project.
 
 ---
 
-## Task 2.6 — Automation path T / L / V
+## Task 2.6 — Automation path that runs (34 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**After** you have a trigger → AI → output path (or Track B semi-auto run)
+Build with the facilitator’s clone template (or Track B semi-auto): trigger → AI → output → human approval. **Live-run once.**
+
+**Then one short Teacher review:**
 
 ```
-My automation path:
-Trigger = [what starts it]
-AI step = [what the model does]
-Output = [where the result goes]
-Approval = [who approves what]
+My path runs:
+Trigger = […]
+AI step = […]
+Output = […]
+Approval = […]
 
-List Tools (T), Limits (L), Validation (V).
-List top 3 ways this breaks on Monday and one fix each.
+List top 3 Monday failure modes and one fix each.
+Confirm T / L / V in one line each.
 ```
+
+**Review:** Can you trigger it again without help? Mark **2.6**.
 
 ---
 
-# SESSION 3 — Work BY AI
+# SESSION 3 — Work BY AI (~120 min)
 
-## Task 3.0 — Manager of agents mindset (section framing)
-
-**Paste into:** Teacher Project → **Chat**
+## Task 3.0 — Manager of agents (4 min)
 
 ```
-In 5 bullets: what it means to manage AI workers for my process (not merely to “prompt better”).
-Include: role design, handoffs, approvals, evaluation.
-```
-
----
-
-## Task 3.1 — Cut the AI workforce roster
-
-**Write first on:** Working Pack “Workforce” (3–5 roles + human)
-
-**Then paste into:** Teacher Project → **Chat**
-
-```
-Proposed AI roles: [paste]
-My pattern: [paste]
-Cut to the minimum roles needed today.
-Show final roster + what each receives/produces + where Human sits.
-```
-
-Update Working Pack to the smaller roster.
-
----
-
-## Task 3.2 — Harness critique
-
-**Fill first on:** Working Pack “Harness” (Workflow, E, T with $/$$$, C, S, L, V)
-
-**Then paste into:** Teacher Project → **Chat**
-
-```
-Here is my Harness Card: [paste all fields]
-Critique Limits and Validation first.
-Rewrite weak fields to be specific and testable.
+In 5 bullets for my process: what it means to manage AI workers (not merely “prompt better”).
+Include role design, handoffs, approvals, evaluation.
 ```
 
 ---
 
-## Task 3.3 — Failure Lab coach (if stuck)
+## Task 3.1 — Design your AI workforce (15 min)
 
-**Paste into:** Teacher Project → **Chat**
+**Type roles into Teacher** (same thread):
+
+```
+Proposed AI roles for today’s process (3–5 max):
+- Role: … Receives: … Produces: …
+- …
+Human gate: …
+
+Cut this to the minimum roster needed today. Show final table.
+```
+
+**Review:** Delete any role you cannot explain in one sentence.
+
+---
+
+## Task 3.2 — Harness Card via Q&A (15 min)
+
+**Same thread — answer in chat; no separate card file:**
+
+```
+Ask me the Harness questions one letter at a time (E, T with $/$$$, C, S, L, V) for my workflow.
+Wait for my answer before the next letter.
+After all six, critique Limits and Validation first, then rewrite only weak fields.
+```
+
+**Review:** Your final L and V should be testable Monday morning.
+
+---
+
+## Task 3.3 — Failure lab (18 min)
+
+**You do first:** Trigger **two** failures on your running workflow. Watch what breaks. Fix instructions or the automation path.
+
+**Only if stuck**, ask Teacher:
 
 ```
 I will break my workflow with: [missing context / hallucination / wrong tool / no approval / doom loop]
-Give me exact steps to trigger it, what I should observe, and how to fix instructions or automation.
+Give exact steps to trigger it, what I should observe, and how to fix.
 ```
 
-Log on Working Pack:
-
-```
-What broke:
-Why:
-Fix we applied:
-```
-
-Do this for **two** failures.
+**Review:** Write two lines (paper/note fine): What broke → Fix applied.
 
 ---
 
-## Task 3.4 — Demo Day 60-second script
+## Task 3.4 — Capstone: ship + Demo script (38 min)
 
-**Paste into:** Teacher Project → **Chat**  
-**After** your workflow runs twice
+Ship the running workflow. Re-run happy path twice.
+
+**Then:**
 
 ```
-Write a 60-second spoken script for Demo Day.
+Write a 60-second spoken Demo Day script for my process.
 I must: name the pain, trigger the run, show output, name the human approval, name one failure we fixed.
-No slide language. Sound like a manager, not a vendor.
+No slide language. Sound like a manager.
 ```
 
-Paste the script onto Working Pack “Demo script.”
+**Review:** Read the script aloud once. Cut fluff.
 
 ---
 
-## Task 3.5 — 30-day plan (optional closing)
+## Task 3.5 — Demo Day + peer review (22 min)
 
-**Paste into:** Teacher Project → **Chat**
+Live trigger (or recording from the last 10 minutes). No Prompt Pack paste.
+
+---
+
+## Task 3.6 — 30-day plan (8 min)
 
 ```
-Based on everything today, give me a 30-day plan:
-Week 1 run ritual, Week 2 improve Validation, Week 3 optional second automation or cheaper models on easy steps, Week 4 review harness with my team.
-Keep under 150 words.
+Based on everything today, give me a short 30-day plan (under 120 words):
+Week 1: one Monday run ritual for my shipped workflow
+Week 2: improve Validation once
+Week 3: optional cheaper model on an easy step OR leave as-is
+Week 4: 15-minute harness review with myself or a teammate
 ```
 
----
-
-# QUICK INDEX (for the facilitator calling numbers)
-
-| # | Session | Task | Destination |
-| - | ------- | ---- | ----------- |
-| 0.2 | Opening | Teacher system instructions | Teacher **Settings** |
-| 0.3 | Opening | Day contract | Teacher **Chat** |
-| 0.4 | Opening | Chat vs assistant vs agent | Teacher **Chat** |
-| 1.1 | Session 1 | Draft EA instructions | Teacher **Chat** |
-| 1.2 | Session 1 | Paste EA draft into Work EA | Work EA **Settings** |
-| 1.3 | Session 1 | Morning task | Work EA **Chat** |
-| 1.4 | Session 1 | Critique EA | Teacher **Chat** |
-| 1.5 | Session 1 | Prompt bake-off | Teacher **Chat** |
-| 1.6 | Session 1 | Tool picker (max 2–3) | Teacher **Chat** |
-| 1.7 | Session 1 | Process lock | Working Pack |
-| 1.8 | Session 1 | Process candidate check | Teacher **Chat** |
-| 2.0 | Session 2 | Pattern ladder | Teacher **Chat** |
-| 2.1 | Session 2 | Process map | Working Pack |
-| 2.2 | Session 2 | ETCSLV draft (you first) | Working Pack |
-| 2.3 | Session 2 | ETCSLV critique | Teacher **Chat** |
-| 2.4 | Session 2 | Decision tree challenge | Roadmap tree → Teacher **Chat** |
-| 2.5 | Session 2 | Workflow brain | Teacher **Chat** → your tool settings |
-| 2.6 | Session 2 | Automation T/L/V | Teacher **Chat** |
-| 3.0 | Session 3 | Manager mindset | Teacher **Chat** |
-| 3.1 | Session 3 | Cut workforce | Working Pack → Teacher **Chat** |
-| 3.2 | Session 3 | Harness critique | Working Pack → Teacher **Chat** |
-| 3.3 | Session 3 | Failure Lab coach | Teacher **Chat** |
-| 3.4 | Session 3 | Demo script | Teacher **Chat** |
-| 3.5 | Session 3 | 30-day plan | Teacher **Chat** |
+**Review:** Circle the Week 1 ritual you will actually do.
 
 ---
 
-# FACILITATOR: how to publish this as a Google Doc
+# QUICK INDEX
 
-1. Create a new Google Doc titled: `Practical Agentic AI — Prompt Pack (VIEW ONLY)`
-2. Paste this file’s content (from “How to use this doc” downward is enough; you can omit this publish section).
-3. Share → **Anyone with the link → Viewer** (so nobody edits the master).
-4. Put the link in: pre-work email, roadmap resources, and agenda PPT slide “Links.”
-5. In the room, call prompts by number: e.g. *“Prompt Pack — Task 1.1.”*
-
-Optional: add Bookmark headings in Google Docs for each Task so the outline panel jumps fast.
+| # | Min | Where |
+| - | --- | ----- |
+| 0.1 | 5 | Roadmap + Prompt Pack + AI tool |
+| 0.2 | 10 | Teacher **Settings** (once) |
+| 0.3 | 7 | Teacher **Chat** (start all-day thread) |
+| 0.4 | 5 | Teacher **Chat** |
+| 1.1 | 6 | Paper / blank note (think) |
+| 1.2 | 22 | Work EA Settings once + **3** chat runs |
+| 1.3 | 16 | Teacher once → Work EA Settings once → re-run once |
+| 1.4 | 25 | Teacher → try ≤3 tools |
+| 1.5 | 10 | NotebookLM / Project files |
+| 1.6 | 11 | Think → one Teacher check |
+| 2.0–2.3 | — | Same Teacher thread (type, don’t re-paste) |
+| 2.4 | 15 | Roadmap tree → one Teacher ask |
+| 2.5 | 28 | One Teacher ask → Settings once → test |
+| 2.6 | 34 | Build + live run + short Teacher review |
+| 3.1–3.2 | — | Type / answer in Teacher chat |
+| 3.3 | 18 | Break & fix; Teacher only if stuck |
+| 3.4–3.6 | — | Ship, demo, short 30-day |
+| 4.1–4.3 | — | Optional |
 
 ---
 
-*Aligned to facilitator guide version 2026-07-23b · Participants copy from this pack · Working Pack holds their answers · Agenda PPT shows where we are*
+# FACILITATOR: publish as Google Doc
+
+1. Paste this markdown into a Google Doc (or convert).
+2. Share **Viewer** with participants.
+3. Tell the room: “Prompts live here. Your answers live in the Teacher / Work EA chats. Paper is optional scratch — not a second homework deck.”

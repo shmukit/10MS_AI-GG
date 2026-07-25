@@ -32,7 +32,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="max-w-2xl w-full mx-4 p-6 rounded-xl shadow-lg bg-card transition-colors duration-200">
+            <div className="max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto p-6 rounded-xl shadow-lg bg-card transition-colors duration-200">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-foreground transition-colors duration-200">
                         {title}
@@ -111,28 +111,36 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
                     <div>
                         <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                            Task Details
+                            Task details / student prompt
                         </label>
+                        <p className="text-xs text-muted-foreground mb-2">
+                            Students see this when they click the task. Use <span className="font-mono">——— COPY BELOW ———</span> …
+                            <span className="font-mono">——— END ———</span> around text they should Copy into AI.
+                            Leave blank only if the task needs no prompt.
+                        </p>
                         <textarea
                             value={taskData.taskDetails || ''}
                             onChange={(e) => setTaskData({ ...taskData, taskDetails: e.target.value })}
-                            rows={3}
-                            className={inputClass}
-                            placeholder="Enter task details"
+                            rows={12}
+                            className={`${inputClass} font-mono text-xs leading-relaxed min-h-[200px]`}
+                            placeholder={"WHERE: Teacher chat\n\n——— COPY BELOW ———\nYour prompt here…\n——— END ———"}
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2 text-muted-foreground transition-colors duration-200">
-                                Relevant Links
+                                Relevant link (optional)
                             </label>
+                            <p className="text-xs text-muted-foreground mb-2">
+                                Shows as a separate open-link button. Use for instructor PPT, decision tree, or readings — not for prompts.
+                            </p>
                             <input
                                 type="url"
                                 value={taskData.relevantLinks || ''}
                                 onChange={(e) => setTaskData({ ...taskData, relevantLinks: e.target.value })}
                                 className={inputClass}
-                                placeholder="https://example.com"
+                                placeholder="https://… (PPT / article) or leave empty"
                             />
                         </div>
 
