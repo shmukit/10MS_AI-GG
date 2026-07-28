@@ -31,7 +31,12 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
 }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const [menuStyle, setMenuStyle] = useState<{ top: number; left: number; minWidth: number } | null>(null);
+    const [menuStyle, setMenuStyle] = useState<{
+        top: number;
+        left: number;
+        minWidth: number;
+        maxWidth: number;
+    } | null>(null);
     const batches = enrolledBatches || [];
     const hasMultiple = batches.length > 1;
     const { primary, secondary } = getBatchLabel(currentBatch || batches[0]);
@@ -64,10 +69,21 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
 
         const updatePosition = () => {
             const rect = buttonRef.current!.getBoundingClientRect();
+            // fixed + block without an explicit width stretches to the viewport;
+            // pin width to the trigger and clamp so the menu stays under the button.
+            const minWidth = Math.max(Math.round(rect.width), 224);
+            const maxWidth = Math.min(320, Math.max(16, window.innerWidth - 16));
+            const width = Math.min(minWidth, maxWidth);
+            let left = rect.left;
+            if (left + width > window.innerWidth - 8) {
+                left = Math.max(8, window.innerWidth - 8 - width);
+            }
+            if (left < 8) left = 8;
             setMenuStyle({
                 top: rect.bottom + 8,
-                left: rect.left,
-                minWidth: Math.max(rect.width, 224),
+                left,
+                minWidth: width,
+                maxWidth,
             });
         };
 
@@ -110,11 +126,13 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
                   <div
                       data-roadmap-dropdown-menu
                       role="listbox"
-                      className="fixed z-[100] rounded-xl shadow-modal border border-border bg-card max-h-72 overflow-y-auto py-2"
+                      className="fixed z-[100] w-max rounded-xl shadow-modal border border-border bg-card max-h-72 overflow-y-auto py-2"
                       style={{
                           top: menuStyle.top,
                           left: menuStyle.left,
+                          width: menuStyle.minWidth,
                           minWidth: menuStyle.minWidth,
+                          maxWidth: menuStyle.maxWidth,
                       }}
                   >
                       {batches.map((batch: any) => {

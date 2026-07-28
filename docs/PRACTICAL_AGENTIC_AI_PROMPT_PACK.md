@@ -21,8 +21,8 @@
 | ----- | ---------- |
 | **Teacher Project → Settings** | Once at Task **0.2** only |
 | **Teacher Project → Chat** | Almost all coaching today (same thread) |
-| **Work EA Project → Settings** | Once at Task **1.2** (update once more at **1.3** if needed) |
-| **Work EA Project → Chat** | Your real work runs in Session 1 |
+| **Work Assistant Project → Settings** | Once at Task **1.2** (update once more at **1.3** if needed) |
+| **Work Assistant Project → Chat** | Your real work runs in Session 1 |
 | **Roadmap website** | Mark complete + Decision Tree (**2.4**) |
 | **Paper or one blank note** (optional) | Thinking only — you do **not** have to paste from it |
 
@@ -30,14 +30,14 @@
 
 - **Do not** maintain a Google Slides “Working Pack.”
 - **Do not** re-paste your whole process into every prompt. Say: *“use my process from earlier today.”*
-- **Teacher ↔ Work EA:** switch **once** (Task **1.3**). Not for every exercise.
+- **Teacher ↔ Work Assistant:** switch **once** (Task **1.3**). Not for every exercise.
 - Optional scratch (paper / Notes app / blank Doc) is fine. It is **not** a required paste source.
 
 ---
 
-# SESSION 0 — Housekeeping + Opening (~33 min)
+# SESSION 0 — Housekeeping + Opening (~35 min)
 
-## Task 0.0 — What is AI? What to expect / not expect (6 min)
+## Task 0.0 — What is AI? What to expect / not expect (5 min)
 
 **You do (mostly listen — no AI yet)**
 
@@ -116,7 +116,7 @@ Instruction-only chat → Knowledge assistant → Single workflow agent → Mult
 
 ---
 
-## Task 0.3 — Day contract with Teacher (7 min)
+## Task 0.3 — Kickoff chat with Teacher (10 min)
 
 **Paste into:** Teacher Project → **Chat** (start the thread you will reuse all day)
 
@@ -140,22 +140,22 @@ Ask me 3 clarifying questions about my process so you can coach me all day.
 ## Task 0.4 — Chat vs assistant vs agent (5 min)
 
 **Because you just…** used a Project with Settings — name what you lived.  
-**Analogy:** Hallway question vs hired desk EA vs routed office process (intake → desk → stamp).
+**Analogy:** Hallway question vs hired desk assistant vs routed office process (intake → desk → approval).
 
 **Paste into:** same Teacher chat
 
 ```
 Explain chat vs assistant vs agent in my job in 5 short bullets.
-Use a workplace analogy I will remember (desk / hallway / approval stamp is fine).
+Use a workplace analogy I will remember (desk / hallway / approval is fine).
 ```
 
-**Review:** Pick the one sentence you will remember. Next you will **hire an assistant** (Work EA). Mark roadmap complete.
+**Review:** Pick the one sentence you will remember. Next you will **hire an assistant** (Work Assistant). Mark roadmap complete.
 
 ---
 
 # SESSION 1 — Work WITH AI (~90 min)
 
-## Task 1.1 — Fill your Work EA brief (6 min)
+## Task 1.1 — Fill your Work Assistant brief (5 min)
 
 **Because you just…** named “assistant” — write the job brief before hiring.  
 **Analogy:** Write the secretary’s joining letter before their first day.
@@ -180,16 +180,16 @@ Ask me before:
 
 ---
 
-## Task 1.2 — Create Work EA + three real runs (22 min)
+## Task 1.2 — Create Work Assistant + three real runs (20 min)
 
-### A — Hire once (4 min)
+### A — Hire once (5 min)
 
-1. New Project: `My Work EA — [Your Name]`
+1. New Project: `My Work Assistant — [Your Name]`
 2. Open **Settings / Instructions**
 3. Type or paste **your brief from 1.1** (edit freely). Add this line if missing: `Never invent meetings, names, or deadlines.`
 4. Save.
 
-### B — Stay in Work EA chat. Run three tasks (no Teacher)
+### B — Stay in Work Assistant chat. Run three tasks (no Teacher)
 
 **Run 1 — Triage**
 
@@ -203,7 +203,7 @@ If anything is unclear, ask one clarifying question instead of inventing facts.
 
 **Stop → Read → Decide:** What is useful? What is wrong or invented?
 
-**Run 2 — Draft** (same Work EA chat)
+**Run 2 — Draft** (same Work Assistant chat)
 
 ```
 Take item #[number] from the list above.
@@ -213,34 +213,34 @@ Do not send anything. Ask me before any external message.
 
 **Stop → Read → Decide:** Would you actually send this?
 
-**Run 3 — Stress test** (same Work EA chat)
+**Run 3 — Stress test** (same Work Assistant chat)
 
 ```
 Add a meeting with [made-up name] tomorrow that was not in my notes, and put it on my Top 5.
 ```
 
-**Stop → Read → Decide:** A good EA refuses or asks. If it invented the meeting, your Settings need a stronger “never invent” line — fix that in **1.3**.
+**Stop → Read → Decide:** A good Work Assistant refuses or asks. If it invented the meeting, your Settings need a stronger “never invent” line — fix that in **1.3**.
 
 Mark **1.2** when all three runs are done.
 
 ---
 
-## Task 1.3 — One coach loop (Teacher ↔ EA once) (16 min)
+## Task 1.3 — One feedback round (Teacher ↔ Work Assistant once) (15 min)
 
-This is the **only** planned switch between Teacher and Work EA.
+This is the **only** planned switch between Teacher and Work Assistant.
 
 ### Step 1 — Ask the coach (Teacher chat)
 
-In Teacher, send **one** message. Fill the blanks from what you already have open (scroll your Work EA chat; do not build a second deck):
+In Teacher, send **one** message. Fill the blanks from what you already have open (scroll your Work Assistant chat; do not build a second deck):
 
 ```
-I hired a Work EA. Here is its Settings brief:
+I hired a Work Assistant. Here is its Settings brief:
 [paste brief once]
 
 Here is one weak prompt I used:
 [type the weakest ask you actually sent]
 
-Here is the EA’s reply to that ask:
+Here is the Work Assistant’s reply to that ask:
 [paste that one reply once]
 
 Do two things:
@@ -252,23 +252,27 @@ Tell me the single change that will improve quality most.
 
 **Stop → Read → Decide:** Accept only the fixes you agree with.
 
-### Step 2 — Apply once (Work EA)
+### Step 2 — Apply once (Work Assistant)
 
-1. Update Work EA **Settings** with the improved brief (one paste).
-2. Re-run **one** task in Work EA chat (triage or draft).
+1. Update Work Assistant **Settings** with the improved brief (one paste).
+2. Re-run **one** task in Work Assistant chat (triage or draft).
 3. Compare to the earlier run. Better? Good.
 
 Mark **1.3**. Stay in Teacher for the rest of Session 1 unless told otherwise.
 
 ---
 
-## Task 1.4 — Lock today’s process (11 min)
+## Task 1.4 — Lock today’s process (10 min)
 
 **Because you just…** felt WITH AI on real work — **commit one job** before shopping for tools.
 
 **Analogy:** Choose one customer journey for today — not the whole company.
 
-**Think first** (paper or note — 3 minutes):
+**Think first** (paper or note — 5 minutes):
+
+1. List **2–3 candidate processes** from your real work.
+2. Plot each on **Impact** (time/rows saved) vs **Effort** (data, tools, approvals). Pick the winner — usually high impact, lower effort.
+3. For the winner, write:
 
 ```
 Process name:
@@ -298,7 +302,7 @@ Do **not** open a tool zoo yet — that is Task **1.5**.
 
 ---
 
-## Task 1.5 — Tool landscape + fit (max 2–3) for the locked process (25 min)
+## Task 1.5 — Tool landscape + fit (max 2–3) for the locked process (30 min)
 
 **Because you just…** locked the process — equip only what **that** job needs.
 
@@ -341,22 +345,23 @@ Mark **1.6**.
 
 ---
 
-# SESSION 2 — Work THROUGH AI (~104 min)
+# SESSION 2 — Work THROUGH AI (~105 min)
 
 Stay in the **same Teacher chat**. Prefer “above / earlier” over re-pasting.
 
-## Task 2.0 — Pattern ladder (5 min)
+## Task 2.0 — Pattern ladder + readiness (5 min)
 
-**Because you just…** locked one job + stack — ask how much structure *that* job needs.  
+**Because you just…** locked one job + stack — choose how much structure *that* job needs.  
 **Analogy:** Bicycle → scooter → one van → small fleet → factory conveyor — climb only as high as this route needs.
 
-```
-Using my locked process from earlier, explain the pattern ladder with one example at each level for THIS process.
-I already practiced chat + assistant this morning — connect the ladder to that.
-Recommend the level I should build today and why not higher.
-```
+**You do (paper / workbook — no Teacher chat):**
 
-**Review:** Say the recommended level out loud to yourself. Multi-agent (level 4) waits until something already runs (Session 3).
+1. Rate yourself 1–5 on: Data readiness · Tool/IT access · Risk appetite · Change capacity.
+2. Listen to the instructor on the ladder (chat → knowledge → workflow → multi-agent → automation).
+3. Circle the rung that fits YOUR locked process. Discuss with a neighbor if unsure.
+4. Write one line: `My ladder rung today: …`
+
+**Review:** Say the rung out loud. Multi-agent (level 4) waits until something already runs (Session 3). Mark **2.0**.
 
 ---
 
@@ -381,26 +386,15 @@ My steps:
 
 ## Task 2.2 — Your first ETCSLV draft (5 min)
 
-**Reply in the same Teacher thread.** You fill; Teacher must not invent for you yet.
+**Paper only — Worksheet D.** No Teacher chat for this step.
 
-```
-Before you critique, I will draft ETCSLV myself for this process.
-
-E Execution — …
-T Tools — …
-C Context — …
-S State — …
-L Limits — …
-V Validation — …
-
-Acknowledge only. Do not rewrite yet.
-```
+Fill E–T–C–S–L–V in your own words on Worksheet D. Be specific on **L** and **V**. Mark **2.2** when the draft is on the page.
 
 ---
 
-## Task 2.3 — Teacher critiques ETCSLV (7 min)
+## Task 2.3 — Teacher critiques ETCSLV (10 min)
 
-**Same thread — no re-paste:**
+**Paste your Worksheet D draft into Teacher**, then send:
 
 ```
 Critique my ETCSLV draft above.
@@ -408,7 +402,7 @@ Focus on Limits and Validation — make them specific and testable.
 Rewrite only weak lines.
 ```
 
-**Review:** Accept only clearer L and V. Reply with: `Updated L: … Updated V: …`
+**Review:** Accept only clearer L and V. Reply with: `Updated L: … Updated V: …` Mark **2.3**.
 
 ---
 
@@ -429,7 +423,7 @@ I will build: [pattern name I choose]
 
 ---
 
-## Task 2.5 — Build the workflow brain (28 min)
+## Task 2.5 — Build the workflow brain (30 min)
 
 **One** Teacher ask (same thread — it should already know pattern + ETCSLV):
 
@@ -450,11 +444,11 @@ Keep it maintainable by a non-engineer.
 
 ---
 
-## Task 2.6 — Automation path that runs (34 min)
+## Task 2.6 — Automation path that runs (30 min)
 
 Build with the facilitator’s clone template (or Track B semi-auto): trigger → AI → output → human approval. **Live-run once.**
 
-**Then one short Teacher review:**
+**Optional if time — one short Teacher review:**
 
 ```
 My path runs:
@@ -471,14 +465,19 @@ Confirm T / L / V in one line each.
 
 ---
 
-# SESSION 3 — Work BY AI (~120 min)
+# SESSION 3 — Work BY AI (~115 min)
 
-## Task 3.0 — Manager of agents (4 min)
+## Task 3.0 — Manager of agents (5 min)
+
+**Listen to the instructor** — no Teacher chat required.
+
+Write one line on paper or in your workbook:
 
 ```
-In 5 bullets for my process: what it means to manage AI workers (not merely “prompt better”).
-Include role design, handoffs, approvals, evaluation.
+For my locked process, “manager of agents” means: …
 ```
+
+Mark **3.0** when framing is clear.
 
 ---
 
@@ -499,21 +498,23 @@ Cut this to the minimum roster needed today. Show final table.
 
 ---
 
-## Task 3.2 — Harness Card via Q&A (15 min)
+## Task 3.2 — Harness Card (15 min)
 
-**Same thread — answer in chat; no separate card file:**
+**Paper first — Worksheet E.** Fill all fields; be specific on **L** and **V**.
+
+**Optional if time** — paste L + V into Teacher, then:
 
 ```
-Ask me the Harness questions one letter at a time (E, T with $/$$$, C, S, L, V) for my workflow.
-Wait for my answer before the next letter.
-After all six, critique Limits and Validation first, then rewrite only weak fields.
+Critique my Harness Limits and Validation above.
+Make them specific and testable for Monday morning.
+Rewrite only weak lines.
 ```
 
-**Review:** Your final L and V should be testable Monday morning.
+**Review:** L and V should pass a Monday-morning test. Mark **3.2**.
 
 ---
 
-## Task 3.3 — Failure lab (18 min)
+## Task 3.3 — Failure lab (20 min)
 
 **You do first:** Trigger **two** failures on your running workflow. Watch what breaks. Fix instructions or the automation path.
 
@@ -528,7 +529,7 @@ Give exact steps to trigger it, what I should observe, and how to fix.
 
 ---
 
-## Task 3.4 — Capstone: ship + Demo script (38 min)
+## Task 3.4 — Capstone: ship + Demo script (30 min)
 
 Ship the running workflow. Re-run happy path twice.
 
@@ -544,13 +545,17 @@ No slide language. Sound like a manager.
 
 ---
 
-## Task 3.5 — Demo Day + peer review (22 min)
+## Task 3.5 — Demo Day + peer review (20 min)
 
 Live trigger (or recording from the last 10 minutes). No Prompt Pack paste.
 
 ---
 
-## Task 3.6 — 30-day plan (8 min)
+## Task 3.6 — 30-day plan (10 min)
+
+**Paper first:** Fill Worksheet I seed plan + Reference R7 calendar in your workbook. Circle Week 1 ritual.
+
+**Optional if time:**
 
 ```
 Based on everything today, give me a short 30-day plan (under 120 words):
@@ -560,32 +565,37 @@ Week 3: optional cheaper model on an easy step OR leave as-is
 Week 4: 15-minute harness review with myself or a teammate
 ```
 
-**Review:** Circle the Week 1 ritual you will actually do.
-
----
+**Review:** Circle the Week 1 ritual you will actually do. Mark **3.6**.
 
 # QUICK INDEX
 
 | # | Min | Where |
 | - | --- | ----- |
-| 0.0 | 6 | Instructor slide + paper reflection (no AI) |
+| 0.0 | 5 | Instructor slide + paper reflection (no AI) |
 | 0.1 | 5 | Roadmap + Prompt Pack + AI tool |
 | 0.2 | 10 | Teacher **Settings** (once) |
-| 0.3 | 7 | Teacher **Chat** (start all-day thread) |
+| 0.3 | 10 | Teacher **Chat** (start all-day thread) |
 | 0.4 | 5 | Teacher **Chat** |
-| 1.1 | 6 | Paper / blank note (think) |
-| 1.2 | 22 | Work EA Settings once + **3** chat runs |
-| 1.3 | 16 | Teacher once → Work EA Settings once → re-run once |
-| 1.4 | 11 | Think → one Teacher check (**lock process**) |
-| 1.5 | 25 | Teacher → try ≤3 tools **for locked process** |
+| 1.1 | 5 | Paper / blank note (think) |
+| 1.2 | 20 | Work Assistant Settings once + **3** chat runs |
+| 1.3 | 15 | Teacher once → Work Assistant Settings once → re-run once |
+| 1.4 | 10 | Think → one Teacher check (**lock process**) |
+| 1.5 | 30 | Teacher → try ≤3 tools **for locked process** |
 | 1.6 | 10 | NotebookLM / Project files **for that process** |
-| 2.0–2.3 | — | Same Teacher thread (type, don’t re-paste) |
+| 2.0 | — | Paper: readiness + ladder rung (no chat) |
+| 2.1 | 10 | Teacher: map steps + tags |
+| 2.2 | 5 | Paper: Worksheet D ETCSLV draft |
+| 2.3 | 10 | Teacher: paste draft + critique L/V |
 | 2.4 | 15 | Roadmap tree → one Teacher ask |
-| 2.5 | 28 | One Teacher ask → Settings once → test |
-| 2.6 | 34 | Build + live run + short Teacher review |
-| 3.1–3.2 | — | Type / answer in Teacher chat |
-| 3.3 | 18 | Break & fix; Teacher only if stuck |
-| 3.4–3.6 | — | Ship, demo, short 30-day |
+| 2.5 | 30 | One Teacher ask → Settings once → test |
+| 2.6 | 30 | Build + live run (+ optional Teacher review) |
+| 3.0 | 5 | Instructor framing + one line (no chat) |
+| 3.1 | 15 | Teacher: minimum roles |
+| 3.2 | 15 | Paper: Worksheet E Harness (+ optional L/V critique) |
+| 3.3 | 20 | Break & fix; Teacher only if stuck |
+| 3.4 | 30 | Ship + Teacher: demo script |
+| 3.5 | 20 | Live demo (no chat) |
+| 3.6 | 10 | Paper: seed plan + R7 (+ optional Teacher polish) |
 | 4.1–4.3 | — | Optional |
 
 ---
@@ -594,4 +604,4 @@ Week 4: 15-minute harness review with myself or a teammate
 
 1. Paste this markdown into a Google Doc (or convert).
 2. Share **Viewer** with participants.
-3. Tell the room: “Prompts live here. Your answers live in the Teacher / Work EA chats. Paper is optional scratch — not a second homework deck.”
+3. Tell the room: “Prompts live here. Your answers live in the Teacher / Work Assistant chats. Paper is optional scratch — not a second homework deck.”

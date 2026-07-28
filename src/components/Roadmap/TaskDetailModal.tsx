@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, CheckCircle2, Copy, Loader2 } from 'lucide-react';
+import { Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Loader2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
+import { getTaskVisual } from './taskVisuals';
 
 export type TaskDetailSegment =
   | { type: 'prose'; text: string }
@@ -142,8 +143,13 @@ export interface TaskDetailModalTask {
 interface TaskDetailModalProps {
   open: boolean;
   task: TaskDetailModalTask | null;
+  /** 0-based index within the current session task list */
+  taskIndex: number;
+  taskCount: number;
   onClose: () => void;
   onComplete: () => void | Promise<void>;
+  onPrevious: () => void;
+  onNext: () => void;
   canComplete: boolean;
   isCompleting?: boolean;
 }
@@ -151,66 +157,131 @@ interface TaskDetailModalProps {
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   open,
   task,
+  taskIndex,
+  taskCount,
   onClose,
   onComplete,
+  onPrevious,
+  onNext,
   canComplete,
   isCompleting = false,
 }) => {
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+
   const segments = useMemo(
     () => parseTaskDetailSegments(task?.details || ''),
     [task?.details]
   );
 
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0 });
+  }, [task?.id]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (taskIndex > 0) onPrevious();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (taskIndex < taskCount - 1) onNext();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, taskIndex, taskCount, onPrevious, onNext]);
+
   if (!task) return null;
 
   const hasCode = segments.some((s) => s.type === 'code');
+  const visual = getTaskVisual(task.title, task.type);
+  const modalTitle = `${visual.emoji} ${task.title}`;
+  const hasPrev = taskIndex > 0;
+  const hasNext = taskIndex < taskCount - 1;
+  const positionLabel =
+    taskCount > 0 ? `Task ${taskIndex + 1} of ${taskCount}` : null;
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={task.title}
+      title={modalTitle}
       size="lg"
       className="max-h-[90vh] flex flex-col"
       footer={
-        <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium border border-border text-foreground hover:bg-muted"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={() => void onComplete()}
-            disabled={!canComplete || task.completed || isCompleting}
-            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              task.completed
-                ? 'bg-green-600 text-white cursor-default'
-                : canComplete && !isCompleting
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-muted text-muted-foreground cursor-not-allowed'
-            }`}
-          >
-            {isCompleting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving…
-              </>
-            ) : task.completed ? (
-              <>
-                <Check className="w-4 h-4" />
-                Completed
-              </>
-            ) : (
-              'Mark complete'
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={!hasPrev}
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none"
+              aria-label="Previous task"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </button>
+            {positionLabel && (
+              <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                {positionLabel}
+              </span>
             )}
-          </button>
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!hasNext}
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none"
+              aria-label="Next task"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium border border-border text-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={() => void onComplete()}
+              disabled={!canComplete || task.completed || isCompleting}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                task.completed
+                  ? 'bg-green-600 text-white cursor-default'
+                  : canComplete && !isCompleting
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+              }`}
+            >
+              {isCompleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving…
+                </>
+              ) : task.completed ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Completed
+                </>
+              ) : (
+                'Mark complete'
+              )}
+            </button>
+          </div>
         </div>
       }
     >
-      <div className="max-h-[55vh] overflow-y-auto space-y-4 -mx-1 px-1">
+      <div ref={bodyRef} className="max-h-[50vh] overflow-y-auto space-y-4 -mx-1 px-1">
         {!task.details?.trim() ? (
           <p className="text-sm text-muted-foreground">
             No prompt for this task yet. Follow the facilitator, then mark complete.
@@ -219,13 +290,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           segments.map((seg, i) =>
             seg.type === 'prose' ? (
               <p
-                key={i}
+                key={`${task.id}-p-${i}`}
                 className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words"
               >
                 {seg.text}
               </p>
             ) : (
-              <PromptCodeBlock key={i} label={seg.label} code={seg.text} />
+              <PromptCodeBlock key={`${task.id}-c-${i}`} label={seg.label} code={seg.text} />
             )
           )
         )}
@@ -234,6 +305,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             Hover a prompt box → Copy → paste into your AI chat or Project Settings.
           </p>
         )}
+        <p className="text-[11px] text-muted-foreground">
+          Tip: use ← → keys to move between tasks.
+        </p>
       </div>
     </Modal>
   );

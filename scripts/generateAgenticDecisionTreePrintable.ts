@@ -17,7 +17,7 @@ const CHARTS_OUT = resolve(DOCS, 'decision-tree-charts');
 const OUT_MD = resolve(DOCS, 'AGENTIC_DECISION_TREE_PRINTABLE.md');
 
 const SECTOR_LABELS: Record<string, string> = {
-  bank: 'Bank / MFI / financial services',
+  bank: 'Bank / MFI / NBFI / financial services',
   rmg: 'RMG / factory / industrial',
   corporate: 'Corporate office (any industry)',
   agency: 'Agency / sales / distribution',
@@ -29,6 +29,7 @@ const SECTOR_LABELS: Record<string, string> = {
 const HEADACHE_TITLES: Record<string, string> = {
   'q-headache-planning': 'Planning / BD / reporting',
   'q-headache-accounts': 'Accounts / finance',
+  'q-headache-collections': 'Collections / recovery / PAR',
   'q-headache-sales': 'Sales / business development',
   'q-headache-marketing': 'Marketing / communications',
   'q-headache-hr': 'HR / admin',

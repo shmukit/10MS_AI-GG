@@ -1,5 +1,6 @@
 import type { DecisionQuestionNode } from '../../agenticDecisionTreeTypes';
 import { accountsHeadacheNode } from './accounts';
+import { collectionsHeadacheNode } from './collections';
 import { educationHeadacheNode } from './education';
 import { engineerHeadacheNode } from './engineer';
 import { generalHeadacheNode } from './general';
@@ -14,6 +15,7 @@ import { salesHeadacheNode } from './sales';
 export const HEADACHE_NODES: Record<string, DecisionQuestionNode> = {
   'q-headache-planning': planningHeadacheNode,
   'q-headache-accounts': accountsHeadacheNode,
+  'q-headache-collections': collectionsHeadacheNode,
   'q-headache-sales': salesHeadacheNode,
   'q-headache-marketing': marketingHeadacheNode,
   'q-headache-hr': hrHeadacheNode,

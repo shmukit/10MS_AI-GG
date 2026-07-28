@@ -1,938 +1,722 @@
 # Slide Plan — Practical Agentic AI for Productivity
 
-**Keep in sync with:** [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md) · Facilitator Guide · roadmap SQL (`task_name` IDs `0.0`…`3.6`).
+**Sync with:** `[PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md)` · Facilitator Guide · roadmap task IDs.
 
-**Pedagogy:** No concept before its prerequisite. Every work slide includes **Because you just…** (bridge) + **Analogy** (workplace picture before jargon). Session 1 order = lock process → tools → memory.
+**On-slide rule:** Short. Large type. Max **4 bullets** (tables don’t count). No walls of prose.
 
-## NotebookLM brief (use with facilitator guide + this file)
+## NotebookLM brief
 
-**How to use this file in NotebookLM**
+1. Upload this file + `PRACTICAL_AGENTIC_AI_FACILITATOR_GUIDE.md`.
+2. Prompt:
 
-1. Upload this file **and** `docs/PRACTICAL_AGENTIC_AI_FACILITATOR_GUIDE.md` as sources.
-2. Prompt NotebookLM roughly like:
+> Create a participant slide deck from these sources only. Follow slide numbers and titles. Keep each slide sparse: short title, task ID if any, max 4 bullets or one small table. No invented timings or frameworks. Add one-line “Instructor cue” per slide. Export as a paste-ready outline for Google Slides. Also a 2-page take-home from the recipe at the end.
 
-> Using only these sources, create a participant-facing slide deck for the one-day workshop. Follow the slide plan exactly (slide numbers, titles, roadmap task IDs, and on-slide bullets). **Every work slide must show both the concept and the matching roadmap task** (Task ID + short title + minutes + Done when), plus a **Because you just…** bridge line and one **Analogy** line. Keep slides sparse: max 6 bullets besides the task banner, large readable text, no walls of prose. Tone: professional, practical, non-engineer. Do not invent tools, timings, task numbers, or frameworks not in the sources. Include a short speaker-note line for each slide under “Instructor cue.” Export as a presentation outline I can paste into Google Slides / PowerPoint. Also produce a 2-page PDF take-home summary from the recipe at the end of this file.
-
-3. After generation: replace placeholders (`[Roadmap URL]`, `[Prompt Pack link]`) with real links.
+1. Replace `[Roadmap URL]` and `[Prompt Pack link]`.
 
 ---
 
-## Deck purpose (read this first)
+## Deck purpose
 
-| This deck IS | This deck is NOT |
-| ------------ | ---------------- |
-| Orientation spine + **task-coherent coaching wall** | The curriculum itself (Teacher Agent + roadmap teach) |
-| **Concept + matching roadmap task** on the same slide | Concept-only lecture slides with no “what do I click now” |
-| Agenda + timing map tied to task IDs (`0.1`…`3.6`) | Capstone / Demo Day content beyond the checklist |
-| Take-home PDF reference | A lecture you read for 40 minutes |
 
-**In-room rule:** Leave the current **task slide** (or session park slide) up while people work. Only advance when the room moves to the next roadmap task. Hands-on time > slide time.
+| This deck IS                   | This deck is NOT    |
+| ------------------------------ | ------------------- |
+| Where we are + what to do next | The full curriculum |
+| Task IDs on the wall           | Long lectures       |
+| Agenda map                     | Capstone content    |
 
-**Slide template (required for every work slide)**
 
-Each work slide must include this banner block **above** the concept bullets:
+**In room:** Leave the current task slide up while people work.
+
+**Work-slide banner (keep tiny):**
 
 ```
-TASK X.Y · [Short title from curriculum] · ~N min
-Because you just… [bridge from previous task — one line]
-Do now: [one line — what they do on laptop / paper]
-Done when: [one line — mark roadmap complete when…]
-Analogy: [one workplace picture — before jargon]
+TASK X.Y · Title · ~N min
+Do: [one line]
+Done: [one line]
 ```
 
-Then 3–6 concept / quality-bar bullets. Never show a framework (ETCSLV, ladder, roles) without the task ID that uses it. Never introduce a concept whose prerequisite task is incomplete.
-
-**Visual style for NotebookLM:** Clean, high contrast, minimal icons, one idea per slide, tables OK when specified, avoid dense paragraphs. Task ID should be the largest secondary signal after the title.
-
-**Audience:** Managers, HR, marketing, ops, founders, analysts — not software engineers.
-
-**Promise of the day:** Leave with **one running workflow** for a real business process (not a PPT-only design).
+**Promise:** One **running** workflow by end of day.
 
 ---
 
-## Full day map (for NotebookLM context)
+## Day map
 
 ```
-Session 0 OPEN (~33) · 0.0–0.4 → Session 1 WITH (~90) · 1.1–1.6 → break
-→ Session 2 THROUGH (~104) · 2.0–2.6 → break/lunch
-→ Session 3 BY (~120) · 3.0–3.6 (Demo Day + 30-day) → Session 4 Reference (async) · 4.1–4.3
+0 Open (~35) → 1 WITH (~90) → break → 2 THROUGH (~105) → lunch → 3 BY (~115) → 4 async
 ```
 
-Arc: **Work WITH AI → Work THROUGH AI → Work BY AI**
-
-Roles: Teacher Agent teaches · Instructor facilitates doing · Roadmap holds checklist · Participant ships
+WITH = AI helps you · THROUGH = the job runs · BY = manage the team + ship
 
 ---
 
-# SLIDE-BY-SLIDE PLAN (31 slides)
+# SLIDES (31)
 
 ---
 
 ### Slide 1 — Title
 
-**Roadmap task:** — (door open)
-
 **On slide**
 
-- Title: Practical Agentic AI for Productivity
-- Subtitle: Build Your Personal AI Workforce in One Day
-- Line: One-day instructor-led workshop for working professionals
-- Footer: Product of the day = one **running** workflow for your process
-- Small: Follow roadmap tasks **0.0 → 3.6** (same numbers as Prompt Pack)
+- Practical Agentic AI for Productivity
+- Build your personal AI workforce in one day
+- Product of the day: one **running** workflow
+- Roadmap tasks **0.0 → 3.6**
 
-**Instructor cue:** Welcome; don’t lecture yet. Point to roadmap login.
-
-**Show when:** Door open / start
+**Instructor cue:** Welcome. Point to roadmap login.  
+**Show when:** Start
 
 ---
 
-### Slide 2 — Promise & non-goals
-
-**Roadmap task:** — (expectation set before 0.1)
+### Slide 2 — Promise
 
 **On slide**
 
-- **You will leave with:** One real workflow that runs (trigger → AI → output → human approval)
-- **You will practice:** Managing AI like a team (brief, check, limit, validate)
-- **You will not:** Learn to code · master every vendor · build a 16-agent swarm today
-- Rule: Simplest pattern that works
-- Capstone = Task **3.4** live run + Task **3.5** Demo Day — not a slide deck
-- Detail next: Task **0.0** — What is AI? / expect vs don’t expect
+- Leave with: trigger → AI → output → human approval
+- Practice: brief, check, limit, validate
+- Not today: coding · every tool · a 16-agent swarm
+- Capstone = **3.4** run + **3.5** Demo Day
 
-**Instructor cue:** Reset expectations briefly; full expect table is Slide 6 / Task **0.0**.
-
-**Show when:** Minute 0–2
+**Instructor cue:** 60 seconds.  
+**Show when:** Opening
 
 ---
 
 ### Slide 3 — How this room works
 
-**Roadmap task:** — (OS of the day; leave up during 0.1–0.2 if helpful)
+**On slide**
 
-**On slide — 4 boxes**
 
-| Role | Job today |
-| ---- | --------- |
-| Teacher Agent | Explains concepts, drafts prompts, grows with you |
-| Instructor | Short demos, unsticks tools, quality bar |
-| Roadmap (web) | Checklist **by task ID**, decision tree, mark complete |
-| You | Build, test, ship |
+| Who           | Job                   |
+| ------------- | --------------------- |
+| Teacher Agent | Explains + drafts     |
+| Instructor    | Demos + unsticks      |
+| Roadmap       | Checklist + mark done |
+| You           | Build + ship          |
 
-- Hands-on ≥ ~60% of the day
-- Call work by number: “We’re on Task **1.3**”
-- Ask the Teacher Agent “why” before asking for a lecture
 
-**Instructor cue:** Operating system. Refer back often.
+- Call work by number: “Task **1.3**”
+- Hands-on most of the day
 
+**Instructor cue:** OS of the day.  
 **Show when:** Opening
 
 ---
 
-### Slide 4 — Day agenda (“You are here” master map)
+### Slide 4 — Agenda
 
-**Roadmap task:** — (master map; revisit at every session transition)
+**On slide**
 
-**On slide — timeline**
 
-| When | Block | Roadmap tasks | What you will actually do |
-| ---- | ----- | ------------- | ------------------------- |
-| ~33 min | **0 · Opening** · What is AI → Hire Teacher | **0.0–0.4** | Expect/don’t · surfaces · Teacher Project · day contract · vocab |
-| ~90 min | **1 · Work WITH AI** = AI helps *you* | **1.1–1.6** | Brief · 3 EA runs · coach once · **lock one job** · ≤3 tools · memory |
-| 15 min | Break | | |
-| ~104 min | **2 · Work THROUGH AI** = AI runs *the job* | **2.0–2.6** | Map · ETCSLV · decision tree · brain · **run once** |
-| as scheduled | Break / lunch | | |
-| ~120 min | **3 · Work BY AI** = AI as a *small team* | **3.0–3.6** | Roles · harness · break it · **ship** · Demo Day · 30-day |
-| later | **4 · Reference** (optional) | **4.1–4.3** | Short reads / video at home |
+| Block               | Tasks   | You do                   |
+| ------------------- | ------- | ------------------------ |
+| **0** Open ~33m     | 0.0–0.4 | Expect · Teacher · vocab |
+| **1** WITH ~90m     | 1.1–1.6 | Work Assistant · lock job · ≤3 tools |
+| **2** THROUGH ~104m | 2.0–2.6 | Map · brain · **run**    |
+| **3** BY ~120m      | 3.0–3.6 | Roles · ship · demo      |
+| **4** Later         | 4.1–4.3 | Optional reads           |
 
-- Bottom banner: **Same job all day.** We escalate structure — we do not start a new project at lunch.
-- Footer legend (small): WITH = helper · THROUGH = one running process · BY = roles + rules + ship
 
-**Instructor cue:** At each transition, point to the **task ID column**, then the plain line.
+- Same job all day — escalate, don’t restart
 
-**Show when:** Opening; each section transition
+**Instructor cue:** Point here at each transition.  
+**Show when:** Opening + transitions
 
 ---
 
-### Slide 5 — Session 0 park · Hire your Teacher Agent
+### Slide 5 — Session 0 park
 
-**Roadmap tasks:** **0.0 → 0.4** (~33 min)
+**On slide**
 
-**On slide — task table (park this slide)**
 
-| ID | Do this | ~min |
-| -- | ------- | ---- |
-| **0.0** | What is AI? What to expect / not expect | 6 |
-| **0.1** | Open roadmap + Prompt Pack + AI tool | 5 |
-| **0.2** | Create Teacher Agent · paste instructions into **Settings** | 10 |
-| **0.3** | Day contract in Teacher chat (same chat all day) | 7 |
-| **0.4** | Chat vs assistant vs agent + checkpoint | 5 |
+| ID      | Do                                     | Min |
+| ------- | -------------------------------------- | --- |
+| **0.0** | What is AI? Expect / don’t             | 6   |
+| **0.1** | Open roadmap + AI tool                 | 5   |
+| **0.2** | Teacher Project → **Settings**         | 10  |
+| **0.3** | Introduce yourself in Teacher **chat** | 7   |
+| **0.4** | Chat vs assistant vs agent             | 5   |
 
-- Banner: **YOU ARE HERE — Session 0**
-- Outcome: Shared AI/expect mental model + one Teacher Project ready; same thread for the day
 
-**Instructor cue:** Park briefly, then go to Slide 6 (**0.0**) before housekeeping.
+- **YOU ARE HERE — Session 0**
+- Goal: one Teacher Project, one chat thread
 
-**Show when:** Start of Session 0
+**Instructor cue:** Then Slide 6.  
+**Show when:** Start Session 0
 
 ---
 
-### Slide 6 — Task 0.0 · What is AI? Expect / don’t expect
-
-**Roadmap task:** **0.0** What is AI? What to expect / not expect (~6 min)
+### Slide 6 — Task 0.0 · What is AI?
 
 **On slide**
 
 ```
-TASK 0.0 · What is AI? Expect / don’t · ~6 min
-Because you just… arrived — we align the mental model before any tools
-Do now: Listen to instructor · write one EXPECT and one DON’T EXPECT on paper/note
-Done when: Those two lines exist; mark roadmap 0.0 complete
-Analogy: AI = a very fast junior who drafts well and invents confidently — needs a manager
+TASK 0.0 · What is AI? · ~5 min
+Do: Write 1 EXPECT and 1 DON’T EXPECT
+Done: Mark 0.0
 ```
 
-**What AI is (in this room)**
 
-- Pattern-based software that drafts, summarizes, classifies, suggests
-- Powerful when you **brief → check → limit → validate**
-- A teammate you **manage** — not a truth oracle
+| Expect                    | Don’t expect           |
+| ------------------------- | ---------------------- |
+| One running workflow      | Learning to code       |
+| Managing AI like a junior | Perfect autonomy       |
+| Hands-on most of the day  | Mastering every vendor |
 
-**What AI is not**
 
-- Magic, consciousness, or always correct
-- A green light to skip human approval on legal, people, money, or external sends
+- AI drafts fast — and invents confidently
+- You manage: brief → check → limit → validate
 
-| Expect today | Don’t expect today |
-| ------------ | ------------------ |
-| One **running** workflow for a real process | Learning to code |
-| Practice managing AI like a team | Mastering every vendor |
-| Shared vocabulary: chat / assistant / agent | Perfect autonomy with zero human |
-| Hands-on most of the day | A 16-agent swarm |
-
-- Optional later: Session 4 video **4.3** is a refresher only — this slide is the live framing
-
-**Instructor cue:** 3–4 min talk from this slide; 2 min silent write; then advance to 0.1.
-
-**Show when:** First work beat of Session 0 (before housekeeping)
+**Instructor cue:** Short talk, then silent write.  
+**Show when:** 0.0
 
 ---
 
-### Slide 7 — Task 0.1–0.2 · Surfaces + Teacher hire
-
-**Roadmap task:** **0.1** Open surfaces (5) → **0.2** Create Teacher + Settings paste (10)
+### Slide 7 — Tasks 0.1–0.2 · Open + hire Teacher
 
 **On slide**
 
 ```
-TASK 0.1 → 0.2 · Open tools + hire Teacher · ~15 min
-Because you just… set expectations — open the desk, then hire the coach
-Do now: Log into roadmap · open Prompt Pack · create AI Project · paste 0.2 into Settings (not chat)
-Done when: Teacher Project exists with saved instructions; roadmap 0.1 & 0.2 checked
-Analogy: Settings = joining letter/handbook · Chat = today’s conversation at the desk
+TASK 0.1–0.2 · Open tools + hire Teacher · ~15 min
+Do: Roadmap open · new AI Project · paste 0.2 into Settings
+Done: Settings saved · mark 0.1 & 0.2
 ```
 
-- Concept: Teacher Agent = your coach for the whole day (not the Work EA)
-- Settings once ≠ chat message
-- Keep **one** Teacher chat thread from here
-- Settings may mention ETCSLV / ladder — **ignore until Session 2** (you will learn them when you need them)
+- Teacher = coach for the day (not Work Assistant)
+- **Settings** ≠ chat
+- Ignore ETCSLV / ladder words until Session 2
 
-**Instructor cue:** Demo Settings paste once. Say: “Don’t decode the acronyms yet.”
-
-**Show when:** Tasks 0.1–0.2
+**Instructor cue:** Demo Settings once.  
+**Show when:** 0.1–0.2
 
 ---
 
-### Slide 8 — Task 0.3 · Day contract
-
-**Roadmap task:** **0.3** Day contract with Teacher (~7 min)
+### Slide 8 — Task 0.3 · Meet your Teacher
 
 **On slide**
 
 ```
-TASK 0.3 · Day contract · ~7 min
-Because you just… hired the coach — start the all-day conversation (not a new thread later)
-Do now: In Teacher chat (not Settings), paste Prompt Pack 0.3 · answer Teacher’s questions
-Done when: You and Teacher agree on how you’ll work today; mark 0.3 complete
-Analogy: Kickoff meeting with your trainer — same room all day
+TASK 0.3 · Meet your Teacher · ~10 min
+Do: Teacher chat → copy 0.3 → send role + process → answer 3 questions
+Done: Mark 0.3
 ```
 
-- Concept: Contract = same chat, stop→read→decide, escalate one process all day
-- No second “answer deck” in Google Slides
-- Prefer “use what I already told you” over re-pasting later
+- Tell Teacher: role · org · one painful process
+- Keep **this same chat** all day
+- Not a legal “contract” — just your intro
 
-**Instructor cue:** Circulate; kill people pasting into Settings again.
-
-**Show when:** Task 0.3
+**Instructor cue:** Stop Settings pastes.  
+**Show when:** 0.3
 
 ---
 
-### Slide 9 — Task 0.4 · Chat vs Assistant vs Agent
-
-**Roadmap task:** **0.4** Chat vs assistant vs agent + checkpoint (~5 min)
-
-**On slide — concept table + task banner**
-
-```
-TASK 0.4 · Vocab checkpoint · ~5 min
-Because you just… used a Project with Settings — name what you lived
-Do now: Ask Teacher (Prompt Pack 0.4) for one-line definitions in YOUR work context · bookmark/pin
-Done when: You can say which of the three you are using; mark 0.4 complete
-Analogy: Hallway question vs hired desk EA vs routed office process (intake → desk → stamp)
-```
-
-| Chat | Assistant | Agent / workflow |
-| ---- | --------- | ---------------- |
-| Hallway question (re-explain every time) | Hired desk EA with a standing brief | Routed process; you manage exceptions |
-| Good for exploration | Good for repeatable drafts/Q&A | Good when process is mapped |
-
-- All day you **manage** these — you don’t worship the model
-- Next: you will **hire** an assistant (Work EA) in Session 1
-
-**Instructor cue:** Ask 2 people for their Teacher’s one-line definition. Bridge: “Next you hire one.”
-
-**Show when:** Task 0.4 / end of Session 0
-
----
-
-### Slide 10 — Session 1 park · Work WITH AI
-
-**Roadmap tasks:** **1.1 → 1.6** (~90 min)
-
-**On slide**
-
-| ID | Do this | ~min |
-| -- | ------- | ---- |
-| **1.1** | Fill Work EA brief (think first — paper/note) | 6 |
-| **1.2** | Create Work EA + **three** real runs | 22 |
-| **1.3** | **One** coach loop (Teacher → fix Settings → re-run once) | 16 |
-| **1.4** | **Lock today’s process** (commit the job) | 11 |
-| **1.5** | Tool landscape + fit (max 2–3) **for that job** | 25 |
-| **1.6** | Memory — docs + grounded questions **for that job** | 10 |
-
-- Banner: **YOU ARE HERE — Session 1: Work WITH AI**
-- Outcome: Work EA hired (3 runs) + one coach loop + **process locked** + ship stack + grounded memory
-- Order rule: **Lock → tools → memory** (never tool-shop before the job is chosen)
-- Reminder: Same Teacher chat all day · Teacher ↔ Work EA switch **once** (at 1.3)
-- Arc analogy: WITH = a capable junior at your elbow
-
-**Instructor cue:** Park during Session 1; jump to the task slide when you call the number.
-
-**Show when:** Start of Session 1
-
----
-
-### Slide 11 — Task 1.1 · Work EA brief
-
-**Roadmap task:** **1.1** Fill your Work EA brief (~6 min)
+### Slide 9 — Task 0.4 · Chat / Assistant / Agent
 
 **On slide**
 
 ```
-TASK 1.1 · Work EA brief · ~6 min
-Because you just… named “assistant” (0.4) — now write the job brief before hiring
-Do now: NO AI yet — fill Prompt Pack 1.1 fields on paper or a blank note
-Done when: Brief is filled enough to paste into Settings next; mark 1.1 complete
-Analogy: Write the secretary’s joining letter before their first day
+TASK 0.4 · Three words · ~5 min
+Do: Ask Teacher (0.4) · pin the answer
+Done: Mark 0.4
 ```
 
-- Concept: Brief = who this EA serves, recurring jobs, tone, hard limits
-- Thinking before hiring beats a vague mega-prompt
-- This brief becomes Work EA **Settings** in 1.2 (paste once)
 
-**Instructor cue:** Silent room. Kill early tool-opening.
+| Chat             | Assistant      | Agent                     |
+| ---------------- | -------------- | ------------------------- |
+| One-off question | Standing brief | Mapped process you manage |
 
-**Show when:** Task 1.1 (after short facilitator demo if using guide)
+
+- Next: hire a Work Assistant (Session 1)
+
+**Instructor cue:** Ask 2 people for a one-liner.  
+**Show when:** 0.4
 
 ---
 
-### Slide 12 — Task 1.2 · Hire Work EA + three runs
+### Slide 10 — Session 1 park
 
-**Roadmap task:** **1.2** Create Work EA + three real tasks (~22 min)
+**On slide**
+
+
+| ID      | Do                        | Min |
+| ------- | ------------------------- | --- |
+| **1.1** | Write Work Assistant brief (no AI)    | 6   |
+| **1.2** | Hire Work Assistant + 3 runs          | 22  |
+| **1.3** | Coach once → fix → re-run | 16  |
+| **1.4** | Lock today’s process      | 11  |
+| **1.5** | Pick ≤3 tools             | 25  |
+| **1.6** | Ground with docs          | 10  |
+
+
+- **YOU ARE HERE — Session 1: WITH AI**
+- Order: **lock job → then tools**
+- Teacher ↔ Work Assistant switch **once** (1.3)
+
+**Instructor cue:** Park; jump by task number.  
+**Show when:** Start Session 1
+
+---
+
+### Slide 11 — Task 1.1 · Work Assistant brief
 
 **On slide**
 
 ```
-TASK 1.2 · Create Work EA + 3 runs · ~22 min
-Because you just… wrote the brief — hire the worker and use them three times
-Do now: New Project · paste 1.1 brief into Settings once · run 3 real work tasks · Stop, read, decide after each
-Done when: Three outputs exist in the Work EA Project; mark 1.2 complete
-Analogy: Teacher = trainer · Work EA = your secretary (different desks)
+TASK 1.1 · Work Assistant brief · ~5 min
+Do: Fill brief on paper/note — no AI
+Done: Mark 1.1
 ```
 
-- Concept: Work EA = daily helper Project (separate from Teacher)
-- Leave Teacher **closed** until 1.3
-- Quality bar: real work, not “write a poem”
-- Stop→Read→Decide = taste before you serve
+- Who it serves · recurring jobs · tone · hard limits
+- This becomes Settings in 1.2
 
-**Instructor cue:** Walk; ask “show me run 2.”
-
-**Show when:** Task 1.2
+**Instructor cue:** Silent. No tools yet.  
+**Show when:** 1.1
 
 ---
 
-### Slide 13 — Task 1.3 · One coach loop
-
-**Roadmap task:** **1.3** Teacher critiques → fix Settings → re-run once (~16 min)
+### Slide 12 — Task 1.2 · Hire Work Assistant + 3 runs
 
 **On slide**
 
 ```
-TASK 1.3 · One coach loop · ~16 min
-Because you just… have real EA output — coach once, don’t thrash
-Do now: Teacher Prompt Pack 1.3 → accept fixes you agree with → update Work EA Settings once → re-run ONE task
-Done when: Before/after comparison exists; mark 1.3 complete
-Analogy: Manager reviews one sample of work, updates the handbook, asks for one redo
+TASK 1.2 · Hire Work Assistant + 3 runs · ~20 min
+Do: New Project · Settings once · 3 real tasks · stop & read each time
+Done: Mark 1.2
 ```
 
-- Concept: Manage prompts like a manager — critique once
-- Only **one** Teacher ↔ Work EA switch this session
-- Update Settings (handbook) — don’t rely on chat memory alone
+- Work Assistant ≠ Teacher
+- Leave Teacher closed until 1.3
+- Real work only
 
-**Instructor cue:** Enforce “once.” No endless critique loops.
-
-**Show when:** Task 1.3
+**Instructor cue:** “Show me run 2.”  
+**Show when:** 1.2
 
 ---
 
-### Slide 14 — Task 1.4 · Lock today’s process
-
-**Roadmap task:** **1.4** Lock today’s process (~11 min)
+### Slide 13 — Task 1.3 · One feedback round
 
 **On slide**
 
 ```
-TASK 1.4 · Lock process · ~11 min
-Because you just… felt WITH AI on real work — commit ONE job before shopping for tools
-Do now: Think 3 min (paper/note) · one short Teacher check (Prompt Pack 1.4) · accept a smaller slice if Teacher pushes
-Done when: One process named for Sessions 2–3; mark 1.4 complete
-Analogy: Choose one customer journey for today — not the whole company
+TASK 1.3 · Coach once · ~15 min
+Do: Teacher 1.3 → update Work Assistant Settings → re-run one task
+Done: Mark 1.3
 ```
 
-- Light tag tease (full teach at **2.1**):
-  - 🟢 thinking · 🔵 rules/automation · 🔴 human approval
-- Pick **one** process with clear 🟢 + 🔴
-- Same process the rest of the day — tools come **next**, fitted to this job
+- Only **one** Teacher ↔ Work Assistant hop
+- Fix the handbook (Settings), not endless chat
 
-**Instructor cue:** Reject “boil the ocean.” Say: “Tools wait until the job is locked.”
-
-**Show when:** Task 1.4
+**Instructor cue:** Enforce once.  
+**Show when:** 1.3
 
 ---
 
-### Slide 15 — Task 1.5 · Tool fit (ship stack)
-
-**Roadmap task:** **1.5** Tool landscape + fit · max 2–3 tools (~25 min)
+### Slide 14 — Task 1.4 · Lock process
 
 **On slide**
 
 ```
-TASK 1.5 · Tool fit for the locked job · ~25 min
-Because you just… locked the process — equip only what THAT job needs
-Do now: Browse for fit · identical test in recommended tools only · lock stack in one line · close a 4th tool if open
-Done when: ≤3 tools named for Demo Day; mark 1.5 complete
-Analogy: Don’t open every stall in the market — pick two that serve today’s meal
+TASK 1.4 · Lock process · ~10 min
+Do: List 2–3 candidates · Impact vs Effort · pick winner · Teacher check
+Done: Mark 1.4
 ```
 
-- Concept: Browse widely · **ship** narrow
-- Typical stack: (1) Primary brain ChatGPT **or** Claude Project (2) Grounding NotebookLM if doc-heavy (3) Runner automation **or** Track B semi-auto
-- Demo Day = re-run this stack — not a tool zoo
+- One process for the rest of the day
+- Start with low-hanging fruit (high impact, lower effort)
+- Tools come **after** this
+- Tease tags: 🟢 think · 🔵 rules · 🔴 human (full teach at 2.1)
 
-**Instructor cue:** Kill FOMO. Stack is for the **1.4** process only.
-
-**Show when:** Task 1.5
+**Instructor cue:** Kill “boil the ocean.” Show Impact/Effort 2×2.  
+**Show when:** 1.4
 
 ---
 
-### Slide 16 — Task 1.6 · Memory / grounding
-
-**Roadmap task:** **1.6** Memory — docs + grounded questions (~10 min)
+### Slide 15 — Task 1.5 · Tool fit
 
 **On slide**
 
 ```
-TASK 1.6 · Memory for the locked job · ~10 min
-Because you just… chose the stack — ground it with the right files (not random PDFs)
-Do now: Prompt Pack 1.6 — attach/upload key docs for YOUR process · ask 2 grounded questions · check faithfulness
-Done when: At least one grounded answer you trust; mark 1.6 complete
-Analogy: Give the junior the company file — not corridor rumors
+TASK 1.5 · ≤3 tools · ~30 min
+Do: Same test in 2–3 tools · lock your stack
+Done: Mark 1.5
 ```
 
-- Concept: Memory = files/context the AI must not invent
-- Grounded Q&A ≠ free hallucination
-- Keep light if the process is not doc-heavy
+- Browse wide · ship narrow
+- Stack is for the **1.4** job only
+- Close a 4th tool
 
-**Instructor cue:** Spot-check “where did that fact come from?”
-
-**Show when:** Task 1.6 · end Session 1
-
----
-
-### Slide 17 — Session 2 park · Work THROUGH AI
-
-**Roadmap tasks:** **2.0 → 2.6** (~104 min)
-
-**On slide**
-
-| ID | Do this | ~min |
-| -- | ------- | ---- |
-| **2.0** | Framing: pattern ladder (same Teacher thread) | 5 |
-| **2.1** | Map process **in Teacher chat** (type steps once) | 10 |
-| **2.2** | First ETCSLV draft (you type) | 5 |
-| **2.3** | Teacher critiques ETCSLV (same thread — no re-paste) | 7 |
-| **2.4** | Decision tree + lock pattern | 15 |
-| **2.5** | Build workflow brain (Settings **once** → test) | 28 |
-| **2.6** | Automation path that **runs** (+ short Teacher review) | 34 |
-
-- Banner: **YOU ARE HERE — Session 2: Work THROUGH AI**
-- Bridge: WITH = junior at your elbow → THROUGH = the **job** runs on a path
-- Outcome: Mapped process + locked pattern + workflow brain + path that can run
-- Same process as **1.4** — escalate, don’t rebuild toys
-- Arc analogy: reception → desk → approval stamp (one customer journey)
-
-**Instructor cue:** Leave park up; advance per task ID.
-
-**Show when:** Start of Session 2
+**Instructor cue:** Kill FOMO.  
+**Show when:** 1.5
 
 ---
 
-### Slide 18 — Task 2.0 · Pattern ladder
-
-**Roadmap task:** **2.0** Framing: pattern ladder (~5 min)
+### Slide 16 — Task 1.6 · Memory
 
 **On slide**
 
 ```
-TASK 2.0 · Pattern ladder · ~5 min
-Because you just… locked one job + stack — ask how much structure THAT job needs (not the universe)
-Do now: Same Teacher thread — Prompt Pack 2.0 (“using my locked process”) — no process re-paste
-Done when: You know which ladder rung you’re aiming at today; mark 2.0 complete
-Analogy: Bicycle → scooter → one van → small fleet → factory conveyor — climb only as high as this route needs
+TASK 1.6 · Memory · ~10 min
+Do: Upload key docs · 2 grounded Qs · 1 trap Q
+Done: Mark 1.6
 ```
 
-- Ladder (vocabulary) — you already lived rungs 1–2 in Session 1:
-  1. Instruction-only chat
-  2. Knowledge assistant (your docs)
-  3. Single workflow agent
-  4. Multi-agent workflow *(Session 3 — after something runs)*
-  5. Automation pipeline
-- Climb only as high as **this process** needs · most ship at 2–3 + light automation
+- Files beat invented facts
+- Keep light if not doc-heavy
 
-**Instructor cue:** “You already lived chat + assistant. Ladder only asks: how high for *this* job?”
-
-**Show when:** Task 2.0
+**Instructor cue:** “Where did that fact come from?”  
+**Show when:** 1.6
 
 ---
 
-### Slide 19 — Task 2.1 · Map the process
+### Slide 17 — Session 2 park
 
-**Roadmap task:** **2.1** Map your process in Teacher chat (~10 min)
+**On slide**
+
+
+| ID      | Do                           | Min |
+| ------- | ---------------------------- | --- |
+| **2.0** | Readiness + ladder (paper) | 5   |
+| **2.1** | Map steps in Teacher chat    | 10  |
+| **2.2** | Draft ETCSLV (Worksheet D)   | 5   |
+| **2.3** | Teacher critiques ETCSLV     | 10  |
+| **2.4** | Decision tree → lock pattern | 15  |
+| **2.5** | Workflow brain               | 28  |
+| **2.6** | Path that **runs**           | 34  |
+
+
+- **YOU ARE HERE — Session 2: THROUGH AI**
+- Same process as **1.4**
+
+**Instructor cue:** Advance by task ID.  
+**Show when:** Start Session 2
+
+---
+
+### Slide 18 — Task 2.0 · Ladder + readiness
 
 **On slide**
 
 ```
-TASK 2.1 · Map in Teacher chat · ~10 min
-Because you just… chose a ladder height — draw the floor plan (steps) for that height
-Do now: Type steps once into Teacher (Prompt Pack 2.1) · Teacher tags 🟢/🔵/🔴 · that message IS the map
-Done when: Ordered steps exist in the Teacher thread; mark 2.1 complete
-Analogy: Kitchen tickets — chef invents (🟢) · timer/printer (🔵) · manager tastes before plate leaves (🔴)
+TASK 2.0 · Ladder + readiness · ~5 min
+Do: Self-score 4 dimensions · listen · circle your rung (no chat)
+Done: Mark 2.0
 ```
 
-- Concept: Map before more tools · chat message = source of truth (no second deck)
-- Full tag teach happens **here** (light tease was at 1.4)
-- Do not rebuild a new process — use the **1.4** lock
+1. Chat
+2. Knowledge assistant
+3. Single workflow
+4. Multi-agent *(later)*
+5. Automation
 
-**Instructor cue:** Teach tags once if needed; then silence.
+- Readiness: data · tool access · risk · change capacity (1–5)
+- Climb only as high as **this** job needs
 
-**Show when:** Task 2.1
+**Instructor cue:** Group discussion — not a paste exercise.  
+**Show when:** 2.0
 
 ---
 
-### Slide 20 — Tasks 2.2–2.3 · ETCSLV draft + critique
-
-**Roadmap tasks:** **2.2** First ETCSLV draft (5) → **2.3** Teacher critique (7)
-
-**On slide — concept table + task banner**
-
-```
-TASK 2.2 → 2.3 · ETCSLV draft + critique · ~12 min
-Because you just… mapped the steps — write the checklist before opening the counter
-Do now: 2.2 type E–V in same Teacher thread · 2.3 “Critique my ETCSLV draft above” · reply with stronger L/V
-Done when: Critiqued ETCSLV exists in-thread (no re-paste); mark 2.2 & 2.3 complete
-Analogy: Before a new service desk opens: how hard · which systems · what they must know · what files stay · what they may never do alone · how you check quality
-```
-
-| Letter | Meaning | Core question |
-| ------ | ------- | ------------- |
-| E | Execution | Multiple reasoning steps or loops? |
-| T | Tools | Need external systems? |
-| C | Context | What must AI always know? |
-| S | State | What must persist beyond one chat? |
-| L | Limits | Boundaries, approvals, safeguards? |
-| V | Validation | How do we know it’s correct? |
-
-- Most teams fail by picking a tool before answering **C, S, L, V**
-
-**Instructor cue:** Projector teach ETCSLV ~5 min before they draft (per facilitator guide).
-
-**Show when:** Tasks 2.2–2.3
-
----
-
-### Slide 21 — Task 2.4 · Decision tree + lock pattern
-
-**Roadmap task:** **2.4** Decision tree + lock pattern (~15 min)
+### Slide 19 — Task 2.1 · Map
 
 **On slide**
 
 ```
-TASK 2.4 · Decision tree + lock pattern · ~15 min
-Because you just… have map + ETCSLV — triage picks the right room (don’t invent architecture)
-Do now: Open roadmap decision tree · walk YOUR process · one short Teacher ask · lock the pattern name
-Done when: Pattern locked for today’s build; mark 2.4 complete
-Analogy: Clinic triage desk — a few questions → the right room, not the whole hospital
+TASK 2.1 · Map · ~10 min
+Do: Type steps in Teacher · get 🟢/🔵/🔴 tags
+Done: Mark 2.1
 ```
 
-- Concept: Tree chooses pattern — third chooser after ladder + ETCSLV, but **narrowing**, not a new religion
-- Lock before building the brain (2.5)
-- Promote complexity only when the tree says so
+- 🟢 AI thinks · 🔵 rules/automation · 🔴 human
+- That chat message = the map
 
-**Instructor cue:** Unstick people who skip the tree and jump to Zapier.
+**Instructor cue:** Teach tags once, then silence.  
+**Show when:** 2.1
 
-**Show when:** Task 2.4
+---
+
+### Slide 20 — Tasks 2.2–2.3 · ETCSLV
+
+**On slide**
+
+```
+TASK 2.2–2.3 · ETCSLV · ~15 min
+Do: Draft on Worksheet D (paper) · paste once · Teacher critiques L/V
+Done: Mark 2.2 & 2.3
+```
+
+
+|       | Ask                   |
+| ----- | --------------------- |
+| **E** | Multi-step reasoning? |
+| **T** | External tools?       |
+| **C** | Always-on context?    |
+| **S** | What must persist?    |
+| **L** | Limits / approvals?   |
+| **V** | How do we check?      |
+
+
+- **2.2** = paper only · **2.3** = one paste + critique
+- Weak **L** / **V** = not ready
+
+**Instructor cue:** Teach table ~5 min first.  
+**Show when:** 2.2–2.3
+
+---
+
+### Slide 21 — Task 2.4 · Decision tree
+
+**On slide**
+
+```
+TASK 2.4 · Lock pattern · ~15 min
+Do: Run decision tree · lock the pattern name
+Done: Mark 2.4
+```
+
+- Tree picks the room — don’t invent architecture
+- Lock before building (2.5)
+
+**Instructor cue:** Stop Zapier-before-tree.  
+**Show when:** 2.4
 
 ---
 
 ### Slide 22 — Task 2.5 · Workflow brain
 
-**Roadmap task:** **2.5** Build the workflow brain (~28 min)
-
 **On slide**
 
 ```
-TASK 2.5 · Workflow brain · ~28 min
-Because you just… locked the pattern — write the standing brief for THIS job
-Do now: One Teacher ask for instructions → paste into Project Settings ONCE → test on a real input
-Done when: Brain Project returns a usable draft for your process; mark 2.5 complete
-Analogy: Standing brief for one recurring job (weekly client update) — not the company handbook
+TASK 2.5 · Workflow brain · ~30 min
+Do: One Teacher ask → Settings once → test real input
+Done: Mark 2.5
 ```
 
-- Concept: Workflow brain = Settings for the **locked process**
-- Identity: extend **Work EA** **or** one new Project — not a third mystery surface / not a new Teacher
-- At most one Settings paste here · test with real work sample
+- Standing brief for **this** job
+- Extend Work Assistant **or** one new Project — not both mysteries
 
-**Instructor cue:** Ask “Are you extending Work EA or one new Project?” Quality = usable output.
-
-**Show when:** Task 2.5
+**Instructor cue:** “Usable draft?”  
+**Show when:** 2.5
 
 ---
 
-### Slide 23 — Task 2.6 · Automation that “runs” (+ cost routing)
-
-**Roadmap task:** **2.6** Automation path that runs (~34 min)
+### Slide 23 — Task 2.6 · It runs
 
 **On slide**
 
 ```
-TASK 2.6 · Automation path that runs · ~34 min
-Because you just… tested the brain — open the counter so the job runs without you remembering
-Do now: Track A clone template (n8n/Zapier/Make) OR Track B semi-auto · live-run once · short Teacher review
-Done when: You can show trigger → AI → output → human approval (if needed); mark 2.6 complete
-Analogy: When the form hits reception, the file opens — nobody waits for you to remember
+TASK 2.6 · Path that runs · ~30 min
+Do: Trigger → AI → output → approval · live once
+Done: Mark 2.6
 ```
 
-- Definition of **running**:
-  1. Trigger used once
-  2. AI step with your instructions/context
-  3. Output where work actually goes
-  4. Human approval before external send (if relevant)
-- Cost routing (manager skill): low-E → cheaper/faster · high-E / high-stakes → stronger model **+** human approval
-- API keys: secrets only — never in notes, chat, or roadmap
+- Running = you can show it on screen
+- Teacher review = **optional if time**
+- Track A: n8n/Make/Zapier · Track B: semi-auto checklist
+- Keys: secrets only
 
-**Instructor cue:** Kill paper-only architectures. 60–90 sec on cost routing while they build.
-
-**Show when:** Task 2.6
+**Instructor cue:** No paper-only builds. Demo first.  
+**Show when:** 2.6
 
 ---
 
-### Slide 24 — Session 3 park · Work BY AI
-
-**Roadmap tasks:** **3.0 → 3.6** (~120 min)
+### Slide 24 — Session 3 park
 
 **On slide**
 
-| ID | Do this | ~min |
-| -- | ------- | ---- |
-| **3.0** | Framing: manager of agents | 4 |
-| **3.1** | Design AI workforce in Teacher chat | 15 |
-| **3.2** | Harness Card (answer Teacher’s questions) | 15 |
-| **3.3** | Failure lab (break → fix) | 18 |
-| **3.4** | Capstone — **ship** the running workflow | 38 |
-| **3.5** | Demo Day + peer review | 22 |
-| **3.6** | 30-day AI adoption plan | 8 |
 
-- Banner: **YOU ARE HERE — Session 3: Work BY AI**
-- Bridge: Path already runs → BY = manage it for Monday (roles + rules + fire drills) — **not** a new product
-- Outcome: Manage the workforce around **the same** workflow → ship → demo the run
-- Arc analogy: You are the floor manager; the counter is already open
-- Never cut **3.4** or **3.5** if late — cut instructor talk first
+| ID      | Do              | Min |
+| ------- | --------------- | --- |
+| **3.0** | Manager framing (no chat) | 4   |
+| **3.1** | Min AI roles (Teacher)    | 15  |
+| **3.2** | Harness — Worksheet E     | 15  |
+| **3.3** | Failure lab               | 18  |
+| **3.4** | **Ship** + demo script    | 38  |
+| **3.5** | Demo Day                  | 22  |
+| **3.6** | 30-day plan (paper)       | 8   |
 
-**Instructor cue:** Park; call task numbers loudly.
 
-**Show when:** Start of Session 3
+- **YOU ARE HERE — Session 3: BY AI**
+- Never cut **3.4** / **3.5** — cut your talking
+
+**Instructor cue:** Call numbers loudly.  
+**Show when:** Start Session 3
 
 ---
 
-### Slide 25 — Tasks 3.0–3.1 · Manager of agents + workforce
-
-**Roadmap tasks:** **3.0** Framing (4) → **3.1** Design AI workforce (15)
+### Slide 25 — Tasks 3.0–3.1 · Framing + roles
 
 **On slide**
 
 ```
-TASK 3.0 → 3.1 · Manager framing + workforce design · ~19 min
-Because you just… have a path that runs — design the smallest team around THAT run (don’t rebuild)
-Do now: 3.0 short Teacher framing · 3.1 type minimum roles in Teacher chat · cut overkill
-Done when: Org chart of roles exists in Teacher thread (not as final deliverable); mark 3.0 & 3.1 complete
-Analogy: Staff a counter that already serves customers — don’t design a new mall
+TASK 3.0 · Framing · ~5 min
+Do: Listen · write one line (no chat)
+Done: Mark 3.0
 ```
 
-- Concept: Example roster (cut to minimum): Planner · Researcher · Writer · Reviewer · **Human**
-- Specialists beat one mega-prompt
-- Human owns outcomes and external actions
-- Chart lives on **Teacher chat or paper** — capstone is still the **run**
+```
+TASK 3.1 · Smallest team · ~15 min
+Do: Type min roles in Teacher · cut extras · fill canvas
+Done: Mark 3.1
+```
 
-**Instructor cue:** 60 sec roster talk; Teacher Agent cuts empire-building.
+- Example: Planner · Researcher · Writer · Reviewer · **Human**
+- Human owns external sends
+- Capstone is still the **run**
 
-**Show when:** Tasks 3.0–3.1
+**Instructor cue:** 3.0 = talk, not paste. Cut empire-building at 3.1.  
+**Show when:** 3.0–3.1
 
 ---
 
-### Slide 26 — Task 3.2 · Harness Card
-
-**Roadmap task:** **3.2** Harness Card (~15 min)
+### Slide 26 — Task 3.2 · Harness
 
 **On slide**
 
 ```
-TASK 3.2 · Harness Card · ~15 min
-Because you just… named roles — harness = the **same ETCSLV** checklist, named for shipping
-Do now: Answer Teacher’s harness questions in the same thread (Prompt Pack 3.2) — map to ETCSLV
-Done when: L and V are explicit enough to demo; mark 3.2 complete
-Analogy: Job description + SOPs + approval stamp on the desk — rules of the seat, not a new framework
+TASK 3.2 · Harness · ~15 min
+Do: Fill Worksheet E (paper) · optional L/V critique in Teacher
+Done: Mark 3.2
 ```
 
-| Harness field | ETCSLV |
-| ------------- | ------ |
-| Workflow | — |
-| Execution complexity | E |
-| Tools (+ which model $ / $$$) | T |
-| Context | C |
-| State | S |
-| Limits | L |
-| Validation | V |
+- Same as ETCSLV — named for shipping
+- Demo needs clear **L** and **V**
 
-- Weak Limits/Validation = not ready to demo
-
-**Instructor cue:** Spot-check L and V only if short on time.
-
-**Show when:** Task 3.2
+**Instructor cue:** Spot-check L/V in the room.  
+**Show when:** 3.2
 
 ---
 
-### Slide 27 — Task 3.3 · Failure Lab
-
-**Roadmap task:** **3.3** Failure lab (~18 min)
+### Slide 27 — Task 3.3 · Failure lab
 
 **On slide**
 
 ```
-TASK 3.3 · Failure lab · ~18 min
-Because you just… wrote L/V — fire-drill the counter on purpose before Demo Day
-Do now: Pick 2 failure modes · trigger on YOUR workflow · fix Harness · Teacher only if stuck
-Done when: At least one real break + fix documented; mark 3.3 complete
-Analogy: Mystery-shopper drill — send a bad file, a fake fact, a send-without-boss
+TASK 3.3 · Break it · ~20 min
+Do: Trigger 2 failures · fix · Teacher only if stuck
+Done: Mark 3.3
 ```
 
-- Five failures (concept):
-  1. Missing context
-  2. Hallucination
-  3. Wrong tool
-  4. No approval
-  5. Doom loop
-- Production AI fails in boring ways
+- Missing context · hallucination · wrong tool · no approval · doom loop
+- Boring breaks beat surprise Demo Day fails
 
-**Instructor cue:** Demo one break yourself first.
-
-**Show when:** Task 3.3
+**Instructor cue:** Demo one break first.  
+**Show when:** 3.3
 
 ---
 
-### Slide 28 — Task 3.4 · Capstone definition of done
-
-**Roadmap task:** **3.4** Capstone — ship the running workflow (~38 min)
+### Slide 28 — Task 3.4 · Capstone
 
 **On slide**
 
 ```
-TASK 3.4 · Capstone ship · ~38 min
-Because you just… fixed one break — make the shop re-openable without the instructor
-Do now: Make the workflow re-runnable without the instructor · use your locked stack
-Done when: Checklist below is true; mark 3.4 complete
-Analogy: Show the shop open — not a poster about the shop
+TASK 3.4 · Ship · ~30 min
+Do: Make it re-run without the instructor
+Done: Checklist true · mark 3.4
 ```
 
-- [ ] Trigger defined and used  
-- [ ] AI step uses your instructions/context  
-- [ ] Output lands in a real destination  
-- [ ] Human approval step exists when needed  
-- [ ] Harness L + V match what you built  
-- [ ] You can re-run without the instructor  
+- [ ] Trigger used  
+- [ ] AI uses your instructions  
+- [ ] Output in a real place  
+- [ ] Human approval if needed  
+- [ ] You can re-run alone  
 
-- Capstone ≠ slides. Capstone = **the run**.
+- Capstone = the **run**, not slides
 
-**Instructor cue:** Post this for the full 38 min ship block.
-
-**Show when:** Task 3.4
+**Instructor cue:** Leave up for the ship block.  
+**Show when:** 3.4
 
 ---
 
-### Slide 29 — Task 3.5 · Demo Day rules
-
-**Roadmap task:** **3.5** Demo Day + peer review (~22 min)
+### Slide 29 — Task 3.5 · Demo Day
 
 **On slide**
 
 ```
-TASK 3.5 · Demo Day · ~22 min
-Because you just… can re-run — show peers the live path (pain → trigger → output → who approves)
-Do now: ~3 min/team (or 90-sec lightning) · peer votes
-Done when: You showed a live (or just-recorded) run; mark 3.5 complete
-Analogy: Live counter demo for a visiting CFO — no slide theater
+TASK 3.5 · Demo Day · ~20 min
+Do: ~3 min/team · live run
+Done: Mark 3.5
 ```
 
-- Must: name the pain → **trigger live** (or recording from last 10 min) → show output → name who approves → one risk fixed
+- Pain → trigger → output → who approves → one fix
 - No slide theater
-- Peer votes: Most practical · Safest · Best time save
+- Votes: practical · safest · time saved
 
-**Instructor cue:** Strict timer. CFO-in-the-room energy.
-
-**Show when:** Task 3.5
+**Instructor cue:** Strict timer.  
+**Show when:** 3.5
 
 ---
 
-### Slide 30 — Task 3.6 · 30-day plan + links
-
-**Roadmap task:** **3.6** 30-day AI adoption plan (~8 min) · then close
+### Slide 30 — Task 3.6 · 30 days + links
 
 **On slide**
 
 ```
-TASK 3.6 · 30-day plan · ~8 min
-Do now: Minimal written plan (Prompt Pack 3.6) · keep Teacher as Monday coach
-Done when: Four-week sketch exists; mark 3.6 complete
+TASK 3.6 · 30-day plan · ~10 min
+Do: Fill seed plan + R7 on paper · circle Week 1 · optional Teacher polish
+Done: Mark 3.6
 ```
 
-- Week 1: Run this workflow once without the workshop room  
-- Week 2: Improve Validation (V)  
-- Week 3: Optional second automation **or** cheaper model on low-E steps  
-- Week 4: Review Harness with your team  
-- Links: Roadmap `[Roadmap URL]` · Prompt Pack `[Prompt Pack link]` · decision tree inside roadmap  
-- Optional async later: Session 4 tasks **4.1–4.3** (reads/video)
+- W1 run once · W2 better V · W3 optional cheap model · W4 harness review
+- Roadmap `[Roadmap URL]` · Prompt Pack `[Prompt Pack link]`
+- Optional later: **4.1–4.3**
 
-**Instructor cue:** Close energy; send PDF + links.
-
-**Show when:** Task 3.6 / closing
+**Instructor cue:** Close + send links.  
+**Show when:** 3.6
 
 ---
 
-### Slide 31 — Thank you / contact
-
-**Roadmap task:** — (end)
+### Slide 31 — Thank you
 
 **On slide**
 
-- Workshop title again
-- One line: You’re not here to chat better — you’re here to **manage AI work**
-- You practiced tasks **0.0 → 3.6** — keep calling work by number on Monday
-- Instructor / org contact placeholders
-- Optional: feedback form link
+- You’re here to **manage AI work**
+- Keep calling tasks by number on Monday
+- Contact / feedback placeholders
 
-**Instructor cue:** End.
-
+**Instructor cue:** End.  
 **Show when:** End
 
 ---
 
-# OPTIONAL SLIDES (only if time / advanced track)
+# OPTIONAL (only if needed)
 
-Use only if you explicitly ask NotebookLM to append them. Default deck = **31 slides above**.
+**A — Keys (during 2.6):** Secrets only · never chat/roadmap · rotate if leaked  
 
-### Optional A — API keys safety (60-sec projector) · use during **2.6**
+**B — Cost (during 2.6):** Easy step → cheap model · hard/high-stakes → strong + human  
 
-**On slide**
-
-- Keys in secret store / automation credentials — never chat, Git, roadmap  
-- Prefer company vault Monday; avoid personal keys in workshop  
-- Log tokens ≈ cost; set spend limits  
-- Rotate if exposed
-
-### Optional B — Dual-model automation sketch · use during **2.6**
-
-**On slide**
-
-- Step 1 (low E) → cheap/fast model  
-- If low confidence / high E → escalate to strong model  
-- Always → Validation + Limits
-
-### Optional C — Session 4 reference card (async)
-
-**On slide**
-
-| ID | Optional read/watch |
-| -- | ------------------- |
-| **4.1** | Anthropic — Building effective agents |
-| **4.2** | IBM — What are AI agents? |
-| **4.3** | Watch — What is AI? (~5 min) — optional refresher (live = Task **0.0**) |
+**C — Session 4:** 4.1 Anthropic · 4.2 IBM · 4.3 short video  
 
 ---
 
-# TAKE-HOME PDF RECIPE (tell NotebookLM)
+# Take-home PDF
 
-Create a **2-page handout** from:
+**Page 1:** 4, 6, 9, 10, 14, 15, 20  
+**Page 2:** 17, 23, 24, 27, 28, 29, 30  
 
-**Page 1:** Slides 4 (agenda+task IDs), 6 (What is AI / expect), 9 (chat/assistant/agent), 10 (S1 task table), 14 (lock process), 15 (tool fit), 20 (ETCSLV)  
-**Page 2:** Slides 17 (S2 task table), 23 (running + cost), 24 (S3 task table), 26 (harness), 27 (failure), 28 (capstone DoD), 29 (demo rules), 30 (30-day + links)
-
-Title the PDF: `Practical Agentic AI — Participant Takeaway`
-
-Include footer: “Teacher Agent + roadmap teach by task ID; this PDF is the map.”
+Title: `Practical Agentic AI — Participant Takeaway`
 
 ---
 
-# NOTEBOOKLM GENERATION CONSTRAINTS (paste into chat)
+# NotebookLM constraints
 
-- Max **6 bullets** per slide unless a table is specified (task banner does not count toward the 6)
-- Every work slide must show **TASK X.Y · title · minutes · Because you just… · Do now · Done when · Analogy**
-- Do **not** paste Prompt Pack Blocks onto slides (link / “use Prompt Pack X.Y” only)
-- Do **not** invent timings or task numbers different from the curriculum master
-- Do **not** make capstone a “build a presentation” activity
-- Prefer tables for ETCSLV, roles, agenda, session park task lists
-- Every session park slide must include **YOU ARE HERE** + full task ID table
-- Language: clear, managerial, Bangladesh/global workplace OK; no hype
+- Max 4 bullets per slide (plus banner / one table)
+- Banner = Task ID · title · Do · Done only
+- No Prompt Pack blocks on slides
+- No invented task numbers
+- Capstone ≠ “make a deck”
 
 ---
 
-# INSTRUCTOR RUN ORDER (when to click)
+# Run order
 
-| Timebox | Slide # | Call out |
-| ------- | ------- | -------- |
-| Start | 1 → 2 → 3 → 4 | — |
-| Session 0 | 5 (park) → 6 (**0.0**) → 7 (**0.1–0.2**) → 8 (**0.3**) → 9 (**0.4**) | Task numbers |
-| Session 1 | 10 (park) → 11 (**1.1**) → 12 (**1.2**) → 13 (**1.3**) → 14 (**1.4 lock**) → 15 (**1.5 tools**) → 16 (**1.6 memory**) | Task numbers |
-| Session 2 | 17 (park) → 18 (**2.0**) → 19 (**2.1**) → 20 (**2.2–2.3**) → 21 (**2.4**) → 22 (**2.5**) → 23 (**2.6**) | Task numbers |
-| Session 3 | 24 (park) → 25 (**3.0–3.1**) → 26 (**3.2**) → 27 (**3.3**) → 28 (**3.4**) → 29 (**3.5**) → 30 (**3.6**) → 31 | Task numbers |
 
-**Park rule:** If the room is mid-task, leave that task’s slide up — don’t flip back to concept-only walls.
+| Block     | Slides                                |
+| --------- | ------------------------------------- |
+| Start     | 1 → 2 → 3 → 4                         |
+| Session 0 | 5 → 6 → 7 → 8 → 9                     |
+| Session 1 | 10 → 11 → 12 → 13 → 14 → 15 → 16      |
+| Session 2 | 17 → 18 → 19 → 20 → 21 → 22 → 23      |
+| Session 3 | 24 → 25 → 26 → 27 → 28 → 29 → 30 → 31 |
 
----
 
-*Aligned to curriculum master · 2026-07-25 · Progression spine · Session 1 lock→tools→memory · Bridges + analogies on every work slide*
+**Park rule:** Mid-task → leave that task slide up.

@@ -7,7 +7,7 @@ export const SHARED_QUESTIONS = {
     'Which sector best describes where you work?',
     'This helps us show examples that feel like your office—not Silicon Valley.',
     [
-      { label: 'Bank / MFI / financial services', nextId: 'q-role-bank', contextKey: 'sector', contextValue: 'Bank / MFI' },
+      { label: 'Bank / MFI / NBFI / financial services', nextId: 'q-role-bank', contextKey: 'sector', contextValue: 'Bank / MFI / NBFI' },
       { label: 'RMG / factory / industrial', nextId: 'q-role-rmg', contextKey: 'sector', contextValue: 'RMG / factory' },
       { label: 'Corporate office (any industry)', nextId: 'q-role-corporate', contextKey: 'sector', contextValue: 'Corporate office' },
       { label: 'Agency / sales / distribution', nextId: 'q-role-agency', contextKey: 'sector', contextValue: 'Agency / sales' },

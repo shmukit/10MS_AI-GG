@@ -114,16 +114,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                             Task details / student prompt
                         </label>
                         <p className="text-xs text-muted-foreground mb-2">
-                            Students see instructions as normal text. Anything between the markers below becomes a
-                            <strong> code snippet with a Copy button</strong> (markers are hidden from students).
-                            Or use a markdown code fence <span className="font-mono">```</span> … <span className="font-mono">```</span>.
+                            Keep it leader-simple: <strong>Goal</strong> (1 line) + numbered <strong>Steps</strong>.
+                            Optional copy boxes use markers (hidden from students → code snippet + Copy).
+                            Do <strong>not</strong> use WHERE / BECAUSE YOU JUST / ANALOGY in student-facing details.
                         </p>
                         <textarea
                             value={taskData.taskDetails || ''}
                             onChange={(e) => setTaskData({ ...taskData, taskDetails: e.target.value })}
                             rows={12}
                             className={`${inputClass} font-mono text-xs leading-relaxed min-h-[200px]`}
-                            placeholder={"WHERE: Teacher chat\n\n——— COPY BELOW ———\nYour prompt here…\n——— END ———"}
+                            placeholder={"Goal: One plain sentence.\n\nSteps\n1. …\n2. …\n3. Mark complete.\n\n——— COPY BELOW ———\nYour prompt…\n——— END ———"}
                         />
                     </div>
 
