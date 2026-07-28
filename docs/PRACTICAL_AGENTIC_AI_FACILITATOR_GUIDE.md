@@ -346,10 +346,10 @@ Poll: “Did the re-run get better?”
 
 **Analogy:** One customer journey today — not the whole company.
 
-Think first (3 min) on paper/note. Then **one short** Teacher check — Prompt Pack **1.4**. Accept smaller slice. Light 🟢/🔵/🔴 tease only; full teach at **2.1**.
+**Think first (5 min) on paper/note:** List 2–3 candidate processes. Plot each on **Impact vs Effort**. Pick the winner (usually high impact, lower effort). Write name · pain · done today · human-only steps. Then **one short** Teacher check — Prompt Pack **1.4**. Accept smaller slice. Light 🟢/🔵/🔴 tease only; full teach at **2.1**.
 
 2–3 people read process aloud. Kill overscoped monsters.  
-Say: “Tools wait until the job is locked.”
+Say: “Tools wait until the job is locked. Start with low-hanging fruit.”
 
 ---
 
@@ -391,9 +391,9 @@ Same process → map → pattern → reusable brain → running path (trigger �
 
 ---
 
-## Task 2.0 — Framing: pattern ladder (5 minutes)
+## Task 2.0 — Framing: pattern ladder + readiness (5 minutes)
 
-### Facilitator (2 minutes)
+### Facilitator (3 minutes)
 
 Show the ladder once on a PPT slide:
 
@@ -405,13 +405,15 @@ Instruction-only chat
 → Automation pipeline
 ```
 
-> “Climb only as high as your process needs. Most people ship at knowledge assistant or single workflow, plus a light run path. You already lived chat + assistant this morning — the ladder only asks how high for *this* job. Multi-agent waits until something runs.”
+Show the **readiness self-score** (4 dimensions: data · tool access · risk appetite · change capacity).
+
+> “Climb only as high as your process needs. Rate yourself honestly — low data readiness means start simpler. You already lived chat + assistant this morning. Multi-agent waits until something runs.”
 
 **Analogy:** Bicycle → scooter → one van → small fleet → factory conveyor.
 
-### Participant activity (3 minutes)
+### Participant activity (2 minutes)
 
-Same Teacher thread — Prompt Pack **2.0** (“using my locked process from earlier” — **no process paste**).
+**Paper/workbook only — no Teacher chat.** They circle a ladder rung and note it on the page. Optional neighbor discuss.
 
 ---
 
@@ -449,13 +451,13 @@ Show the table on a PPT slide and walk **one fully filled example** (“Weekly c
 
 Say:
 
-> “ETCSLV is your operating checklist. Map in the Teacher chat. Draft letters yourself. Then ask for critique — do not paste the map twice.”
+> “ETCSLV is your operating checklist. Map in Teacher chat (2.1). Draft on Worksheet D (2.2) — paper only. Paste that draft once for critique (2.3).”
 
 ### Participant activity (14 minutes)
 
-**2.1** Prompt Pack — type steps into Teacher; Teacher tags Green/Blue/Red.  
-**2.2** Same thread — they type E–V; Teacher only acknowledges.  
-**2.3** Same thread — “Critique my ETCSLV draft above.” They reply with updated L/V.
+**2.1** Prompt Pack — type steps into Teacher; Teacher tags Green/Blue/Red. Copy to Worksheet C.  
+**2.2** Worksheet D — fill E–V on paper. **No chat.**  
+**2.3** Paste E–V into Teacher; “Critique my ETCSLV draft above.” Reply with updated L/V.
 
 **Review mantra:** Stop → Read → Decide before accepting rewrites.
 
@@ -548,7 +550,7 @@ Also say (cost routing, 1–2 minutes):
 1. Clone template or build: Trigger → AI → Output.  
 2. Wire workflow-brain instructions into the AI step.  
 3. Live-run once.  
-4. Short Teacher review — Prompt Pack **2.6** (fill short blanks; do not paste essays).
+4. **Optional if time:** Teacher review — Prompt Pack **2.6** (fill short blanks; do not paste essays).
 
 **Track B — If automation is blocked**  
 Checklist on paper → assistant produces artifact → human sends after review. Still counts if live-runnable.
@@ -584,7 +586,7 @@ Facilitator:
 
 **Analogy:** Staff a process that already serves customers — don’t design a new mall.
 
-Participant — Prompt Pack **3.0** in Teacher chat.
+Participants write **one line** on paper/workbook. **No Teacher chat.**
 
 ---
 
@@ -608,11 +610,11 @@ Handoffs clear; human on external/high-risk steps.
 
 ---
 
-## Task 3.2 — Harness via Q&A (15 minutes)
+## Task 3.2 — Harness Card (15 minutes)
 
 ### Goal
 
-Same ETCSLV, answered **in the Teacher chat** one letter at a time — no paste of a filled card.  
+Same ETCSLV on **Worksheet E** (paper) — Harness = shipping name.  
 Say explicitly: “Harness ≠ new framework. Harness = ETCSLV with a shipping name.”
 
 **Analogy:** Job description + SOPs + approval on the desk.
@@ -623,7 +625,8 @@ Fill one example harness on a PPT slide (“Weekly competitor brief”).
 
 ### Participant activity (11 minutes)
 
-Prompt Pack **3.2**: Teacher asks E, T ($/$$$), C, S, L, V one at a time; then critiques L/V.
+Fill **Worksheet E** — all fields; spot-check **L** and **V** in the room.  
+**Optional if time:** paste L + V to Teacher for critique (Prompt Pack **3.2**).
 
 ### Done when
 
@@ -714,7 +717,8 @@ Too many teams → 90-second lightning runs.
 
 ## Task 3.6 — 30-day plan (10 minutes, minimal)
 
-Prompt Pack **3.6** (short). Mark **3.5** and **3.6** complete.
+Fill Worksheet I + Reference R7 on paper. Circle Week 1 ritual.  
+**Optional:** Prompt Pack **3.6** polish in Teacher if time. Mark **3.5** and **3.6** complete.
 
 ---
 

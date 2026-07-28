@@ -317,15 +317,16 @@ Done: Mark 1.3
 
 ```
 TASK 1.4 · Lock process · ~10 min
-Do: Name one job · Teacher check · accept a smaller slice
+Do: List 2–3 candidates · Impact vs Effort · pick winner · Teacher check
 Done: Mark 1.4
 ```
 
 - One process for the rest of the day
+- Start with low-hanging fruit (high impact, lower effort)
 - Tools come **after** this
 - Tease tags: 🟢 think · 🔵 rules · 🔴 human (full teach at 2.1)
 
-**Instructor cue:** Kill “boil the ocean.”  
+**Instructor cue:** Kill “boil the ocean.” Show Impact/Effort 2×2.  
 **Show when:** 1.4
 
 ---
@@ -374,10 +375,10 @@ Done: Mark 1.6
 
 | ID      | Do                           | Min |
 | ------- | ---------------------------- | --- |
-| **2.0** | Pattern ladder               | 5   |
+| **2.0** | Readiness + ladder (paper) | 5   |
 | **2.1** | Map steps in Teacher chat    | 10  |
-| **2.2** | Draft ETCSLV                 | 5   |
-| **2.3** | Teacher critiques ETCSLV     | 7   |
+| **2.2** | Draft ETCSLV (Worksheet D)   | 5   |
+| **2.3** | Teacher critiques ETCSLV     | 10  |
 | **2.4** | Decision tree → lock pattern | 15  |
 | **2.5** | Workflow brain               | 28  |
 | **2.6** | Path that **runs**           | 34  |
@@ -391,13 +392,13 @@ Done: Mark 1.6
 
 ---
 
-### Slide 18 — Task 2.0 · Ladder
+### Slide 18 — Task 2.0 · Ladder + readiness
 
 **On slide**
 
 ```
-TASK 2.0 · Ladder · ~5 min
-Do: Ask Teacher 2.0 — which rung for MY job?
+TASK 2.0 · Ladder + readiness · ~5 min
+Do: Self-score 4 dimensions · listen · circle your rung (no chat)
 Done: Mark 2.0
 ```
 
@@ -407,9 +408,10 @@ Done: Mark 2.0
 4. Multi-agent *(later)*
 5. Automation
 
+- Readiness: data · tool access · risk · change capacity (1–5)
 - Climb only as high as **this** job needs
 
-**Instructor cue:** “You already lived 1–2.”  
+**Instructor cue:** Group discussion — not a paste exercise.  
 **Show when:** 2.0
 
 ---
@@ -438,7 +440,7 @@ Done: Mark 2.1
 
 ```
 TASK 2.2–2.3 · ETCSLV · ~15 min
-Do: Type E–V · then “critique above”
+Do: Draft on Worksheet D (paper) · paste once · Teacher critiques L/V
 Done: Mark 2.2 & 2.3
 ```
 
@@ -453,6 +455,7 @@ Done: Mark 2.2 & 2.3
 | **V** | How do we check?      |
 
 
+- **2.2** = paper only · **2.3** = one paste + critique
 - Weak **L** / **V** = not ready
 
 **Instructor cue:** Teach table ~5 min first.  
@@ -507,10 +510,11 @@ Done: Mark 2.6
 ```
 
 - Running = you can show it on screen
-- Cheap model for easy steps · strong + human for high stakes
+- Teacher review = **optional if time**
+- Track A: n8n/Make/Zapier · Track B: semi-auto checklist
 - Keys: secrets only
 
-**Instructor cue:** No paper-only builds.  
+**Instructor cue:** No paper-only builds. Demo first.  
 **Show when:** 2.6
 
 ---
@@ -522,13 +526,13 @@ Done: Mark 2.6
 
 | ID      | Do              | Min |
 | ------- | --------------- | --- |
-| **3.0** | Manager framing | 4   |
-| **3.1** | Min AI roles    | 15  |
-| **3.2** | Harness (L + V) | 15  |
-| **3.3** | Failure lab     | 18  |
-| **3.4** | **Ship**        | 38  |
-| **3.5** | Demo Day        | 22  |
-| **3.6** | 30-day plan     | 8   |
+| **3.0** | Manager framing (no chat) | 4   |
+| **3.1** | Min AI roles (Teacher)    | 15  |
+| **3.2** | Harness — Worksheet E     | 15  |
+| **3.3** | Failure lab               | 18  |
+| **3.4** | **Ship** + demo script    | 38  |
+| **3.5** | Demo Day                  | 22  |
+| **3.6** | 30-day plan (paper)       | 8   |
 
 
 - **YOU ARE HERE — Session 3: BY AI**
@@ -539,21 +543,27 @@ Done: Mark 2.6
 
 ---
 
-### Slide 25 — Tasks 3.0–3.1 · Roles
+### Slide 25 — Tasks 3.0–3.1 · Framing + roles
 
 **On slide**
 
 ```
-TASK 3.0–3.1 · Smallest team · ~20 min
-Do: Framing · type min roles in Teacher · cut extras
-Done: Mark 3.0 & 3.1
+TASK 3.0 · Framing · ~5 min
+Do: Listen · write one line (no chat)
+Done: Mark 3.0
+```
+
+```
+TASK 3.1 · Smallest team · ~15 min
+Do: Type min roles in Teacher · cut extras · fill canvas
+Done: Mark 3.1
 ```
 
 - Example: Planner · Researcher · Writer · Reviewer · **Human**
 - Human owns external sends
 - Capstone is still the **run**
 
-**Instructor cue:** Cut empire-building.  
+**Instructor cue:** 3.0 = talk, not paste. Cut empire-building at 3.1.  
 **Show when:** 3.0–3.1
 
 ---
@@ -564,14 +574,14 @@ Done: Mark 3.0 & 3.1
 
 ```
 TASK 3.2 · Harness · ~15 min
-Do: Answer Teacher’s E–V questions
+Do: Fill Worksheet E (paper) · optional L/V critique in Teacher
 Done: Mark 3.2
 ```
 
 - Same as ETCSLV — named for shipping
 - Demo needs clear **L** and **V**
 
-**Instructor cue:** Spot-check L/V.  
+**Instructor cue:** Spot-check L/V in the room.  
 **Show when:** 3.2
 
 ---
@@ -642,7 +652,7 @@ Done: Mark 3.5
 
 ```
 TASK 3.6 · 30-day plan · ~10 min
-Do: Short plan (roadmap 3.6)
+Do: Fill seed plan + R7 on paper · circle Week 1 · optional Teacher polish
 Done: Mark 3.6
 ```
 

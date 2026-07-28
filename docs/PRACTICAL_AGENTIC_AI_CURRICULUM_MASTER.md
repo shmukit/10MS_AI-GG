@@ -38,10 +38,10 @@ Human story of the day: **hire a coach → hire a helper → commit one job → 
 | **Hire coach** | Teacher Project + Settings (handbook) | **0.2–0.3** | Desk open |
 | **Name the roles** | Chat vs assistant vs agent (lived Project) | **0.4** | Teacher chat exists |
 | **Hire helper** | Work Assistant brief → 3 runs → one feedback round | **1.1–1.3** | “Assistant” named at 0.4 |
-| **Commit the job** | Lock **one** process for the rest of the day | **1.4** | Lived WITH AI on real work |
+| **Commit the job** | Prioritize candidates (Impact vs Effort) → lock **one** process | **1.4** | Lived WITH AI on real work |
 | **Equip the job** | ≤3 tools that fit **that** process | **1.5** | Process locked |
 | **Ground the job** | Docs/memory for **that** process | **1.6** | Stack chosen |
-| **Choose height** | Pattern ladder for *this* process only | **2.0** | Job + stack locked |
+| **Choose height** | Readiness self-score + pattern ladder for *this* process | **2.0** | Job + stack locked |
 | **Map the path** | Steps + 🟢/🔵/🔴 | **2.1** | Process locked; ladder framed |
 | **Write the job rules** | ETCSLV draft → critique | **2.2–2.3** | Map exists |
 | **Pick the room** | Decision tree → lock pattern | **2.4** | Map + ETCSLV |
@@ -124,7 +124,7 @@ Human story of the day: **hire a coach → hire a helper → commit one job → 
 | 1.1 | Fill your Work Assistant brief (think first — paper or note) | 5 | written | …named “assistant” — write the job brief before hiring |
 | 1.2 | Create Work Assistant + run **three** real tasks in that Project | 20 | project | …wrote the brief — hire the secretary and use them thrice |
 | 1.3 | **One** feedback round: Teacher critiques → you fix Settings → re-run once | 15 | project | …have real Work Assistant output — feedback once, don’t thrash |
-| 1.4 | Lock today’s process (think, then one short Teacher check) | 10 | project | …felt WITH AI — **commit one job** before shopping for tools |
+| 1.4 | Lock today’s process (prioritize Impact vs Effort, then one Teacher check) | 10 | project | …felt WITH AI — **commit one job** before shopping for tools |
 | 1.5 | Tool landscape + fit (max 2–3 tools) **for the locked process** | 30 | project | …locked the job — equip only what that job needs |
 | 1.6 | Memory — docs + grounded questions **for that process** | 10 | project | …chose the stack — ground it with the right files |
 
@@ -136,13 +136,13 @@ Human story of the day: **hire a coach → hire a helper → commit one job → 
 
 | ID | Task | Min | Type | Because you just… |
 | -- | ---- | --- | ---- | ----------------- |
-| 2.0 | Framing: pattern ladder (same Teacher thread) | 5 | attend | …locked one job — ask how much structure *that* job needs |
+| 2.0 | Framing: readiness self-score + pattern ladder (paper/discussion) | 5 | attend | …locked one job — choose how much structure *that* job needs |
 | 2.1 | Map your process **in Teacher chat** (type steps once) | 10 | project | …chose a height — write the steps on the process map |
-| 2.2 | First ETCSLV draft — you type in same thread | 5 | written | …mapped steps — write the setup checklist (E–V) |
-| 2.3 | Teacher critiques ETCSLV (reply in same thread — no re-paste) | 10 | project | …drafted E–V — tighten Limits + Validation |
+| 2.2 | First ETCSLV draft — **Worksheet D only** (no chat) | 5 | written | …mapped steps — write the setup checklist (E–V) |
+| 2.3 | Teacher critiques ETCSLV (paste draft + critique in chat) | 10 | project | …drafted E–V — tighten Limits + Validation |
 | 2.4 | Decision tree + lock pattern (roadmap, then one short Teacher ask) | 15 | project | …have map + rules — triage picks the room (pattern) |
 | 2.5 | Build the workflow brain (one Teacher ask → paste Settings **once** → test) | 30 | project | …locked pattern — write the standing brief for **this** job |
-| 2.6 | Automation path that runs (+ short Teacher review) | 30 | project | …tested the brain — start the run (trigger → run once) |
+| 2.6 | Automation path that runs (+ **optional** Teacher review) | 30 | project | …tested the brain — start the run (trigger → run once) |
 
 > **Identity rule:** Workflow brain = Settings for the **locked process** (extend Work Assistant **or** one new Project — not a third mystery surface).
 
@@ -152,13 +152,13 @@ Human story of the day: **hire a coach → hire a helper → commit one job → 
 
 | ID | Task | Min | Type | Because you just… |
 | -- | ---- | --- | ---- | ----------------- |
-| 3.0 | Framing: manager of agents | 5 | attend | …have a path that runs — now manage it for Monday |
+| 3.0 | Framing: manager of agents (instructor + one line on paper) | 5 | attend | …have a path that runs — now manage it for Monday |
 | 3.1 | Design AI workforce **in Teacher chat** (type, then cut) | 15 | project | …are the manager — minimum roster around the **same** run |
-| 3.2 | Harness Card — answer Teacher’s questions (same thread) | 15 | project | …named roles — harness = **same ETCSLV**, shipping name |
+| 3.2 | Harness Card — **Worksheet E** (+ optional L/V critique in chat) | 15 | written | …named roles — harness = **same ETCSLV**, shipping name |
 | 3.3 | Failure lab (break → review → fix; Teacher only if stuck) | 20 | project | …wrote L/V — fire-drill the process on purpose |
-| 3.4 | Capstone — ship the running workflow | 30 | project | …fixed one break — make it re-runnable without the instructor |
+| 3.4 | Capstone — ship the running workflow (+ demo script in Teacher) | 30 | project | …fixed one break — make it re-runnable without the instructor |
 | 3.5 | Demo Day + peer review | 20 | attend | …can re-run — show the shop open, not a poster |
-| 3.6 | 30-day AI adoption plan (minimal) | 10 | written | …demoed — write the Monday ritual |
+| 3.6 | 30-day plan — **paper** seed + R7 (+ optional Teacher polish) | 10 | written | …demoed — write the Monday ritual |
 
 ---
 

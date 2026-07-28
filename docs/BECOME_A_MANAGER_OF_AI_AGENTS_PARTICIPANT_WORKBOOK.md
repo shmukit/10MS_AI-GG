@@ -664,13 +664,25 @@ What I changed in Settings:
 
 | 🔒 **TASK 1.4** (~10 min) — Lock today’s process |
 | -------------------------------------------------------------------------------- |
-| **Do:** On paper (3 min): name · pain · done today · what stays human. Then send the roadmap **Copy** box in Teacher chat. If Teacher says too big, take the smaller slice. Do **not** pick tools yet. |
+| **Do:** List 2–3 candidate processes. Plot each on **Impact vs Effort** (below). Pick the winner. Write name · pain · done today · what stays human. Then send the roadmap **Copy** box in Teacher chat. If Teacher says too big, take the smaller slice. Do **not** pick tools yet. |
 | **Done when:** Process locked for the rest of the day. Mark roadmap **1.4** complete. |
 | **Next:** tools (**1.5**) → memory (**1.6**) for *this* job. **Session 2** will turn **this same locked process** into a path that can run (map → rules → automate). |
 
 
 *One recurring job for the rest of the day — not the whole company.*  
-*If you feel stuck, steal the starter column, then rewrite for your real job.*
+*Start with low-hanging fruit: high impact, lower effort.*
+
+**Pick your process — Impact vs Effort**
+
+| | **Low effort** (data ready, tools OK, few approvals) | **High effort** (messy data, IT blocks, many sign-offs) |
+| --- | --- | --- |
+| **High impact** (saves hours / many rows) | *Best start — put candidate #1 here* | *Phase 2 — after you ship one win* |
+| **Low impact** (nice-to-have) | *Maybe later* | *Skip for now* |
+
+**My candidates:** 1. _________________________ 2. _________________________ 3. _________________________  
+**Winner for today:** _________________________
+
+*If you feel stuck, steal the starter column in the table below, then rewrite for your real job.*
 
 
 |                                           | Starter (steal & adapt)                                                         | Write yours                       |
@@ -997,7 +1009,7 @@ _______________________________________________________________________________
 | ⑥ Brain | Standing instructions | Settings that survive a new chat |
 | ⑦ Run | Trigger → result | A live path (automation **or** semi-auto) |
 
-**Tools in Session 2:** Teacher chat for 2.0–2.4 · chatbot Project (or NotebookLM if file-heavy) for 2.5 · **Track A** n8n/Make/Zapier clone **or Track B** semi-auto for 2.6.
+**Tools in Session 2:** Teacher chat for **2.1, 2.3, 2.4, 2.5** only · chatbot Project (or NotebookLM if file-heavy) for 2.5 · **Track A** n8n/Make/Zapier clone **or Track B** semi-auto for 2.6. Tasks **2.0** and **2.2** are paper/discussion — no forced chat.
 
 
 ## 2.1 What is an AI workflow? (the destination picture)
@@ -1077,12 +1089,21 @@ Extend your Work Assistant **or** create **one** worker Project for the locked j
 ## 2.5 Pattern ladder (how much structure?) — Step ②
 
 
-| 🪜 **TASK 2.0** (~5 min) — Pattern ladder |
+| 🪜 **TASK 2.0** (~5 min) — Pattern ladder + readiness |
 | -------------------------------------------------------------------------------- |
 | **Because:** You locked one job — now ask how much structure *that* job needs (don’t jump to n8n yet). |
-| **Do:** In the same Teacher thread, send the roadmap **Copy** box. Note the level Teacher recommends below. |
-| **Done when:** Recommended level noted. Mark roadmap **2.0** complete. |
+| **Do:** Rate yourself 1–5 on the readiness table below. Listen to the instructor on the ladder. Circle your rung. Discuss with a neighbor if unsure. **No Teacher chat required.** |
+| **Done when:** Rung noted below. Mark roadmap **2.0** complete. |
 
+
+**Readiness self-score (1 = weak · 5 = strong)**
+
+| Dimension | 1 | 2 | 3 | 4 | 5 | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Data readiness** (clean inputs exist?) | ☐ | ☐ | ☐ | ☐ | ☐ | |
+| **Tool / IT access** (apps you need?) | ☐ | ☐ | ☐ | ☐ | ☐ | |
+| **Risk appetite** (OK with AI draft before you send?) | ☐ | ☐ | ☐ | ☐ | ☐ | |
+| **Change capacity** (team can adopt in ~30 days?) | ☐ | ☐ | ☐ | ☐ | ☐ | |
 
 Climb only as high as *this* route needs:
 
@@ -1096,7 +1117,7 @@ Climb only as high as *this* route needs:
 
 **Bicycle → scooter → van → small fleet → factory.** Do not buy a factory for a bicycle trip.
 
-**My locked pattern for today:** *e.g. Type 3 Work buddy — or “Single workflow agent”* ______________________________________________
+**My ladder rung for today:** *e.g. Level 3 — single workflow agent* ______________________________________________
 
 ---
 
@@ -1225,15 +1246,15 @@ Before you open a new role (or onboard a new hire), you decide: how hard is the 
 | ✍️ **TASK 2.2** (~5 min) — First ETCSLV draft |
 | -------------------------------------------------------------------------------- |
 | **Because:** The map shows steps — now write the desk rules (especially **L**imits and **V**alidation). |
-| **Do:** In the same Teacher thread, send the roadmap **Copy** box — you fill E–T–C–S–L–V in your own words. Also fill this page. Be specific on **L** and **V**. |
-| **Done when:** Draft written. Mark roadmap **2.2** complete. |
+| **Do:** Fill E–T–C–S–L–V below in your own words. **Paper only — no Teacher chat.** Critique is Task 2.3. |
+| **Done when:** Draft written on this page. Mark roadmap **2.2** complete. |
 
 
 
 | 🔍 **TASK 2.3** (~10 min) — Teacher critiques ETCSLV |
 | -------------------------------------------------------------------------------- |
 | **Because:** First drafts of L/V are usually soft (“be careful”) — tighten until Monday-testable. |
-| **Do:** Same thread — send the roadmap **Copy** box. Reply with updated **L** and **V** only (testable, not “be careful”). |
+| **Do:** Paste your E–V from this page into Teacher chat. Send the roadmap **Copy** box. Reply with updated **L** and **V** only. |
 | **Done when:** Updated L + V are specific/testable. Mark roadmap **2.3** complete. |
 
 
@@ -1359,7 +1380,7 @@ Automation means the path can **start without you remembering** (“when the for
 | ⚡ **TASK 2.6** (~30 min) — Automation path that runs |
 | -------------------------------------------------------------------------------- |
 | **Because:** Brain is tested — open the path once (automation **or** Track B semi-auto). |
-| **Do:** **Track A:** clone facilitator template → wire your workflow-brain instructions into the AI step → live-run once. **Track B (if blocked):** trigger checklist/form → AI produces the artifact in chat → you show paste/send after approval. Then send the roadmap **Copy** box to Teacher for a short review. |
+| **Do:** **Track A:** clone facilitator template → wire your workflow-brain instructions into the AI step → live-run once. **Track B (if blocked):** trigger checklist/form → AI produces the artifact in chat → you show paste/send after approval. **Optional if time:** send the roadmap **Copy** box to Teacher for a short review. |
 | **Done when:** You can re-trigger (or re-run the Track B path) without the instructor. Mark roadmap **2.6** complete. |
 | **My track today:** ☐ A (n8n/Make/Zapier) · ☐ B (semi-auto chatbot) |
 
@@ -1429,11 +1450,16 @@ _______________________________________________________________________________
 
 | 👔 **TASK 3.0** (~5 min) — Manager of agents (framing) |
 | -------------------------------------------------------------------------------- |
-| **Do:** Follow the instructor, then send the roadmap **Copy** box in Teacher chat. Listen for: you manage roles + rules + evaluation; AI does the drafting. |
-| **Done when:** Framing heard. Mark roadmap **3.0** complete. |
+| **Do:** Follow the instructor. Write one line below: what “manager of agents” means for your process. **No Teacher chat required.** |
+| **Done when:** Framing heard + one line written. Mark roadmap **3.0** complete. |
 
 
 *Goal: Manage AI like a small team — roles, harness, failure drill, then ship.*
+
+**One line for me:** *You manage roles + rules + evaluation; AI does the drafting.*  
+_______________________________________________________________________________
+
+**Tools in Session 3:** Teacher chat for **3.1** and **3.4** (required) · **3.2** and **3.6** optional polish · **3.3** only if stuck · **3.5** live demo (no chat).
 
 ---
 
@@ -1567,9 +1593,9 @@ Human       : *Approve / edit / send* __________________________________________
 ## Worksheet E — Harness Card (shipping name for ETCSLV)
 
 
-| 🛡️ **TASK 3.2** (~15 min) — Harness Card via Q&A |
+| 🛡️ **TASK 3.2** (~15 min) — Harness Card (shipping name for ETCSLV) |
 | -------------------------------------------------------------------------------- |
-| **Do:** In Teacher chat, send the roadmap **Copy** box. Answer one letter at a time. Harness = same ETCSLV, shipping name. Fill this card as you go. |
+| **Do:** Fill Worksheet E below — all fields, especially **L** and **V**. Harness = same ETCSLV, shipping name. **Optional if time:** paste L + V into Teacher and send the roadmap **Copy** box for critique. |
 | **Done when:** L and V are clear enough to demo. Mark roadmap **3.2** complete. |
 
 
@@ -1728,7 +1754,7 @@ Before you delegate a task to AI (assistant or workflow):
 
 | 📅 **TASK 3.6** (~10 min) — 30-day AI adoption plan |
 | -------------------------------------------------------------------------------- |
-| **Do:** Send the roadmap **Copy** box in Teacher chat. Fill this seed plan. Complete the full calendar on **Page 32 (R7)**. Circle the Week 1 action you will actually do. |
+| **Do:** Fill this seed plan and complete the full calendar on **Page 32 (R7)**. Circle the Week 1 action you will actually do. **Optional if time:** send the roadmap **Copy** box to Teacher for a polish pass. |
 | **Done when:** Tomorrow + this week filled. Mark roadmap **3.6** complete. |
 
 
