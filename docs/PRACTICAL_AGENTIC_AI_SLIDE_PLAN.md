@@ -42,7 +42,7 @@ Done: [one line]
 ## Day map
 
 ```
-0 Open (~33) → 1 WITH (~90) → break → 2 THROUGH (~104) → lunch → 3 BY (~120) → 4 async
+0 Open (~35) → 1 WITH (~90) → break → 2 THROUGH (~105) → lunch → 3 BY (~115) → 4 async
 ```
 
 WITH = AI helps you · THROUGH = the job runs · BY = manage the team + ship
@@ -150,7 +150,7 @@ WITH = AI helps you · THROUGH = the job runs · BY = manage the team + ship
 **On slide**
 
 ```
-TASK 0.0 · What is AI? · ~6 min
+TASK 0.0 · What is AI? · ~5 min
 Do: Write 1 EXPECT and 1 DON’T EXPECT
 Done: Mark 0.0
 ```
@@ -195,7 +195,7 @@ Done: Settings saved · mark 0.1 & 0.2
 **On slide**
 
 ```
-TASK 0.3 · Meet your Teacher · ~7 min
+TASK 0.3 · Meet your Teacher · ~10 min
 Do: Teacher chat → copy 0.3 → send role + process → answer 3 questions
 Done: Mark 0.3
 ```
@@ -261,7 +261,7 @@ Done: Mark 0.4
 **On slide**
 
 ```
-TASK 1.1 · Work Assistant brief · ~6 min
+TASK 1.1 · Work Assistant brief · ~5 min
 Do: Fill brief on paper/note — no AI
 Done: Mark 1.1
 ```
@@ -279,7 +279,7 @@ Done: Mark 1.1
 **On slide**
 
 ```
-TASK 1.2 · Hire Work Assistant + 3 runs · ~22 min
+TASK 1.2 · Hire Work Assistant + 3 runs · ~20 min
 Do: New Project · Settings once · 3 real tasks · stop & read each time
 Done: Mark 1.2
 ```
@@ -298,7 +298,7 @@ Done: Mark 1.2
 **On slide**
 
 ```
-TASK 1.3 · Coach once · ~16 min
+TASK 1.3 · Coach once · ~15 min
 Do: Teacher 1.3 → update Work Assistant Settings → re-run one task
 Done: Mark 1.3
 ```
@@ -316,7 +316,7 @@ Done: Mark 1.3
 **On slide**
 
 ```
-TASK 1.4 · Lock process · ~11 min
+TASK 1.4 · Lock process · ~10 min
 Do: Name one job · Teacher check · accept a smaller slice
 Done: Mark 1.4
 ```
@@ -335,7 +335,7 @@ Done: Mark 1.4
 **On slide**
 
 ```
-TASK 1.5 · ≤3 tools · ~25 min
+TASK 1.5 · ≤3 tools · ~30 min
 Do: Same test in 2–3 tools · lock your stack
 Done: Mark 1.5
 ```
@@ -437,7 +437,7 @@ Done: Mark 2.1
 **On slide**
 
 ```
-TASK 2.2–2.3 · ETCSLV · ~12 min
+TASK 2.2–2.3 · ETCSLV · ~15 min
 Do: Type E–V · then “critique above”
 Done: Mark 2.2 & 2.3
 ```
@@ -483,7 +483,7 @@ Done: Mark 2.4
 **On slide**
 
 ```
-TASK 2.5 · Workflow brain · ~28 min
+TASK 2.5 · Workflow brain · ~30 min
 Do: One Teacher ask → Settings once → test real input
 Done: Mark 2.5
 ```
@@ -501,7 +501,7 @@ Done: Mark 2.5
 **On slide**
 
 ```
-TASK 2.6 · Path that runs · ~34 min
+TASK 2.6 · Path that runs · ~30 min
 Do: Trigger → AI → output → approval · live once
 Done: Mark 2.6
 ```
@@ -544,7 +544,7 @@ Done: Mark 2.6
 **On slide**
 
 ```
-TASK 3.0–3.1 · Smallest team · ~19 min
+TASK 3.0–3.1 · Smallest team · ~20 min
 Do: Framing · type min roles in Teacher · cut extras
 Done: Mark 3.0 & 3.1
 ```
@@ -581,7 +581,7 @@ Done: Mark 3.2
 **On slide**
 
 ```
-TASK 3.3 · Break it · ~18 min
+TASK 3.3 · Break it · ~20 min
 Do: Trigger 2 failures · fix · Teacher only if stuck
 Done: Mark 3.3
 ```
@@ -599,7 +599,7 @@ Done: Mark 3.3
 **On slide**
 
 ```
-TASK 3.4 · Ship · ~38 min
+TASK 3.4 · Ship · ~30 min
 Do: Make it re-run without the instructor
 Done: Checklist true · mark 3.4
 ```
@@ -622,7 +622,7 @@ Done: Checklist true · mark 3.4
 **On slide**
 
 ```
-TASK 3.5 · Demo Day · ~22 min
+TASK 3.5 · Demo Day · ~20 min
 Do: ~3 min/team · live run
 Done: Mark 3.5
 ```
@@ -641,7 +641,7 @@ Done: Mark 3.5
 **On slide**
 
 ```
-TASK 3.6 · 30-day plan · ~8 min
+TASK 3.6 · 30-day plan · ~10 min
 Do: Short plan (roadmap 3.6)
 Done: Mark 3.6
 ```

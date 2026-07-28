@@ -17,9 +17,12 @@ Run these scripts in the **Supabase SQL Editor** in order:
 9. **Less-paste curriculum (Session 1 = 1.1–1.6, no Working Pack):** [`sql/20260725_agentic_curriculum_less_paste_v2.sql`](../sql/20260725_agentic_curriculum_less_paste_v2.sql)  
 10. **Embed prompts into roadmap tasks (Copy modal):** [`sql/20260725_agentic_task_prompts_in_roadmap_fix.sql`](../sql/20260725_agentic_task_prompts_in_roadmap_fix.sql)  
    *(Skip the broken `…_task_prompts_in_roadmap.sql` — it errors on `GET DIAGNOSTICS`.)*  
+11. Later curriculum tweaks as needed (`0.0`, Session 1 lock-before-tools, serial sync, plain-language rename).  
+12. **Simplify task copy (Goal → Steps):** [`sql/20260728_simplify_task_details_leader_ux.sql`](../sql/20260728_simplify_task_details_leader_ux.sql)  
+13. **Round task times to 5/10/15/20/30:** [`sql/20260728_round_task_times_to_nice_minutes.sql`](../sql/20260728_round_task_times_to_nice_minutes.sql)  
    Master: [`docs/PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md)
 
-**Edit prompts later (mentors):** Mentor → Roadmap → edit task → **Task details / student prompt**. That field is what students Copy. Optional **Relevant link** = PPT / decision tree / reading only.
+**Edit prompts later (mentors):** Mentor → Roadmap → edit task → **Task details / student prompt**. Prefer `Goal` + numbered `Steps` + optional `——— COPY BELOW ———` boxes. Students never need WHERE / BECAUSE / ANALOGY in the modal.
 
 ## Troubleshooting
 

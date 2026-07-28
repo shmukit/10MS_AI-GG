@@ -291,7 +291,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
           return next;
         });
         if (onRefresh) onRefresh();
-        closeTaskDetail();
+        // Stay open so they can tap Next without re-opening from the list
       } else {
         toastError('Failed to mark task as completed. Please try again.');
       }
@@ -569,8 +569,12 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       <TaskDetailModal
         open={detailTaskIndex >= 0}
         task={detailTask}
+        taskIndex={Math.max(0, detailTaskIndex)}
+        taskCount={node.tasks.length}
         onClose={closeTaskDetail}
         onComplete={handleCompleteFromModal}
+        onPrevious={() => setDetailTaskIndex((i) => Math.max(0, i - 1))}
+        onNext={() => setDetailTaskIndex((i) => Math.min(node.tasks.length - 1, i + 1))}
         canComplete={node.status === 'active'}
         isCompleting={isCompletingFromModal}
       />
