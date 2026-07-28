@@ -9,6 +9,7 @@ import { posthog } from '../../lib/posthog';
 import { isDecisionTreeResourceUrl } from '../Playbooks/AgenticDecisionTree';
 import { useToast } from '../ui/ToastProvider';
 import { TaskDetailModal } from './TaskDetailModal';
+import { getTaskVisual, parseTaskId } from './taskVisuals';
 
 interface NodeContentPanelProps {
   node: RoadmapNodeData;
@@ -179,6 +180,24 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
       case 'reading': return <BookOpen className={iconClass} />;
       default: return <Circle className={iconClass} />;
     }
+  };
+
+  /** Prefer workshop emoji marker; fall back to type icon. */
+  const renderTaskMarker = (title: string, type: string) => {
+    const visual = getTaskVisual(title, type);
+    if (parseTaskId(title) || visual.emoji !== '📌') {
+      return (
+        <span
+          className="text-base leading-none shrink-0"
+          title={visual.label}
+          aria-label={visual.label}
+          role="img"
+        >
+          {visual.emoji}
+        </span>
+      );
+    }
+    return getTaskIcon(type);
   };
 
   const completionRate = completedTasks.filter(Boolean).length / completedTasks.length;
@@ -413,7 +432,7 @@ export const NodeContentPanel: React.FC<NodeContentPanelProps> = ({ node, onClos
                     )}
                   </button>
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {getTaskIcon(task.type)}
+                    {renderTaskMarker(task.title, task.type)}
                     <span className={`text-sm min-w-0 ${completedTasks[index] ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                       {task.title}
                     </span>

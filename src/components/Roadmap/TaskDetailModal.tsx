@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, CheckCircle2, Copy, Loader2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
+import { getTaskVisual } from './taskVisuals';
 
 export type TaskDetailSegment =
   | { type: 'prose'; text: string }
@@ -164,12 +165,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   if (!task) return null;
 
   const hasCode = segments.some((s) => s.type === 'code');
+  const visual = getTaskVisual(task.title, task.type);
+  const modalTitle = `${visual.emoji} ${task.title}`;
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={task.title}
+      title={modalTitle}
       size="lg"
       className="max-h-[90vh] flex flex-col"
       footer={
