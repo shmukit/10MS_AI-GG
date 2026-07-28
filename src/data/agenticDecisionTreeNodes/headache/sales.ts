@@ -57,4 +57,18 @@ export const salesHeadacheNode = headacheNode('q-headache-sales', 'sales', [
     nextId: 'q-finished',
     contextValue: 'sales-pitch-deck',
   },
+  {
+    label: 'Liability / deposit product talking points for a client visit',
+    example: 'Rate card + eligibility rules → 1-pager and FAQ you review before the meeting.',
+    modality: 'text',
+    nextId: 'q-needs-files',
+    contextValue: 'liability-talk-track',
+  },
+  {
+    label: 'Corporate / retail liability pipeline update for leadership',
+    example: 'Messy CRM notes → clean funnel table + 5 bullets on stuck deals.',
+    modality: 'numbers',
+    nextId: 'q-finished',
+    contextValue: 'liability-pipeline',
+  },
 ]);

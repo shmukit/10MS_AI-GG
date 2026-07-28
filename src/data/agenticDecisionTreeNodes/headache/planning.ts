@@ -57,4 +57,11 @@ export const planningHeadacheNode = headacheNode('q-headache-planning', 'plannin
     nextId: 'q-finished',
     contextValue: 'demo-walkthrough',
   },
+  {
+    label: 'Investment / portfolio performance note for stakeholders',
+    example: 'Holdings + returns export → plain-language note with risks and next review date.',
+    modality: 'numbers',
+    nextId: 'q-needs-files',
+    contextValue: 'portfolio-performance-note',
+  },
 ]);

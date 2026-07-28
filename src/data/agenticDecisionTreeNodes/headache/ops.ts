@@ -43,4 +43,18 @@ export const opsHeadacheNode = headacheNode('q-headache-ops', 'operations', [
     nextId: 'q-finished',
     contextValue: 'ops-data-clean',
   },
+  {
+    label: 'Track supply-chain delays or order exceptions',
+    example: 'PO/shipment sheet → late lines, reason codes, and escalation list for South Asia ops standup.',
+    modality: 'numbers',
+    nextId: 'q-finished',
+    contextValue: 'supply-chain-exceptions',
+  },
+  {
+    label: 'Draft vendor / logistics follow-up from status sheet',
+    example: 'Delayed SKUs + agreed SLA → polite email/WhatsApp you approve before send.',
+    modality: 'text',
+    nextId: 'q-finished',
+    contextValue: 'vendor-followup',
+  },
 ]);

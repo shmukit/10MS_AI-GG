@@ -1,0 +1,203 @@
+/* Participant workbook → PDF print styles
+   npx md-to-pdf docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK.md --stylesheet docs/workbook-print.css
+*/
+
+@page {
+  size: A4;
+  /* Bottom margin reserved for stamped logo + page number (added after PDF export) */
+  margin: 14mm 14mm 30mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  color: #111;
+  max-width: 100%;
+  padding-bottom: 8mm;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+h1 {
+  font-size: 20pt;
+  margin: 0.2em 0 0.4em;
+  border-bottom: 3px solid #111;
+  padding-bottom: 0.25em;
+}
+
+h2 {
+  font-size: 14pt;
+  margin: 1em 0 0.4em;
+  padding-bottom: 0.15em;
+  border-bottom: 1.5px solid #444;
+}
+
+h3 {
+  font-size: 12pt;
+  margin: 0.9em 0 0.35em;
+}
+
+hr {
+  border: 0;
+  border-top: 1.5px solid #999;
+  margin: 1em 0;
+}
+
+/* —— Page breaks —— */
+.page-break {
+  break-before: page !important;
+  page-break-before: always !important;
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* —— TABLES (fix borderless / dull PDF) —— */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 0.75em 0 1em !important;
+  font-size: 9.5pt;
+  border: 1.5px solid #111 !important;
+  /* Allow multi-page tables (e.g. Contents) to break — avoid blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+thead {
+  display: table-header-group;
+}
+
+th,
+td {
+  border: 1px solid #333 !important;
+  padding: 6px 8px !important;
+  vertical-align: top !important;
+  text-align: left !important;
+}
+
+th {
+  background: #e6e6e6 !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* GFM first header row often renders as th */
+tr:first-child th,
+thead th {
+  background: #d9d9d9 !important;
+  border-bottom: 2px solid #111 !important;
+}
+
+/* Alternating body rows for scanability */
+tbody tr:nth-child(even) td {
+  background: #f7f7f7 !important;
+}
+
+/* —— TASK BOXES (single-column tables) —— */
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) {
+  border: 2.5px solid #111 !important;
+  background: #f3f3f3 !important;
+  margin: 0.9em 0 1.1em !important;
+  /* Keep short task boxes together; large data tables may still break */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Dark header ONLY on thead — do NOT style tbody first row (that is "Do:") */
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th {
+  background: #222 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+  font-size: 10.5pt !important;
+  padding: 8px 10px !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Body rows: always dark text on light fill (fixes invisible "Do:") */
+table:has(> tbody > tr > td:only-child) tbody td,
+table:has(> thead > tr > th:only-child) tbody td {
+  color: #111 !important;
+  background: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+table:has(> tbody > tr > td:only-child) tbody tr:nth-child(even) td,
+table:has(> thead > tr > th:only-child) tbody tr:nth-child(even) td {
+  background: #ececec !important;
+  color: #111 !important;
+}
+
+/* —— Callouts / tips (blockquotes) —— */
+blockquote {
+  margin: 0.8em 0 !important;
+  padding: 10px 14px !important;
+  border: 1.5px solid #333 !important;
+  border-left: 6px solid #111 !important;
+  background: #f5f5f5 !important;
+  /* Do NOT use page-break-inside:avoid — large/late quotes create blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+blockquote p {
+  margin: 0.25em 0 !important;
+}
+
+blockquote strong:first-child {
+  display: inline-block;
+  margin-bottom: 0.15em;
+}
+
+/* —— Code / ASCII diagrams —— */
+pre,
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 8.5pt;
+}
+
+pre {
+  border: 1.5px solid #333 !important;
+  background: #f4f4f4 !important;
+  padding: 10px 12px !important;
+  overflow-x: auto;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* —— Lists —— */
+ul, ol {
+  margin: 0.4em 0 0.6em 1.2em;
+  padding: 0;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+/* —— Keep headings with following content —— */
+h1, h2, h3, h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Corner logo is stamped into the PDF after export (see scripts/export_workbook_pdf.py).
+   Do not use position:fixed here — Chrome prints it on top of tables. */
+

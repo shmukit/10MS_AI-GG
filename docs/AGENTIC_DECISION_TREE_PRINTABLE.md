@@ -53,13 +53,17 @@ flowchart LR
 
 Find your sector. Circle one role. Remember the **table name** it points to for Step 3.
 
-#### Bank / MFI / financial services
+#### Bank / MFI / NBFI / financial services
 
 - **Accounts / finance** → open the **Accounts / finance** table in Step 3
+- **Collections / recovery / PAR** → open the **Collections / recovery / PAR** table in Step 3
+- **Liability / deposits / funding products** → open the **Sales / business development** table in Step 3
+- **Credit / portfolio / risk reporting** → open the **Accounts / finance** table in Step 3
 - **Sales / relationship** → open the **Sales / business development** table in Step 3
 - **Strategy / research / planning** → open the **Planning / BD / reporting** table in Step 3
-- **Operations / customer service** → open the **Operations / customer care** table in Step 3
-- **Team lead / manager** → open the **Team lead / manager** table in Step 3
+- **Operations / customer service / SEO** → open the **Operations / customer care** table in Step 3
+- **Team lead / manager / unit head** → open the **Team lead / manager** table in Step 3
+- **Executive office / MD coordinator** → open the **Team lead / manager** table in Step 3
 - **QA / compliance checker** → open the **QA / evaluation / compliance** table in Step 3
 
 #### RMG / factory / industrial
@@ -67,18 +71,23 @@ Find your sector. Circle one role. Remember the **table name** it points to for 
 - **Accounts / finance** → open the **Accounts / finance** table in Step 3
 - **HR / admin** → open the **HR / admin** table in Step 3
 - **Operations / floor coordination** → open the **Operations / customer care** table in Step 3
+- **Supply chain / commercial ops** → open the **Operations / customer care** table in Step 3
 - **Planning / reporting** → open the **Planning / BD / reporting** table in Step 3
-- **Team lead / manager** → open the **Team lead / manager** table in Step 3
+- **Team lead / manager / DGM+** → open the **Team lead / manager** table in Step 3
 
 #### Corporate office (any industry)
 
 - **Accounts / finance** → open the **Accounts / finance** table in Step 3
+- **Portfolio / investment management** → open the **Planning / BD / reporting** table in Step 3
 - **Sales / business development** → open the **Sales / business development** table in Step 3
+- **Commercial / banking liaison** → open the **Sales / business development** table in Step 3
 - **Marketing / communications** → open the **Marketing / communications** table in Step 3
 - **Strategy / planning / research** → open the **Planning / BD / reporting** table in Step 3
 - **HR / admin** → open the **HR / admin** table in Step 3
 - **Operations / customer care** → open the **Operations / customer care** table in Step 3
+- **Supply chain / logistics** → open the **Operations / customer care** table in Step 3
 - **Team lead / manager** → open the **Team lead / manager** table in Step 3
+- **Senior leadership / director / MD office** → open the **Team lead / manager** table in Step 3
 - **QA / evaluation** → open the **QA / evaluation / compliance** table in Step 3
 
 #### Agency / sales / distribution
@@ -88,6 +97,7 @@ Find your sector. Circle one role. Remember the **table name** it points to for 
 - **Strategy / BD / planning** → open the **Planning / BD / reporting** table in Step 3
 - **Accounts / billing** → open the **Accounts / finance** table in Step 3
 - **Operations** → open the **Operations / customer care** table in Step 3
+- **Leadership / director / MD** → open the **Team lead / manager** table in Step 3
 
 #### Education / NGO / development
 
@@ -110,6 +120,7 @@ Find your sector. Circle one role. Remember the **table name** it points to for 
 - **General office staff** → open the **General office staff** table in Step 3
 - **Planning / reporting / admin support** → open the **Planning / BD / reporting** table in Step 3
 - **Accounts / finance** → open the **Accounts / finance** table in Step 3
+- **Collections / recovery** → open the **Collections / recovery / PAR** table in Step 3
 - **HR / admin** → open the **HR / admin** table in Step 3
 - **Team lead / manager** → open the **Team lead / manager** table in Step 3
 
@@ -134,6 +145,18 @@ If it already names **Type 4 / 6 / 7**, skip straight to that Type card.
 | 5 | Monthly financial report narrative from the numbers | P&L + cashflow tabs → plain-language summary for CFO with 3 risks called out. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
 | 6 | Analyze expense or revenue trends in Excel | 12 months of GL export → top cost drivers and one chart-ready table. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 | 7 | Clean transaction export before reconciliation | Raw bank/ERP dump → standard columns, no duplicates, ready for VLOOKUP. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 8 | Credit / portfolio risk snapshot for the week | Exposure sheet → concentration, top movers, and 3 questions for the risk meeting. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+
+### Collections / recovery / PAR
+
+| # | Your task this week | What “done” looks like | What to do next |
+|---|---------------------|------------------------|-----------------|
+| 1 | Prioritize overdue accounts for today’s call list | Aging / PAR sheet → Top 20 to call with reason and suggested next action (you still dial). | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 2 | Draft polite recovery / reminder message (Bangla or English) | Account facts + tone rules → SMS/WhatsApp/email draft you approve before send. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 3 | Summarize portfolio-at-risk (PAR) movement for leadership | This week vs last week buckets → 1-page narrative + 3 risks for Head of Collections. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
+| 4 | Extract promise-to-pay or field notes into a tracker | Call notes / WhatsApp updates → structured sheet: date, amount promised, follow-up. | Ask: I approve each step, or two different roles hand off? → Follow-ups chart |
+| 5 | Batch-classify many overdue cases overnight | Hundreds of rows → soft/hard/legal tags by morning; you spot-check a sample. | Your match is **Type 6** (nightly batch) — skip to Types below |
+| 6 | Prepare recovery file pack before escalation | Statement + notices + call log → checklist of missing docs for legal/ops handoff. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
 
 ### Education / teaching
 
@@ -191,6 +214,8 @@ If it already names **Type 4 / 6 / 7**, skip straight to that Type card.
 | 4 | Analyze ops or support metrics for weekly report | Ticket export → volume, top issues, SLA misses in bullets for Monday standup. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 | 5 | Organize SOPs and process docs into one handbook | PDFs in email/Drive chaos → single indexed folder with “current SOP” labels. | Ask: I approve each step, or two different roles hand off? → Follow-ups chart |
 | 6 | Clean operational data export before dashboard | Raw CSV from system → fixed dates, categories, and nulls for Sheets dashboard. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 7 | Track supply-chain delays or order exceptions | PO/shipment sheet → late lines, reason codes, and escalation list for South Asia ops standup. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 8 | Draft vendor / logistics follow-up from status sheet | Delayed SKUs + agreed SLA → polite email/WhatsApp you approve before send. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 
 ### Planning / BD / reporting
 
@@ -204,6 +229,7 @@ If it already names **Type 4 / 6 / 7**, skip straight to that Type card.
 | 6 | Organize scattered docs into folders + index | Years of Drive/WhatsApp/email attachments → named folders, README index, “official version” tagged. | Ask: I approve each step, or two different roles hand off? → Follow-ups chart |
 | 7 | Digitize paper files / binders into searchable archive | Stack of signed forms or old contracts → scans OCR’d, filed, and findable by name/date. | Your match is **Type 6** (nightly batch) — skip to Types below |
 | 8 | Prepare real demo product walkthrough (what to show and say) | Live product or prototype → 10-min demo script, click path, and answers to likely client questions. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 9 | Investment / portfolio performance note for stakeholders | Holdings + returns export → plain-language note with risks and next review date. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
 
 ### QA / evaluation / compliance
 
@@ -225,6 +251,8 @@ If it already names **Type 4 / 6 / 7**, skip straight to that Type card.
 | 6 | Client demo script and talk track for a real product | 15-min meeting: opening, 5 screens to show, objection answers, and close ask. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 | 7 | Win/loss or pipeline analysis from CRM export | Last quarter deals → why we won/lost and where pipeline is stuck. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 | 8 | Proposal or pitch deck from discovery notes | Visit notes + pricing sheet → client-facing slides and cover email draft. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
+| 9 | Liability / deposit product talking points for a client visit | Rate card + eligibility rules → 1-pager and FAQ you review before the meeting. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
+| 10 | Corporate / retail liability pipeline update for leadership | Messy CRM notes → clean funnel table + 5 bullets on stuck deals. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 
 ### Software engineer / developer
 
@@ -246,6 +274,8 @@ If it already names **Type 4 / 6 / 7**, skip straight to that Type card.
 | 4 | Leadership presentation from team inputs | Dept updates + KPI sheet → board-ready slide outline and speaker notes. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 | 5 | Quarterly plan or strategy draft for your unit | Goals, budget ask, risks, and milestones in one doc for sign-off. | Ask: I approve each step / overnight batch / two roles hand off? → Follow-ups chart |
 | 6 | Monthly performance report from scattered inputs | Email threads + 4 sheets → one manager report with charts described. | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
+| 7 | Briefing pack for MD / director before a meeting | Emails + KPIs + open issues → 1-page brief with decisions needed (you still own the stamp). | Ask: can I paste in chat, or must AI read company files? → Follow-ups chart |
+| 8 | Action tracker after leadership meeting | Messy notes → owners, deadlines, and status table for the MD office follow-up. | Ask yourself: one finished thing, or several steps? → Follow-ups chart |
 
 
 ---

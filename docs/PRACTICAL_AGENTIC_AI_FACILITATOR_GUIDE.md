@@ -10,7 +10,7 @@ This document is written for **you, the facilitator**. Read it as a step-by-step
 2. [`sql/20260725_agentic_session1_lock_before_tools.sql`](../sql/20260725_agentic_session1_lock_before_tools.sql) — Session 1 lock → tools → memory  
 **Prompts:** Live on the roadmap — click task → **Copy** → paste into AI → **Mark complete**. Backup doc: [`PRACTICAL_AGENTIC_AI_PROMPT_PACK.md`](./PRACTICAL_AGENTIC_AI_PROMPT_PACK.md). Call tasks by number (e.g. “Task **1.3**”).
 
-**Room rule:** Copy-paste less. Same Teacher chat all day. Teacher ↔ Work EA switch **once**. Answers live in the chat thread — not a second slide deck.
+**Room rule:** Copy-paste less. Same Teacher chat all day. Teacher ↔ Work Assistant switch **once**. Answers live in the chat thread — not a second slide deck.
 
 **Sessions on the roadmap site**
 
@@ -58,7 +58,7 @@ Participants mostly live in **three places**:
 | Surface | Purpose |
 | ------- | ------- |
 | **1. Agenda PPT (projector)** | “Where we are” — you advance this |
-| **2. AI tools on their laptop** | Teacher Project (same chat all day), Work EA, NotebookLM, automation |
+| **2. AI tools on their laptop** | Teacher Project (same chat all day), Work Assistant, NotebookLM, automation |
 | **3. Roadmap website** | Checklist, decision tree, mark complete |
 
 **Prompt Pack** = read-only menu of prompts (Google Doc). Not a notebook.
@@ -77,7 +77,7 @@ It is **not** required. They must **not** maintain a Google Slides “Working Pa
 
 | Helper | What it does |
 | ------ | ------------ |
-| **Teacher Agent** | One ChatGPT/Claude **Project**. Same chat thread all day. Remembers their process from the Day contract. |
+| **Teacher Agent** | One ChatGPT/Claude **Project**. Same chat thread all day. Remembers their process from the Kickoff chat. |
 | **You (facilitator)** | Short demos, walk the room, fix logins, keep time, quality bar, Demo Day. |
 | **Roadmap (website)** | Activity checklist + decision tree. |
 
@@ -85,7 +85,7 @@ It is **not** required. They must **not** maintain a Google Slides “Working Pa
 
 **After every AI reply, coach them to:** Stop → Read → Decide (what is wrong?) → then act. Do not rush to the next paste.
 
-**One spine:** One Teacher thread + one Work EA + **one business process**. Do not let them start five toy projects.
+**One spine:** One Teacher thread + one Work Assistant + **one business process**. Do not let them start five toy projects.
 
 ---
 
@@ -133,12 +133,12 @@ End of day: they **trigger the workflow live** (or a recording from the last few
 
 | When | Session | Length | They leave with |
 | ---- | ------- | ------ | --------------- |
-| Start | **0** Housekeeping + Opening | ~33 min | What is AI / expect → surfaces → Teacher Agent live |
-| Morning | **1** Work WITH AI | ~90 min | Work EA (3 runs) + one coach loop + tools ≤3 + process locked |
+| Start | **0** Housekeeping + Opening | ~35 min | What is AI / expect → surfaces → Teacher Agent live |
+| Morning | **1** Work WITH AI | ~90 min | Work Assistant (3 runs) + one feedback round + tools ≤3 + process locked |
 | | Break | 15 min | |
-| Mid | **2** Work THROUGH AI | ~104 min | Map + ETCSLV + pattern + brain + **running** path |
+| Mid | **2** Work THROUGH AI | ~105 min | Map + ETCSLV + pattern + brain + **running** path |
 | | Break / lunch | 15–60 min | |
-| Afternoon | **3** Work BY AI | ~120 min | Workforce + harness + failure + ship + Demo Day + short 30-day |
+| Afternoon | **3** Work BY AI | ~115 min | Workforce + harness + failure + ship + Demo Day + short 30-day |
 | After / home | **4** Reference | ~40 min optional | Readings / video |
 
 Full task list with minutes: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md).
@@ -147,7 +147,7 @@ Full task list with minutes: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRA
 
 ---
 
-# SESSION 0 — Housekeeping + Opening (~33 minutes)
+# SESSION 0 — Housekeeping + Opening (~35 minutes)
 
 **Roadmap / Prompt Pack:** `0.0` → `0.4`
 
@@ -165,7 +165,7 @@ Show: roadmap **Session 0** + agenda PPT “You are here: Session 0.”
 
 ## Participant activity — you walk the room
 
-### Task 0.0 — What is AI? What to expect / not expect (6 min)
+### Task 0.0 — What is AI? What to expect / not expect (5 min)
 
 **Projector:** Task **0.0** slide (concept + expect / don’t-expect table). This is the live framing — Session 4’s optional “What is AI?” video is a later refresher only.
 
@@ -225,7 +225,7 @@ Pattern ladder (simplest → complex):
 Instruction-only chat → Knowledge assistant → Single workflow agent → Multi-agent workflow → Automation pipeline
 ```
 
-### Task 0.3 — Day contract (7 min)
+### Task 0.3 — Kickoff chat (10 min)
 
 In the Project **chat** (not settings), Prompt Pack **0.3** — paste:
 
@@ -272,14 +272,14 @@ They can state one expect + one don’t-expect (Task **0.0**); Teacher Project e
 
 ## Session goal
 
-1. Hire one Work EA (Settings once) and **use it three times**.  
-2. Switch Teacher ↔ EA **once** to learn good prompts + dual-Project critique.  
+1. Hire one Work Assistant (Settings once) and **use it three times**.  
+2. Switch Teacher ↔ Work Assistant **once** to learn good prompts + dual-Project critique.  
 3. **Lock one process**, then fit ≤3 tools, then ground memory — in that order.  
 4. Think and review more than copy-paste.
 
 **Wall script for you:**
 
-> “1) Fill a brief. 2) Hire the EA — three runs. 3) Ask the coach once — fix — re-run once. 4) **Lock the job.** 5) Pick tools for *that* job. 6) Ground with the right files. Stay in one Project until I say switch.”
+> “1) Fill a brief. 2) Hire the Work Assistant — three runs. 3) Ask the coach once — fix — re-run once. 4) **Lock the job.** 5) Pick tools for *that* job. 6) Ground with the right files. Stay in one Project until I say switch.”
 
 **Progression bridge into Session 1:**
 
@@ -291,13 +291,13 @@ They can state one expect + one don’t-expect (Task **0.0**); Teacher Project e
 
 **Weak chat:** empty chat + messy notes + `Help me with my morning.` → generic.
 
-**Work EA with Settings:** same notes → useful Top 5 → invent-trap → show “never invent.”
+**Work Assistant with Settings:** same notes → useful Top 5 → invent-trap → show “never invent.”
 
-> “You hired a role. Settings stick across many chats. That is why we will run the EA three times — not once.”
+> “You hired a role. Settings stick across many chats. That is why we will run the Work Assistant three times — not once.”
 
 ---
 
-## Task 1.1 — Fill Work EA brief (6 min)
+## Task 1.1 — Fill Work Assistant brief (5 min)
 
 **No AI.** Paper or blank note. Prompt Pack **1.1** fields.
 
@@ -305,12 +305,12 @@ Walk the room: if their brief is vague (“be helpful”), force priorities + ne
 
 ---
 
-## Task 1.2 — Create Work EA + three runs (22 min)
+## Task 1.2 — Create Work Assistant + three runs (20 min)
 
 | Project | Purpose |
 | ------- | ------- |
 | Teacher | Coach — leave closed until **1.3** |
-| `My Work EA — [Name]` | Worker — stay here for all three runs |
+| `My Work Assistant — [Name]` | Worker — stay here for all three runs |
 
 1. Settings: paste/type their **1.1** brief once.  
 2. Run 1 triage → **Stop, read, decide.**  
@@ -319,17 +319,17 @@ Walk the room: if their brief is vague (“be helpful”), force priorities + ne
 
 If someone finishes early: improve Settings themselves (no Teacher yet).
 
-**Done when:** three runs visible in one Work EA chat.
+**Done when:** three runs visible in one Work Assistant chat.
 
 ---
 
-## Task 1.3 — One coach loop (16 min)
+## Task 1.3 — One feedback round (15 min)
 
-**Only planned Teacher ↔ EA switch today.**
+**Only planned Teacher ↔ Work Assistant switch today.**
 
-1. Teacher Prompt Pack **1.3** — one message: brief + one weak prompt + one EA reply.  
+1. Teacher Prompt Pack **1.3** — one message: brief + one weak prompt + one Work Assistant reply.  
 2. They accept only fixes they agree with.  
-3. Update Work EA Settings once.  
+3. Update Work Assistant Settings once.  
 4. Re-run **one** task. Compare.
 
 Say:
@@ -340,7 +340,7 @@ Poll: “Did the re-run get better?”
 
 ---
 
-## Task 1.4 — Lock today’s process (11 min)
+## Task 1.4 — Lock today’s process (10 min)
 
 **Bridge:** They felt WITH AI — now commit **one** job before any tool shopping.
 
@@ -353,7 +353,7 @@ Say: “Tools wait until the job is locked.”
 
 ---
 
-## Task 1.5 — Tool landscape + fit (25 min)
+## Task 1.5 — Tool landscape + fit (30 min)
 
 **Bridge:** Process locked — equip only what **that** job needs.
 
@@ -377,7 +377,7 @@ NotebookLM / Project files: 2 grounded + 1 trap. **Review** refuse vs invent. Te
 
 ---
 
-# SESSION 2 — Work THROUGH AI (~104 minutes)
+# SESSION 2 — Work THROUGH AI (~105 minutes)
 
 **Roadmap / Prompt Pack tasks:** `2.0` → `2.6`
 
@@ -387,7 +387,7 @@ Same process → map → pattern → reusable brain → running path (trigger �
 
 **Bridge into Session 2:**
 
-> “WITH = a junior at your elbow. THROUGH = the **job** runs on a path — reception → desk → stamp. Same process you locked at **1.4**. We only add structure.”
+> “WITH = a junior at your elbow. THROUGH = the **job** runs on a path — reception → desk → approval. Same process you locked at **1.4**. We only add structure.”
 
 ---
 
@@ -415,7 +415,7 @@ Same Teacher thread — Prompt Pack **2.0** (“using my locked process from ear
 
 ---
 
-## Tasks 2.1–2.3 — Map + ETCSLV in the same Teacher thread (22 minutes)
+## Tasks 2.1–2.3 — Map + ETCSLV in the same Teacher thread (25 minutes)
 
 ### Goal
 
@@ -433,7 +433,7 @@ Same Teacher thread — Prompt Pack **2.0** (“using my locked process from ear
 
 ### Facilitator demo — teach ETCSLV first (5 minutes) — projector only
 
-**Bridge:** Map is the floor plan; ETCSLV is the checklist before the counter opens.  
+**Bridge:** Map is the process map; ETCSLV is the checklist before the process goes live.  
 **Analogy:** How hard · which systems · what they must know · what files stay · what they may never do alone · how you check quality.
 
 Show the table on a PPT slide and walk **one fully filled example** (“Weekly client report”):
@@ -496,13 +496,13 @@ Celebrate anyone told to build **simpler** than expected.
 
 ---
 
-## Task 2.5 — Build the workflow brain (28 minutes)
+## Task 2.5 — Build the workflow brain (30 minutes)
 
 ### Goal
 
 One Teacher ask (uses earlier ETCSLV) → **one** Settings paste → test happy + messy. Review the output; fix Settings yourself.
 
-**Bridge / identity:** Brain = standing brief for **this** locked job. Extend **Work EA** or create **one** new Project — not a new Teacher, not five surfaces.  
+**Bridge / identity:** Brain = standing brief for **this** locked job. Extend **Work Assistant** or create **one** new Project — not a new Teacher, not five surfaces.  
 **Analogy:** Standing brief for the weekly client update — not the whole company handbook.
 
 ### Facilitator demo (4 minutes) — projector only
@@ -522,7 +522,7 @@ Say aloud: “Still requires a human: ___.”
 
 ---
 
-## Task 2.6 — Automation path that can run (34 minutes)
+## Task 2.6 — Automation path that can run (30 minutes)
 
 ### Goal
 
@@ -561,7 +561,7 @@ Three people show the **run on screen**.
 
 ---
 
-# SESSION 3 — Work BY AI (~120 minutes)
+# SESSION 3 — Work BY AI (~115 minutes)
 
 **Roadmap / Prompt Pack tasks:** `3.0` → `3.6`
 
@@ -572,17 +572,17 @@ Keep answers in the **Teacher chat** — no workforce/harness slide deck.
 
 **Bridge into Session 3:**
 
-> “Your path already runs. BY is not a new product — it is managing the counter for Monday: roles, rules, fire drills. You are the floor manager.”
+> “Your path already runs. BY is not a new product — it is managing the process for Monday: roles, rules, fire drills. You are the floor manager.”
 
 ---
 
-## Task 3.0 — Framing: manager of agents (4 minutes)
+## Task 3.0 — Framing: manager of agents (5 minutes)
 
 Facilitator:
 
 > “You are the manager. AI roles are workers. The harness is the job description — **same ETCSLV letters**, shipping name. Failure Lab is Monday. Then we ship.”
 
-**Analogy:** Staff a counter that already serves customers — don’t design a new mall.
+**Analogy:** Staff a process that already serves customers — don’t design a new mall.
 
 Participant — Prompt Pack **3.0** in Teacher chat.
 
@@ -615,7 +615,7 @@ Handoffs clear; human on external/high-risk steps.
 Same ETCSLV, answered **in the Teacher chat** one letter at a time — no paste of a filled card.  
 Say explicitly: “Harness ≠ new framework. Harness = ETCSLV with a shipping name.”
 
-**Analogy:** Job description + SOPs + approval stamp on the desk.
+**Analogy:** Job description + SOPs + approval on the desk.
 
 ### Facilitator demo (2 minutes) — projector only
 
@@ -631,7 +631,7 @@ L and V are specific enough to test Monday morning.
 
 ---
 
-## Task 3.3 — Failure Lab (18 minutes)
+## Task 3.3 — Failure Lab (20 minutes)
 
 ### Goal
 
@@ -657,7 +657,7 @@ Teacher only if stuck — Prompt Pack **3.3**.
 
 ---
 
-## Task 3.4 — Capstone: ship the real workflow (38 minutes)
+## Task 3.4 — Capstone: ship the real workflow (30 minutes)
 
 ### Goal
 
@@ -693,7 +693,7 @@ Walk desks. Kill scope creep: “Ship the slice you can re-run in ten minutes.�
 
 ---
 
-## Task 3.5 — Demo Day (22 minutes)
+## Task 3.5 — Demo Day (20 minutes)
 
 ### Goal
 
@@ -712,7 +712,7 @@ Too many teams → 90-second lightning runs.
 
 > “Monday: run this once without this room. Keep the Teacher Agent. Improve Validation next. Add complexity only when the decision tree says so.”
 
-## Task 3.6 — 30-day plan (8 minutes, minimal)
+## Task 3.6 — 30-day plan (10 minutes, minimal)
 
 Prompt Pack **3.6** (short). Mark **3.5** and **3.6** complete.
 
@@ -731,10 +731,10 @@ Full minutes per task: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL
 
 | Session | ~Time | Bias |
 | ------- | ----- | ---- |
-| 0 Opening | ~33 | Hands-on |
+| 0 Opening | ~35 | Hands-on |
 | 1 WITH | ~90 | Hands-on |
-| 2 THROUGH | ~104 | Hands-on |
-| 3 BY + Demo | ~120 | Hands-on |
+| 2 THROUGH | ~105 | Hands-on |
+| 3 BY + Demo | ~115 | Hands-on |
 | 4 Reference | ~40 async | Optional |
 | Breaks | 2×15 (+ lunch) | |
 
@@ -767,7 +767,7 @@ Full minutes per task: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL
 
 - Add Miro/Mural or a Google Slides Working Pack.  
 - Require multi-block pastes (process + map + ETCSLV) in one prompt.  
-- Hop Teacher ↔ Work EA except the one coach loop (**1.3**).  
+- Hop Teacher ↔ Work Assistant except the one feedback round (**1.3**).  
 - Let people try more than 3 tools for the shipping stack.  
 - Accept a deck as capstone without a run.  
 - Introduce ETCSLV only via a Teacher prompt with no explanation.
@@ -792,10 +792,11 @@ Full minutes per task: [`PRACTICAL_AGENTIC_AI_CURRICULUM_MASTER.md`](./PRACTICAL
 Same prompts as in the sections. Use this when projecting a shared doc.
 
 **E1 — Teacher system instructions** → 0.2 (Settings once)  
-**E2 — Day contract** → 0.3 (start all-day Teacher thread)  
-**E3 — One coach loop** → 1.3 (only Teacher↔EA switch; includes prompt rewrite)  
-**E4 — Tool picker (max 2–3)** → 1.4  
-**E5 — Process lock check** → 1.6  
+**E2 — Kickoff chat** → 0.3 (start all-day Teacher thread)  
+**E3 — One feedback round** → 1.3 (only Teacher↔Work Assistant switch; includes prompt rewrite)  
+**E4 — Process lock check** → 1.4  
+**E5 — Tool picker (max 2–3)** → 1.5  
+
 **E6 — Ladder** → 2.0 (no process re-paste)  
 **E7 — Map in chat** → 2.1  
 **E8 — ETCSLV critique** → 2.3 (after their draft in 2.2; same thread)  
@@ -821,7 +822,7 @@ This is your prep checklist. Do this **before** workshop day.
 
 | Need | What to set up |
 | ---- | -------------- |
-| Home LLM | ChatGPT and/or Claude with Projects — Teacher + Work EA demos pre-created |
+| Home LLM | ChatGPT and/or Claude with Projects — Teacher + Work Assistant demos pre-created |
 | Knowledge demo | NotebookLM (or Project files) + 1–2 safe PDFs |
 | Compare demo | One second chat/research tool (e.g. Perplexity) |
 | Automation | **One** platform you will support live: Zapier **or** Make **or** n8n — with a **clone link** |
@@ -829,7 +830,7 @@ This is your prep checklist. Do this **before** workshop day.
 | Agenda deck | Google Slides / PPT with session “You are here” markers |
 | Prompt Pack | Google Doc (viewer) republished from PROMPT_PACK.md |
 | Roadmap | Batch enrolled; decision tree on; Prompt Pack linked |
-| Backup | Hotspot; ChatGPT+Claude-only track; optional 1-page paper cheat-sheet (EA brief fields + Green/Blue/Red) |
+| Backup | Hotspot; ChatGPT+Claude-only track; optional 1-page paper cheat-sheet (Work Assistant brief fields + Green/Blue/Red) |
 
 **Try every demo once the day before** with the same Wi‑Fi quality you expect in the room.
 
@@ -837,7 +838,7 @@ This is your prep checklist. Do this **before** workshop day.
 
 | Demo | What “ready” means |
 | ---- | ------------------ |
-| Weak chat vs Work EA | Messy inbox text saved; EA Project instructions already filled |
+| Weak chat vs Work Assistant | Messy inbox text saved; Work Assistant Project instructions already filled |
 | Prompt before/after | Two prompts saved in a note |
 | Tool landscape | 5 lanes on one agenda slide; one live flash per lane max |
 | NotebookLM trap question | PDF uploaded; two questions written |
@@ -851,9 +852,9 @@ This is your prep checklist. Do this **before** workshop day.
 
 If Wi‑Fi or focus is weak, print **one page** with:
 
-- EA brief blanks (role / priorities / never-invent / ask-before)  
+- Work Assistant brief blanks (role / priorities / never-invent / ask-before)  
 - Green / Blue / Red meanings  
-- Reminder: answers live in Teacher / Work EA chats  
+- Reminder: answers live in Teacher / Work Assistant chats  
 
 Do **not** require Google Slides copies or paste-from-paper rituals.
 
@@ -863,7 +864,7 @@ Keep sparse (see also `PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md`). Must include:
 
 - Day map with YOU ARE HERE  
 - Surfaces: roadmap · Prompt Pack · AI tools (+ optional scratch)  
-- Same Teacher chat all day · Teacher↔EA once  
+- Same Teacher chat all day · Teacher↔Work Assistant once  
 - Stop → Read → Decide  
 - Chat vs Assistant vs Agent  
 - Tool landscape 5 lanes + “max 2–3 for your workflow”  
@@ -894,11 +895,11 @@ Document in one page: clone link, required connections, where to paste their pro
 
 | Pack | Contents |
 | ---- | -------- |
-| Messy inbox | Morning bullets for Work EA demo |
-| EA instructions | Final text for your demo Work EA |
+| Messy inbox | Morning bullets for Work Assistant demo |
+| Work Assistant instructions | Final text for your demo Work Assistant |
 | Client-report map | 6–8 steps + tags + full ETCSLV answers |
 | Trap PDF | Short fake policy PDF for NotebookLM |
-| Coach-loop sample | One weak prompt + mediocre EA reply for 1.3 demo |
+| Feedback-round sample | One weak prompt + mediocre Work Assistant reply for 1.3 demo |
 | Multimodal one-liners | One sentence per lane for the tour |
 
 ## F7 — Night-before facilitator checklist
@@ -913,4 +914,4 @@ Document in one page: clone link, required connections, where to paste their pro
 
 ---
 
-*Document version: 2026-07-25c · Sessions 0–4 · Less paste · Same Teacher thread · No Working Pack · Teacher↔EA once · Stop→Read→Decide · Product of the day: one running workflow*
+*Document version: 2026-07-25c · Sessions 0–4 · Less paste · Same Teacher thread · No Working Pack · Teacher↔Work Assistant once · Stop→Read→Decide · Product of the day: one running workflow*

@@ -43,4 +43,18 @@ export const leadHeadacheNode = headacheNode('q-headache-lead', 'team lead', [
     nextId: 'q-needs-files',
     contextValue: 'monthly-report',
   },
+  {
+    label: 'Briefing pack for MD / director before a meeting',
+    example: 'Emails + KPIs + open issues → 1-page brief with decisions needed (you still own the stamp).',
+    modality: 'text',
+    nextId: 'q-needs-files',
+    contextValue: 'md-briefing-pack',
+  },
+  {
+    label: 'Action tracker after leadership meeting',
+    example: 'Messy notes → owners, deadlines, and status table for the MD office follow-up.',
+    modality: 'text',
+    nextId: 'q-finished',
+    contextValue: 'leadership-action-tracker',
+  },
 ]);

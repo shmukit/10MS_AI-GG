@@ -50,4 +50,11 @@ export const accountsHeadacheNode = headacheNode('q-headache-accounts', 'account
     nextId: 'q-finished',
     contextValue: 'finance-data-clean',
   },
+  {
+    label: 'Credit / portfolio risk snapshot for the week',
+    example: 'Exposure sheet → concentration, top movers, and 3 questions for the risk meeting.',
+    modality: 'numbers',
+    nextId: 'q-finished',
+    contextValue: 'credit-portfolio-snapshot',
+  },
 ]);
