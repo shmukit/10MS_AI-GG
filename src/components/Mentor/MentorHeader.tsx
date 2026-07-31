@@ -33,10 +33,10 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 min-w-0">
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg transition-colors duration-200 bg-muted text-muted-foreground hover:text-foreground hover:bg-accent border border-border"
+              className="p-2 rounded-lg transition-colors duration-200 bg-muted text-muted-foreground hover:text-foreground hover:bg-accent border border-border shrink-0"
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>

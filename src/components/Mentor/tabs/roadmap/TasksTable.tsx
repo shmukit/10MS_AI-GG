@@ -2,6 +2,7 @@ import React from 'react';
 import { Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { RoadmapItem } from '../../../../types/mentor';
 import { formatTaskTypeLabel, getTaskTypeColor } from '../../../../utils/mentorUtils';
+import { ClampedText } from '../../../ui/ClampedText';
 
 interface TasksTableProps {
     currentRoadmapTitle: string;
@@ -31,8 +32,8 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Session</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Domain</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Type</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Task Name</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Details</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200 min-w-[10rem]">Task Name</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200 min-w-[14rem] max-w-md">Details</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Links</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Deadline</th>
                             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors duration-200">Actions</th>
@@ -52,11 +53,15 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                                         {formatTaskTypeLabel(task.taskType)}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200">
-                                    {task.taskName}
+                                <td className="px-4 py-3 text-sm text-foreground transition-colors duration-200 max-w-[16rem]">
+                                    <span className="line-clamp-2" title={task.taskName}>{task.taskName}</span>
                                 </td>
-                                <td className="px-4 py-3 text-sm text-muted-foreground transition-colors duration-200">
-                                    {task.taskDetails}
+                                <td className="px-4 py-3 text-sm text-muted-foreground transition-colors duration-200 max-w-md align-top">
+                                    {task.taskDetails ? (
+                                        <ClampedText text={task.taskDetails} lines={3} />
+                                    ) : (
+                                        <span className="text-muted-foreground/60">—</span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-3">
                                     {task.relevantLinks && (
