@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { nodeFilterLabel } from '../../../../utils/roadmapNodeUtils';
+import { QuizTaskSettings, type QuizTaskFormData } from './QuizTaskSettings';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -13,6 +14,11 @@ interface TaskModalProps {
     title: string;
     submitLabel: string;
     nodeUnitLabel?: string;
+    roadmapId?: string;
+    batchId?: string;
+    editingTaskId?: string;
+    quizData?: QuizTaskFormData;
+    setQuizData?: (data: QuizTaskFormData) => void;
 }
 
 const inputClass = 'w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15 transition-colors duration-200 bg-muted text-foreground';
@@ -27,6 +33,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     title,
     submitLabel,
     nodeUnitLabel = 'Week',
+    roadmapId,
+    batchId,
+    editingTaskId,
+    quizData,
+    setQuizData,
 }) => {
     if (!isOpen) return null;
 
@@ -169,6 +180,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                 className={inputClass}
                             />
                         </div>
+                    )}
+
+                    {taskData.taskType === 'MCQ' && roadmapId && quizData && setQuizData && (
+                        <QuizTaskSettings
+                            taskId={editingTaskId}
+                            taskName={taskData.taskName}
+                            roadmapId={roadmapId}
+                            batchId={batchId}
+                            quizData={quizData}
+                            setQuizData={setQuizData}
+                        />
                     )}
 
                     <div className="flex gap-3 mt-6">

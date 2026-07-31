@@ -84,6 +84,7 @@ export const generateRoadmapData = (
           type: task.task_type as any, // Use actual task_type from database
           details: task.task_details || undefined,
           url: link?.trim(),
+          quizId: task.quiz_id || undefined,
           completed: isCompleted
         };
       }),

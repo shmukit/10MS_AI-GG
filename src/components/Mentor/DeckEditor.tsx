@@ -23,15 +23,21 @@ interface CardContent {
     correctAnswer?: number;
 }
 
+interface RoadmapOption {
+    id: string;
+    title: string;
+}
+
 interface DeckEditorProps {
     deckId?: string;
+    roadmaps?: RoadmapOption[];
     onClose: () => void;
     onSave: () => void;
 }
 
 const inputClass = 'w-full px-4 py-2 rounded-lg border border-border bg-muted text-foreground';
 
-export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave }) => {
+export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, roadmaps = [], onClose, onSave }) => {
     const { user } = useAuthContext();
     const [loading, setLoading] = useState(!!deckId);
     const [saving, setSaving] = useState(false);
@@ -41,6 +47,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave 
     const [description, setDescription] = useState('');
     const [coverImage, setCoverImage] = useState('');
     const [isPublic, setIsPublic] = useState(false);
+    const [roadmapId, setRoadmapId] = useState<string>('');
 
     // Cards
     const [cards, setCards] = useState<PracticeCard[]>([]);
@@ -67,6 +74,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave 
             setDescription(deck.description || '');
             setCoverImage(deck.cover_image || '');
             setIsPublic(deck.is_public);
+            setRoadmapId(deck.roadmap_id || '');
         }
 
         setCards(deckCards);
@@ -92,6 +100,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave 
                 description: description.trim() || null,
                 cover_image: coverImage.trim() || null,
                 is_public: isPublic,
+                roadmap_id: roadmapId || null,
                 created_by: user.id
             };
 
@@ -245,6 +254,24 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave 
                             />
                         </div>
 
+                        {roadmaps.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
+                                    Roadmap (required for student access &amp; quizzes)
+                                </label>
+                                <select
+                                    value={roadmapId}
+                                    onChange={(e) => setRoadmapId(e.target.value)}
+                                    className={inputClass}
+                                >
+                                    <option value="">No roadmap</option>
+                                    {roadmaps.map((r) => (
+                                        <option key={r.id} value={r.id}>{r.title}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -254,7 +281,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ deckId, onClose, onSave 
                                 className="w-4 h-4 rounded border-border"
                             />
                             <label htmlFor="isPublic" className="text-sm text-muted-foreground">
-                                Make this deck public (visible to all students)
+                                Make this deck public (visible to all students on this roadmap)
                             </label>
                         </div>
                     </div>

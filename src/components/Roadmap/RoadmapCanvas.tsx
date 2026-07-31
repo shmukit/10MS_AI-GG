@@ -10,9 +10,10 @@ interface RoadmapCanvasProps {
   targetWeekNumber?: number | null;
   nodeUnitLabel?: string;
   onOpenDecisionTree?: () => void;
+  onOpenQuiz?: (taskId: string, quizId?: string) => void;
 }
 
-export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes, onRefresh, batchId, targetWeekNumber, nodeUnitLabel = 'Week', onOpenDecisionTree }) => {
+export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes, onRefresh, batchId, targetWeekNumber, nodeUnitLabel = 'Week', onOpenDecisionTree, onOpenQuiz }) => {
   const [selectedNode, setSelectedNode] = useState<RoadmapNodeData | null>(null);
 
   const handleNodeClick = (node: RoadmapNodeData) => {
@@ -117,6 +118,7 @@ export const RoadmapCanvas: React.FC<RoadmapCanvasProps> = memo(({ roadmapNodes,
           batchId={batchId || undefined}
           nodeUnitLabel={nodeUnitLabel}
           onOpenDecisionTree={onOpenDecisionTree}
+          onOpenQuiz={onOpenQuiz}
         />
       )}
     </div>

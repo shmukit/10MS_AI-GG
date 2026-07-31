@@ -128,6 +128,7 @@ export interface RoadmapTask {
     week_number?: number;
     meeting_time?: string;
     is_active?: boolean;
+    quiz_id?: string | null;
 }
 
 export interface StudentProgress {

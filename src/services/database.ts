@@ -29,6 +29,7 @@ import * as PracticeDeckService from './db/practiceDeckService';
 import * as GamificationService from './db/gamificationService';
 import * as RoadmapResourceService from './db/roadmapResourceService';
 import * as MarketingService from './db/marketingService';
+import * as QuizService from './db/quizService';
 
 // Re-export types
 export type {
@@ -136,4 +137,14 @@ export class DatabaseService {
 
   // Marketing
   static getMarketingData = MarketingService.getMarketingData;
+
+  // Roadmap quizzes
+  static getQuizById = QuizService.getQuizById;
+  static getQuizForTask = QuizService.getQuizForTask;
+  static getQuizzesForRoadmap = QuizService.getQuizzesForRoadmap;
+  static upsertRoadmapQuiz = QuizService.upsertRoadmapQuiz;
+  static linkQuizToTask = QuizService.linkQuizToTask;
+  static getStudentAttempts = QuizService.getStudentAttempts;
+  static getBatchQuizStats = QuizService.getBatchQuizStats;
+  static getTaskQuizScoreSummary = QuizService.getTaskQuizScoreSummary;
 }

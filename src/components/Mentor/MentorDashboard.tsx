@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, BookOpen, Bell, LayoutDashboard, Layers } from 'lucide-react';
+import { Users, BookOpen, Bell, LayoutDashboard, Layers, BarChart3 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthContext } from '../../lib';
 import { posthog } from '../../lib/posthog';
@@ -10,6 +10,7 @@ import { RoadmapTab } from './tabs/RoadmapTab';
 import { StudentsTab } from './tabs/StudentsTab';
 import { NoticeTab } from './tabs/NoticeTab';
 import { PracticeDeckTab } from './tabs/PracticeDeckTab';
+import { QuizStatsTab } from './tabs/QuizStatsTab';
 import { DeckEditor } from './DeckEditor';
 import { Batch, Student, RoadmapItem, Notice } from '../../types/mentor';
 
@@ -18,10 +19,10 @@ interface MentorDashboardProps {
   onProfile?: () => void;
 }
 
-type MentorTab = 'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice';
+type MentorTab = 'dashboard' | 'roadmap' | 'students' | 'notice' | 'practice' | 'quizzes';
 
 const MENTOR_TAB_KEY = 'mentor-dashboard-tab';
-const VALID_TABS = new Set<MentorTab>(['dashboard', 'roadmap', 'students', 'notice', 'practice']);
+const VALID_TABS = new Set<MentorTab>(['dashboard', 'roadmap', 'students', 'notice', 'practice', 'quizzes']);
 
 function readStoredTab(): MentorTab {
   const saved = sessionStorage.getItem(MENTOR_TAB_KEY);
@@ -366,6 +367,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
   };
 
   const stats = getDashboardStats();
+  const selectedBatchData = batches.find((b) => b.id === selectedBatch);
+  const quizRoadmapId = selectedBatchData?.roadmapId || selectedRoadmap || null;
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
@@ -383,6 +386,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
               { id: 'roadmap', label: 'Roadmap', icon: BookOpen },
               { id: 'students', label: 'Batch & Students', icon: Users },
               { id: 'practice', label: 'Practice Decks', icon: Layers },
+              { id: 'quizzes', label: 'Quiz Results', icon: BarChart3 },
               { id: 'notice', label: 'Notices', icon: Bell }
             ].map(({ id, label, icon: Icon }) => (
               <button
@@ -473,6 +477,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
               onEditDeck={handleEditDeck}
             />
           </div>
+          <div className={activeTab !== 'quizzes' ? 'hidden' : undefined} aria-hidden={activeTab !== 'quizzes'}>
+            <QuizStatsTab
+              selectedBatchId={selectedBatch || null}
+              roadmapId={quizRoadmapId}
+            />
+          </div>
           <div className={activeTab !== 'notice' ? 'hidden' : undefined} aria-hidden={activeTab !== 'notice'}>
             <NoticeTab
               notices={notices}
@@ -490,6 +500,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
       {showDeckEditor && (
         <DeckEditor
           deckId={editingDeckId}
+          roadmaps={roadmaps.map((r) => ({ id: r.id, title: r.title }))}
           onClose={() => setShowDeckEditor(false)}
           onSave={handleDeckSaved}
         />

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Type, Image as ImageIcon, Video, HelpCircle } from 'lucide-react';
 import { getCardById, createCard, updateCard } from '../../services/db/practiceDeckService';
+import type { QuestionKind } from '../../types/quizTypes';
+import { LIKERT_DEFAULT_LABELS, QUESTION_KIND_LABELS } from '../../types/quizTypes';
 
 type CardType = 'text' | 'image' | 'video' | 'quiz';
 
@@ -26,8 +28,13 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
     const [videoUrl, setVideoUrl] = useState('');
     const [videoDescription, setVideoDescription] = useState('');
     const [quizQuestion, setQuizQuestion] = useState('');
-    const [quizOptions, setQuizOptions] = useState(['', '', '', '']);
+    const [questionKind, setQuestionKind] = useState<QuestionKind>('likert');
+    const [quizOptions, setQuizOptions] = useState<string[]>([...LIKERT_DEFAULT_LABELS]);
+    const [scaleMin, setScaleMin] = useState(1);
+    const [scaleMax, setScaleMax] = useState(5);
+    const [hasCorrectAnswer, setHasCorrectAnswer] = useState(false);
     const [correctAnswer, setCorrectAnswer] = useState(0);
+    const [correctAnswers, setCorrectAnswers] = useState<number[]>([]);
 
     useEffect(() => {
         if (cardId) {
@@ -61,8 +68,13 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                     break;
                 case 'quiz':
                     setQuizQuestion(content.question || '');
-                    setQuizOptions(content.options || ['', '', '', '']);
-                    setCorrectAnswer(content.correctAnswer || 0);
+                    setQuestionKind(content.questionKind || (typeof content.correctAnswer === 'number' ? 'mcq_single' : 'likert'));
+                    setQuizOptions(content.options?.length ? content.options : [...LIKERT_DEFAULT_LABELS]);
+                    setScaleMin(content.scaleMin ?? 1);
+                    setScaleMax(content.scaleMax ?? 5);
+                    setHasCorrectAnswer(content.hasCorrectAnswer ?? typeof content.correctAnswer === 'number');
+                    setCorrectAnswer(content.correctAnswer ?? 0);
+                    setCorrectAnswers(content.correctAnswers ?? []);
                     break;
             }
         }
@@ -79,7 +91,17 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
             case 'video':
                 return { videoUrl, description: videoDescription };
             case 'quiz':
-                return { question: quizQuestion, options: quizOptions, correctAnswer };
+                return {
+                    questionKind,
+                    question: quizQuestion,
+                    options: quizOptions.filter((o) => o.trim()),
+                    ...(questionKind === 'likert' ? { scaleMin, scaleMax } : {}),
+                    ...(questionKind === 'binary' || questionKind === 'categorical'
+                        ? { hasCorrectAnswer, ...(hasCorrectAnswer ? { correctAnswer } : {}) }
+                        : {}),
+                    ...(questionKind === 'mcq_single' ? { correctAnswer } : {}),
+                    ...(questionKind === 'mcq_multi' ? { correctAnswers } : {}),
+                };
         }
     };
 
@@ -97,6 +119,14 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
             case 'quiz':
                 if (!quizQuestion.trim()) return 'Please enter a question';
                 if (quizOptions.filter(o => o.trim()).length < 2) return 'Please provide at least 2 options';
+                if (questionKind === 'binary' && quizOptions.filter(o => o.trim()).length !== 2) {
+                    return 'Binary questions need exactly 2 options';
+                }
+                if (questionKind === 'mcq_single' && correctAnswer < 0) return 'Select a correct answer';
+                if (questionKind === 'mcq_multi' && correctAnswers.length === 0) return 'Select at least one correct answer';
+                if ((questionKind === 'binary' || questionKind === 'categorical') && hasCorrectAnswer && correctAnswer < 0) {
+                    return 'Select the correct option';
+                }
                 break;
         }
         return null;
@@ -286,6 +316,29 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                         <>
                             <div>
                                 <label className="block text-sm font-medium mb-2 text-muted-foreground">
+                                    Question type
+                                </label>
+                                <select
+                                    value={questionKind}
+                                    onChange={(e) => {
+                                        const k = e.target.value as QuestionKind;
+                                        setQuestionKind(k);
+                                        if (k === 'likert') setQuizOptions([...LIKERT_DEFAULT_LABELS]);
+                                        if (k === 'binary') setQuizOptions(['Yes', 'No']);
+                                        if (k === 'categorical' || k === 'mcq_single' || k === 'mcq_multi') {
+                                            setQuizOptions(['', '', '', '']);
+                                        }
+                                        setCorrectAnswers([]);
+                                    }}
+                                    className={inputClass}
+                                >
+                                    {(Object.keys(QUESTION_KIND_LABELS) as QuestionKind[]).map((k) => (
+                                        <option key={k} value={k}>{QUESTION_KIND_LABELS[k]}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                                     Question *
                                 </label>
                                 <textarea
@@ -296,20 +349,47 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                                     placeholder="Enter your question..."
                                 />
                             </div>
+                            {(questionKind === 'binary' || questionKind === 'categorical') && (
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={hasCorrectAnswer}
+                                        onChange={(e) => setHasCorrectAnswer(e.target.checked)}
+                                    />
+                                    Has correct answer (scored)
+                                </label>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium mb-3 text-muted-foreground">
-                                    Answer Options * (at least 2 required)
+                                    Options *
                                 </label>
                                 <div className="space-y-3">
                                     {quizOptions.map((option, index) => (
                                         <div key={index} className="flex items-center gap-3">
-                                            <input
-                                                type="radio"
-                                                name="correctAnswer"
-                                                checked={correctAnswer === index}
-                                                onChange={() => setCorrectAnswer(index)}
-                                                className="w-4 h-4"
-                                            />
+                                            {(questionKind === 'mcq_single' ||
+                                              ((questionKind === 'binary' || questionKind === 'categorical') && hasCorrectAnswer)) && (
+                                                <input
+                                                    type="radio"
+                                                    name="correctAnswer"
+                                                    checked={correctAnswer === index}
+                                                    onChange={() => setCorrectAnswer(index)}
+                                                    className="w-4 h-4"
+                                                />
+                                            )}
+                                            {questionKind === 'mcq_multi' && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={correctAnswers.includes(index)}
+                                                    onChange={() => {
+                                                        setCorrectAnswers((prev) =>
+                                                            prev.includes(index)
+                                                                ? prev.filter((i) => i !== index)
+                                                                : [...prev, index]
+                                                        );
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                            )}
                                             <input
                                                 type="text"
                                                 value={option}
@@ -324,9 +404,15 @@ export const CardEditor: React.FC<CardEditorProps> = ({ deckId, cardId, onClose,
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-xs mt-2 text-muted-foreground">
-                                    Select the radio button next to the correct answer
-                                </p>
+                                {questionKind !== 'likert' && questionKind !== 'binary' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setQuizOptions([...quizOptions, ''])}
+                                        className="mt-2 text-sm text-primary hover:underline"
+                                    >
+                                        + Add option
+                                    </button>
+                                )}
                             </div>
                         </>
                     )}

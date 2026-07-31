@@ -171,6 +171,7 @@ export interface Database {
           created_at: string | null
           meeting_time: string | null
           is_active: boolean | null
+          quiz_id: string | null
         }
         Insert: {
           id?: string
@@ -186,6 +187,7 @@ export interface Database {
           created_at?: string | null
           meeting_time?: string | null
           is_active?: boolean | null
+          quiz_id?: string | null
         }
         Update: {
           id?: string
@@ -201,6 +203,130 @@ export interface Database {
           created_at?: string | null
           meeting_time?: string | null
           is_active?: boolean | null
+          quiz_id?: string | null
+        }
+      }
+      roadmap_quizzes: {
+        Row: {
+          id: string
+          roadmap_id: string
+          practice_deck_id: string
+          task_id: string | null
+          batch_id: string | null
+          title: string
+          description: string | null
+          is_active: boolean
+          negative_marking_enabled: boolean
+          negative_mark_value: number | null
+          default_question_kind: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          roadmap_id: string
+          practice_deck_id: string
+          task_id?: string | null
+          batch_id?: string | null
+          title: string
+          description?: string | null
+          is_active?: boolean
+          negative_marking_enabled?: boolean
+          negative_mark_value?: number | null
+          default_question_kind?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          roadmap_id?: string
+          practice_deck_id?: string
+          task_id?: string | null
+          batch_id?: string | null
+          title?: string
+          description?: string | null
+          is_active?: boolean
+          negative_marking_enabled?: boolean
+          negative_mark_value?: number | null
+          default_question_kind?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      quiz_attempts: {
+        Row: {
+          id: string
+          student_id: string
+          roadmap_quiz_id: string
+          batch_id: string | null
+          score: number
+          max_score: number
+          negative_marking_enabled: boolean
+          negative_mark_value: number | null
+          started_at: string
+          completed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          roadmap_quiz_id: string
+          batch_id?: string | null
+          score?: number
+          max_score?: number
+          negative_marking_enabled?: boolean
+          negative_mark_value?: number | null
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          roadmap_quiz_id?: string
+          batch_id?: string | null
+          score?: number
+          max_score?: number
+          negative_marking_enabled?: boolean
+          negative_mark_value?: number | null
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+        }
+      }
+      quiz_attempt_answers: {
+        Row: {
+          id: string
+          attempt_id: string
+          card_id: string
+          selected_option: number | null
+          selected_options: number[] | null
+          is_correct: boolean | null
+          points: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          attempt_id: string
+          card_id: string
+          selected_option?: number | null
+          selected_options?: number[] | null
+          is_correct?: boolean | null
+          points?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          attempt_id?: string
+          card_id?: string
+          selected_option?: number | null
+          selected_options?: number[] | null
+          is_correct?: boolean | null
+          points?: number
+          created_at?: string
         }
       }
       roadmap_weeks: {
