@@ -41,7 +41,7 @@ function QuestionInput({
 
   if (kind === 'likert') {
     return (
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3">
         {options.map((label, idx) => {
           const active = selectedOption === idx;
           return (
@@ -50,13 +50,18 @@ function QuestionInput({
               type="button"
               disabled={submitted}
               onClick={() => onSelectOption(idx)}
-              className={`min-h-[48px] rounded-xl border px-3 py-3 text-sm font-medium transition-colors ${
+              className={`flex min-h-[64px] items-center gap-3 rounded-2xl border px-5 py-4 text-left text-base font-medium transition-all active:scale-[0.98] ${
                 active
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-muted/50 hover:bg-accent'
+                  ? 'border-primary bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
+                  : 'border-border bg-muted/40 hover:bg-accent'
               }`}
             >
-              {label}
+              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                {idx + 1}
+              </span>
+              <span>{label.replace(/^\d\s*[—-]\s*/, '')}</span>
             </button>
           );
         })}
@@ -64,52 +69,36 @@ function QuestionInput({
     );
   }
 
-  if (kind === 'mcq_multi') {
-    return (
-      <div className="space-y-2">
-        <p className="text-xs text-muted-foreground mb-2">Select all that apply</p>
-        {options.map((opt, idx) => {
-          const checked = selectedOptions.includes(idx);
-          return (
-            <label
-              key={idx}
-              className={`flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 ${
-                checked ? 'border-primary bg-primary/5' : 'border-border bg-muted/30'
-              } ${submitted ? 'pointer-events-none opacity-80' : ''}`}
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                disabled={submitted}
-                onChange={() => onToggleMulti(idx)}
-                className="h-5 w-5 accent-primary"
-              />
-              <span className="text-sm">{opt}</span>
-            </label>
-          );
-        })}
-      </div>
-    );
-  }
+  const isMulti = kind === 'mcq_multi';
+  const isSingle = kind === 'mcq_single' || kind === 'binary' || kind === 'categorical';
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      {isMulti && (
+        <p className="text-sm font-medium text-muted-foreground">Select all that apply.</p>
+      )}
+      {isSingle && (
+        <p className="text-sm font-medium text-muted-foreground">Choose one answer.</p>
+      )}
       {options.map((opt, idx) => {
-        const active = selectedOption === idx;
+        const active = isMulti ? selectedOptions.includes(idx) : selectedOption === idx;
         return (
-          <button
+          <label
             key={idx}
-            type="button"
-            disabled={submitted}
-            onClick={() => onSelectOption(idx)}
-            className={`flex min-h-[48px] w-full items-center rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
-              active
-                ? 'border-primary bg-primary/10 text-foreground'
-                : 'border-border bg-muted/30 hover:bg-accent'
-            }`}
+            className={`flex min-h-[56px] cursor-pointer items-center gap-4 rounded-2xl border px-5 py-4 text-left text-base transition-all active:scale-[0.98] ${
+              active ? 'border-primary bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20' : 'border-border bg-muted/40 hover:bg-accent'
+            } ${submitted ? 'pointer-events-none opacity-90' : ''}`}
           >
-            {opt}
-          </button>
+            <input
+              type={isMulti ? 'checkbox' : 'radio'}
+              checked={active}
+              disabled={submitted}
+              onChange={() => (isMulti ? onToggleMulti(idx) : onSelectOption(idx))}
+              className={`shrink-0 accent-primary ${isMulti ? 'h-6 w-6' : 'h-5 w-5'}`}
+              name={isMulti ? undefined : 'single-answer'}
+            />
+            <span className="font-medium">{opt}</span>
+          </label>
         );
       })}
     </div>
@@ -248,7 +237,9 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
     phase === 'intro'
       ? 'Start quiz'
       : !submittedCurrent
-        ? 'Confirm answer'
+        ? scored
+          ? 'Check answer'
+          : 'Save & continue'
         : currentIndex < cards.length - 1
           ? 'Next question'
           : submitting
@@ -285,108 +276,121 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto px-4 py-6 pb-28">
-        {loading && <p className="text-muted-foreground">Loading questions…</p>}
+      <main className="flex flex-1 flex-col overflow-y-auto px-5 py-6">
+        <div className="flex flex-1 flex-col justify-center">
+          {loading && <p className="text-center text-muted-foreground">Loading questions…</p>}
 
-        {!loading && cards.length === 0 && (
-          <p className="text-muted-foreground">This quiz has no questions yet.</p>
-        )}
+          {!loading && cards.length === 0 && (
+            <p className="text-center text-muted-foreground">This quiz has no questions yet.</p>
+          )}
 
-        {phase === 'intro' && !loading && cards.length > 0 && (
-          <div className="mx-auto max-w-lg space-y-4">
-            {quiz.description && (
-              <p className="text-sm text-muted-foreground">{quiz.description}</p>
-            )}
-            <p className="text-sm">
-              {cards.length} question{cards.length !== 1 ? 's' : ''}.
-              {hasScoredInQuiz && quiz.negative_marking_enabled && quiz.negative_mark_value != null && (
-                <span className="mt-2 block text-amber-700 dark:text-amber-400">
-                  Wrong answers on scored questions: −{quiz.negative_mark_value} pt each.
-                </span>
+          {phase === 'intro' && !loading && cards.length > 0 && (
+            <div className="mx-auto w-full max-w-xl space-y-5 text-center">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-foreground">Ready?</h3>
+                <p className="text-base text-muted-foreground">
+                  {cards.length} question{cards.length !== 1 ? 's' : ''}.
+                </p>
+              </div>
+              {quiz.description && (
+                <p className="text-base text-muted-foreground">{quiz.description}</p>
               )}
-            </p>
-          </div>
-        )}
-
-        {phase === 'question' && currentCard && currentContent && (
-          <div className="mx-auto max-w-lg space-y-6">
-            <p className="text-lg font-medium leading-snug text-foreground">
-              {currentContent.question}
-            </p>
-            <QuestionInput
-              content={currentContent}
-              selectedOption={selectedOption}
-              selectedOptions={selectedOptions}
-              submitted={submittedCurrent}
-              onSelectOption={(idx) => saveCurrentAnswer({ selectedOption: idx })}
-              onToggleMulti={(idx) => {
-                const next = selectedOptions.includes(idx)
-                  ? selectedOptions.filter((i) => i !== idx)
-                  : [...selectedOptions, idx];
-                saveCurrentAnswer({ selectedOptions: next });
-              }}
-            />
-            {feedback === 'correct' && (
-              <div className="flex items-center gap-2 rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400">
-                <CheckCircle2 className="h-4 w-4 shrink-0" /> Correct
-              </div>
-            )}
-            {feedback === 'incorrect' && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400">
-                <XCircle className="h-4 w-4 shrink-0" /> Incorrect
-                {quiz.negative_marking_enabled && quiz.negative_mark_value != null && (
-                  <span className="ml-1">(−{quiz.negative_mark_value})</span>
-                )}
-              </div>
-            )}
-            {submittedCurrent && !scored && (
-              <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 shrink-0" /> Saved
-              </div>
-            )}
-          </div>
-        )}
-
-        {phase === 'summary' && finalScore && (
-          <div className="mx-auto max-w-lg space-y-6 text-center">
-            <CheckCircle2 className="mx-auto h-14 w-14 text-primary" />
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {finalScore.score} / {finalScore.max}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {finalScore.max > 0
-                  ? `${Math.round((finalScore.score / finalScore.max) * 100)}%`
-                  : 'Complete'}
-              </p>
+              {hasScoredInQuiz && quiz.negative_marking_enabled && quiz.negative_mark_value != null && (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+                  Scored quiz: wrong answers lose {quiz.negative_mark_value} point{quiz.negative_mark_value !== 1 ? 's' : ''} each.
+                </p>
+              )}
+              {!hasScoredInQuiz && (
+                <p className="text-sm text-muted-foreground">There are no right or wrong answers. Just pick what feels true for you.</p>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setPhase('intro');
-                setCurrentIndex(0);
-                setAnswers(new Map());
-                setSubmittedCurrent(false);
-                setAttemptId(null);
-                setFinalScore(null);
-              }}
-              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm hover:bg-accent"
-            >
-              <RotateCcw className="h-4 w-4" /> Retake
-            </button>
-          </div>
-        )}
+          )}
+
+          {phase === 'question' && currentCard && currentContent && (
+            <div className="mx-auto w-full max-w-xl space-y-6">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                  Question {currentIndex + 1} of {cards.length}
+                </p>
+                <h3 className="text-xl font-semibold leading-snug text-foreground sm:text-2xl">
+                  {currentContent.question}
+                </h3>
+              </div>
+              <QuestionInput
+                content={currentContent}
+                selectedOption={selectedOption}
+                selectedOptions={selectedOptions}
+                submitted={submittedCurrent}
+                onSelectOption={(idx) => saveCurrentAnswer({ selectedOption: idx })}
+                onToggleMulti={(idx) => {
+                  const next = selectedOptions.includes(idx)
+                    ? selectedOptions.filter((i) => i !== idx)
+                    : [...selectedOptions, idx];
+                  saveCurrentAnswer({ selectedOptions: next });
+                }}
+              />
+              {feedback === 'correct' && (
+                <div className="flex items-center gap-2 rounded-xl bg-green-500/10 px-4 py-3 text-sm font-medium text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="h-5 w-5 shrink-0" /> Correct
+                </div>
+              )}
+              {feedback === 'incorrect' && (
+                <div className="flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-medium text-red-700 dark:text-red-400">
+                  <XCircle className="h-5 w-5 shrink-0" /> Incorrect
+                  {quiz.negative_marking_enabled && quiz.negative_mark_value != null && (
+                    <span className="ml-1">(−{quiz.negative_mark_value})</span>
+                  )}
+                </div>
+              )}
+              {submittedCurrent && !scored && (
+                <div className="flex items-center gap-2 rounded-xl bg-muted px-4 py-3 text-sm font-medium text-muted-foreground">
+                  <CheckCircle2 className="h-5 w-5 shrink-0" /> Saved
+                </div>
+              )}
+            </div>
+          )}
+
+          {phase === 'summary' && finalScore && (
+            <div className="mx-auto w-full max-w-xl space-y-6 text-center">
+              <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
+              <div className="space-y-1">
+                <p className="text-3xl font-bold text-foreground">
+                  {finalScore.score} / {finalScore.max}
+                </p>
+                <p className="text-base text-muted-foreground">
+                  {finalScore.max > 0
+                    ? `${Math.round((finalScore.score / finalScore.max) * 100)}% complete`
+                    : 'Complete'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPhase('intro');
+                  setCurrentIndex(0);
+                  setAnswers(new Map());
+                  setSubmittedCurrent(false);
+                  setAttemptId(null);
+                  setFinalScore(null);
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 text-base font-medium hover:bg-accent"
+              >
+                <RotateCcw className="h-4 w-4" /> Retake
+              </button>
+            </div>
+          )}
+        </div>
       </main>
 
       {(phase === 'intro' || phase === 'question') && cards.length > 0 && (
-        <footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 px-4 py-4 backdrop-blur safe-area-inset-bottom">
+        <footer className="sticky bottom-0 border-t border-border bg-background/95 px-5 py-4 backdrop-blur safe-area-inset-bottom">
           <button
             type="button"
             disabled={
               (phase === 'question' && !submittedCurrent && !canProceed) || submitting
             }
             onClick={handlePrimaryAction}
-            className="w-full min-h-[48px] rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="w-full min-h-[56px] rounded-2xl bg-primary px-5 py-3 text-base font-semibold text-primary-foreground disabled:opacity-50"
           >
             {primaryLabel}
           </button>
@@ -394,11 +398,11 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
       )}
 
       {phase === 'summary' && (
-        <footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 px-4 py-4 backdrop-blur safe-area-inset-bottom">
+        <footer className="sticky bottom-0 border-t border-border bg-background/95 px-5 py-4 backdrop-blur safe-area-inset-bottom">
           <button
             type="button"
             onClick={onClose}
-            className="w-full min-h-[48px] rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+            className="w-full min-h-[56px] rounded-2xl bg-primary px-5 py-3 text-base font-semibold text-primary-foreground"
           >
             Done
           </button>
