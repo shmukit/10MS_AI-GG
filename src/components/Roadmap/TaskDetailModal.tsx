@@ -138,6 +138,7 @@ export interface TaskDetailModalTask {
   type: string;
   details?: string;
   completed: boolean;
+  quizId?: string;
 }
 
 interface TaskDetailModalProps {
@@ -152,6 +153,7 @@ interface TaskDetailModalProps {
   onNext: () => void;
   canComplete: boolean;
   isCompleting?: boolean;
+  onStartQuiz?: () => void;
 }
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -165,6 +167,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   onNext,
   canComplete,
   isCompleting = false,
+  onStartQuiz,
 }) => {
   const bodyRef = React.useRef<HTMLDivElement>(null);
 
@@ -251,7 +254,17 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             >
               Close
             </button>
-            <button
+            <div className="flex flex-col sm:flex-row gap-2">
+              {onStartQuiz && (
+                <button
+                  type="button"
+                  onClick={onStartQuiz}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+                >
+                  Start quiz
+                </button>
+              )}
+              <button
               type="button"
               onClick={() => void onComplete()}
               disabled={!canComplete || task.completed || isCompleting}
@@ -277,6 +290,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 'Mark complete'
               )}
             </button>
+            </div>
           </div>
         </div>
       }

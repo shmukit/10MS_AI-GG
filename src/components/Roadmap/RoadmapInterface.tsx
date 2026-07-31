@@ -20,6 +20,9 @@ import { useNavigate } from 'react-router-dom';
 import { posthog } from '../../lib/posthog';
 import { AgenticDecisionTree } from '../Playbooks/AgenticDecisionTree';
 import { RoadmapSlidesModal } from './RoadmapSlidesModal';
+import { QuizPlayer } from '../Quiz/QuizPlayer';
+import { getQuizById, getQuizForTask, getTaskQuizScoreSummary, getQuizCardsForDeck } from '../../services/db/quizService';
+import type { RoadmapQuiz } from '../../types/quizTypes';
 
 type RoadmapView = 'sessions' | 'decision-tree';
 
@@ -81,6 +84,11 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
   const [selectedSlideDeck, setSelectedSlideDeck] = useState<EnabledSlideDeck | null>(null);
   const [showSlidesModal, setShowSlidesModal] = useState(false);
   const [showSlidePicker, setShowSlidePicker] = useState(false);
+  const [activeQuiz, setActiveQuiz] = useState<RoadmapQuiz | null>(null);
+  const [activeQuizTaskId, setActiveQuizTaskId] = useState<string | null>(null);
+  const [quizScoreByTaskId, setQuizScoreByTaskId] = useState<
+    Record<string, { score: number; maxScore: number }>
+  >({});
   const navigate = useNavigate();
 
   const refreshRoadmapData = async () => {
@@ -261,6 +269,44 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
     }
   }, [weeks, batchId, loading]);
 
+  useEffect(() => {
+    if (!databaseUserId || tasks.length === 0) return;
+    (async () => {
+      const scores: Record<string, { score: number; maxScore: number }> = {};
+      for (const task of tasks) {
+        if (!task.quiz_id) continue;
+        const quiz = await getQuizById(task.quiz_id);
+        if (!quiz) continue;
+        const cards = await getQuizCardsForDeck(quiz.practice_deck_id);
+        const summary = await getTaskQuizScoreSummary(databaseUserId, quiz.id, cards);
+        if (summary) scores[task.id] = summary;
+      }
+      setQuizScoreByTaskId(scores);
+    })();
+  }, [databaseUserId, tasks, studentProgress]);
+
+  const handleOpenQuiz = async (taskId: string, quizId?: string) => {
+    const quiz = quizId ? await getQuizById(quizId) : await getQuizForTask(taskId);
+    if (!quiz) {
+      alert('Quiz not found for this task.');
+      return;
+    }
+    setActiveQuiz(quiz);
+    setActiveQuizTaskId(taskId);
+  };
+
+  const handleQuizComplete = async (score: number, maxScore: number) => {
+    if (!databaseUserId || !activeQuizTaskId) return;
+    await DatabaseService.updateTaskProgress(databaseUserId, activeQuizTaskId, 'completed');
+    if (activeQuiz) {
+      setQuizScoreByTaskId((prev) => ({
+        ...prev,
+        [activeQuizTaskId]: { score, maxScore },
+      }));
+    }
+    await refreshRoadmapData();
+  };
+
   const handleViewChange = (view: RoadmapView, treeKey?: string) => {
     setActiveView(view);
     const params = new URLSearchParams(searchParams);
@@ -320,6 +366,10 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
   const nodesWithStats = roadmapData.nodes.map((node) => ({
     ...node,
     completionStats: completionStats[node.id] || undefined,
+    tasks: node.tasks.map((task) => ({
+      ...task,
+      quizScore: quizScoreByTaskId[task.id],
+    })),
   }));
 
   const completedNodes = nodesWithStats.filter((node) => {
@@ -424,9 +474,24 @@ export const RoadmapInterface: React.FC<RoadmapInterfaceProps> = ({ onBack }) =>
                 ? () => handleViewChange('decision-tree', enabledTrees[0]?.tree_key)
                 : undefined
             }
+            onOpenQuiz={(taskId, quizId) => void handleOpenQuiz(taskId, quizId)}
           />
         )}
       </div>
+
+      {activeQuiz && databaseUserId && (
+        <QuizPlayer
+          quiz={activeQuiz}
+          studentId={databaseUserId}
+          batchId={batchId ?? undefined}
+          taskId={activeQuizTaskId ?? undefined}
+          onClose={() => {
+            setActiveQuiz(null);
+            setActiveQuizTaskId(null);
+          }}
+          onComplete={handleQuizComplete}
+        />
+      )}
     </div>
   );
 };

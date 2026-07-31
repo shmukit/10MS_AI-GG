@@ -1,4 +1,3 @@
-import React from 'react';
 import { BookOpen, Circle, Code, FileText, Play, Users } from 'lucide-react';
 import { getTaskVisual, parseTaskId } from '../taskVisuals';
 

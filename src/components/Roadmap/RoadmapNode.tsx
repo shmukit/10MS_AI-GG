@@ -18,6 +18,8 @@ export interface RoadmapNodeData {
     details?: string;
     /** External resource (PPT, decision tree, reading). Omit when none. */
     url?: string;
+    quizId?: string;
+    quizScore?: { score: number; maxScore: number };
     completed: boolean;
   }>;
   relatedSkills: string[];

@@ -10,6 +10,9 @@ import {
 } from './roadmapTaskApi';
 import { DEFAULT_NEW_TASK, type NewTaskForm } from './types';
 import { useToast } from '../../../../ui/ToastProvider';
+import { useAuthContext } from '../../../../../lib';
+import { linkQuizToTask, upsertRoadmapQuiz } from '../../../../../services/db/quizService';
+import { DEFAULT_QUIZ_TASK, type QuizTaskFormData } from '../../../tabs/roadmap/QuizTaskSettings';
 
 interface UseRoadmapTasksParams {
     selectedRoadmap: string;
@@ -29,10 +32,31 @@ export function useRoadmapTasks({
     refreshRoadmapNodes,
 }: UseRoadmapTasksParams) {
     const { success, error: toastError } = useToast();
+    const { user } = useAuthContext();
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [editingTask, setEditingTask] = useState<string | null>(null);
     const [editingTaskData, setEditingTaskData] = useState<any>(null);
     const [newTask, setNewTask] = useState<NewTaskForm>(DEFAULT_NEW_TASK);
+    const [newTaskQuiz, setNewTaskQuiz] = useState<QuizTaskFormData>(DEFAULT_QUIZ_TASK);
+    const [editingTaskQuiz, setEditingTaskQuiz] = useState<QuizTaskFormData>(DEFAULT_QUIZ_TASK);
+
+    const saveTaskQuiz = async (taskId: string, quiz: QuizTaskFormData) => {
+        if (!quiz.quizDeckId || !selectedRoadmap) return;
+        const saved = await upsertRoadmapQuiz({
+            id: quiz.quizId,
+            roadmap_id: selectedRoadmap,
+            practice_deck_id: quiz.quizDeckId,
+            task_id: taskId,
+            batch_id: selectedBatch || null,
+            title: quiz.quizTitle || 'Quiz',
+            negative_marking_enabled: quiz.quizNegativeMarkingEnabled,
+            negative_mark_value: quiz.quizNegativeMarkingEnabled ? quiz.quizNegativeMarkValue : null,
+            created_by: user?.id ?? null,
+        });
+        if (saved) {
+            await linkQuizToTask(taskId, saved.id);
+        }
+    };
 
     const handleAddTask = async () => {
         try {
@@ -70,9 +94,14 @@ export function useRoadmapTasks({
                     newTask.domain || 'General'
                 );
 
+                if (newTask.taskType === 'MCQ' && newTaskQuiz.quizDeckId) {
+                    await saveTaskQuiz(data.id, newTaskQuiz);
+                }
+
                 setRoadmapData([...roadmapData, newItem]);
                 setIsAddingTask(false);
                 setNewTask(DEFAULT_NEW_TASK);
+                setNewTaskQuiz(DEFAULT_QUIZ_TASK);
             }
         } catch (error) {
             console.error('Error adding task:', error);
@@ -119,12 +148,17 @@ export function useRoadmapTasks({
 
             if (error) throw error;
 
+            if (editingTaskData.taskType === 'MCQ' && editingTaskQuiz.quizDeckId) {
+                await saveTaskQuiz(editingTask, editingTaskQuiz);
+            }
+
             setRoadmapData(roadmapData.map(task =>
                 task.id === editingTask ? { ...task, ...editingTaskData } : task
             ));
 
             setEditingTask(null);
             setEditingTaskData(null);
+            setEditingTaskQuiz(DEFAULT_QUIZ_TASK);
             success('Task updated successfully!');
         } catch (error) {
             console.error('Error updating task:', error);
@@ -156,6 +190,10 @@ export function useRoadmapTasks({
         setEditingTaskData,
         newTask,
         setNewTask,
+        newTaskQuiz,
+        setNewTaskQuiz,
+        editingTaskQuiz,
+        setEditingTaskQuiz,
         handleAddTask,
         handleUpdateTask,
         handleDeleteTask,

@@ -10,6 +10,7 @@ import { AddWeekModal } from './roadmap/AddWeekModal';
 import { EditNodeModal } from './roadmap/EditNodeModal';
 import { NodesPanel } from './roadmap/NodesPanel';
 import { RoadmapResourcesPanel } from './roadmap/RoadmapResourcesPanel';
+import { DEFAULT_QUIZ_TASK } from './roadmap/QuizTaskSettings';
 
 interface RoadmapTabProps {
     roadmaps: any[];
@@ -47,6 +48,8 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
         editingTaskData, setEditingTaskData,
         editingRoadmapData, setEditingRoadmapData,
         newTask, setNewTask,
+        newTaskQuiz, setNewTaskQuiz,
+        editingTaskQuiz, setEditingTaskQuiz,
         newRoadmap, setNewRoadmap,
         getCurrentRoadmap,
         getWeekOptions,
@@ -126,11 +129,15 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 title="Add New Task"
                 submitLabel="Add Task"
                 nodeUnitLabel={nodeUnitLabel}
+                roadmapId={selectedRoadmap}
+                batchId={selectedBatch}
+                quizData={newTaskQuiz}
+                setQuizData={setNewTaskQuiz}
             />
 
             <TaskModal
                 isOpen={!!editingTask && !!editingTaskData}
-                onClose={() => { setEditingTask(null); setEditingTaskData(null); }}
+                onClose={() => { setEditingTask(null); setEditingTaskData(null); setEditingTaskQuiz(DEFAULT_QUIZ_TASK); }}
                 taskData={editingTaskData || newTask}
                 setTaskData={setEditingTaskData}
                 onSubmit={handleUpdateTask}
@@ -138,6 +145,11 @@ export const RoadmapTab: React.FC<RoadmapTabProps> = ({
                 title="Edit Task"
                 submitLabel="Update Task"
                 nodeUnitLabel={nodeUnitLabel}
+                roadmapId={selectedRoadmap}
+                batchId={selectedBatch}
+                editingTaskId={editingTask || undefined}
+                quizData={editingTaskQuiz}
+                setQuizData={setEditingTaskQuiz}
             />
 
             <AddWeekModal
