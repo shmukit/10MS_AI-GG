@@ -91,9 +91,9 @@ export interface QuizCard {
 
 export const LIKERT_DEFAULT_LABELS = [
   '1 — Not at all',
-  '2',
+  '2 — Slightly',
   '3 — A little',
-  '4',
+  '4 — Mostly',
   '5 — Yes, confidently',
 ];
 

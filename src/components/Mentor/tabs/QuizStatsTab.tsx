@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BarChart3, Users } from 'lucide-react';
+import { BarChart3, Users, PlusCircle } from 'lucide-react';
 import { getBatchQuizStats, type BatchQuizStats } from '../../../services/db/quizService';
 
 interface QuizStatsTabProps {
@@ -27,8 +27,14 @@ export const QuizStatsTab: React.FC<QuizStatsTabProps> = ({ selectedBatchId, roa
 
   if (!selectedBatchId || !roadmapId) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-        Select a batch with a roadmap to view quiz results.
+      <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+          <BarChart3 className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground">No batch or roadmap selected</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Choose a batch from the Batch & Students tab or the Roadmap tab first, then return here to see quiz results.
+        </p>
       </div>
     );
   }
@@ -39,17 +45,52 @@ export const QuizStatsTab: React.FC<QuizStatsTabProps> = ({ selectedBatchId, roa
 
   if (stats.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-        No quizzes on this roadmap yet.
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <BarChart3 className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">No quizzes yet</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This roadmap has no quizzes attached. Once students complete quizzes, scores and per-question breakdowns will appear here.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h4 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
+            <PlusCircle className="h-5 w-5 text-primary" /> How to add a quiz
+          </h4>
+          <ol className="space-y-4 text-sm text-muted-foreground">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">1</span>
+              <span>
+                Go to <strong className="text-foreground">Practice Decks</strong> and create a deck with quiz cards (Likert, MCQ, etc.).
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">2</span>
+              <span>
+                Set the deck’s <strong className="text-foreground">Roadmap</strong> so students can see it.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">3</span>
+              <span>
+                Go to <strong className="text-foreground">Roadmap</strong>, add or edit an <strong className="text-foreground">MCQ</strong> task, and attach the deck in the quiz settings.
+              </span>
+            </li>
+          </ol>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <BarChart3 className="h-5 w-5" /> Quiz results
-      </h2>
+      <div className="flex items-center gap-2">
+        <BarChart3 className="h-5 w-5 text-primary" />
+        <h2 className="text-lg font-semibold text-foreground">Quiz results</h2>
+      </div>
       {stats.map((q) => (
         <div key={q.quizId} className="rounded-xl border border-border bg-card overflow-hidden">
           <button
@@ -61,7 +102,7 @@ export const QuizStatsTab: React.FC<QuizStatsTabProps> = ({ selectedBatchId, roa
               <p className="font-medium text-foreground">{q.quizTitle}</p>
               <p className="text-sm text-muted-foreground mt-1">
                 {q.attemptedCount} / {q.enrolledCount} attempted · avg{' '}
-                {q.avgBestScore.toFixed(1)} / {q.itemMeans.length > 0 ? '40' : '—'} (
+                {q.avgBestScore.toFixed(1)} / {q.itemMeans.length > 0 ? q.avgBestPercent.toFixed(0) : '—'} (
                 {q.avgBestPercent.toFixed(0)}%)
               </p>
             </div>
