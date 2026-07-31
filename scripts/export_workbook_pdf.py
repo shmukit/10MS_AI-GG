@@ -6,6 +6,7 @@ Logo is stamped into the bottom-right *margin* of every PDF page after export
 
 Usage:
   python3 scripts/export_workbook_pdf.py
+  python3 scripts/export_workbook_pdf.py docs/OTHER_WORKBOOK.md
 """
 
 from __future__ import annotations
@@ -101,7 +102,20 @@ def stamp_logo_on_pdf(pdf_path: Path, logo_path: Path) -> None:
 
 
 def main() -> int:
-    raw = MD.read_text(encoding="utf-8")
+    md = MD
+    html = HTML
+    pdf = PDF
+    if len(sys.argv) > 1:
+        md = Path(sys.argv[1])
+        if not md.is_absolute():
+            md = ROOT / md
+        if not md.exists():
+            print(f"Markdown not found: {md}", file=sys.stderr)
+            return 1
+        html = md.with_suffix(".html")
+        pdf = md.with_suffix(".pdf")
+
+    raw = md.read_text(encoding="utf-8")
     css = CSS.read_text(encoding="utf-8")
     embedded = ""
     m = re.search(r"<style>(.*?)</style>", raw, re.S)
@@ -119,7 +133,7 @@ def main() -> int:
         return 1
 
     # No fixed HTML logo — that overlays tables in Chrome print.
-    HTML.write_text(
+    html.write_text(
         f"""<!DOCTYPE html>
 <html>
 <head>
@@ -140,7 +154,7 @@ def main() -> int:
 
     chrome = next((p for p in CHROME_CANDIDATES if p.exists()), None)
     if not chrome:
-        print("Google Chrome not found. Open the HTML and Print → Save as PDF:", HTML)
+        print("Google Chrome not found. Open the HTML and Print → Save as PDF:", html)
         print("(Enable Background graphics in the print dialog.)")
         return 1
 
@@ -149,17 +163,17 @@ def main() -> int:
         "--headless=new",
         "--disable-gpu",
         "--no-pdf-header-footer",
-        f"--print-to-pdf={PDF}",
-        str(HTML),
+        f"--print-to-pdf={pdf}",
+        str(html),
     ]
     subprocess.run(cmd, check=False, capture_output=True)
-    if not PDF.exists():
+    if not pdf.exists():
         print("PDF was not created.", file=sys.stderr)
         return 1
 
-    stamp_logo_on_pdf(PDF, logo_path)
-    print(f"Wrote {PDF} ({PDF.stat().st_size} bytes) with corner logo stamped")
-    print(f"Also wrote {HTML}")
+    stamp_logo_on_pdf(pdf, logo_path)
+    print(f"Wrote {pdf} ({pdf.stat().st_size} bytes) with corner logo stamped")
+    print(f"Also wrote {html}")
     return 0
 
 

@@ -28,6 +28,8 @@
     "test:watch": "vitest",
     "generate:decision-tree-printable": "vite-node scripts/generateAgenticDecisionTreePrintable.ts",
     "export:workbook-pdf": "python3 scripts/export_workbook_pdf.py",
+    "export:workbook-pdf-compact": "python3 scripts/export_workbook_pdf.py docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK_COMPACT.md",
+    "export:workbook-pdf-compact": "python3 scripts/export_workbook_pdf.py docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK_COMPACT.md",
     "start": "vite preview --port 3000 --host 0.0.0.0"
   },
   "dependencies": {

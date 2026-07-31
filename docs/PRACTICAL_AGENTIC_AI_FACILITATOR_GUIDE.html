@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Become a Manager of AI Agents — Participant Workbook</title>
+<style>
+/* Participant workbook → PDF print styles
+   npx md-to-pdf docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK.md --stylesheet docs/workbook-print.css
+*/
+
+@page {
+  size: A4;
+  /* Bottom margin reserved for stamped logo + page number (added after PDF export) */
+  margin: 14mm 14mm 30mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  color: #111;
+  max-width: 100%;
+  padding-bottom: 8mm;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+h1 {
+  font-size: 20pt;
+  margin: 0.2em 0 0.4em;
+  border-bottom: 3px solid #111;
+  padding-bottom: 0.25em;
+}
+
+h2 {
+  font-size: 14pt;
+  margin: 1em 0 0.4em;
+  padding-bottom: 0.15em;
+  border-bottom: 1.5px solid #444;
+}
+
+h3 {
+  font-size: 12pt;
+  margin: 0.9em 0 0.35em;
+}
+
+hr {
+  border: 0;
+  border-top: 1.5px solid #999;
+  margin: 1em 0;
+}
+
+/* —— Page breaks —— */
+.page-break {
+  break-before: page !important;
+  page-break-before: always !important;
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* —— TABLES (fix borderless / dull PDF) —— */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 0.75em 0 1em !important;
+  font-size: 9.5pt;
+  border: 1.5px solid #111 !important;
+  /* Allow multi-page tables (e.g. Contents) to break — avoid blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+thead {
+  display: table-header-group;
+}
+
+th,
+td {
+  border: 1px solid #333 !important;
+  padding: 6px 8px !important;
+  vertical-align: top !important;
+  text-align: left !important;
+}
+
+th {
+  background: #e6e6e6 !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* GFM first header row often renders as th */
+tr:first-child th,
+thead th {
+  background: #d9d9d9 !important;
+  border-bottom: 2px solid #111 !important;
+}
+
+/* Alternating body rows for scanability */
+tbody tr:nth-child(even) td {
+  background: #f7f7f7 !important;
+}
+
+/* —— TASK BOXES (single-column tables) —— */
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) {
+  border: 2.5px solid #111 !important;
+  background: #f3f3f3 !important;
+  margin: 0.9em 0 1.1em !important;
+  /* Keep short task boxes together; large data tables may still break */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Dark header ONLY on thead — do NOT style tbody first row (that is "Do:") */
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th {
+  background: #222 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+  font-size: 10.5pt !important;
+  padding: 8px 10px !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Body rows: always dark text on light fill (fixes invisible "Do:") */
+table:has(> tbody > tr > td:only-child) tbody td,
+table:has(> thead > tr > th:only-child) tbody td {
+  color: #111 !important;
+  background: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+table:has(> tbody > tr > td:only-child) tbody tr:nth-child(even) td,
+table:has(> thead > tr > th:only-child) tbody tr:nth-child(even) td {
+  background: #ececec !important;
+  color: #111 !important;
+}
+
+/* —— Callouts / tips (blockquotes) —— */
+blockquote {
+  margin: 0.8em 0 !important;
+  padding: 10px 14px !important;
+  border: 1.5px solid #333 !important;
+  border-left: 6px solid #111 !important;
+  background: #f5f5f5 !important;
+  /* Do NOT use page-break-inside:avoid — large/late quotes create blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+blockquote p {
+  margin: 0.25em 0 !important;
+}
+
+blockquote strong:first-child {
+  display: inline-block;
+  margin-bottom: 0.15em;
+}
+
+/* —— Code / ASCII diagrams —— */
+pre,
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 8.5pt;
+}
+
+pre {
+  border: 1.5px solid #333 !important;
+  background: #f4f4f4 !important;
+  padding: 10px 12px !important;
+  overflow-x: auto;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* —— Lists —— */
+ul, ol {
+  margin: 0.4em 0 0.6em 1.2em;
+  padding: 0;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+/* —— Keep headings with following content —— */
+h1, h2, h3, h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Corner logo is stamped into the PDF after export (see scripts/export_workbook_pdf.py).
+   Do not use position:fixed here — Chrome prints it on top of tables. */
+
+
+
+</style>
+</head>
+<body class="workbook">
+<h1>Practical Agentic AI for Productivity</h1>
+<h2>Build Your Personal AI Workforce in One Day — Facilitator Runbook</h2>
+<p>This document is written for <strong>you, the facilitator</strong>. Read it as a step-by-step script: what you say, what you show, what participants do, and how you know they are done.</p>
+<p><strong>Aligned with:</strong> roadmap tasks (Sessions 0–4) · agenda slides (<a href="./PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md"><code>PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md</code></a>) · task modal Copy boxes on the roadmap.</p>
+<p><strong>Room rule:</strong> Same Teacher chat all day. Teacher ↔ Work Assistant switch <strong>once</strong> (task <strong>1.3</strong>). Click task → <strong>Copy</strong> → paste into AI → <strong>Mark complete</strong>. Call tasks by number (e.g. “Task <strong>1.3</strong>”).</p>
+<p><strong>Mode key (use the table below)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Slide</strong></td>
+<td>Projector only — you talk / demo; they watch. No roadmap click yet.</td>
+</tr>
+<tr>
+<td><strong>Slide + task</strong></td>
+<td>Leave the task slide up <strong>and</strong> they do the roadmap activity.</td>
+</tr>
+<tr>
+<td><strong>Task</strong></td>
+<td>They work in roadmap + laptop; slide stays on the session park or prior task if needed.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sessions</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>Housekeeping + Opening (~35 min)</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>Work WITH AI (~90 min)</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Work THROUGH AI (~105 min)</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Work BY AI (~115 min)</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Reference (optional async)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Why this order (read once before you teach)</h2>
+<h3>What participants should be able to do by the end of the day</h3>
+<p>By the end of the live workshop, each participant (or small team) should be able to:</p>
+<ol>
+<li>Point to <strong>one real work process</strong> they chose today (not five ideas).</li>
+<li>Show that process <strong>running once on their screen</strong>: something starts it → AI does a clear step → a result appears in a real place (Sheet, Doc, email draft, chat) → a <strong>human still approves</strong> anything external or high-risk.</li>
+<li>Explain, in plain language, <strong>what the AI is allowed to do</strong>, <strong>what it must never do alone</strong>, and <strong>how they check the output</strong>.</li>
+<li>Re-run that path <strong>without you standing next to them</strong>, and name <strong>one habit</strong> they will keep for the next 30 days.</li>
+</ol>
+<p>Everything earlier in the day exists so that final run is the right process, with clear instructions, and safe enough for Monday—not so they collect tools or theory.</p>
+<h3>How the day builds (full sentences)</h3>
+<p>The day has five layers. Each layer adds something the next layer needs.</p>
+<p><strong>Session 0 — Set up the room and the coach.</strong><br />
+Participants open their tools, create one Teacher Project, and start one chat they will keep all day. They also learn three plain words (chat, assistant, agent) so later activities have shared language. Without this, every later step becomes a login problem or a new empty chat with no memory.</p>
+<p><strong>Session 1 — Use AI as a daily helper, then commit to one job.</strong><br />
+They write a short brief, hire a Work Assistant, run it three times, and take <strong>one</strong> round of feedback. Only after they have felt what good and bad AI output looks like do they <strong>lock one work process</strong> for the rest of the day. Then they pick at most three tools and ground AI in real documents <strong>for that process only</strong>.<br />
+Reason: if they shop for tools before locking a job, the afternoon becomes tourism. If they lock a job before feeling AI, they lock from fear or FOMO.</p>
+<p><strong>Session 2 — Turn that job into a reusable path.</strong><br />
+They choose how much structure the job needs, map the steps, write operating rules (ETCSLV—especially Limits and Validation), and lock a build pattern. Then they write standing instructions (<strong>the brain</strong>) and make a simple automation or semi-automatic path (<strong>the hands</strong>) run once.<br />
+Reason: instructions without a run are notes; a run without instructions is fragile. Brain comes before hands.</p>
+<p><strong>Session 3 — Manage the path that already runs.</strong><br />
+They name the smallest set of AI jobs for that same path, rewrite the operating rules as a <strong>Monday-ready checklist</strong> (same ETCSLV letters—not a new framework), break the path on purpose, fix it, re-run it alone, demonstrate it, and write a short 30-day habit plan.<br />
+Reason: “managing AI” is credible only after something actually moves. Session 3 does not start a second product.</p>
+<p><strong>Session 4 — Optional reading later.</strong><br />
+Deeper articles and a short video for after the workshop. Not required live.</p>
+<h3>What each block adds (and what it unlocks next)</h3>
+<table>
+<thead>
+<tr>
+<th>Block</th>
+<th>What they learn to do</th>
+<th>Why it comes next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0.0</strong></td>
+<td>State what AI will and will not do today</td>
+<td>Stops magic expectations before tools</td>
+</tr>
+<tr>
+<td><strong>0.1–0.3</strong></td>
+<td>Keep one Teacher chat with memory for the day</td>
+<td>Later asks can say “use my process from earlier”</td>
+</tr>
+<tr>
+<td><strong>0.4</strong></td>
+<td>Use the words chat, assistant, and agent correctly</td>
+<td>Shared labels for Sessions 1–2 (they have not built a full agent yet)</td>
+</tr>
+<tr>
+<td><strong>1.1–1.3</strong></td>
+<td>Brief an assistant, run it, improve Settings once</td>
+<td>Builds judgment before they commit to a process</td>
+</tr>
+<tr>
+<td><strong>1.4</strong></td>
+<td>Lock <strong>one</strong> process for the rest of the day</td>
+<td>Becomes the spine of the afternoon</td>
+</tr>
+<tr>
+<td><strong>1.5–1.6</strong></td>
+<td>Choose ≤3 tools and test docs for that process</td>
+<td>Equips the locked job only</td>
+</tr>
+<tr>
+<td><strong>2.0</strong></td>
+<td>Choose how much structure that job needs</td>
+<td>Stops multi-agent fantasy before mapping</td>
+</tr>
+<tr>
+<td><strong>2.1</strong></td>
+<td>Map steps and mark AI / rules / human</td>
+<td>Shows who owns each step</td>
+</tr>
+<tr>
+<td><strong>2.2–2.3</strong></td>
+<td>Write and tighten Limits and Validation</td>
+<td>Becomes the Monday checklist and failure tests</td>
+</tr>
+<tr>
+<td><strong>2.4</strong></td>
+<td>Lock the build pattern</td>
+<td>Sets how ambitious 2.5–2.6 should be</td>
+</tr>
+<tr>
+<td><strong>2.5</strong></td>
+<td>Paste standing instructions once and test them</td>
+<td>Gives the AI step something stable to follow</td>
+</tr>
+<tr>
+<td><strong>2.6</strong></td>
+<td>Run trigger → AI → output → approval once</td>
+<td>Creates the artifact Demo Day will show</td>
+</tr>
+<tr>
+<td><strong>3.0–3.2</strong></td>
+<td>Name min AI jobs + a Monday-ready rules checklist</td>
+<td>Ownership of the <strong>same</strong> path—not a new build</td>
+</tr>
+<tr>
+<td><strong>3.3–3.4</strong></td>
+<td>Break it, fix it, re-run without the instructor</td>
+<td>Makes the demo honest</td>
+</tr>
+<tr>
+<td><strong>3.5–3.6</strong></td>
+<td>Demonstrate live and pick a Week-1 habit</td>
+<td>Public proof + follow-through</td>
+</tr>
+</tbody>
+</table>
+<h3>What the three session names mean</h3>
+<ul>
+<li><strong>Work WITH AI:</strong> You use AI beside you (an assistant with standing instructions).  </li>
+<li><strong>Work THROUGH AI:</strong> The <strong>job</strong> moves along a path (clear instructions + a run you can show).  </li>
+<li><strong>Work BY AI:</strong> You <strong>manage</strong> that path (who does what, what is allowed, what breaks, what you re-run on Monday). You do not start a second project.</li>
+</ul>
+<h3>Why not a different order?</h3>
+<table>
+<thead>
+<tr>
+<th>Tempting reorder</th>
+<th>Why we don’t</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lock a process at 0.3 before any assistant</td>
+<td>They would commit before they have felt good vs bad AI output. Tasks <strong>1.1–1.3</strong> build taste; <strong>1.4</strong> commits.</td>
+</tr>
+<tr>
+<td>Browse many tools before locking a process</td>
+<td>They try eight apps and finish nothing. Always <strong>lock → tools → files</strong>.</td>
+</tr>
+<tr>
+<td>Build n8n/automation before map and Limits/Validation</td>
+<td>Demos look clever and fail on Monday. <strong>Specify, then run.</strong></td>
+</tr>
+<tr>
+<td>Design a multi-agent org chart before anything runs</td>
+<td>Looks impressive; usually fiction. <strong>Run a thin path first (2.6), then name only the jobs that path needs (3.1).</strong></td>
+</tr>
+<tr>
+<td>Write the full rules checklist / roles before 2.6</td>
+<td>Sounds more “agentic” on paper; weaker in a one-day room. Managing is believable <strong>after</strong> something runs.</td>
+</tr>
+<tr>
+<td>Demo Day without Failure Lab</td>
+<td>False confidence. <strong>Break on purpose before the audience.</strong></td>
+</tr>
+</tbody>
+</table>
+<h3>Where this order is strong vs weak (be honest in the room)</h3>
+<p><strong>Keep these choices</strong><br />
+1. Feel AI → lock one job → then pick tools (<strong>1.1–1.6</strong>).<br />
+2. Standing instructions (<strong>2.5</strong>) before automation (<strong>2.6</strong>).<br />
+3. A path that runs (<strong>2.6</strong>) before “manager of AI work” (<strong>3.x</strong>).<br />
+4. One Teacher chat all day—more important than any framework name.</p>
+<p><strong>Watch these weak joints live</strong><br />
+1. <strong>0.4 “agent”</strong> is mostly vocabulary. Say: “You will earn this word this afternoon.”<br />
+2. The Work Assistant from <strong>1.2</strong> may not match the process locked at <strong>1.4</strong>. At <strong>2.5</strong>, force a choice: extend that Work Assistant <strong>or</strong> create <strong>one</strong> new Project for the locked job—not both.<br />
+3. <strong>1.5</strong> (tools) is long. If late, cut your tool-tour talking—not <strong>1.4</strong>, <strong>2.6</strong>, <strong>3.4</strong>, or <strong>3.5</strong>.<br />
+4. <strong>3.1</strong> (AI jobs) becomes theater if their path is only three steps. Cap at <strong>two or three jobs for this path</strong>.<br />
+5. <strong>3.2</strong> is <strong>the same ETCSLV rules</strong>, written so a colleague could follow them on Monday—not a new framework. Say that out loud.<br />
+6. A <strong>template</strong> in <strong>2.6</strong> may use sample data. That is fine if the shape matches their job (start → AI → result → human check). Do not promise a live Meta-to-CRM build in the room.<br />
+7. Success is often a <strong>simple running path plus clear instructions</strong>—not a multi-agent empire by 5pm. Treat that as a win.</p>
+<p><strong>When someone is lost, ask only these four questions</strong></p>
+<blockquote>
+<p>“What process did you lock? Where are the standing instructions? Can you run it once on screen? What must a human still approve?”</p>
+</blockquote>
+<p>If they cannot answer, do not add more roles, tools, or dashboards.</p>
+<h3>How Teacher and Work Assistant get their context</h3>
+<p>Two different “agents,” two different memories. Neither magically knows the day unless we put context in <strong>Settings</strong> (standing rules) or in <strong>the same chat thread</strong> (conversation memory).</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>What it is</th>
+<th>Where memory lives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Teacher</strong></td>
+<td>Coach for the whole day</td>
+<td>One Project: <strong>Settings</strong> (job description) + <strong>one chat thread</strong> all day</td>
+</tr>
+<tr>
+<td><strong>Work Assistant</strong> (daily / “executive” helper)</td>
+<td>Worker for desk tasks and, if chosen, the locked process</td>
+<td>Separate Project: <strong>Settings</strong> (brief) + <strong>its own chat</strong> for runs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule you enforce:</strong> Prefer “use my process / map / ETCSLV from earlier” in the <strong>Teacher</strong> thread. Do <strong>not</strong> re-paste essays. Switch Teacher ↔ Work Assistant only for the <strong>one</strong> feedback round (<strong>1.3</strong>), unless they extend the Work Assistant at <strong>2.5</strong>.</p>
+<h4>Context builds over the day (read left → right)</h4>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What we put into <strong>Teacher</strong></th>
+<th>What we put into <strong>Work Assistant</strong></th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0.2</strong></td>
+<td><strong>Settings once:</strong> teaching role, plain-language rules, HITL, ETCSLV labels (ignore until Session 2), pattern ladder list</td>
+<td>— (not created yet)</td>
+<td>Standing “how to coach me” handbook</td>
+</tr>
+<tr>
+<td><strong>0.3</strong></td>
+<td><strong>Chat:</strong> role, org type, painful process; answers to Teacher’s 3 questions</td>
+<td>—</td>
+<td>Who they are + candidate problem (day spine starts)</td>
+</tr>
+<tr>
+<td><strong>0.4</strong></td>
+<td><strong>Chat:</strong> chat vs assistant vs agent in <em>their</em> job</td>
+<td>—</td>
+<td>Shared vocabulary</td>
+</tr>
+<tr>
+<td><strong>1.1</strong></td>
+<td>—</td>
+<td><strong>Paper only:</strong> job brief (priorities, never-invent, ask-before)</td>
+<td>Think before hiring</td>
+</tr>
+<tr>
+<td><strong>1.2</strong></td>
+<td>—</td>
+<td><strong>Settings:</strong> paste brief + never-invent. <strong>Chat:</strong> 3 real runs (triage, draft, stress test)</td>
+<td>WA now knows its job + has sample work in thread</td>
+</tr>
+<tr>
+<td><strong>1.3</strong></td>
+<td><strong>Chat (once):</strong> WA Settings text + one weak prompt + one WA reply → critique</td>
+<td><strong>Settings updated once</strong> from agreed fixes; optional one re-run in WA chat</td>
+<td>Only planned Teacher ↔ WA handoff</td>
+</tr>
+<tr>
+<td><strong>1.4</strong></td>
+<td><strong>Chat:</strong> lock today’s process (name, pain, done, human-only)</td>
+<td>Usually unchanged</td>
+<td>Teacher holds the <strong>locked process</strong> (spine for afternoon)</td>
+</tr>
+<tr>
+<td><strong>1.5</strong></td>
+<td><strong>Chat:</strong> tool fit for locked process (max 2–3)</td>
+<td>—</td>
+<td>Stack choice remembered in Teacher</td>
+</tr>
+<tr>
+<td><strong>1.6</strong></td>
+<td>— (optional note in Teacher if useful)</td>
+<td>Optional: files in NotebookLM / Project — <strong>not</strong> always WA</td>
+<td>Grounding for the process; may be a third surface</td>
+</tr>
+<tr>
+<td><strong>2.0</strong></td>
+<td>Paper / light chat: ladder + readiness for <em>this</em> process</td>
+<td>—</td>
+<td>Height choice</td>
+</tr>
+<tr>
+<td><strong>2.1</strong></td>
+<td><strong>Chat:</strong> step map + Green/Blue/Red tags</td>
+<td>—</td>
+<td>Process map lives in Teacher thread</td>
+</tr>
+<tr>
+<td><strong>2.2–2.3</strong></td>
+<td><strong>Chat:</strong> ETCSLV draft + L/V critique</td>
+<td>—</td>
+<td>Operating rules in Teacher</td>
+</tr>
+<tr>
+<td><strong>2.4</strong></td>
+<td><strong>Chat:</strong> decision-tree result phrase + “I will build…”</td>
+<td>—</td>
+<td>Pattern name locked in Teacher</td>
+</tr>
+<tr>
+<td><strong>2.5</strong></td>
+<td><strong>Chat:</strong> ask for system instructions (uses earlier pattern + ETCSLV — no re-paste)</td>
+<td><strong>Either</strong> paste those instructions into <strong>this</strong> WA Settings <strong>or</strong> create <strong>one</strong> new Project for the locked job — pick one</td>
+<td>Brain = standing instructions for the job</td>
+</tr>
+<tr>
+<td><strong>2.6</strong></td>
+<td><strong>Chat (optional):</strong> map process → template; after run, short review</td>
+<td>Only if brain lives in WA; else n8n/template is the “hands”</td>
+<td>Teacher knows what they ran; WA not required to run n8n</td>
+</tr>
+<tr>
+<td><strong>3.0–3.2</strong></td>
+<td><strong>Chat / paper:</strong> manager framing, min AI jobs, Monday-ready L/V</td>
+<td>Unchanged unless they reuse WA as a named “job”</td>
+<td>Manage the <strong>same</strong> path</td>
+</tr>
+<tr>
+<td><strong>3.3–3.4</strong></td>
+<td><strong>Chat if stuck</strong> / demo script from Teacher</td>
+<td>Same running path (template or WA)</td>
+<td>Harden + narrate</td>
+</tr>
+<tr>
+<td><strong>3.5–3.6</strong></td>
+<td>Optional polish for 30-day plan</td>
+<td>—</td>
+<td>Habit, not new context dump</td>
+</tr>
+</tbody>
+</table>
+<h4>What each agent should “know” by mid-afternoon (sanity check)</h4>
+<table>
+<thead>
+<tr>
+<th>By end of…</th>
+<th>Teacher should already know (from same thread / Settings)</th>
+<th>Work Assistant should know</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session 0</td>
+<td>How to teach them; who they are; rough pain</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Session 1</td>
+<td>Locked process; tool stack hint</td>
+<td>Brief + whatever was in the 3 runs; improved Settings after 1.3</td>
+</tr>
+<tr>
+<td>Session 2</td>
+<td>Map, ETCSLV (esp. L/V), pattern, brain text it drafted</td>
+<td>Standing instructions <strong>if</strong> they extended WA at 2.5; otherwise a sibling Project holds the brain</td>
+</tr>
+<tr>
+<td>Session 3</td>
+<td>Same as Session 2 + roles / harness language</td>
+<td>Still the worker for desk or process—not a second Teacher</td>
+</tr>
+</tbody>
+</table>
+<p><strong>If Teacher “forgets”:</strong> they opened a new chat or a new Project. Fix: return to the original Teacher Project chat; say “use my locked process from earlier.” Re-paste only if the thread is truly gone.</p>
+<p><strong>If Work Assistant feels empty at 2.5:</strong> either they never ran 1.2 seriously, or the locked process is different from the morning brief — then create <strong>one</strong> process Project instead of overloading the general WA.</p>
+<hr />
+<h2>Instructor day map (do this in order)</h2>
+<p>Slide numbers match <a href="./PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md"><code>PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md</code></a>. Advance the deck when the <strong>Slide</strong> column changes.</p>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>ID / moment</th>
+<th>~Min</th>
+<th>Mode</th>
+<th>Slide #</th>
+<th>What <strong>you</strong> do</th>
+<th>What <strong>they</strong> do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Welcome</td>
+<td>2</td>
+<td>Slide</td>
+<td>1–2</td>
+<td>Title + promise</td>
+<td>Listen; roadmap login ready</td>
+</tr>
+<tr>
+<td>2</td>
+<td>How this room works</td>
+<td>3</td>
+<td>Slide</td>
+<td>3</td>
+<td>Surfaces + same Teacher chat</td>
+<td>Listen</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Agenda</td>
+<td>2</td>
+<td>Slide</td>
+<td>4</td>
+<td>Day map; “you are here”</td>
+<td>Glance</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Session 0 park</td>
+<td>1</td>
+<td>Slide</td>
+<td>5</td>
+<td>Call <code>0.0</code> → <code>0.4</code></td>
+<td>Open Session 0 on roadmap</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>0.0</strong> What is AI</td>
+<td>5</td>
+<td>Slide + task</td>
+<td>6</td>
+<td>Short talk + expect table</td>
+<td>Paper: expect / don’t expect → mark <strong>0.0</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>0.1–0.2</strong> Desk + Teacher</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>7</td>
+<td>Demo Settings once</td>
+<td>Open tools; create Teacher Project; paste Settings → mark</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>0.3</strong> Kickoff chat</td>
+<td>10</td>
+<td>Slide + task</td>
+<td>8</td>
+<td>“Chat, not Settings”</td>
+<td>Send kickoff → answer 3 Qs → mark <strong>0.3</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>0.4</strong> Three words</td>
+<td>5</td>
+<td>Slide + task</td>
+<td>9</td>
+<td>Ask 2 people for a one-liner</td>
+<td>Teacher prompt → mark <strong>0.4</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Session 1 park</td>
+<td>1</td>
+<td>Slide</td>
+<td>10</td>
+<td>Call <code>1.1</code> → <code>1.6</code></td>
+<td>Open Session 1</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>1.1</strong> WA brief</td>
+<td>5</td>
+<td>Slide + task</td>
+<td>11</td>
+<td>Silent; no tools yet</td>
+<td>Paper brief → mark <strong>1.1</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>1.2</strong> Hire + 3 runs</td>
+<td>20</td>
+<td>Slide + task</td>
+<td>12</td>
+<td>Spot-check run 2</td>
+<td>New Project + 3 runs → mark <strong>1.2</strong></td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>1.3</strong> Feedback once</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>13</td>
+<td>Enforce <strong>one</strong> round only</td>
+<td>Teacher critique → fix Settings once → re-test → mark</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>1.4</strong> Lock process</td>
+<td>10</td>
+<td>Slide + task</td>
+<td>14</td>
+<td>Kill “boil the ocean”; Impact/Effort</td>
+<td>Paper + Teacher check → lock → mark <strong>1.4</strong></td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>1.5</strong> ≤3 tools</td>
+<td>30</td>
+<td>Slide + task</td>
+<td>15</td>
+<td>Short tool tour; kill FOMO</td>
+<td>Teacher picker → one test → stack line → mark</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>1.6</strong> Memory</td>
+<td>10</td>
+<td>Slide + task</td>
+<td>16</td>
+<td>“Where did that fact come from?”</td>
+<td>Upload docs; 2 real Q + 1 trap → mark</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Break</td>
+<td>15</td>
+<td>—</td>
+<td>—</td>
+<td>Timebox</td>
+<td>—</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Session 2 park</td>
+<td>1</td>
+<td>Slide</td>
+<td>17</td>
+<td>Call <code>2.0</code> → <code>2.6</code></td>
+<td>Open Session 2</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>2.0</strong> Ladder + readiness</td>
+<td>5</td>
+<td>Slide + task</td>
+<td>18</td>
+<td>Teach ladder + readiness</td>
+<td>Paper: circle rung → mark <strong>2.0</strong> (no chat)</td>
+</tr>
+<tr>
+<td>18</td>
+<td><strong>2.1</strong> Map</td>
+<td>10</td>
+<td>Slide + task</td>
+<td>19</td>
+<td>Teach Green/Blue/Red once</td>
+<td>Type steps in Teacher → mark <strong>2.1</strong></td>
+</tr>
+<tr>
+<td>19</td>
+<td><strong>2.2–2.3</strong> ETCSLV</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>20</td>
+<td>Teach table + one example (~5 min)</td>
+<td>Draft on paper (<strong>2.2</strong>); Teacher critique (<strong>2.3</strong>) → mark</td>
+</tr>
+<tr>
+<td>20</td>
+<td><strong>2.4</strong> Decision tree</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>21</td>
+<td>Live tree with a volunteer</td>
+<td>Tree → one Teacher ask → lock pattern → mark</td>
+</tr>
+<tr>
+<td>21</td>
+<td><strong>2.5</strong> Workflow brain</td>
+<td>30</td>
+<td>Slide + task</td>
+<td>22</td>
+<td>Demo status-assistant; “brain ≠ n8n”</td>
+<td>One Teacher ask → Settings once → test → mark</td>
+</tr>
+<tr>
+<td>22</td>
+<td><strong>2.6</strong> Path that runs</td>
+<td>30</td>
+<td>Slide + task</td>
+<td>23</td>
+<td>Demo template; room uses <strong>templates</strong></td>
+<td>Clone template → run once (custom only if simple) → mark</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Break / lunch</td>
+<td>15–60</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Session 3 park</td>
+<td>1</td>
+<td>Slide</td>
+<td>24</td>
+<td>Never cut <strong>3.4</strong> / <strong>3.5</strong></td>
+<td>Open Session 3</td>
+</tr>
+<tr>
+<td>24</td>
+<td><strong>3.0</strong> Manager framing</td>
+<td>5</td>
+<td>Slide + task</td>
+<td>25</td>
+<td>Talk only; analogy</td>
+<td>One paper line → mark <strong>3.0</strong> (no chat)</td>
+</tr>
+<tr>
+<td>25</td>
+<td><strong>3.1</strong> Smallest AI team</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>25</td>
+<td>Cut empire-building</td>
+<td>Teacher: min AI jobs → final table → mark</td>
+</tr>
+<tr>
+<td>26</td>
+<td><strong>3.2</strong> Harness</td>
+<td>15</td>
+<td>Slide + task</td>
+<td>26</td>
+<td>Spot-check L and V</td>
+<td>Worksheet E; optional Teacher L/V → mark</td>
+</tr>
+<tr>
+<td>27</td>
+<td><strong>3.3</strong> Failure lab</td>
+<td>20</td>
+<td>Slide + task</td>
+<td>27</td>
+<td>Demo one break first</td>
+<td>Trigger 2 failures → fix → mark</td>
+</tr>
+<tr>
+<td>28</td>
+<td><strong>3.4</strong> Make it re-run alone</td>
+<td>30</td>
+<td>Slide + task</td>
+<td>28</td>
+<td>Leave checklist up; walk desks</td>
+<td>Re-run twice; demo script → mark</td>
+</tr>
+<tr>
+<td>29</td>
+<td><strong>3.5</strong> Demo Day</td>
+<td>20</td>
+<td>Slide + task</td>
+<td>29</td>
+<td>Strict timer; votes</td>
+<td>Live run (~3 min/team) → mark</td>
+</tr>
+<tr>
+<td>30</td>
+<td><strong>3.6</strong> 30-day + close</td>
+<td>10</td>
+<td>Slide + task</td>
+<td>30–31</td>
+<td>Close + links</td>
+<td>Paper plan; optional Teacher → mark</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Session 4 (later)</td>
+<td>—</td>
+<td>Task</td>
+<td>—</td>
+<td>Send links in follow-up</td>
+<td>Optional <strong>4.1–4.3</strong> async</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2.6 rule (say once on Slide 23)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Who</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Template (default — almost everyone)</strong></td>
+<td>The room</td>
+<td>Clone your prepared n8n/Make/Zapier template → put their sample/process flavor in → <strong>Execute once</strong></td>
+</tr>
+<tr>
+<td><strong>Custom (exception only)</strong></td>
+<td>Over-enthusiastic + clear lock</td>
+<td>Very simple flow only: Manual Trigger · ≤5 nodes · no webhook / Meta / CRM / HTTP / Send Email · stuck &gt;10 min → back to template</td>
+</tr>
+<tr>
+<td><strong>Semi-auto (blocked)</strong></td>
+<td>OAuth / IT blocked</td>
+<td>Checklist → AI in chat → they paste/send → still counts if live once</td>
+</tr>
+</tbody>
+</table>
+<p>Same <strong>done</strong> for all: start → AI step → output on screen → human approval named.</p>
+<p><strong>If late:</strong> Cut your talking first. Never cut Demo Day (<strong>3.5</strong>) or the final live run (<strong>3.4</strong>).</p>
+<p><strong>How to read each block below</strong></p>
+<ul>
+<li><strong>Facilitator demo</strong> — Projector. They watch.</li>
+<li><strong>Participant activity</strong> — Laptops / paper. Roadmap task modal = prompts.</li>
+<li><strong>Reflect / check</strong> — Short share + “done” look.</li>
+</ul>
+<hr />
+<h2>1. What this workshop is</h2>
+<p><strong>Who is in the room:</strong> Working professionals — managers, HR, marketing, analysts, founders, operations, consultants, educators. They are <strong>not</strong> software engineers.</p>
+<p><strong>What the day is about:</strong> People learn to manage AI the way they manage junior employees: give clear instructions, check the work, set limits, and only automate what is safe.</p>
+<p><strong>The story of the day (say this once at the start):</strong></p>
+<ol>
+<li><strong>Work WITH AI</strong> — Use AI as a daily helper (better prompts, right tool, memory).</li>
+<li><strong>Work THROUGH AI</strong> — Turn one messy work process into a reusable assistant and a path that can run.</li>
+<li><strong>Work BY AI</strong> — Treat AI like a small team: roles, rules, failure tests, then ship.</li>
+</ol>
+<p><strong>What “done” means at the end of the day:</strong><br />
+Each person (or small team) can <strong>live-demonstrate one real work process</strong> that runs like this:</p>
+<blockquote>
+<p>Something starts the work (a form, an email, a checklist, a pasted note) → AI does a clear step → the result appears where work actually goes (Google Doc, Sheet, email draft, Slack, Slides, etc.) → a human still approves anything external or high-risk.</p>
+</blockquote>
+<p>That running path is the product. Notes alone are <strong>not</strong> enough.</p>
+<hr />
+<h2>2. Surfaces (keep it simple)</h2>
+<p>Participants mostly live in <strong>three places</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Agenda PPT (projector)</strong></td>
+<td>“Where we are” — you advance this (slide numbers in the day map above)</td>
+</tr>
+<tr>
+<td><strong>2. AI tools on their laptop</strong></td>
+<td>Teacher Project (same chat all day), Work Assistant, NotebookLM, n8n/Make (2.6)</td>
+</tr>
+<tr>
+<td><strong>3. Roadmap website</strong></td>
+<td>Checklist, decision tree, task modal (<strong>Copy</strong> prompts), mark complete</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Prompts live on the roadmap</strong> (click task → Copy). Optional backup: Prompt Pack Google Doc (viewer).<br />
+<strong>Optional scratch:</strong> paper or one blank note — <strong>not</strong> a Google Slides “Working Pack.”</p>
+<p><strong>Do not use Miro, Mural, or a Working Pack slide deck.</strong></p>
+<hr />
+<h2>3. How teaching works in this room</h2>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Teacher Agent</strong></td>
+<td>One ChatGPT/Claude <strong>Project</strong>. Same chat thread all day. Remembers their process from the Kickoff chat.</td>
+</tr>
+<tr>
+<td><strong>You (facilitator)</strong></td>
+<td>Short demos, walk the room, fix logins, keep time, quality bar, Demo Day.</td>
+</tr>
+<tr>
+<td><strong>Roadmap (website)</strong></td>
+<td>Activity checklist + decision tree.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb:</strong> Theory / critique → Teacher (same thread). Broken login / Settings → you help.</p>
+<p><strong>After every AI reply, coach them to:</strong> Stop → Read → Decide (what is wrong?) → then act. Do not rush to the next paste.</p>
+<p><strong>One spine:</strong> One Teacher thread + one Work Assistant + <strong>one business process</strong>. Do not let them start five toy projects.</p>
+<hr />
+<h2>4. Before the workshop</h2>
+<h3>Message to participants (~48 hours before)</h3>
+<p>Ask them to complete <strong>before the night of the workshop</strong> (not during class):</p>
+<ol>
+<li><strong>Home base:</strong> ChatGPT (Projects) <strong>or</strong> Claude (Projects).</li>
+<li><strong>Knowledge / research (pick at least one):</strong> NotebookLM and/or Perplexity and/or Gemini.</li>
+<li><strong>Multimodal menu (create accounts now; they will only use 2–3 tomorrow):</strong><br />
+   Suggest a short menu you actually support, for example:<br />
+   - Slides / docs: Gamma <strong>or</strong> Google Slides / Docs AI features<br />
+   - Image: ChatGPT images / Gemini images / one image tool you choose<br />
+   - Voice (optional): one voice tool you choose<br />
+   - Analysis: ChatGPT/Claude with a CSV <strong>or</strong> a spreadsheet AI add-on<br />
+   - UI / web mock (optional): one lightweight mock tool <strong>or</strong> “describe UI in ChatGPT + screenshot”  </li>
+<li>Bring <strong>1–3 work documents</strong> they are allowed to use.</li>
+<li>Write one sentence naming a <strong>painful repetitive process</strong>.</li>
+<li>Log into the roadmap URL once.</li>
+<li>Open the roadmap URL once and click any task to see the <strong>Copy</strong> button.</li>
+</ol>
+<h3>What you prepare</h3>
+<p>See <strong>Appendix F — Facilitator toolkit &amp; templates</strong> at the end (accounts, demo scripts, <strong>2.6 Option A clone link</strong>, optional paper cheat-sheets).</p>
+<hr />
+<h2>5. How you check work</h2>
+<p>After each activity, at a few desks:</p>
+<ol>
+<li>“Show me what you built.”</li>
+<li>“What problem does this solve at work?”</li>
+<li>“What must a human still approve?”</li>
+<li>If clear → “Mark this roadmap task complete.”</li>
+</ol>
+<p>Mid-day: glance at their Teacher chat (map / ETCSLV) or paper scratch.<br />
+End of day: they <strong>trigger the workflow live</strong> (or a recording from the last few minutes).</p>
+<hr />
+<h2>6. Day schedule (summary)</h2>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Session</th>
+<th>Length</th>
+<th>They leave with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start</td>
+<td><strong>0</strong> Housekeeping + Opening</td>
+<td>~35 min</td>
+<td>What is AI / expect → Teacher Agent live</td>
+</tr>
+<tr>
+<td>Morning</td>
+<td><strong>1</strong> Work WITH AI</td>
+<td>~90 min</td>
+<td>Work Assistant (3 runs) + one feedback round + process locked + tools ≤3 + memory</td>
+</tr>
+<tr>
+<td></td>
+<td>Break</td>
+<td>15 min</td>
+<td></td>
+</tr>
+<tr>
+<td>Mid</td>
+<td><strong>2</strong> Work THROUGH AI</td>
+<td>~105 min</td>
+<td>Map + ETCSLV + pattern + brain + <strong>running</strong> path (A/B/C)</td>
+</tr>
+<tr>
+<td></td>
+<td>Break / lunch</td>
+<td>15–60 min</td>
+<td></td>
+</tr>
+<tr>
+<td>Afternoon</td>
+<td><strong>3</strong> Work BY AI</td>
+<td>~115 min</td>
+<td>Min AI jobs + Monday checklist + failure + re-run + Demo Day + 30-day</td>
+</tr>
+<tr>
+<td>After / home</td>
+<td><strong>4</strong> Reference</td>
+<td>~40 min optional</td>
+<td>Readings / video</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <strong>Instructor day map</strong> at the top for slide vs task modes. Full minutes per task live on the roadmap task titles.</p>
+<p><strong>If late:</strong> Cut your talking first. Never cut Demo Day (<strong>3.5</strong>) or the final live run (<strong>3.4</strong>).</p>
+<hr />
+<h1>SESSION 0 — Housekeeping + Opening (~35 minutes)</h1>
+<p><strong>Roadmap:</strong> <code>0.0</code> → <code>0.4</code></p>
+<h2>Goal</h2>
+<p>Shared mental model of AI + expectations; surfaces open; every participant has Project <strong><code>Workshop Teacher — Agentic AI</code></strong>. It stays open all day as their tutor. You are the build coach.</p>
+<h2>Facilitator framing (3 minutes)</h2>
+<p>Say:</p>
+<blockquote>
+<p>“I will not lecture agentic AI for an hour. You will hire a <strong>Teacher Agent</strong> that teaches you. I will help you build and fix things. The roadmap is your checklist. The agenda slides show where we are. By evening you leave with <strong>one real work process that runs</strong> — not just notes.”</p>
+</blockquote>
+<p>Show: roadmap <strong>Session 0</strong> + agenda PPT “You are here: Session 0.”</p>
+<h2>Participant activity — you walk the room</h2>
+<h3>Task 0.0 — What is AI? What to expect / not expect (5 min)</h3>
+<p><strong>Projector:</strong> Task <strong>0.0</strong> slide (concept + expect / don’t-expect table). This is the live framing — Session 4’s optional “What is AI?” video is a later refresher only.</p>
+<p>Say in plain language (~3–4 min):</p>
+<blockquote>
+<p>“AI in this room means software that predicts useful next text or actions from patterns — drafts, summaries, classifications, suggestions. It is not magic and it is not always right. You will <strong>manage</strong> it: brief it, check it, limit it. Today you will leave with one workflow that runs. You will not learn to code, master every tool, or build a no-human autonomous swarm.”</p>
+</blockquote>
+<p><strong>Participant (2 min):</strong> On paper/note — one line they <strong>will</strong> expect, one line they <strong>won’t</strong>. Mark roadmap <strong>0.0</strong>.</p>
+<h3>Task 0.1 — Housekeeping (5 min)</h3>
+<p>Everyone opens: roadmap, ChatGPT/Claude. Optional paper/blank note for scratch. <strong>No Working Pack slides.</strong> Then:</p>
+<h3>Task 0.2 — Create the Teacher Project (10 min)</h3>
+<p>Open ChatGPT or Claude → create a <strong>Project</strong> (not a normal empty chat).</p>
+<ul>
+<li>Name: <code>Workshop Teacher — Agentic AI</code></li>
+<li>If they cannot use Projects: Custom GPT / Gem, or a normal chat where they paste instructions at the top of important messages.</li>
+</ul>
+<h3>Still Task 0.2 — Paste the Teacher’s job into Project <strong>settings</strong></h3>
+<p>This is <strong>not</strong> a chat message. Roadmap <strong>0.2</strong>.<br />
+<strong>Analogy:</strong> Settings = joining letter / handbook · Chat = today’s conversation.</p>
+<ol>
+<li>Open the Project.  </li>
+<li>Find <strong>Instructions</strong> / <strong>Project instructions</strong> / custom instructions for that Project.  </li>
+<li>Paste the text below into that settings box and save.  </li>
+<li>Say aloud: “If you see <strong>ETCSLV</strong> or a ladder in this text — <strong>ignore until Session 2</strong>. Don’t decode now.”</li>
+</ol>
+<pre><code class="language-text">You are the Workshop Teacher Agent for “Practical Agentic AI for Productivity.”
+
+Audience: working professionals (not software engineers).
+Your job: teach agentic AI concepts clearly, sequentially, and practically.
+The human instructor handles live demos and tool troubleshooting. You handle explanation, critique, and drafting.
+
+Rules:
+1) Use plain language. No jargon without a one-line meaning.
+2) Prefer the simplest pattern that works.
+3) Always keep Human-in-the-loop for external actions, legal, people decisions, and money.
+4) When asked to draft prompts or instructions, make them copy-paste ready.
+5) Grow complexity across the day: chat → assistant → knowledge → single workflow → light automation → managed roles/harness.
+6) If the learner’s process is too big for one day, propose a smaller slice.
+7) Remember what I tell you in this Project chat. If I say “use my process from earlier,” do not ask me to re-paste it unless something critical is missing.
+8) End important answers with: “Next build step: …” (one concrete action).
+
+ETCSLV (learner’s harness checklist):
+E Execution — multiple reasoning steps or loops?
+T Tools — interact with external systems?
+C Context — what must AI always know?
+S State — what must persist beyond one chat?
+L Limits — boundaries, approvals, safeguards?
+V Validation — how do we know it’s correct?
+
+Pattern ladder (simplest → complex):
+Instruction-only chat → Knowledge assistant → Single workflow agent → Multi-agent workflow → Automation pipeline
+</code></pre>
+<h3>Task 0.3 — Kickoff chat (10 min)</h3>
+<p>In the Project <strong>chat</strong> (not settings), Roadmap <strong>0.3</strong> — paste:</p>
+<pre><code class="language-text">I am starting the workshop now.
+My role: [e.g. HR Business Partner / Marketing Manager / Operations Lead]
+My organization type: [e.g. education company / fintech / agency]
+The painful process I might automate today: [1–2 sentences]
+
+Confirm you understand your teaching role.
+Then explain in 6 bullets how today will grow from “work WITH AI” to “work BY AI.”
+Ask me 3 clarifying questions about my process so you can coach me all day.
+</code></pre>
+<p>Answer the Teacher’s three questions briefly <strong>in the same chat</strong>. This thread is home base for the day.</p>
+<h3>Task 0.4 — Chat vs assistant vs agent (5 min)</h3>
+<p>Roadmap <strong>0.4</strong>:</p>
+<pre><code class="language-text">Explain chat vs assistant vs agent in my job as [role] in 5 short bullets.
+</code></pre>
+<p>Pin/bookmark if possible. Mark roadmap <strong>0.4</strong> complete.</p>
+<h2>Reflect / checkpoint</h2>
+<p>Two volunteers read one sentence their Teacher used to define “agent.”</p>
+<p>You say:</p>
+<blockquote>
+<p>“Keep this Teacher Project open all day. Explanations → Teacher. Building and fixing the live path → I help you.”</p>
+</blockquote>
+<h3>Done when</h3>
+<p>They can state one expect + one don’t-expect (Task <strong>0.0</strong>); Teacher Project exists; instructions are in settings; first chat happened; they can explain chat vs assistant vs agent in plain language.</p>
+<hr />
+<h1>SESSION 1 — Work WITH AI (~90 minutes)</h1>
+<p><strong>Roadmap:</strong> <code>1.1</code> → <code>1.6</code></p>
+<h2>Session goal</h2>
+<ol>
+<li>Hire one Work Assistant (Settings once) and <strong>use it three times</strong>.  </li>
+<li>Switch Teacher ↔ Work Assistant <strong>once</strong> to learn good prompts + dual-Project critique.  </li>
+<li><strong>Lock one process</strong>, then fit ≤3 tools, then ground memory — in that order.  </li>
+<li>Think and review more than copy-paste.</li>
+</ol>
+<p><strong>Wall script for you:</strong></p>
+<blockquote>
+<p>“1) Fill a brief. 2) Hire the Work Assistant — three runs. 3) Ask the coach once — fix — re-run once. 4) <strong>Lock the job.</strong> 5) Pick tools for <em>that</em> job. 6) Ground with the right files. Stay in one Project until I say switch.”</p>
+</blockquote>
+<p><strong>Progression bridge into Session 1:</strong></p>
+<blockquote>
+<p>“You named <em>assistant</em> at 0.4. Now you hire one — like writing a secretary’s joining letter, then putting them to work.”</p>
+</blockquote>
+<hr />
+<h2>Facilitator demo (5 min) — projector only — before 1.1</h2>
+<p><strong>Weak chat:</strong> empty chat + messy notes + <code>Help me with my morning.</code> → generic.</p>
+<p><strong>Work Assistant with Settings:</strong> same notes → useful Top 5 → invent-trap → show “never invent.”</p>
+<blockquote>
+<p>“You hired a role. Settings stick across many chats. That is why we will run the Work Assistant three times — not once.”</p>
+</blockquote>
+<hr />
+<h2>Task 1.1 — Fill Work Assistant brief (5 min)</h2>
+<p><strong>No AI.</strong> Paper or blank note. Roadmap <strong>1.1</strong> fields.</p>
+<p>Walk the room: if their brief is vague (“be helpful”), force priorities + never-invent + ask-before.</p>
+<hr />
+<h2>Task 1.2 — Create Work Assistant + three runs (20 min)</h2>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Teacher</td>
+<td>Coach — leave closed until <strong>1.3</strong></td>
+</tr>
+<tr>
+<td><code>My Work Assistant — [Name]</code></td>
+<td>Worker — stay here for all three runs</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Settings: paste/type their <strong>1.1</strong> brief once.  </li>
+<li>Run 1 triage → <strong>Stop, read, decide.</strong>  </li>
+<li>Run 2 draft from one list item → review.  </li>
+<li>Run 3 invent-trap → must refuse or ask.</li>
+</ol>
+<p>If someone finishes early: improve Settings themselves (no Teacher yet).</p>
+<p><strong>Done when:</strong> three runs visible in one Work Assistant chat.</p>
+<hr />
+<h2>Task 1.3 — One feedback round (15 min)</h2>
+<p><strong>Only planned Teacher ↔ Work Assistant switch today.</strong></p>
+<ol>
+<li>Teacher Roadmap <strong>1.3</strong> — one message: brief + one weak prompt + one Work Assistant reply.  </li>
+<li>They accept only fixes they agree with.  </li>
+<li>Update Work Assistant Settings once.  </li>
+<li>Re-run <strong>one</strong> task. Compare.</li>
+</ol>
+<p>Say:</p>
+<blockquote>
+<p>“This is how two Projects help each other — once. Good prompts + better job design in the same loop. Do not hop back and forth for the rest of the morning.”</p>
+</blockquote>
+<p>Poll: “Did the re-run get better?”</p>
+<hr />
+<h2>Task 1.4 — Lock today’s process (10 min)</h2>
+<p><strong>Bridge:</strong> They felt WITH AI — now commit <strong>one</strong> job before any tool shopping.</p>
+<p><strong>Analogy:</strong> One customer journey today — not the whole company.</p>
+<p><strong>Think first (5 min) on paper/note:</strong> List 2–3 candidate processes. Plot each on <strong>Impact vs Effort</strong>. Pick the winner (usually high impact, lower effort). Write name · pain · done today · human-only steps. Then <strong>one short</strong> Teacher check — Roadmap <strong>1.4</strong>. Accept smaller slice. Light 🟢/🔵/🔴 tease only; full teach at <strong>2.1</strong>.</p>
+<p>2–3 people read process aloud. Kill overscoped monsters.<br />
+Say: “Tools wait until the job is locked. Start with low-hanging fruit.”</p>
+<hr />
+<h2>Task 1.5 — Tool landscape + fit (30 min)</h2>
+<p><strong>Bridge:</strong> Process locked — equip only what <strong>that</strong> job needs.</p>
+<p><strong>Analogy:</strong> Don’t open every stall — pick two for today’s meal.</p>
+<p>Same landscape demo as before (five lanes, projector). Max <strong>2–3 tools</strong> for the <strong>1.4</strong> process.</p>
+<p>Participant: Roadmap <strong>1.5</strong> in Teacher → one identical test in recommended tools only → lock stack in one line (paper/note fine). Close a fourth tool if open.</p>
+<hr />
+<h2>Task 1.6 — Memory (10 min)</h2>
+<p><strong>Bridge:</strong> Stack chosen — ground with files for <strong>this</strong> process.</p>
+<p><strong>Analogy:</strong> Company file, not corridor rumors.</p>
+<p>NotebookLM / Project files: 2 grounded + 1 trap. <strong>Review</strong> refuse vs invent. Teacher optional.</p>
+<h3>Break — 15 minutes</h3>
+<hr />
+<h1>SESSION 2 — Work THROUGH AI (~105 minutes)</h1>
+<p><strong>Roadmap:</strong> <code>2.0</code> → <code>2.6</code></p>
+<h2>Session goal</h2>
+<p>Same process → map → pattern → reusable brain → running path (trigger → AI → output → approval).</p>
+<p><strong>Bridge into Session 2:</strong></p>
+<blockquote>
+<p>“WITH = a junior at your elbow. THROUGH = the <strong>job</strong> runs on a path — reception → desk → approval. Same process you locked at <strong>1.4</strong>. We only add structure.”</p>
+</blockquote>
+<hr />
+<h2>Task 2.0 — Framing: pattern ladder + readiness (5 minutes)</h2>
+<h3>Facilitator (3 minutes)</h3>
+<p>Show the ladder once on a PPT slide:</p>
+<pre><code class="language-text">Instruction-only chat
+→ Knowledge assistant (your docs)
+→ Single workflow agent
+→ Multi-agent workflow
+→ Automation pipeline
+</code></pre>
+<p>Show the <strong>readiness self-score</strong> (4 dimensions: data · tool access · risk appetite · change capacity).</p>
+<blockquote>
+<p>“Climb only as high as your process needs. Rate yourself honestly — low data readiness means start simpler. You already lived chat + assistant this morning. Multi-agent waits until something runs.”</p>
+</blockquote>
+<p><strong>Analogy:</strong> Bicycle → scooter → one van → small fleet → factory conveyor.</p>
+<h3>Participant activity (2 minutes)</h3>
+<p><strong>Paper/workbook only — no Teacher chat.</strong> They circle a ladder rung and note it on the page. Optional neighbor discuss.</p>
+<hr />
+<h2>Tasks 2.1–2.3 — Map + ETCSLV in the same Teacher thread (25 minutes)</h2>
+<h3>Goal</h3>
+<ol>
+<li>Teach ETCSLV <strong>before</strong> critique.  </li>
+<li>Map steps <strong>in Teacher chat</strong> (typed once — that message is the map).  </li>
+<li>They draft ETCSLV; Teacher critiques in the <strong>same thread</strong> (no re-paste).</li>
+</ol>
+<h3>What the step tags mean (say once) — full teach here</h3>
+<p><strong>Analogy (kitchen):</strong> chef inventing a special (🟢) · oven timer / ticket printer (🔵) · manager tasting before the plate leaves (🔴).</p>
+<ul>
+<li><strong>Green — LLM thinking:</strong> draft, summarize, brainstorm, rewrite.  </li>
+<li><strong>Blue — rules / automation:</strong> forms, reminders, moving data, triggers.  </li>
+<li><strong>Red — human only:</strong> legal, people conflict, money, send-to-client without review.</li>
+</ul>
+<h3>Facilitator demo — teach ETCSLV first (5 minutes) — projector only</h3>
+<p><strong>Bridge:</strong> Map is the process map; ETCSLV is the checklist before the process goes live.<br />
+<strong>Analogy:</strong> How hard · which systems · what they must know · what files stay · what they may never do alone · how you check quality.</p>
+<p>Show the table on a PPT slide and walk <strong>one fully filled example</strong> (“Weekly client report”):</p>
+<table>
+<thead>
+<tr>
+<th>Letter</th>
+<th>Meaning</th>
+<th>Core question</th>
+<th>Example answer for weekly client report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E</strong></td>
+<td>Execution</td>
+<td>Multiple reasoning steps or loops?</td>
+<td>Yes — gather bullets, rewrite, adjust tone</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>Tools</td>
+<td>External systems needed?</td>
+<td>Email + Doc; optional sheet of inputs</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Context</td>
+<td>What must AI always know?</td>
+<td>Client name, offer, forbidden claims</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>State</td>
+<td>What persists beyond one chat?</td>
+<td>Last week’s report file; client prefs</td>
+</tr>
+<tr>
+<td><strong>L</strong></td>
+<td>Limits</td>
+<td>Boundaries / approvals?</td>
+<td>No send without manager approval; no invented metrics</td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td>Validation</td>
+<td>How do we know it’s correct?</td>
+<td>Checklist: facts cited, tone OK, human signed off</td>
+</tr>
+</tbody>
+</table>
+<p>Say:</p>
+<blockquote>
+<p>“ETCSLV is your operating checklist. Map in Teacher chat (2.1). Draft on Worksheet D (2.2) — paper only. Paste that draft once for critique (2.3).”</p>
+</blockquote>
+<h3>Participant activity (14 minutes)</h3>
+<p><strong>2.1</strong> Roadmap — type steps into Teacher; Teacher tags Green/Blue/Red. Copy to Worksheet C.<br />
+<strong>2.2</strong> Worksheet D — fill E–V on paper. <strong>No chat.</strong><br />
+<strong>2.3</strong> Paste E–V into Teacher; “Critique my ETCSLV draft above.” Reply with updated L/V.</p>
+<p><strong>Review mantra:</strong> Stop → Read → Decide before accepting rewrites.</p>
+<h3>Reflect (3 minutes)</h3>
+<p>“Hardest letter was ___.” Spot-check that L and V are not “be careful.”</p>
+<h3>Done when</h3>
+<p>Map exists in Teacher chat; L and V are specific.</p>
+<hr />
+<h2>Task 2.4 — Decision tree + lock pattern (15 minutes)</h2>
+<h3>Goal</h3>
+<p>Lock today’s pattern. <strong>One</strong> short Teacher ask — result phrase only, not a process dump.</p>
+<p><strong>Bridge:</strong> You already have map + ETCSLV — the tree <strong>narrows</strong> the room; it is not a third religion.<br />
+<strong>Say aloud:</strong> “Next (<strong>2.6</strong>) almost everyone will run a <strong>prepared template</strong> that matches this pattern’s shape—not build Meta-to-CRM from scratch. Mapping and rules still matter: they tell you <em>what</em> the template is standing in for.”<br />
+<strong>Analogy:</strong> Clinic triage — a few questions → the right room, not the whole hospital.</p>
+<h3>Facilitator demo (3 minutes) — projector only</h3>
+<p>Volunteer process → roadmap Decision Tree live → read result card.</p>
+<p><strong>Printable decision tree (external handout):</strong> Generate <a href="AGENTIC_DECISION_TREE_PRINTABLE.md"><code>docs/AGENTIC_DECISION_TREE_PRINTABLE.md</code></a> with <code>npm run generate:decision-tree-printable</code>.</p>
+<h3>Participant activity (10 minutes)</h3>
+<ol>
+<li>Complete Decision Tree on the roadmap (click through).  </li>
+<li>Roadmap <strong>2.4</strong> — one Teacher message with the <strong>result phrase</strong> + “I will build: …”  </li>
+<li>No second document required.</li>
+</ol>
+<h3>Reflect (2 minutes)</h3>
+<p>Celebrate anyone told to build <strong>simpler</strong> than expected.</p>
+<hr />
+<h2>Task 2.5 — Build the workflow brain (30 minutes)</h2>
+<h3>Goal</h3>
+<p>One Teacher ask (uses earlier ETCSLV) → <strong>one</strong> Settings paste → test happy + messy.</p>
+<p><strong>Bridge / identity:</strong> Brain = standing brief for <strong>this</strong> locked job. Extend <strong>Work Assistant</strong> or create <strong>one</strong> new Project — not a new Teacher, not five surfaces.<br />
+<strong>Say aloud:</strong> “This is the <strong>brain</strong> (instructions). The <strong>hands</strong> (n8n / template) come in <strong>2.6</strong>.”</p>
+<p><strong>Analogy:</strong> Standing brief for the weekly client update — not the whole company handbook.</p>
+<h3>Facilitator demo (4 minutes) — projector only</h3>
+<p>Show a “Weekly Status Report Assistant”: fixed sections, rule “ask if bullets missing.” Run once.</p>
+<h3>Participant activity (22 minutes)</h3>
+<ol>
+<li>Roadmap <strong>2.5</strong> — one Teacher message (<strong>no</strong> re-paste of pattern/process/ETCSLV blocks).  </li>
+<li>Paste <strong>only</strong> system instructions into the worker Project/GPT/NotebookLM Settings once.  </li>
+<li>Test happy + messy. <strong>Review</strong> before asking Teacher again.  </li>
+<li>Optional: one short fix ask if stuck.</li>
+</ol>
+<h3>Reflect (2 minutes)</h3>
+<p>Say aloud: “Still requires a human: ___.”</p>
+<hr />
+<h2>Task 2.6 — Automation path that can run (30 minutes)</h2>
+<h3>Goal</h3>
+<p>Trigger → AI → output → approval — <strong>live once</strong>, not paper architecture.</p>
+<h3>Facilitator demo (6 minutes) — projector only</h3>
+<p>Show <strong>your</strong> cloneable template once (prefer Manual Trigger → AI/clean → Sheet or Gmail <strong>draft</strong> → human checks).</p>
+<p>Then say:</p>
+<blockquote>
+<p>“Almost everyone will <strong>clone this template</strong> and make it about <em>your</em> process.<br />
+If you are very comfortable and want a tiny custom flow: Manual Trigger only, under five nodes, no webhooks, no auto-send. If it fights you for ten minutes, come back to the template.<br />
+If n8n will not connect: checklist → AI in chat → you paste the result. That still counts.”</p>
+</blockquote>
+<p>Also say (cost routing, 1–2 minutes):</p>
+<blockquote>
+<p>“Do not use an expensive model for a cheap formatting job. Easy steps <code>$</code>, hard judgment <code>$$$</code>. Never put API keys in chat.”</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Kind of step</th>
+<th>Model choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Format, extract, tag, clear classify</td>
+<td>Smaller / faster / cheaper</td>
+</tr>
+<tr>
+<td>Ambiguous planning or hard judgment</td>
+<td>Stronger / costlier</td>
+</tr>
+<tr>
+<td>External / high-stakes message</td>
+<td>Stronger model + human approval</td>
+</tr>
+</tbody>
+</table>
+<h3>Participant activity (24 minutes)</h3>
+<p><strong>Default — Template (almost everyone)</strong><br />
+1. Open the clone link.<br />
+2. Replace labels / sample rows with their process flavor (or keep sample and narrate how it maps to their job).<br />
+3. <strong>Execute once.</strong> Confirm output on screen.<br />
+4. Write one line: what <strong>they</strong> approve before anything goes out.<br />
+5. Optional if time: roadmap <strong>2.6</strong> short Teacher review.</p>
+<p><strong>Exception — Custom (only if they insist and you agree)</strong><br />
+1. Manual Trigger · ≤5 nodes · no webhook / Meta / CRM / HTTP / Send Email (draft OK).<br />
+2. <strong>Execute once.</strong> Same approval line.<br />
+3. Stuck &gt;10 minutes → <strong>back to template</strong>. No long debugging.</p>
+<p><strong>If automation blocked — Semi-auto</strong><br />
+Checklist → assistant produces artifact → human sends after review. Still counts if they can re-do it live.</p>
+<h3>Reflect (4 minutes)</h3>
+<p>Three people show the <strong>run on screen</strong>.</p>
+<h3>Break or lunch</h3>
+<hr />
+<h1>SESSION 3 — Work BY AI (~115 minutes)</h1>
+<p><strong>Roadmap:</strong> <code>3.0</code> → <code>3.6</code></p>
+<h2>Session goal</h2>
+<p>Same workflow → minimum AI jobs → Monday-ready rules checklist → break it → make it re-run alone → demo the run.<br />
+Keep answers in the <strong>Teacher chat</strong> — no workforce/harness slide deck.</p>
+<p><strong>Bridge into Session 3:</strong></p>
+<blockquote>
+<p>“Your path already runs. BY is not a new product — it is managing the process for Monday: roles, rules, fire drills. You are the floor manager.”</p>
+</blockquote>
+<hr />
+<h2>Task 3.0 — Framing: manager of agents (5 minutes)</h2>
+<p>Facilitator:</p>
+<blockquote>
+<p>“You are the manager. AI jobs are workers. The harness is the job description and safety rules — <strong>the same ETCSLV letters</strong>, written so you could hand them to a colleague on Monday. Failure Lab is practice for when things break. Then you make the path re-run without me.”</p>
+</blockquote>
+<p><strong>Analogy:</strong> Staff a process that already serves customers — don’t design a new mall.</p>
+<p>Participants write <strong>one line</strong> on paper/workbook. <strong>No Teacher chat.</strong></p>
+<hr />
+<h2>Task 3.1 — AI workforce (15 minutes)</h2>
+<h3>Goal</h3>
+<p>Minimum <strong>AI jobs</strong> for today’s process (not an org chart) — typed in Teacher — around the <strong>same</strong> running path from <strong>2.6</strong>.</p>
+<h3>Facilitator demo (2 minutes) — projector only</h3>
+<p>On a PPT slide, show a <strong>tiny</strong> example (not five fancy titles):</p>
+<pre><code class="language-text">Cleaner  → gets messy file → produces clean rows
+Sorter   → gets clean rows → produces location groups
+Human    → approves before any email goes out
+</code></pre>
+<p>Say: “If you cannot explain a job in one sentence, delete it.”</p>
+<h3>Participant activity (11 minutes)</h3>
+<p>Roadmap <strong>3.1</strong>: draft ≤3 AI jobs with input/output/human gate → Teacher cuts → final table.</p>
+<h3>Done when</h3>
+<p>Handoffs clear; human owns external / high-risk steps.</p>
+<hr />
+<h2>Task 3.2 — Harness Card (15 minutes)</h2>
+<h3>Goal</h3>
+<p>Same ETCSLV on <strong>Worksheet E</strong> (paper).<br />
+Say explicitly: “Harness is not a new framework. Harness means your ETCSLV rules written clearly enough to use at work on Monday.”</p>
+<p><strong>Analogy:</strong> Job description + SOPs + approval on the desk.</p>
+<h3>Facilitator demo (2 minutes) — projector only</h3>
+<p>Fill one example harness on a PPT slide (“Weekly competitor brief”).</p>
+<h3>Participant activity (11 minutes)</h3>
+<p>Fill <strong>Worksheet E</strong> — all fields; spot-check <strong>L</strong> and <strong>V</strong> in the room.<br />
+<strong>Optional if time:</strong> paste L + V to Teacher for critique (Roadmap <strong>3.2</strong>).</p>
+<h3>Done when</h3>
+<p>L and V are specific enough to test Monday morning.</p>
+<hr />
+<h2>Task 3.3 — Failure Lab (20 minutes)</h2>
+<h3>Goal</h3>
+<p>Break <strong>the same path from 2.6</strong> (template or custom) on purpose; harden it. <strong>Do first, ask Teacher only if stuck.</strong></p>
+<h3>Failure types (facilitator explains once)</h3>
+<ol>
+<li>Missing context  </li>
+<li>Hallucination  </li>
+<li>Wrong tool  </li>
+<li>No approval  </li>
+<li>Doom loop  </li>
+</ol>
+<h3>Facilitator demo (3 minutes) — projector only</h3>
+<p>Break your demo once (empty input is easiest). Show the fix in instructions.</p>
+<h3>Participant activity (12 minutes)</h3>
+<p>Trigger <strong>two</strong> failures. After each: Stop → Read → Fix. Optional two lines on paper: What broke → Fix.</p>
+<p>Teacher only if stuck — roadmap <strong>3.3</strong>.</p>
+<hr />
+<h2>Task 3.4 — Capstone: make the workflow re-run without the instructor (30 minutes)</h2>
+<h3>Goal</h3>
+<p><strong>Not</strong> “make a presentation about the idea.”<br />
+<strong>Yes</strong> — make <strong>this</strong> process (the <strong>2.6</strong> path) run twice on their machine without you beside them.</p>
+<h3>Definition of done (show on agenda PPT)</h3>
+<ul>
+<li>[ ] Trigger defined and used  </li>
+<li>[ ] AI step uses their instructions/context  </li>
+<li>[ ] Output lands where real work goes  </li>
+<li>[ ] Human approval before external send when relevant  </li>
+<li>[ ] Harness L + V match the build  </li>
+<li>[ ] They can re-run without you beside them  </li>
+</ul>
+<h3>Participant activity (~28 minutes)</h3>
+<ol>
+<li>Close Failure Lab gaps.  </li>
+<li>Re-run happy path twice.  </li>
+<li>Roadmap <strong>3.4</strong> — Teacher for spoken Demo Day script.  </li>
+<li>Agenda PPT is for orientation — not the capstone.</li>
+</ol>
+<h3>Facilitator</h3>
+<p>Walk desks. Kill scope creep: “Keep the slice you can re-run alone in ten minutes.”</p>
+<hr />
+<h2>Task 3.5 — Demo Day (20 minutes)</h2>
+<h3>Goal</h3>
+<p>Show the <strong>run</strong>, not slide theater.</p>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 min</td>
+<td>Rules: ~3 min/team; live trigger or recording from last 10 min</td>
+</tr>
+<tr>
+<td>~3 min × teams</td>
+<td>Pain → run → who approves → one risk fixed</td>
+</tr>
+<tr>
+<td>3 min</td>
+<td>Votes: Most practical · Safest · Best time saved</td>
+</tr>
+<tr>
+<td>3 min</td>
+<td>Close + 30-day challenge</td>
+</tr>
+</tbody>
+</table>
+<p>Too many teams → 90-second lightning runs.</p>
+<h3>Closing — say this</h3>
+<blockquote>
+<p>“Monday: run this once without this room. Keep the Teacher Agent. Improve Validation next. Add complexity only when the decision tree says so.”</p>
+</blockquote>
+<h2>Task 3.6 — 30-day plan (10 minutes, minimal)</h2>
+<p>Fill Worksheet I + Reference R7 on paper. Circle Week 1 ritual.<br />
+<strong>Optional:</strong> Roadmap <strong>3.6</strong> polish in Teacher if time. Mark <strong>3.5</strong> and <strong>3.6</strong> complete.</p>
+<hr />
+<h1>SESSION 4 — Reference (optional, async)</h1>
+<p><strong>Roadmap:</strong> <code>4.1</code> → <code>4.3</code>. Not required live. Link in follow-up email.<br />
+Note: Task <strong>4.3</strong> (What is AI? video) is an optional refresher — the live framing is Task <strong>0.0</strong> at the start of the day.</p>
+<hr />
+<h1>Appendix A — Timing map</h1>
+<table>
+<thead>
+<tr>
+<th>Session</th>
+<th>~Time</th>
+<th>Bias</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 Opening</td>
+<td>~35</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td>1 WITH</td>
+<td>~90</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td>2 THROUGH</td>
+<td>~105</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td>3 BY + Demo</td>
+<td>~115</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td>4 Reference</td>
+<td>~40 async</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>Breaks</td>
+<td>2×15 (+ lunch)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Task minutes (5 / 10 / 15 / 20 / 30) are on roadmap task titles. Use the <strong>Instructor day map</strong> for slide vs task modes.</p>
+<hr />
+<h1>Appendix B — Roadmap sessions (<code>week_number</code> = session #)</h1>
+<table>
+<thead>
+<tr>
+<th>week_number</th>
+<th>Title</th>
+<th>Task IDs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Session 0: Housekeeping + Opening</td>
+<td>0.0–0.4</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Session 1: Work WITH AI</td>
+<td>1.1–1.6</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Session 2: Work THROUGH AI</td>
+<td>2.0–2.6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Session 3: Work BY AI</td>
+<td>3.0–3.6</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Session 4: Reference — Go deeper (optional)</td>
+<td>4.1–4.3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>Appendix C — Do / don’t</h1>
+<p><strong>Do</strong></p>
+<ul>
+<li>Keep one Teacher chat all day (“use earlier context”).  </li>
+<li>Demo short; rescue long.  </li>
+<li>Force slices that can re-run today.  </li>
+<li>Require a live run.  </li>
+<li>After every AI reply: Stop → Read → Decide.  </li>
+<li>Allow optional paper/blank note for thinking — not as a paste source.</li>
+</ul>
+<p><strong>Don’t</strong></p>
+<ul>
+<li>Add Miro/Mural or a Google Slides Working Pack.  </li>
+<li>Require multi-block pastes (process + map + ETCSLV) in one prompt.  </li>
+<li>Hop Teacher ↔ Work Assistant except the one feedback round (<strong>1.3</strong>).  </li>
+<li>Let people try more than 3 tools for today’s locked process.</li>
+<li>Accept a deck as capstone without a run.  </li>
+<li>Introduce ETCSLV only via a Teacher prompt with no explanation.</li>
+</ul>
+<hr />
+<h1>Appendix D — If things go wrong</h1>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wi‑Fi / tool blocked</td>
+<td><strong>Option C</strong> semi-auto; still require a live run</td>
+</tr>
+<tr>
+<td>Process too big</td>
+<td>One trigger, one AI step, one output</td>
+</tr>
+<tr>
+<td>Automation clone fails</td>
+<td>Switch A→C: Sheet/form → assistant → human send still counts if live</td>
+</tr>
+<tr>
+<td>Option B n8n AI invents webhooks</td>
+<td>Delete extras; re-ask Teacher “workshop slice only”; or switch to <strong>A</strong></td>
+</tr>
+<tr>
+<td>Stuck on Option B &gt;10 min</td>
+<td>Switch to <strong>Option A</strong> template — no shame</td>
+</tr>
+<tr>
+<td>Too many Demo Day teams</td>
+<td>90-second lightning</td>
+</tr>
+<tr>
+<td>Teacher Agent weak</td>
+<td>Re-paste Opening system instructions (roadmap <strong>0.2</strong>)</td>
+</tr>
+<tr>
+<td>Someone opens a 4th tool</td>
+<td>Remind locked stack; close it</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>Appendix E — Teacher prompts (quick index)</h1>
+<p>Prompts live in the <strong>roadmap task modal</strong>. Use this index when calling numbers aloud.</p>
+<p><strong>E1 — Teacher system instructions</strong> → 0.2 (Settings once)<br />
+<strong>E2 — Kickoff chat</strong> → 0.3<br />
+<strong>E3 — One feedback round</strong> → 1.3<br />
+<strong>E4 — Process lock check</strong> → 1.4<br />
+<strong>E5 — Tool picker (max 2–3)</strong> → 1.5  </p>
+<p><strong>E6 — Ladder</strong> → 2.0 (paper; optional chat)<br />
+<strong>E7 — Map in chat</strong> → 2.1<br />
+<strong>E8 — ETCSLV critique</strong> → 2.3<br />
+<strong>E9 — Decision tree challenge</strong> → 2.4<br />
+<strong>E10 — Workflow brain</strong> → 2.5<br />
+<strong>E11a — Map process onto template</strong> → 2.6 BOX A (optional; default path is clone + run)<br />
+<strong>E11b — Automation review</strong> → 2.6 BOX B (optional after run)<br />
+<strong>E12 — Manager mindset</strong> → 3.0 (optional)<br />
+<strong>E13 — Cut AI jobs</strong> → 3.1<br />
+<strong>E14 — Harness Q&amp;A</strong> → 3.2<br />
+<strong>E15 — Failure coach</strong> → 3.3 (only if stuck)<br />
+<strong>E16 — Demo script</strong> → 3.4<br />
+<strong>E17 — 30-day plan</strong> → 3.6 (optional)</p>
+<p>Do not invent shorter versions that reintroduce multi-paste dumps.</p>
+<hr />
+<h1>Appendix F — Facilitator toolkit &amp; templates</h1>
+<p>This is your prep checklist. Do this <strong>before</strong> workshop day.</p>
+<h2>F1 — Accounts and tools you must have ready</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>What to set up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Home LLM</td>
+<td>ChatGPT and/or Claude with Projects — Teacher + Work Assistant demos pre-created</td>
+</tr>
+<tr>
+<td>Knowledge demo</td>
+<td>NotebookLM (or Project files) + 1–2 safe PDFs</td>
+</tr>
+<tr>
+<td>Compare demo</td>
+<td>One second chat/research tool (e.g. Perplexity)</td>
+</tr>
+<tr>
+<td>Automation</td>
+<td><strong>One</strong> platform you support live: n8n <strong>or</strong> Make <strong>or</strong> Zapier — with a <strong>clone link for Option A</strong></td>
+</tr>
+<tr>
+<td>Multimodal tour</td>
+<td>Accounts for every lane you will show on projector (you demo; they already signed up)</td>
+</tr>
+<tr>
+<td>Agenda deck</td>
+<td>Google Slides / PPT with session “You are here” markers</td>
+</tr>
+<tr>
+<td>Roadmap</td>
+<td>Batch enrolled; decision tree on; task Copy prompts current</td>
+</tr>
+<tr>
+<td>Prompt Pack (optional backup)</td>
+<td>Google Doc viewer if you still publish one</td>
+</tr>
+<tr>
+<td>Backup</td>
+<td>Hotspot; ChatGPT+Claude-only track; optional 1-page paper cheat-sheet (Work Assistant brief fields + Green/Blue/Red)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Try every demo once the day before</strong> with the same Wi‑Fi quality you expect in the room.</p>
+<h2>F2 — Pre-built demos you should be able to run cold</h2>
+<table>
+<thead>
+<tr>
+<th>Demo</th>
+<th>What “ready” means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weak chat vs Work Assistant</td>
+<td>Messy inbox text saved; Work Assistant Project instructions already filled</td>
+</tr>
+<tr>
+<td>Prompt before/after</td>
+<td>Two prompts saved in a note</td>
+</tr>
+<tr>
+<td>Tool landscape</td>
+<td>5 lanes on one agenda slide; one live flash per lane max</td>
+</tr>
+<tr>
+<td>NotebookLM trap question</td>
+<td>PDF uploaded; two questions written</td>
+</tr>
+<tr>
+<td>Decision tree</td>
+<td>One sample process with known answers</td>
+</tr>
+<tr>
+<td>Workflow brain</td>
+<td>Status assistant Project ready</td>
+</tr>
+<tr>
+<td>Automation</td>
+<td>Option A clone ready with dummy data; Option B safety rules on a sticky note</td>
+</tr>
+<tr>
+<td>Failure</td>
+<td>One intentional break + known fix</td>
+</tr>
+<tr>
+<td>Cost $ / $$$</td>
+<td>Same sample map with two steps marked</td>
+</tr>
+</tbody>
+</table>
+<h2>F3 — Optional paper cheat-sheet (not a second homework deck)</h2>
+<p>If Wi‑Fi or focus is weak, print <strong>one page</strong> with:</p>
+<ul>
+<li>Work Assistant brief blanks (role / priorities / never-invent / ask-before)  </li>
+<li>Green / Blue / Red meanings  </li>
+<li>Reminder: answers live in Teacher / Work Assistant chats  </li>
+</ul>
+<p>Do <strong>not</strong> require Google Slides copies or paste-from-paper rituals.</p>
+<h2>F4 — Agenda PPT / Google Slides (facilitator projector deck)</h2>
+<p>Keep sparse (see also <code>PRACTICAL_AGENTIC_AI_SLIDE_PLAN.md</code>). Must include:</p>
+<ul>
+<li>Day map with YOU ARE HERE  </li>
+<li>Surfaces: roadmap (Copy prompts) · AI tools (+ optional scratch)  </li>
+<li>Same Teacher chat all day · Teacher↔Work Assistant once  </li>
+<li>Stop → Read → Decide  </li>
+<li>Chat vs Assistant vs Agent  </li>
+<li>Tool landscape 5 lanes + “max 2–3 for your workflow”  </li>
+<li>Green / Blue / Red tags  </li>
+<li>ETCSLV table with one filled example  </li>
+<li>Pattern ladder  </li>
+<li>Cost $ vs $$$  </li>
+<li>Definition of done  </li>
+<li>Slide 23: 2.6 Options A / B / C  </li>
+<li>Demo Day rules  </li>
+<li>30-day challenge + links  </li>
+</ul>
+<p>Participants do <strong>not</strong> collaboratively edit your agenda deck.</p>
+<h2>F5 — Automation template structure (n8n / Make / Zapier) — Option A</h2>
+<p>Build <strong>one</strong> scenario participants can clone. Prefer workshop-safe defaults:</p>
+<ol>
+<li><strong>Trigger</strong> — <strong>Manual Trigger</strong> (best for the room) <strong>or</strong> new Sheet row / Form submit  </li>
+<li><strong>Normalize</strong> — Edit Fields / Set with sample: <code>raw_input</code>, <code>requester</code>, <code>date</code>  </li>
+<li><strong>AI step</strong> (optional) — classify or clean only; paste “workflow brain” snippet + <code>{{raw_input}}</code>  </li>
+<li><strong>Write output</strong> — Sheet append / Doc body / Gmail <strong>Create Draft</strong> (never auto-send)  </li>
+<li><strong>Approval</strong> — sticky note or field: “Human checks before external send”  </li>
+<li><strong>Dummy data</strong> — 3 sample rows for the live demo  </li>
+</ol>
+<p><strong>Banned in Option B AI builds (and avoid in Option A demos):</strong> webhooks, Meta, CRM writeback, HTTP to random APIs, loops, Send Email, &gt;5 nodes.</p>
+<p>Document on one page: clone link, required connections, where to paste their prompt, <strong>A / B / C</strong> chooser.</p>
+<h2>F6 — Sample content packs to pre-write</h2>
+<table>
+<thead>
+<tr>
+<th>Pack</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Messy inbox</td>
+<td>Morning bullets for Work Assistant demo</td>
+</tr>
+<tr>
+<td>Work Assistant instructions</td>
+<td>Final text for your demo Work Assistant</td>
+</tr>
+<tr>
+<td>Client-report map</td>
+<td>6–8 steps + tags + full ETCSLV answers</td>
+</tr>
+<tr>
+<td>Trap PDF</td>
+<td>Short fake policy PDF for NotebookLM</td>
+</tr>
+<tr>
+<td>Feedback-round sample</td>
+<td>One weak prompt + mediocre Work Assistant reply for 1.3 demo</td>
+</tr>
+<tr>
+<td>Multimodal one-liners</td>
+<td>One sentence per lane for the tour</td>
+</tr>
+</tbody>
+</table>
+<h2>F7 — Night-before facilitator checklist</h2>
+<ul>
+<li>[ ] All your demo Projects open and tested  </li>
+<li>[ ] <strong>Option A</strong> automation clone works on a second browser/profile  </li>
+<li>[ ] Option B safety card printed (Manual Trigger · ≤5 nodes · draft only)  </li>
+<li>[ ] Agenda deck matches slide plan (incl. Slide 23 A/B/C)  </li>
+<li>[ ] Roadmap tasks show current Copy prompts  </li>
+<li>[ ] Agenda deck on the workshop laptop + backup PDF  </li>
+<li>[ ] Room Wi‑Fi + hotspot verified  </li>
+<li>[ ] Optional paper cheat-sheets for ~20% of seats  </li>
+</ul>
+<hr />
+<p><em>Document version: 2026-07-31 · Sessions 0–4 · Instructor day map (slide / slide+task / task) · 2.6 Options A/B/C · Same Teacher thread · Roadmap Copy primary · Product of the day: one running workflow</em></p>
+</body>
+</html>
