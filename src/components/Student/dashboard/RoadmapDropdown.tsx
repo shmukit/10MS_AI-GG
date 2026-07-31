@@ -70,15 +70,16 @@ export const RoadmapDropdown: React.FC<RoadmapDropdownProps> = ({
         const updatePosition = () => {
             const rect = buttonRef.current!.getBoundingClientRect();
             // fixed + block without an explicit width stretches to the viewport;
-            // pin width to the trigger and clamp so the menu stays under the button.
+            // pin width to the trigger and prefer aligning under the trigger's right edge
+            // so a long greeting on the left does not push/clip the menu.
             const minWidth = Math.max(Math.round(rect.width), 224);
             const maxWidth = Math.min(320, Math.max(16, window.innerWidth - 16));
             const width = Math.min(minWidth, maxWidth);
-            let left = rect.left;
+            let left = rect.right - width;
+            if (left < 8) left = 8;
             if (left + width > window.innerWidth - 8) {
                 left = Math.max(8, window.innerWidth - 8 - width);
             }
-            if (left < 8) left = 8;
             setMenuStyle({
                 top: rect.bottom + 8,
                 left,

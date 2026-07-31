@@ -35,10 +35,12 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            <div className="hidden xs:flex flex-col items-end mr-1">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 min-w-0">
+            <div className="hidden xs:flex flex-col items-end mr-1 min-w-0">
               <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">Hello,</span>
-              <span className="text-xs sm:text-sm font-semibold truncate max-w-[80px] sm:max-w-none text-foreground">{userName}</span>
+              <span className="text-xs sm:text-sm font-semibold truncate max-w-[80px] sm:max-w-[120px] lg:max-w-[160px] text-foreground" title={userName}>
+                {userName}
+              </span>
             </div>
             <div className="md:hidden">
               <button

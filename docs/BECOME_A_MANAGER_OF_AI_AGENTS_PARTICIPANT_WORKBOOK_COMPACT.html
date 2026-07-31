@@ -1,0 +1,3300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Become a Manager of AI Agents — Participant Workbook</title>
+<style>
+/* Participant workbook → PDF print styles
+   npx md-to-pdf docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK.md --stylesheet docs/workbook-print.css
+*/
+
+@page {
+  size: A4;
+  /* Bottom margin reserved for stamped logo + page number (added after PDF export) */
+  margin: 14mm 14mm 30mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  color: #111;
+  max-width: 100%;
+  padding-bottom: 8mm;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+h1 {
+  font-size: 20pt;
+  margin: 0.2em 0 0.4em;
+  border-bottom: 3px solid #111;
+  padding-bottom: 0.25em;
+}
+
+h2 {
+  font-size: 14pt;
+  margin: 1em 0 0.4em;
+  padding-bottom: 0.15em;
+  border-bottom: 1.5px solid #444;
+}
+
+h3 {
+  font-size: 12pt;
+  margin: 0.9em 0 0.35em;
+}
+
+hr {
+  border: 0;
+  border-top: 1.5px solid #999;
+  margin: 1em 0;
+}
+
+/* —— Page breaks —— */
+.page-break {
+  break-before: page !important;
+  page-break-before: always !important;
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* —— TABLES (fix borderless / dull PDF) —— */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 0.75em 0 1em !important;
+  font-size: 9.5pt;
+  border: 1.5px solid #111 !important;
+  /* Allow multi-page tables (e.g. Contents) to break — avoid blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+thead {
+  display: table-header-group;
+}
+
+th,
+td {
+  border: 1px solid #333 !important;
+  padding: 6px 8px !important;
+  vertical-align: top !important;
+  text-align: left !important;
+}
+
+th {
+  background: #e6e6e6 !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* GFM first header row often renders as th */
+tr:first-child th,
+thead th {
+  background: #d9d9d9 !important;
+  border-bottom: 2px solid #111 !important;
+}
+
+/* Alternating body rows for scanability */
+tbody tr:nth-child(even) td {
+  background: #f7f7f7 !important;
+}
+
+/* —— TASK BOXES (single-column tables) —— */
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) {
+  border: 2.5px solid #111 !important;
+  background: #f3f3f3 !important;
+  margin: 0.9em 0 1.1em !important;
+  /* Keep short task boxes together; large data tables may still break */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Dark header ONLY on thead — do NOT style tbody first row (that is "Do:") */
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th {
+  background: #222 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+  font-size: 10.5pt !important;
+  padding: 8px 10px !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Body rows: always dark text on light fill (fixes invisible "Do:") */
+table:has(> tbody > tr > td:only-child) tbody td,
+table:has(> thead > tr > th:only-child) tbody td {
+  color: #111 !important;
+  background: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+table:has(> tbody > tr > td:only-child) tbody tr:nth-child(even) td,
+table:has(> thead > tr > th:only-child) tbody tr:nth-child(even) td {
+  background: #ececec !important;
+  color: #111 !important;
+}
+
+/* —— Callouts / tips (blockquotes) —— */
+blockquote {
+  margin: 0.8em 0 !important;
+  padding: 10px 14px !important;
+  border: 1.5px solid #333 !important;
+  border-left: 6px solid #111 !important;
+  background: #f5f5f5 !important;
+  /* Do NOT use page-break-inside:avoid — large/late quotes create blank orphan pages */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+blockquote p {
+  margin: 0.25em 0 !important;
+}
+
+blockquote strong:first-child {
+  display: inline-block;
+  margin-bottom: 0.15em;
+}
+
+/* —— Code / ASCII diagrams —— */
+pre,
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 8.5pt;
+}
+
+pre {
+  border: 1.5px solid #333 !important;
+  background: #f4f4f4 !important;
+  padding: 10px 12px !important;
+  overflow-x: auto;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* —— Lists —— */
+ul, ol {
+  margin: 0.4em 0 0.6em 1.2em;
+  padding: 0;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+/* —— Keep headings with following content —— */
+h1, h2, h3, h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Corner logo is stamped into the PDF after export (see scripts/export_workbook_pdf.py).
+   Do not use position:fixed here — Chrome prints it on top of tables. */
+
+
+
+/* Embedded fallback so tables/boxes still print if external CSS is skipped */
+table { border-collapse: collapse !important; width: 100% !important; margin: 0.75em 0 !important; border: 1.5px solid #111 !important; }
+th, td { border: 1px solid #333 !important; padding: 6px 8px !important; vertical-align: top !important; text-align: left !important; }
+th, thead th, tr:first-child th { background: #d9d9d9 !important; font-weight: 700 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+tbody tr:nth-child(even) td { background: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) { border: 2.5px solid #111 !important; background: #f3f3f3 !important; }
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th { background: #222 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child) tbody td,
+table:has(> thead > tr > th:only-child) tbody td { color: #111 !important; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child) tbody tr:nth-child(even) td,
+table:has(> thead > tr > th:only-child) tbody tr:nth-child(even) td { background: #ececec !important; color: #111 !important; }
+blockquote { margin: 0.8em 0 !important; padding: 10px 14px !important; border: 1.5px solid #333 !important; border-left: 6px solid #111 !important; background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page-break { break-before: page !important; page-break-before: always !important; display: block; height: 0; }
+pre { border: 1.5px solid #333 !important; background: #f4f4f4 !important; padding: 10px 12px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+h1 { border-bottom: 3px solid #111; padding-bottom: 0.25em; }
+h2 { border-bottom: 1.5px solid #444; padding-bottom: 0.15em; }
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+/* —— COMPACT EDITION density overrides (page budget ~35pp) —— */
+@page { size: A4; margin: 11mm 11mm 26mm 11mm; }
+body { font-size: 9.5pt !important; line-height: 1.26 !important; padding-bottom: 4mm !important; }
+h1 { font-size: 16pt !important; margin: 0.1em 0 0.3em !important; }
+h2 { font-size: 12pt !important; margin: 0.55em 0 0.25em !important; }
+h3 { font-size: 10.5pt !important; margin: 0.5em 0 0.2em !important; }
+hr { margin: 0.45em 0 !important; }
+p { margin: 0.3em 0 !important; }
+table { font-size: 8.5pt !important; margin: 0.4em 0 0.5em !important; }
+th, td { padding: 3px 5px !important; }
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) { margin: 0.45em 0 0.6em !important; }
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th { font-size: 9pt !important; padding: 5px 7px !important; }
+blockquote { margin: 0.4em 0 !important; padding: 6px 10px !important; }
+pre, code { font-size: 7.8pt !important; }
+pre { padding: 6px 9px !important; margin: 0.4em 0 !important; line-height: 1.25 !important; }
+ul, ol { margin: 0.25em 0 0.35em 1.1em !important; }
+li { margin: 0.1em 0 !important; }
+
+</style>
+</head>
+<body class="workbook">
+<!--
+COMPACT EDITION (~35 pages) — trimmed from the full workbook for print budget.
+The full edition stays at docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK.md (58 pp).
+
+PDF EXPORT
+  python3 scripts/export_workbook_pdf.py docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK_COMPACT.md
+
+Needs: pip3 install markdown · Google Chrome
+Output: docs/BECOME_A_MANAGER_OF_AI_AGENTS_PARTICIPANT_WORKBOOK_COMPACT.pdf
+-->
+<style>
+/* Embedded fallback so tables/boxes still print if external CSS is skipped */
+table { border-collapse: collapse !important; width: 100% !important; margin: 0.75em 0 !important; border: 1.5px solid #111 !important; }
+th, td { border: 1px solid #333 !important; padding: 6px 8px !important; vertical-align: top !important; text-align: left !important; }
+th, thead th, tr:first-child th { background: #d9d9d9 !important; font-weight: 700 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+tbody tr:nth-child(even) td { background: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) { border: 2.5px solid #111 !important; background: #f3f3f3 !important; }
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th { background: #222 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child) tbody td,
+table:has(> thead > tr > th:only-child) tbody td { color: #111 !important; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table:has(> tbody > tr > td:only-child) tbody tr:nth-child(even) td,
+table:has(> thead > tr > th:only-child) tbody tr:nth-child(even) td { background: #ececec !important; color: #111 !important; }
+blockquote { margin: 0.8em 0 !important; padding: 10px 14px !important; border: 1.5px solid #333 !important; border-left: 6px solid #111 !important; background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page-break { break-before: page !important; page-break-before: always !important; display: block; height: 0; }
+pre { border: 1.5px solid #333 !important; background: #f4f4f4 !important; padding: 10px 12px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+h1 { border-bottom: 3px solid #111; padding-bottom: 0.25em; }
+h2 { border-bottom: 1.5px solid #444; padding-bottom: 0.15em; }
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+/* —— COMPACT EDITION density overrides (page budget ~35pp) —— */
+@page { size: A4; margin: 11mm 11mm 26mm 11mm; }
+body { font-size: 9.5pt !important; line-height: 1.26 !important; padding-bottom: 4mm !important; }
+h1 { font-size: 16pt !important; margin: 0.1em 0 0.3em !important; }
+h2 { font-size: 12pt !important; margin: 0.55em 0 0.25em !important; }
+h3 { font-size: 10.5pt !important; margin: 0.5em 0 0.2em !important; }
+hr { margin: 0.45em 0 !important; }
+p { margin: 0.3em 0 !important; }
+table { font-size: 8.5pt !important; margin: 0.4em 0 0.5em !important; }
+th, td { padding: 3px 5px !important; }
+table:has(> tbody > tr > td:only-child),
+table:has(> thead > tr > th:only-child) { margin: 0.45em 0 0.6em !important; }
+table:has(> thead > tr > th:only-child) thead th,
+table:has(> tbody > tr > td:only-child) thead th { font-size: 9pt !important; padding: 5px 7px !important; }
+blockquote { margin: 0.4em 0 !important; padding: 6px 10px !important; }
+pre, code { font-size: 7.8pt !important; }
+pre { padding: 6px 9px !important; margin: 0.4em 0 !important; line-height: 1.25 !important; }
+ul, ol { margin: 0.25em 0 0.35em 1.1em !important; }
+li { margin: 0.1em 0 !important; }
+</style>
+
+<p><strong>Sec 01</strong> · Opening · Cover &amp; How to Use</p>
+<h1>Become a Manager of AI Agents</h1>
+<h3>Build Your Personal AI Workforce</h3>
+<p><strong>One-day instructor-led workshop · Participant Workbook — Compact Edition</strong></p>
+<hr />
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Participant name</strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Organization / team</strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Role</strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>City</strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>How to use this book</strong><br />
+This is a <strong>workshop companion</strong>, not a textbook. Listen to the instructor. Use these pages to capture ideas, complete exercises, and take home a plan you can use later. Write in the blanks. Leave pages messy. The value is in <em>your</em> notes, not the printed text.<br />
+Where you see <em>italic starters</em> or an “e.g.” — those are <strong>examples to steal and adapt</strong>, not the “right answer.” Cross them out and write your real work.</p>
+<p><strong>Roadmap = instructions.</strong> Each task’s <strong>Copy</strong> box lives on the roadmap website. This book is for writing, worksheets, and notes — not a second prompt dump.</p>
+<p><strong>Finding a page:</strong> Use the <strong>page number at the bottom center</strong> (same as the PDF viewer). Headers say <strong>Sec XX</strong> for the chapter.</p>
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 01</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 02</strong> · Opening · Story of the Day &amp; Day Map</p>
+<h2>The story of the day</h2>
+<pre><code>Work WITH AI  →  Work THROUGH AI  →  Work BY AI
+     ↓                  ↓                  ↓
+ AI helps YOU     AI runs THE JOB    YOU manage AI
+ at your job     on a clear path    like a small team
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Plain meaning</th>
+<th>Workplace example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WITH</strong></td>
+<td>AI sits next to you and helps</td>
+<td>A capable junior at your desk</td>
+</tr>
+<tr>
+<td><strong>THROUGH</strong></td>
+<td>AI helps run a recurring process</td>
+<td>Reception → desk → approval</td>
+</tr>
+<tr>
+<td><strong>BY</strong></td>
+<td>You coordinate specialist AI roles</td>
+<td>You are the manager; AI does the drafting</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Product of the day:</strong> One real work process that can run like this:</p>
+<blockquote>
+<p>Trigger → AI step → Output where work lives → Human approval for anything risky</p>
+</blockquote>
+<h2>Day map (fill as you go)</h2>
+<table>
+<thead>
+<tr>
+<th>Block</th>
+<th>Focus</th>
+<th>Time (approx.)</th>
+<th>Tasks</th>
+<th>My status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Opening</td>
+<td>What AI is · expectations · Teacher Agent</td>
+<td>~35 min</td>
+<td><strong>0.0–0.4</strong></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Session 1</td>
+<td>Work <strong>WITH</strong> AI</td>
+<td>~90 min</td>
+<td><strong>1.1–1.6</strong></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Break</td>
+<td></td>
+<td>15 min</td>
+<td></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Session 2</td>
+<td>Work <strong>THROUGH</strong> AI</td>
+<td>~105 min</td>
+<td><strong>2.0–2.6</strong></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Lunch / break</td>
+<td></td>
+<td></td>
+<td></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>Session 3</td>
+<td>Work <strong>BY</strong> AI · Demo Day · 30-day plan</td>
+<td>~115 min</td>
+<td><strong>3.0–3.6</strong></td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>My painful process for today (one sentence):</strong></p>
+<blockquote>
+<p><em>Starter:</em> “Every Friday I scramble WhatsApp notes into a manager update and numbers go wrong.”</p>
+<hr />
+</blockquote>
+<p><strong>What “done” looks like:</strong></p>
+<blockquote>
+<p><em>e.g.</em> “Friday 4pm: one approved email draft in Gmail, numbers checked, ready to send.”</p>
+<hr />
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 02</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 03</strong> · Opening · Contents — Page Guide</p>
+<h1>Contents — Page Guide</h1>
+<p>Instructors may say “open <strong>Sec 10</strong>” or “Task <strong>1.1</strong>.” In this edition the <strong>Sec number is also the page number</strong>. Task serials match the roadmap website and slides: <strong>0.0→0.4</strong> · <strong>1.1→1.6</strong> · <strong>2.0→2.6</strong> · <strong>3.0→3.6</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Sec</th>
+<th>Block</th>
+<th>Title</th>
+<th>Tasks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>01</strong></td>
+<td>Opening</td>
+<td>Cover &amp; How to Use</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td>Opening</td>
+<td>Story of the Day &amp; Day Map</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td>Opening</td>
+<td>Contents — Page Guide</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td>Session 0 · Opening</td>
+<td>What is AI? What is Generative AI?</td>
+<td><strong>0.0</strong></td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td>Session 0 · Opening</td>
+<td>AI vs Software · Chat / Assistant / Agent</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td>Session 0 · Opening</td>
+<td>Teacher Agent &amp; Labels</td>
+<td><strong>0.1–0.4</strong></td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td>Session 0 · Opening</td>
+<td>Prompt Engineering (CTAO)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>08</strong></td>
+<td>Section 1 · WITH</td>
+<td>Hallucination &amp; Human-in-the-loop</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>09</strong></td>
+<td>Section 1 · WITH</td>
+<td>Worksheet A — Work Assistant Brief</td>
+<td><strong>1.1–1.3</strong></td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>Section 1 · WITH</td>
+<td>Worksheet B — Lock Process</td>
+<td><strong>1.4</strong></td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td>Section 1 · WITH</td>
+<td>Choosing Tools (≤3)</td>
+<td><strong>1.5</strong></td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td>Section 1 · WITH</td>
+<td>Context, Memory &amp; Reflection</td>
+<td><strong>1.6</strong></td>
+</tr>
+<tr>
+<td><strong>13</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Workflows — the destination picture</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>14</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Pattern Ladder, Readiness &amp; Projects</td>
+<td><strong>2.0</strong></td>
+</tr>
+<tr>
+<td><strong>15</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Worksheet C — Workflow Canvas</td>
+<td><strong>2.1</strong></td>
+</tr>
+<tr>
+<td><strong>16</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>ETCSLV Framework</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>17</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Worksheet D — ETCSLV Draft</td>
+<td><strong>2.2–2.3</strong></td>
+</tr>
+<tr>
+<td><strong>18</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Decision Tree &amp; Type Cards</td>
+<td><strong>2.4</strong></td>
+</tr>
+<tr>
+<td><strong>19</strong></td>
+<td>Section 2 · THROUGH</td>
+<td>Workflow Brain, Make it Run &amp; Reflection</td>
+<td><strong>2.5–2.6</strong></td>
+</tr>
+<tr>
+<td><strong>20</strong></td>
+<td>Section 3 · BY</td>
+<td>From Helper to AI Workforce</td>
+<td><strong>3.0</strong></td>
+</tr>
+<tr>
+<td><strong>21</strong></td>
+<td>Section 3 · BY</td>
+<td>Worksheet F — AI Workforce Canvas</td>
+<td><strong>3.1</strong></td>
+</tr>
+<tr>
+<td><strong>22</strong></td>
+<td>Section 3 · BY</td>
+<td>Worksheet E — Harness Card</td>
+<td><strong>3.2</strong></td>
+</tr>
+<tr>
+<td><strong>23</strong></td>
+<td>Section 3 · BY</td>
+<td>Failure Lab</td>
+<td><strong>3.3</strong></td>
+</tr>
+<tr>
+<td><strong>24</strong></td>
+<td>Section 3 · BY</td>
+<td>Worksheet G — Capstone &amp; Demo Day</td>
+<td><strong>3.4–3.5</strong></td>
+</tr>
+<tr>
+<td><strong>25</strong></td>
+<td>Section 3 · BY</td>
+<td>Delegation, Adoption Plan &amp; Reflection</td>
+<td><strong>3.6</strong></td>
+</tr>
+<tr>
+<td><strong>26</strong></td>
+<td>Reference</td>
+<td>R1 Prompt Cheat Sheet · R3 Workflow Check</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>27</strong></td>
+<td>Reference</td>
+<td>R2 Tool Matrix · R4 ETCSLV · R5 Tree</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>28</strong></td>
+<td>Reference</td>
+<td>R6 Ethics &amp; Privacy · R9 Glossary</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>29</strong></td>
+<td>Reference</td>
+<td>R7 — 30-Day Personal AI Adoption Plan</td>
+<td><strong>3.6</strong></td>
+</tr>
+<tr>
+<td><strong>30</strong></td>
+<td>Reference</td>
+<td>R8 — Corporate Scenario Bank</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>31</strong></td>
+<td>Big picture</td>
+<td>Day Roadmap — How every piece connects</td>
+<td><strong>0.0–3.6</strong></td>
+</tr>
+<tr>
+<td><strong>32</strong></td>
+<td>Notes</td>
+<td>Notes page</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>33</strong></td>
+<td>Notes</td>
+<td>Parking Lot, Wins &amp; Closing</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Quick find</strong> — Work Assistant Brief <strong>09</strong> · Lock process <strong>10</strong> · Tool fit <strong>11</strong> · Memory <strong>12</strong> · Workflow Canvas <strong>15</strong> · ETCSLV taught <strong>16</strong> · ETCSLV draft <strong>17</strong> · Harness Card <strong>22</strong> · Capstone <strong>24</strong> · 30-day plan <strong>29</strong> · Scenario ideas <strong>30</strong></p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 03</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 04</strong> · Session 0 · Opening · What is AI? What is Generative AI?</p>
+<h1>SESSION 0 — Housekeeping + Opening</h1>
+<p><em>Goal: Shared language + one Teacher Agent you will use all day.</em></p>
+<table>
+<thead>
+<tr>
+<th>🧠 <strong>TASK 0.0</strong> (~5 min) — What is AI? What to expect / not expect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Follow the instructor. On this page, write one line you <strong>expect</strong> today and one you will <strong>not</strong> expect.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Both lines written. Mark roadmap <strong>0.0</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What is AI — in plain words:</strong><br />
+Software that learns patterns from large amounts of data and produces useful outputs — text, summaries, suggestions, classifications — without you writing every rule by hand.</p>
+<p><strong>Analogy:</strong> A <strong>very fast new junior</strong> who has read a huge library. They draft quickly and <strong>sound confident</strong>. They still invent details when unsure. They need a manager who briefs them, checks the work, and decides what leaves the room.</p>
+<p><strong>What is Generative AI:</strong> AI that creates <em>new</em> content from a prompt — emails, reports, Bangla/English rewrites, slide outlines — instead of only retrieving a fixed answer.<br />
+Traditional software is a <strong>fixed menu</strong>: press button → same dish. Generative AI is a <strong>skilled cook</strong>: give ingredients and instructions → a new plate each time. <strong>Taste before you serve.</strong></p>
+<p><strong>What AI is good at today</strong></p>
+<table>
+<thead>
+<tr>
+<th>Strong</th>
+<th>Weak / risky</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drafting and rewriting</td>
+<td>Final hiring, legal, budget, or credit decisions</td>
+</tr>
+<tr>
+<td>Summarizing long text</td>
+<td>Inventing “facts” when sources are missing</td>
+</tr>
+<tr>
+<td>Turning rough notes into structure</td>
+<td>Knowing your latest internal policy unless you provide it</td>
+</tr>
+<tr>
+<td>Brainstorming options</td>
+<td>Sending emails, publishing, or approving alone</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Callout — Manager mindset</strong><br />
+You do not need to “become a programmer.” You need to become a <strong>clear brief-giver and quality checker</strong>.</p>
+</blockquote>
+<p><strong>I expect today:</strong> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong></p>
+<p><strong>I do <em>not</em> expect today:</strong> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>_____</p>
+<p><strong>Where I already manage juniors (brief → review → approve):</strong> <strong><em>_</em></strong><strong><em>_</em></strong>______</p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 04</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 05</strong> · Session 0 · Opening · AI vs Software · Chat / Assistant / Agent</p>
+<h2>AI vs traditional software</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Traditional software</th>
+<th>Generative AI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>How it works</strong></td>
+<td>Fixed rules and forms</td>
+<td>Predicts likely next words / patterns</td>
+</tr>
+<tr>
+<td><strong>Same input</strong></td>
+<td>Same output every time</td>
+<td>Similar but not identical</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Calculations, records, workflows that must not invent</td>
+<td>Drafting, summarizing, exploring options</td>
+</tr>
+<tr>
+<td><strong>Risk</strong></td>
+<td>Wrong rule → wrong result (usually consistent)</td>
+<td>Confident wrong answer (“hallucination”)</td>
+</tr>
+<tr>
+<td><strong>Your job</strong></td>
+<td>Configure and operate</td>
+<td>Brief, constrain, and review</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Callout</strong><br />
+Use traditional software (HRIS, ERP, CRM) for <strong>truth that must not drift</strong>. Use generative AI for <strong>language, structure, and first drafts</strong>. AI should never “invent” a leave balance or invoice total.</p>
+</blockquote>
+<p><strong>When would you use which?</strong> (circle one per row)</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>System of record</th>
+<th>Generative AI</th>
+<th>Both + human</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Check leave balance or payroll total</td>
+<td>○</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>Write a polite follow-up email to a vendor</td>
+<td>○</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>Decide final hiring / budget / credit approval</td>
+<td>○</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>Summarize 20-page policy for new-joiner training</td>
+<td>○</td>
+<td>○</td>
+<td>○</td>
+</tr>
+</tbody>
+</table>
+<h2>Chatbots vs AI Assistants vs AI Agents</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Picture</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chatbot / chat</strong></td>
+<td>Hallway question to whoever is free</td>
+<td>One-off Q&A; little standing brief</td>
+</tr>
+<tr>
+<td><strong>AI Assistant</strong></td>
+<td>Hired desk assistant with a joining letter</td>
+<td>Project/Settings = standing role; you still drive</td>
+</tr>
+<tr>
+<td><strong>AI Agent / workflow</strong></td>
+<td>Routed office process: intake → desk → approval</td>
+<td>Steps, tools, and rules; human still approves high risk</td>
+</tr>
+</tbody>
+</table>
+<pre><code>Chat          →  “Help me rewrite this email.”
+Assistant     →  “You are my Work Assistant for weekly reporting. Always ask if numbers are missing.”
+Agent path    →  Form arrives → AI drafts → Sheet updates → Manager approves before send
+</code></pre>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 05</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 06</strong> · Session 0 · Opening · Teacher Agent &amp; Labels (0.1–0.4)</p>
+<h3>Opening tasks (Session 0)</h3>
+<table>
+<thead>
+<tr>
+<th>🖥️ <strong>TASK 0.1</strong> (~5 min) — Open your tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Open this <strong>roadmap</strong> · ChatGPT or Claude (ready for a Project). Optional: blank note for scratch. Copy boxes for later tasks live on the roadmap.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Roadmap + AI tool open. Mark roadmap <strong>0.1</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>📘 <strong>TASK 0.2</strong> (~10 min) — Create Teacher Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Create Project <code>Workshop Teacher — Agentic AI</code> → open <strong>Settings</strong> (not chat) → paste the roadmap <strong>Copy</strong> box once → Save.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Settings saved. Mark roadmap <strong>0.2</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>🤝 <strong>TASK 0.3</strong> (~10 min) — Kickoff chat with Teacher</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> In Teacher <strong>Chat</strong> (same thread all day), send the roadmap <strong>Copy</strong> box (role, org, painful process). Answer Teacher’s 3 questions in the <strong>same</strong> chat.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Teacher has your process right. Mark roadmap <strong>0.3</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>💬 <strong>TASK 0.4</strong> (~5 min) — Chat vs assistant vs agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> In the <strong>same Teacher chat</strong>, send the roadmap <strong>Copy</strong> box. Write one sentence you will remember in the checkpoint below.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> One remember-sentence written. Mark roadmap <strong>0.4</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Checkpoint — Write one sentence you will remember</strong></p>
+<blockquote>
+<hr />
+</blockquote>
+<p><strong>Teacher vs Work Assistant (don’t mix them up)</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Teacher Agent</th>
+<th>Work Assistant</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Job</td>
+<td>Coach / critique / explain</td>
+<td>Do <em>your</em> real work</td>
+</tr>
+<tr>
+<td>When</td>
+<td>Same <strong>one chat thread</strong> all day</td>
+<td>Session 1 runs + later as your worker</td>
+</tr>
+<tr>
+<td>Switch</td>
+<td>—</td>
+<td><strong>Once</strong> at Task <strong>1.3</strong> (feedback round), not every task</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 06</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 07</strong> · Session 0 · Opening · Prompt Engineering (CTAO)</p>
+<h2>Prompt Engineering (clear instructions)</h2>
+<p><strong>In plain words:</strong> A prompt is a work brief. Better briefs → better first drafts. You still review.</p>
+<p><strong>Simple prompt recipe (CTAO)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Letter</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C</strong></td>
+<td>Context</td>
+<td>“I am an Operations Lead at a corporate office in Dhaka.”</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>Task</td>
+<td>“Draft a follow-up email after yesterday’s vendor meeting.”</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td>Audience / constraints</td>
+<td>“Polite, under 120 words, no new commercial promises.”</td>
+</tr>
+<tr>
+<td><strong>O</strong></td>
+<td>Output format</td>
+<td>“3 options. Label A/B/C.”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Weak vs stronger</strong></p>
+<table>
+<thead>
+<tr>
+<th>Weak</th>
+<th>Stronger (CTAO)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“Make this email better.”</td>
+<td>“Context: Ops lead, Dhaka office. Task: rewrite this vendor follow-up. Audience: polite, under 100 words, no new price promises. Output: 2 options A/B + 3 risks I should check.”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exercise — Rewrite your weak prompt</strong></p>
+<p>My weak prompt:</p>
+<hr />
+<p>My stronger prompt (use CTAO):</p>
+<hr />
+<hr />
+<hr />
+<p><strong>After AI replies — Stop → Read → Decide</strong></p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Yes / No</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Facts match what I know?</td>
+<td>☐ / ☐</td>
+</tr>
+<tr>
+<td>Tone safe for customer / boss?</td>
+<td>☐ / ☐</td>
+</tr>
+<tr>
+<td>Anything invented?</td>
+<td>☐ / ☐</td>
+</tr>
+<tr>
+<td>Ready to send as-is?</td>
+<td>☐ / ☐</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 07</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 08</strong> · Section 1 · WITH · Hallucination &amp; Human-in-the-loop</p>
+<h2>Hallucination</h2>
+<p><strong>In plain words:</strong> AI invents details that sound right but are not true — fake citations, wrong numbers, made-up clause numbers, imaginary employee or customer facts. A confident junior filling gaps so the board pack “looks complete.”</p>
+<p><strong>High-risk zones</strong></p>
+<ul>
+<li>Headcount, salary, bonus, or budget figures</li>
+<li>Legal, HR, or compliance wording (“policy says…”) without a source</li>
+<li>Customer or employee PII · marketing and competitor claims</li>
+<li>Promises to clients, vendors, or candidates · rates, fees, EMI, regulatory language</li>
+</ul>
+<p><strong>Detection habits:</strong> ask for a source or “say unknown” · spot-check numbers against the system of record · prefer “draft + checklist” over “final answer.”</p>
+<h2>Human-in-the-loop</h2>
+<p><strong>In plain words:</strong> A human must approve steps that affect customers, money, legal/compliance, people decisions, or public reputation.</p>
+<p><strong>Green / Blue / Red (kitchen tags) — same meanings all day</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🟢 <strong>Green</strong></td>
+<td>AI thinking OK</td>
+<td>Draft, summarize, rewrite, brainstorm</td>
+</tr>
+<tr>
+<td>🔵 <strong>Blue</strong></td>
+<td>Rules / automation OK</td>
+<td>Forms, reminders, moving data, triggers</td>
+</tr>
+<tr>
+<td>🔴 <strong>Red</strong></td>
+<td>Human only</td>
+<td>Hiring, legal, conflict, budget/credit decision, send externally without review</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Always human before…</strong></p>
+<ul>
+<li>[ ] External email / SMS / WhatsApp to customer, vendor, or candidate</li>
+<li>[ ] Changing official records (HRIS, ERP, CRM)</li>
+<li>[ ] Publishing marketing / social posts · HR letters with pay or exit language</li>
+<li>[ ] Hiring, budget, legal, credit, or compliance decisions</li>
+</ul>
+<p><strong>My personal red lines</strong></p>
+<p><em>e.g. (1) Any email leaving the company (2) Numbers in a manager pack (3) HR letters with pay language</em></p>
+<ol>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+</ol>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 08</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 09</strong> · Section 1 · WITH · Worksheet A — Work Assistant Brief</p>
+<h1>SECTION 1 — Work WITH AI</h1>
+<p><em>Goal: Use AI as a daily helper — clear instructions, the right tool, and human judgment.</em><br />
+<strong>Task order:</strong> <strong>1.1 → 1.2 → 1.3 → 1.4 → 1.5 → 1.6</strong> (lock the job before tools).</p>
+<h2>Worksheet A — Work Assistant Brief</h2>
+<table>
+<thead>
+<tr>
+<th>📝 <strong>TASK 1.1</strong> (~5 min) — Fill your Work Assistant brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Complete the brief below first (paper — <strong>no AI yet</strong>). Keep it short enough that a stranger could follow it.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Brief filled. Mark roadmap <strong>1.1</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>🧑‍💼 <strong>TASK 1.2</strong> (~20 min) — Create Work Assistant + three real runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> New Project <code>My Work Assistant — [Your Name]</code> → paste your brief into <strong>Settings</strong> (add “Never invent meetings, names, or deadlines” if missing) → run the <strong>three</strong> prompts from the roadmap <strong>Copy</strong> boxes in that chat. Read each answer before the next.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Three runs done. Mark roadmap <strong>1.2</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>🔁 <strong>TASK 1.3</strong> (~15 min) — One feedback round (Teacher ↔ Work Assistant once)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> In Teacher chat, send the roadmap <strong>Copy</strong> box (brief + weak prompt + one reply). Keep fixes you agree with → update Work Assistant <strong>Settings</strong> once → re-run <strong>one</strong> task.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Settings updated + one re-run compared. Mark roadmap <strong>1.3</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Italic starters are examples — cross them out and write yours.</em></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Your answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Role title</strong></td>
+<td>Executive Assistant for <em>e.g. Operations Lead — weekly reporting &amp; vendor follow-ups</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Top 3 priorities</strong></td>
+<td>1. <em>e.g. Turn rough notes into clear updates</em> 2. <em>e.g. Draft polite follow-ups</em> 3. <em>e.g. Flag missing numbers</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong></td>
+</tr>
+<tr>
+<td><strong>Tone</strong></td>
+<td>☐ Formal ☐ Friendly-professional ☐ Concise bullets ☐ Bangla-first ☐ English-first</td>
+</tr>
+<tr>
+<td><strong>Always ask me before…</strong></td>
+<td><em>e.g. Sending externally · inventing a deadline · using any figure I did not provide</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Never invent…</strong></td>
+<td><em>e.g. Metrics, headcount, prices, policy clauses, people’s names not in my notes</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Output style</strong></td>
+<td><em>e.g. Short bullets first, then optional full draft; end with “Human must check:”</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+<tr>
+<td><strong>Success looks like</strong></td>
+<td><em>e.g. I can paste 5 messy bullets and get a usable draft in under 2 minutes</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three real tasks I will run today</strong> — <em>rewrite one real email · clean one meeting note into actions · draft one weekly update</em></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>☐</td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What I changed in Settings after Teacher critique:</strong> <em>e.g. Added “never invent numbers”</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>_</p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 09</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 10</strong> · Section 1 · WITH · Worksheet B — Lock Process</p>
+<h2>Worksheet B — Lock today’s process</h2>
+<table>
+<thead>
+<tr>
+<th>🔒 <strong>TASK 1.4</strong> (~10 min) — Lock today’s process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> List 2–3 candidate processes. Plot each on <strong>Impact vs Effort</strong> (below). Pick the winner. Write name · pain · done today · what stays human. Then send the roadmap <strong>Copy</strong> box in Teacher chat. If Teacher says too big, take the smaller slice. Do <strong>not</strong> pick tools yet.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Process locked for the rest of the day. Mark roadmap <strong>1.4</strong> complete.</td>
+</tr>
+<tr>
+<td><strong>Next:</strong> tools (<strong>1.5</strong>) → memory (<strong>1.6</strong>) for <em>this</em> job. <strong>Session 2</strong> turns <strong>this same locked process</strong> into a path that can run.</td>
+</tr>
+</tbody>
+</table>
+<p><em>One recurring job for the rest of the day — not the whole company. Start with low-hanging fruit: high impact, lower effort.</em></p>
+<p><strong>Pick your process — Impact vs Effort</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Low effort</strong> (data ready, tools OK, few approvals)</th>
+<th><strong>High effort</strong> (messy data, IT blocks, many sign-offs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>High impact</strong> (saves hours / many rows)</td>
+<td><em>Best start — put candidate #1 here</em></td>
+<td><em>Phase 2 — after you ship one win</em></td>
+</tr>
+<tr>
+<td><strong>Low impact</strong> (nice-to-have)</td>
+<td><em>Maybe later</em></td>
+<td><em>Skip for now</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>My candidates:</strong> 1. <span style="display:inline-block;width:150px;border-bottom:1px solid #666"></span> 2. <span style="display:inline-block;width:150px;border-bottom:1px solid #666"></span> 3. <span style="display:inline-block;width:150px;border-bottom:1px solid #666"></span><br />
+<strong>Winner for today:</strong> <span style="display:inline-block;width:300px;border-bottom:1px solid #666"></span></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Starter (steal &amp; adapt)</th>
+<th>Write yours</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process name</td>
+<td>Weekly team update from Friday bullets</td>
+<td></td>
+</tr>
+<tr>
+<td>Who starts it?</td>
+<td>Me — I paste bullets / fill a Sheet row</td>
+<td></td>
+</tr>
+<tr>
+<td>Who receives the output?</td>
+<td>My manager (email draft)</td>
+<td></td>
+</tr>
+<tr>
+<td>How often?</td>
+<td>Weekly</td>
+<td>Daily / Weekly / Monthly / Ad hoc</td>
+</tr>
+<tr>
+<td>Pain today</td>
+<td>Last-minute scramble; numbers sometimes wrong</td>
+<td></td>
+</tr>
+<tr>
+<td>Smallest useful slice for <em>this</em> workshop</td>
+<td>Bullets → draft update → I approve before send <em>(not “automate all reporting”)</em></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Green / Blue / Red first sketch</strong> (optional — refine in Session 2; tag key on <strong>Sec 08</strong>)</p>
+<table>
+<thead>
+<tr>
+<th>Step (rough)</th>
+<th>🟢 / 🔵 / 🔴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Collect bullet points or requirements from team</em></td>
+<td><em>🔵 or you</em></td>
+</tr>
+<tr>
+<td><em>AI drafts the update</em></td>
+<td><em>🟢</em></td>
+</tr>
+<tr>
+<td><em>I check numbers &amp; send</em></td>
+<td><em>🔴</em></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 10</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 11</strong> · Section 1 · WITH · Choosing Tools (≤3)</p>
+<h2>Choosing the right AI tool</h2>
+<table>
+<thead>
+<tr>
+<th>🧰 <strong>TASK 1.5</strong> (~30 min) — Tool landscape + fit (max 2–3) for the locked process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Watch the short tool tour. With your locked process from <strong>1.4</strong>, send the roadmap <strong>Copy</strong> box to Teacher. Run <strong>one</strong> identical test only in the recommended tools (max 3). Write today’s stack below.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Stack written (max 3). Mark roadmap <strong>1.5</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of the day:</strong> Lock <strong>one job</strong> first. Then pick <strong>≤3 tools</strong> for that job. Do not open every shop in the market.</p>
+<blockquote>
+<p><strong>Tools change fast.</strong> Brand names here are <strong>examples for today</strong>. Learn the <strong>core job</strong> each tool does, then pick whatever your company allows.</p>
+</blockquote>
+<p><strong>Five lanes (A–E) — jobs, not brands</strong></p>
+<table>
+<thead>
+<tr>
+<th>Lane</th>
+<th>Core job</th>
+<th>What it does for you</th>
+<th>Example tools (illustrative)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>Think &amp; draft</td>
+<td>Writes, rewrites, critiques, plans</td>
+<td>ChatGPT, Claude</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Research web</td>
+<td>Finds current public info + links</td>
+<td>Perplexity, Gemini</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Your files</td>
+<td>Answers from <em>your</em> PDFs / SOPs</td>
+<td>NotebookLM, Projects with uploads</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>See / hear / show</td>
+<td>Images, voice, slides, screenshots</td>
+<td>Gemini, Gamma, ChatGPT images</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Connect &amp; run</td>
+<td>Trigger → AI → Doc/Sheet/email draft</td>
+<td>Zapier / Make / n8n (+ Forms/Sheets)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fit questions:</strong> (1) Do I need one finished draft — or many steps? (2) Must the answer come from <strong>company files</strong>? (3) Will a human approve each sensitive step?</p>
+<p><strong>My stack for today’s locked process (max 3)</strong></p>
+<p><em>Starter stack many people use:</em> ChatGPT or Claude (Work Assistant) · NotebookLM or Project files (SOPs) · Google Form/Sheet (trigger).</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Tool</th>
+<th>Why this job needs it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><em>e.g. Claude / ChatGPT</em></td>
+<td><em>Standing Work Assistant + drafts</em></td>
+</tr>
+<tr>
+<td>2</td>
+<td><em>e.g. NotebookLM</em></td>
+<td><em>Answers from our handbook PDF</em></td>
+</tr>
+<tr>
+<td>3</td>
+<td><em>e.g. Google Form → Sheet</em></td>
+<td><em>Trigger / inputs</em></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Callout — Privacy</strong><br />
+Do not paste employee/customer NID, salaries, passwords, medical details, or confidential contracts into public tools unless your organization has approved that use.</p>
+</blockquote>
+<p><strong>Exercise — Match the <em>job type</em> (A–E), then name a tool</strong></p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Core job (A–E)</th>
+<th>Tool you would try</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Summarize our leave policy PDF with page refs</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+<tr>
+<td>Rewrite angry customer/vendor email, polite Bangla</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+<tr>
+<td>Find recent public news on our industry / competitors</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+<tr>
+<td>Standing weekly Work Assistant for your team update</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+<tr>
+<td>Turn bullets into a first-pass slide outline</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+<tr>
+<td>Form submit → draft lands in a Doc for my review</td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong></td>
+<td><strong><em>_</em></strong><strong><em>_</em></strong>__</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 11</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 12</strong> · Section 1 · WITH · Context, Memory &amp; Reflection</p>
+<h2>Context</h2>
+<p><strong>In plain words:</strong> Context is everything AI needs <em>in this conversation</em> — role, product, audience, constraints, and the actual content (notes, policy excerpt, table). Like briefing a new hire <em>before</em> they write a customer letter.</p>
+<p><strong>Did I give enough context?</strong> ☐ Who I am / my role · ☐ Who the audience is · ☐ The raw material · ☐ What “good” looks like · ☐ What is forbidden</p>
+<h2>Memory</h2>
+<table>
+<thead>
+<tr>
+<th>📁 <strong>TASK 1.6</strong> (~10 min) — Memory — docs + grounded questions for the locked process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Upload 1–2 allowed work docs for your locked process (NotebookLM or Project files). Ask two questions the docs can answer. Ask one trap question that is <strong>not</strong> in the docs — did it refuse or invent?</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> You verified one citation and saw the trap fail safely. Mark roadmap <strong>1.6</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In plain words:</strong> Memory is what sticks beyond one message — Project instructions, uploaded files, past chat in the same thread, saved preferences.</p>
+<table>
+<thead>
+<tr>
+<th>Kind of memory</th>
+<th>Workplace picture</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instructions / Settings</strong></td>
+<td>Joining letter / handbook</td>
+<td>“Never invent numbers or policy clauses.”</td>
+</tr>
+<tr>
+<td><strong>Files</strong></td>
+<td>Company file on the desk</td>
+<td>Policy PDF, product FAQ, SOP</td>
+</tr>
+<tr>
+<td><strong>Chat history</strong></td>
+<td>Ongoing conversation at the desk</td>
+<td>“Use my process from earlier.”</td>
+</tr>
+<tr>
+<td><strong>Your brain</strong></td>
+<td>Manager judgment</td>
+<td>You still know what is true today</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Callout — Grounding</strong><br />
+Give the junior the <strong>company file</strong>, not corridor rumors. If the file is missing, good AI should say “I don’t know” — not invent policy.</p>
+</blockquote>
+<p><strong>Exercise — What should my Work Assistant always remember?</strong></p>
+<table>
+<thead>
+<tr>
+<th>Always know</th>
+<th>Never invent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>e.g. My role, Bangla/English preference, weekly update format</em></td>
+<td><em>e.g. Headcount, salary, revenue, deadlines I did not give</em></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>Section 1 — Reflection</h2>
+<ol>
+<li>What changed in how I brief AI after this morning?</li>
+</ol>
+<hr />
+<ol start="2">
+<li>Which habit will I keep: better prompts, memory/files, or human-in-the-loop?</li>
+</ol>
+<hr />
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 12</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 13</strong> · Section 2 · THROUGH · Workflows — the destination picture</p>
+<h1>SECTION 2 — Work THROUGH AI</h1>
+<p><em>Goal: Turn one messy process into a reusable path — map, rules, pattern, and a run that works once.</em></p>
+<blockquote>
+<p><strong>Bridge from Session 1</strong><br />
+In <strong>Task 1.4</strong> you locked <strong>one</strong> recurring job. Session 1 = AI helped <em>you</em>. Session 2 = that <strong>same job</strong> becomes a <strong>path that can run</strong> (not a blank chat every time).</p>
+</blockquote>
+<p><strong>My locked process from Task 1.4:</strong></p>
+<hr />
+<h3>Session 2 spine (why this order — follow top → bottom)</h3>
+<pre><code>① Picture the destination     Anatomy: Trigger → AI → Output → Human approval
+② How tall is the build?      Pattern ladder (Task 2.0)
+③ What happens on the floor?  Map steps + 🟢 AI thinking / 🔵 rules / 🔴 human (Task 2.1)
+④ Learn ETCSLV → write it     Framework page → Worksheet D (Tasks 2.2–2.3)
+⑤ Pick the room               Decision tree → lock one pattern (Task 2.4)
+⑥ Hire the standing brief     Workflow brain in Settings (Task 2.5)
+⑦ Open for business           Make it run once — Track A or Track B (Task 2.6)
+</code></pre>
+<p><strong>What is an AI workflow?</strong> A <strong>repeatable path</strong>: something starts the work → AI (and maybe other systems) do clear steps → a result appears where your team already works → a human still owns risk. Reception → desk → manager approval. AI can sit at some desks; it should not steal the manager’s approval.</p>
+<p><strong>Anatomy of a running workflow (remember this picture)</strong></p>
+<pre><code>TRIGGER          AI / SYSTEMS           OUTPUT              HUMAN
+(form, email,    (draft, extract,       (Doc, Sheet,        (approve /
+ sheet row,       classify, route)       draft email,        edit / reject)
+ checklist)                              Slack)
+</code></pre>
+<p><strong>Tools in Session 2:</strong> Teacher chat for <strong>2.1, 2.3, 2.4, 2.5</strong> only · chatbot Project (or NotebookLM if file-heavy) for 2.5 · <strong>Track A</strong> n8n/Make/Zapier clone <strong>or Track B</strong> semi-auto for 2.6. Tasks <strong>2.0</strong> and <strong>2.2</strong> are paper/discussion — no forced chat.</p>
+<blockquote>
+<p>You will <strong>not</strong> automate yet. First choose height (ladder), map steps, write rules, lock a pattern, write the brain. Automation comes at <strong>Task 2.6</strong>.</p>
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 13</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 14</strong> · Section 2 · THROUGH · Pattern Ladder, Readiness &amp; Projects</p>
+<h2>Pattern ladder (how much structure?) — Step ②</h2>
+<table>
+<thead>
+<tr>
+<th>🪜 <strong>TASK 2.0</strong> (~5 min) — Pattern ladder + readiness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> You locked one job — now ask how much structure <em>that</em> job needs (don’t jump to n8n yet).</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> Rate yourself 1–5 on the readiness table below. Listen to the instructor on the ladder. Circle your rung. Discuss with a neighbour if unsure. <strong>No Teacher chat required.</strong></td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Rung noted below. Mark roadmap <strong>2.0</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Readiness self-score (1 = weak · 5 = strong)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data readiness</strong> (clean inputs exist?)</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Tool / IT access</strong> (apps you need?)</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Risk appetite</strong> (OK with AI draft before you send?)</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Change capacity</strong> (team can adopt in ~30 days?)</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td>☐</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Climb only as high as <em>this</em> route needs:</p>
+<pre><code>1 Instruction-only chat
+2 Knowledge assistant (your files)
+3 Single workflow agent (clear steps + you approve)
+4 Multi-agent / role handoff
+5 Automation pipeline (trigger → run)
+</code></pre>
+<p><strong>Bicycle → scooter → van → small fleet → factory.</strong> Do not buy a factory for a bicycle trip.</p>
+<p><strong>My ladder rung for today:</strong> <em>e.g. Level 3 — single workflow agent</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___</p>
+<h2>Knowledge assistants, Projects &amp; the workflow brain</h2>
+<p><strong>Knowledge assistant / RAG:</strong> before answering, the system <strong>finds relevant passages from your files</strong>, then writes an answer grounded in those passages (ideally with citations). Instead of guessing leave rules from memory, the junior <strong>opens the HR binder</strong>, then drafts. <em>Still your job:</em> verify citations; update files when policy changes.</p>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reusable assistant</strong></td>
+<td>Same role and rules every time (Settings / instructions)</td>
+</tr>
+<tr>
+<td><strong>AI Project</strong></td>
+<td>A container: instructions + files + ongoing chats for one job family</td>
+</tr>
+<tr>
+<td><strong>Workflow brain</strong></td>
+<td>Standing brief for <strong>one locked process</strong> (not the whole company handbook)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Identity rule for today:</strong> Extend your Work Assistant <strong>or</strong> create <strong>one</strong> worker Project for the locked job — not five mystery bots.</p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 14</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 15</strong> · Section 2 · THROUGH · Worksheet C — Workflow Canvas</p>
+<h2>Worksheet C — Map your process — Step ③</h2>
+<table>
+<thead>
+<tr>
+<th>🗺️ <strong>TASK 2.1</strong> (~10 min) — Map your process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> You chose a height on the ladder — now write the floor plan (steps) and tag who does what.</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> In Teacher chat, send the roadmap <strong>Copy</strong> box with your steps (max 8). Accept or correct 🟢/🔵/🔴 tags. Copy the map onto this canvas.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Map exists in Teacher chat + on this page. Mark roadmap <strong>2.1</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Map the process. Messy is fine. Rows 1–4 show a starter path — replace with yours.</em></p>
+<p><strong>Process name:</strong> <em>e.g. Weekly team update</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Who / what does it</th>
+<th>🟢 Green · 🔵 Blue · 🔴 Red</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><em>Trigger: Friday Sheet row / pasted bullets</em></td>
+<td><em>Form / Sheet / me</em></td>
+<td><em>🔵</em></td>
+</tr>
+<tr>
+<td>2</td>
+<td><em>AI drafts update from bullets</em></td>
+<td><em>Work Assistant / workflow brain</em></td>
+<td><em>🟢</em></td>
+</tr>
+<tr>
+<td>3</td>
+<td><em>Draft lands in Google Doc / email draft</em></td>
+<td><em>Doc / Gmail</em></td>
+<td><em>🔵</em></td>
+</tr>
+<tr>
+<td>4</td>
+<td><em>Manager checks numbers &amp; tone, then sends</em></td>
+<td><em>You</em></td>
+<td><em>🔴</em></td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><em>Key: 🟢 </em><em>Green</em><em> = AI thinking · 🔵 </em><em>Blue</em><em> = rules / automation · 🔴 </em><em>Red</em><em> = human only</em></p>
+<p><strong>Draw the flow</strong> (boxes and arrows)</p>
+<pre><code>┌──────────┐      ┌──────────┐      ┌──────────┐      ┌──────────┐
+│ Trigger  │  →   │          │  →   │          │  →   │ Human    │
+│          │      │          │      │          │      │ approval │
+└──────────┘      └──────────┘      └──────────┘      └──────────┘
+
+(Redraw freely)
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+</code></pre>
+<p><strong>Still requires a human:</strong> <em>e.g. Final send + any number that affects decisions</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>__</p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 15</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 16</strong> · Section 2 · THROUGH · ETCSLV Framework</p>
+<h2>ETCSLV — Onboarding a new employee (and an AI helper on a desk process)</h2>
+<blockquote>
+<p>Use this page <strong>after Worksheet C</strong> (map) and <strong>before Worksheet D</strong> (ETCSLV draft).</p>
+</blockquote>
+<p><strong>Say the picture first:</strong> before you open a new role, you decide how hard the work is, which systems they touch, what they must always know, what files stay, what they may never do alone, and how you check quality.</p>
+<table>
+<thead>
+<tr>
+<th>Letter</th>
+<th>Name</th>
+<th>Core question</th>
+<th>New-employee analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E</strong></td>
+<td>Execution</td>
+<td>Multiple reasoning steps or loops?</td>
+<td>Is this a multi-step desk job or a one-line reply?</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>Tools</td>
+<td>Which systems must they touch?</td>
+<td>Email, Docs, Sheet, CRM, Forms…</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Context</td>
+<td>What must they always know?</td>
+<td>Team goals, tone, forbidden claims</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>State</td>
+<td>What must persist beyond one chat?</td>
+<td>Last week’s file, client prefs, ticket ID</td>
+</tr>
+<tr>
+<td><strong>L</strong></td>
+<td>Limits</td>
+<td>What may they never do alone?</td>
+<td>No send, no salary figures, no legal promises</td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td>Validation</td>
+<td>How do we know it’s correct?</td>
+<td>Checklist, sample check, manager sign-off</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Filled example — Weekly team / stakeholder update (common corporate)</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Example answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E</strong></td>
+<td>Yes — gather bullets, rewrite, adjust tone</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>Email + Doc; optional input Sheet</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Audience (boss / client), priorities, forbidden claims, brand tone</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>Last week’s update file; known preferences</td>
+</tr>
+<tr>
+<td><strong>L</strong></td>
+<td>No send without manager approval; no invented metrics or headcount</td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td>Facts cited / source noted; tone OK; human signed off</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Callout</strong><br />
+<strong>Harness = the same ETCSLV checklist</strong>, named for shipping. You will reuse it in Session 3 (Worksheet E).</p>
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 16</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 17</strong> · Section 2 · THROUGH · Worksheet D — ETCSLV Draft</p>
+<h2>Worksheet D — ETCSLV draft — Step ④</h2>
+<blockquote>
+<p>Fill this <strong>after</strong> the ETCSLV Framework page (<strong>Sec 16</strong>).</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>✍️ <strong>TASK 2.2</strong> (~5 min) — First ETCSLV draft</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> The map shows steps — now write the desk rules (especially <strong>L</strong>imits and <strong>V</strong>alidation).</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> Fill E–T–C–S–L–V below in your own words. <strong>Paper only — no Teacher chat.</strong> Critique is Task 2.3.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Draft written on this page. Mark roadmap <strong>2.2</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>🔍 <strong>TASK 2.3</strong> (~10 min) — Teacher critiques ETCSLV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> First drafts of L/V are usually soft (“be careful”) — tighten until Monday-testable.</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> Paste your E–V from this page into Teacher chat. Send the roadmap <strong>Copy</strong> box. Reply with updated <strong>L</strong> and <strong>V</strong> only.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Updated L + V are specific/testable. Mark roadmap <strong>2.3</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Starters below match a “weekly update” job — rewrite for your process. Be specific on L and V.</em></p>
+<table>
+<thead>
+<tr>
+<th>Letter</th>
+<th>My answer for today’s process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E</strong> Execution</td>
+<td><em>e.g. Yes — gather bullets, rewrite, adjust tone</em></td>
+</tr>
+<tr>
+<td><strong>T</strong> Tools</td>
+<td><em>e.g. Sheet (inputs) + Doc/email draft</em></td>
+</tr>
+<tr>
+<td><strong>C</strong> Context</td>
+<td><em>e.g. Audience = my manager; no invented metrics; friendly-professional</em></td>
+</tr>
+<tr>
+<td><strong>S</strong> State</td>
+<td><em>e.g. Last week’s update file; recurring section headings</em> <em>(State = what must still exist next week)</em></td>
+</tr>
+<tr>
+<td><strong>L</strong> Limits</td>
+<td><em>e.g. Never send; never invent headcount/revenue; ask if bullets missing</em> <em>(not just “be careful”)</em></td>
+</tr>
+<tr>
+<td><strong>V</strong> Validation</td>
+<td><em>e.g. Checklist: every number has a Sheet source · I sign off before send</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>After Teacher critique — updated L &amp; V (must be specific)</strong></p>
+<p>| <strong>L</strong> (revised) | |<br />
+| <strong>V</strong> (revised) | |</p>
+<p>Hardest letter for me: <em>often S, L, or V</em> <span style="display:inline-block;width:60px;border-bottom:1px solid #666"></span> because <span style="display:inline-block;width:330px;border-bottom:1px solid #666"></span></p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 17</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 18</strong> · Section 2 · THROUGH · Decision Tree &amp; Type Cards</p>
+<h2>Decision Tree — Find the simplest help — Step ⑤</h2>
+<table>
+<thead>
+<tr>
+<th>🌳 <strong>TASK 2.4</strong> (~15 min) — Decision tree + lock pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> Map + rules exist — triage picks <strong>one</strong> pattern room (don’t collect options).</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> Complete the Decision Tree on the <strong>roadmap</strong> (link on the task). Note the result. Send the roadmap <strong>Copy</strong> box to Teacher. Lock <strong>one</strong> pattern — do not collect options.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Pattern locked. Mark roadmap <strong>2.4</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Clinic triage: a few questions → the right room, not the whole hospital.</em></p>
+<ol>
+<li><strong>When this job is finished, what do you have?</strong><br />
+  - ☐ One message, doc, image, or answer → go to Q2<br />
+  - ☐ Several steps until a sheet / inbox / status updates → go to Q3</li>
+<li><strong>Does AI need company files?</strong><br />
+  - ☐ No — I can paste in chat → <strong>Type 1 · Quick helper</strong><br />
+  - ☐ Yes — PDFs / sheets / scans → <strong>Type 2 · Company brain</strong></li>
+<li><strong>How should multi-step work run?</strong><br />
+  - ☐ I approve each step → <strong>Type 3 · Work buddy</strong><br />
+  - ☐ Many similar items overnight → <strong>Type 6 · Batch</strong><br />
+  - ☐ Two different roles hand off → <strong>Type 5 · Handoff</strong></li>
+</ol>
+<p><strong>My result</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type # and name</td>
+<td><em>e.g. Type 3 · Work buddy</em></td>
+</tr>
+<tr>
+<td>I will build today</td>
+<td><em>e.g. Sheet bullets → AI draft Doc → I approve before email</em></td>
+</tr>
+<tr>
+<td>Simpler than I expected?</td>
+<td>☐ Yes ☐ No</td>
+</tr>
+</tbody>
+</table>
+<h2>Type cards (short)</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>One-line meaning</th>
+<th>Monday 15-min action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 Quick helper</strong></td>
+<td>One good output; you check; send/save</td>
+<td>Paste draft + 3 rules; one improved version</td>
+</tr>
+<tr>
+<td><strong>2 Company brain</strong></td>
+<td>Answers from your files + citations</td>
+<td>Upload 3–5 PDFs; ask; verify one citation</td>
+</tr>
+<tr>
+<td><strong>3 Work buddy</strong></td>
+<td>Multi-step; you approve each sensitive step</td>
+<td>Gather → AI draft → you approve → paste/send</td>
+</tr>
+<tr>
+<td><strong>4 Coding helper</strong></td>
+<td>Ship/fix with tests as “done”</td>
+<td>AI for PR text; code still through tests</td>
+</tr>
+<tr>
+<td><strong>5 Handoff</strong></td>
+<td>Two specialist roles; structured packet</td>
+<td>Role A sources → Role B writes from packet only</td>
+</tr>
+<tr>
+<td><strong>6 Batch</strong></td>
+<td>Many similar items; morning sample-check</td>
+<td>Trigger on new rows; review sample column</td>
+</tr>
+<tr>
+<td><strong>7 Quality checker</strong></td>
+<td>Score vs checklist; human decides</td>
+<td>Pin rubric; never auto-pass unsure cases</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 18</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 19</strong> · Section 2 · THROUGH · Workflow Brain, Make it Run &amp; Reflection</p>
+<table>
+<thead>
+<tr>
+<th>🧬 <strong>TASK 2.5</strong> (~30 min) — Build the workflow brain — Step ⑥</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> Pattern is locked — write the <strong>standing brief</strong> for the AI step (Settings once). Still chatbot/NotebookLM here — not n8n yet.</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> Send the roadmap <strong>Copy</strong> box to Teacher → paste <strong>only</strong> the system instructions into Settings for this job <strong>once</strong> (extend Work Assistant or one new Project; NotebookLM OK if file-heavy). Test a good example and a messy example.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Brain tested. Mark roadmap <strong>2.5</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<h2>Make it run — Track A or Track B — Step ⑦</h2>
+<p><strong>In plain words:</strong> Automation means the path can <strong>start without you remembering</strong>. Day one stays humble: one trigger, one AI step, one output, one approval.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Track A — preferred</strong></th>
+<th><strong>Track B — if automation is blocked</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Clone facilitator’s <strong>n8n / Make / Zapier</strong> template</td>
+<td>Semi-auto: checklist or form → <strong>AI draft in chat</strong> → <strong>you</strong> paste/send after review</td>
+</tr>
+<tr>
+<td><strong>When</strong></td>
+<td>Wi-Fi + tool access OK</td>
+<td>Corporate laptop blocks automation, or IT forbids</td>
+</tr>
+<tr>
+<td><strong>Still must</strong></td>
+<td>Live-run once on screen</td>
+<td>Live-run once on screen (show the draft + where you’d send it)</td>
+</tr>
+<tr>
+<td><strong>Not enough</strong></td>
+<td>Architecture diagram only</td>
+<td>Notes-only with no live AI output</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>⚡ <strong>TASK 2.6</strong> (~30 min) — Automation path that runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Because:</strong> Brain is tested — open the path once (automation <strong>or</strong> Track B semi-auto).</td>
+</tr>
+<tr>
+<td><strong>Do:</strong> <strong>Track A:</strong> clone facilitator template → wire your workflow-brain instructions into the AI step → live-run once. <strong>Track B (if blocked):</strong> trigger checklist/form → AI produces the artifact in chat → you show paste/send after approval. <strong>Optional if time:</strong> send the roadmap <strong>Copy</strong> box to Teacher for a short review.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> You can re-trigger (or re-run the Track B path) without the instructor. Mark roadmap <strong>2.6</strong> complete.</td>
+</tr>
+<tr>
+<td><strong>My track today:</strong> ☐ A (n8n/Make/Zapier) · ☐ B (semi-auto chatbot)</td>
+</tr>
+</tbody>
+</table>
+<h2>Quick share — Workflow spotlight (5–10 min)</h2>
+<p>A volunteer (or someone picked at random) explains in ~60 seconds: (1) the locked process, (2) where the <strong>human approval</strong> (🔴) sits, (3) what AI must <strong>never invent</strong>. Listeners: note one idea to steal for your own L or V.</p>
+<p><strong>Idea I heard that I might use:</strong> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>____</p>
+<h2>Section 2 — Reflection</h2>
+<ol>
+<li>Did the decision tree push me simpler or more complex?</li>
+</ol>
+<hr />
+<ol start="2">
+<li>Can I demo trigger → AI → output once? ☐ Yes ☐ Not yet — blocker: <strong><em>_</em></strong>_____</li>
+</ol>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 19</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 20</strong> · Section 3 · BY · From Helper to AI Workforce</p>
+<h1>SECTION 3 — Work BY AI</h1>
+<p><em>Goal: Manage AI like a small team — roles, harness, failure drill, then ship.</em></p>
+<table>
+<thead>
+<tr>
+<th>👔 <strong>TASK 3.0</strong> (~5 min) — Manager of agents (framing)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Follow the instructor. Write one line below: what “manager of agents” means for your process. <strong>No Teacher chat required.</strong></td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Framing heard + one line written. Mark roadmap <strong>3.0</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>One line for me:</strong> <em>You manage roles + rules + evaluation; AI does the drafting.</em></p>
+<hr />
+<p><strong>Tools in Session 3:</strong> Teacher chat for <strong>3.1</strong> and <strong>3.4</strong> (required) · <strong>3.2</strong> and <strong>3.6</strong> optional polish · <strong>3.3</strong> only if stuck · <strong>3.5</strong> live demo (no chat).</p>
+<h2>From helper to workforce</h2>
+<p><strong>Manager truth:</strong> You do not personally write every email, check every cell, and design every slide. You <strong>coordinate specialists</strong>, set standards, and own exceptions. Managing AI is the same:</p>
+<pre><code>Model  +  Memory  +  Tools  +  Workflow  +  Evaluation
+  │         │         │          │             │
+ which      what it   systems    the path      how you
+ brain      must know  it may    it follows    know it’s
+ you use    / remember touch                   good enough
+</code></pre>
+<h2>AI workers &amp; AI teams</h2>
+<p><strong>Specialist roles (use only what you need)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Job</th>
+<th>Human parallel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planner</strong></td>
+<td>Break work into steps / outline</td>
+<td>Team lead planning the day</td>
+</tr>
+<tr>
+<td><strong>Researcher</strong></td>
+<td>Gather facts from allowed sources</td>
+<td>Analyst pulling data</td>
+</tr>
+<tr>
+<td><strong>Writer</strong></td>
+<td>Draft the customer- or manager-facing text</td>
+<td>Communications</td>
+</tr>
+<tr>
+<td><strong>Reviewer</strong></td>
+<td>Check tone, policy, completeness</td>
+<td>Peer review</td>
+</tr>
+<tr>
+<td><strong>Evaluator</strong></td>
+<td>Score against a rubric / checklist</td>
+<td>QA / compliance checker</td>
+</tr>
+<tr>
+<td><strong>Human manager</strong></td>
+<td>Approves, rejects, escalates</td>
+<td>You</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Corporate sketch — New joiner onboarding pack:</strong> Researcher pulls the day-1 checklist from the approved HR handbook → Writer drafts welcome email + checklist → Reviewer flags any salary/benefit language that was not provided → <strong>HR (you) sends or edits</strong>.</p>
+<blockquote>
+<p><strong>Callout</strong><br />
+Minimum roster. Extra agents create coordination cost. Prefer <strong>one running path</strong> over a 16-agent swarm.</p>
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 20</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 21</strong> · Section 3 · BY · Worksheet F — AI Workforce Canvas</p>
+<h2>Worksheet F — AI Workforce Canvas</h2>
+<table>
+<thead>
+<tr>
+<th>👥 <strong>TASK 3.1</strong> (~15 min) — Design your AI workforce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> In Teacher chat, send the roadmap <strong>Copy</strong> box (3–5 roles max). Let Teacher cut extras. Delete any role you cannot explain in one sentence. Fill this canvas.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Minimum role list named. Mark roadmap <strong>3.1</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Minimum roster. Starters assume weekly update — cut roles you don’t need.</em></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Your design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Locked process</td>
+<td><em>e.g. Weekly team update</em></td>
+</tr>
+<tr>
+<td>Human manager</td>
+<td><em>e.g. Me</em></td>
+</tr>
+<tr>
+<td>Roles I will use (circle)</td>
+<td>Planner · Researcher · Writer · Reviewer · Evaluator · Other: ______</td>
+</tr>
+<tr>
+<td>Handoff packet (what passes between roles)</td>
+<td><em>e.g. Bullets + sources → draft text only (no new facts)</em></td>
+</tr>
+<tr>
+<td>Tools per role</td>
+<td><em>e.g. Writer: Claude · Evaluator: checklist in Sheet</em></td>
+</tr>
+<tr>
+<td>Limits (shared)</td>
+<td><em>e.g. No external send; no invented numbers</em></td>
+</tr>
+<tr>
+<td>Validation (shared)</td>
+<td><em>e.g. Every figure has a source row · human approves</em></td>
+</tr>
+<tr>
+<td>Cost note ($ cheap draft vs $$$ careful review)</td>
+<td><em>e.g. $ draft · $$$ only for board-facing rewrite</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Swimlane sketch</strong></p>
+<pre><code>Planner     : *e.g. Outline: wins / risks / asks* _______________________________
+
+Researcher  : *(optional)* *Pull last week’s file / Sheet totals* _______________
+
+Writer      : *Draft narrative from packet only* _______________________________
+
+Reviewer    : *Flag tone + any claim without source* ___________________________
+
+Human       : *Approve / edit / send* __________________________________________
+</code></pre>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 21</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 22</strong> · Section 3 · BY · Worksheet E — Harness Card</p>
+<h2>Worksheet E — Harness Card (shipping name for ETCSLV)</h2>
+<table>
+<thead>
+<tr>
+<th>🛡️ <strong>TASK 3.2</strong> (~15 min) — Harness Card (shipping name for ETCSLV)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Fill Worksheet E below — all fields, especially <strong>L</strong> and <strong>V</strong>. Harness = same ETCSLV, shipping name. <strong>Optional if time:</strong> paste L + V into Teacher and send the roadmap <strong>Copy</strong> box for critique.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> L and V are clear enough to demo. Mark roadmap <strong>3.2</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Same letters. Now written as job rules for the process that must run.</em><br />
+<em>Middle column = example to steal. Right column = blank lines for your answers.</em></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Example (starter)</th>
+<th>Write yours</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workflow name</td>
+<td><em>Friday Team Update Draft</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td>Owner (human manager)</td>
+<td><em>Me (Ops Lead)</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>E</strong> How hard / multi-step?</td>
+<td><em>Multi-step: collect → draft → tone pass</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>T</strong> Tools (+ cheap vs expensive)</td>
+<td><em>$ Sheet+Doc draft · $$$ only if legal review</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>C</strong> Always-on context</td>
+<td><em>Audience, forbidden claims, section template</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>S</strong> What must persist</td>
+<td><em>Last update file + standing Settings</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>L</strong> Hard limits / approvals</td>
+<td><em>No send; no invented metrics; escalate missing bullets</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td><strong>V</strong> How we validate</td>
+<td><em>Number-source checklist + human sign-off</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td>Failure test I will try</td>
+<td><em>Submit empty bullets / ask it to invent a %</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+<tr>
+<td>Pass / fail rule</td>
+<td><em>Pass only if it asks for missing input and refuses invented %</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:185px"></div></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 22</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 23</strong> · Section 3 · BY · Failure Lab</p>
+<h2>Failure Lab</h2>
+<table>
+<thead>
+<tr>
+<th>💥 <strong>TASK 3.3</strong> (~20 min) — Failure lab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Trigger <strong>two</strong> failures on your running workflow. Fix instructions or the path. Use the roadmap <strong>Copy</strong> box only if stuck.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Two lines written: What broke → Fix applied. Mark roadmap <strong>3.3</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analogy:</strong> Mystery-shopper / fire drill on your own process — break it on purpose before Monday does.</p>
+<table>
+<thead>
+<tr>
+<th>Attack</th>
+<th>Example</th>
+<th>What I observed</th>
+<th>Fix applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing input</td>
+<td>Empty bullets</td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:150px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0;min-width:150px"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+</tr>
+<tr>
+<td>Messy / Bangla-English mix</td>
+<td><em>e.g. Half Bangla WhatsApp paste</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+</tr>
+<tr>
+<td>Forbidden ask</td>
+<td>“Promise a salary / discount we never approved”</td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+</tr>
+<tr>
+<td>Overconfident draft</td>
+<td>Invented metric</td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+</tr>
+<tr>
+<td><em>(your own attack)</em></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+<td><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div><div style="border-bottom:1px solid #666;height:1.45em;margin:0.25em 0"></div></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What broke (1):</strong> <span style="display:inline-block;width:480px;border-bottom:1px solid #666"></span></p>
+<p><strong>Fix applied (1):</strong> <span style="display:inline-block;width:475px;border-bottom:1px solid #666"></span></p>
+<p><strong>What broke (2):</strong> <span style="display:inline-block;width:480px;border-bottom:1px solid #666"></span></p>
+<p><strong>Fix applied (2):</strong> <span style="display:inline-block;width:475px;border-bottom:1px solid #666"></span></p>
+<p><strong>One fix I shipped after Failure Lab:</strong> <span style="display:inline-block;width:370px;border-bottom:1px solid #666"></span></p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 23</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 24</strong> · Section 3 · BY · Worksheet G — Capstone &amp; Demo Day</p>
+<h2>Worksheet G — Capstone (ship the running workflow)</h2>
+<table>
+<thead>
+<tr>
+<th>🚀 <strong>TASK 3.4</strong> (~30 min) — Capstone: ship + demo script</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Re-run the happy path twice without the instructor. Confirm trigger · AI · real output place · human approval. Fill the capstone fields and use the roadmap <strong>Copy</strong> box for a 60-second demo script.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Definition-of-done checklist complete. Mark roadmap <strong>3.4</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>🎤 <strong>TASK 3.5</strong> (~20 min) — Demo Day + peer review</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Live-demo trigger → AI → output → human approval. Say: pain → run → who approves → one risk you fixed. Peer notes one strength + one improvement.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Demo shown + peer row filled. Mark roadmap <strong>3.5</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Definition of done:</strong> ☐ Trigger is real ☐ AI step uses standing instructions ☐ Output lands where work lives ☐ Human approval step is visible ☐ I can re-run without the instructor ☐ L and V match what I built</p>
+<table>
+<thead>
+<tr>
+<th>Capstone field</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Demo title (5 words)</td>
+<td><em>e.g. Friday Update Auto-Draft</em></td>
+</tr>
+<tr>
+<td>Trigger</td>
+<td><em>e.g. New row in “Weekly Bullets” Sheet / pasted notes</em></td>
+</tr>
+<tr>
+<td>AI does</td>
+<td><em>e.g. Writes manager update from bullets using Settings rules</em></td>
+</tr>
+<tr>
+<td>Output location</td>
+<td><em>e.g. Google Doc body / Gmail draft</em></td>
+</tr>
+<tr>
+<td>Human must still…</td>
+<td><em>e.g. Check every number and click Send</em></td>
+</tr>
+<tr>
+<td>Biggest risk remaining</td>
+<td><em>e.g. Someone pastes incomplete bullets and still trusts the draft</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Demo Day script (60–90 seconds)</strong></p>
+<ol>
+<li>Problem: <em>e.g. Friday scramble from WhatsApp notes</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>______</li>
+<li>Show trigger: <em>e.g. I add a Sheet row / paste bullets</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>__</li>
+<li>Show output: <em>e.g. Draft appears in Doc</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___</li>
+<li>Show human gate: <em>e.g. I refuse to send until numbers checked</em> <strong><em>_</em></strong><strong><em>_</em></strong>_</li>
+<li>Monday next step: <em>e.g. Run it once with real team bullets</em> <strong><em>_</em></strong><strong><em>_</em></strong>____</li>
+</ol>
+<p><strong>Peer review received</strong></p>
+<table>
+<thead>
+<tr>
+<th>Strength</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 24</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 25</strong> · Section 3 · BY · Delegation, Adoption Plan &amp; Reflection</p>
+<h2>Checklist H — AI Delegation Checklist</h2>
+<p>Before you delegate a task to AI (assistant or workflow):</p>
+<p><strong>Brief:</strong> ☐ Role and outcome clear ☐ Audience and tone set ☐ Forbidden content listed ☐ Output format specified</p>
+<p><strong>Safety:</strong> ☐ No unnecessary PII in the prompt ☐ Red steps marked human-only ☐ Hallucination checks for numbers / policy</p>
+<p><strong>Operate &amp; ship:</strong> ☐ Right tool for this job (≤3) ☐ Files attached if required ☐ Validation method named (V) ☐ You own exceptions ☐ Ran once successfully ☐ Failure case tested once</p>
+<h2>Worksheet I — Personal AI Adoption Plan (seed for 30 days)</h2>
+<table>
+<thead>
+<tr>
+<th>📅 <strong>TASK 3.6</strong> (~10 min) — 30-day AI adoption plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do:</strong> Fill this seed plan and complete the full calendar in <strong>R7 (Sec 29)</strong>. Circle the Week 1 action you will actually do. <strong>Optional if time:</strong> send the roadmap <strong>Copy</strong> box to Teacher for a polish pass.</td>
+</tr>
+<tr>
+<td><strong>Done when:</strong> Tomorrow + this week filled. Mark roadmap <strong>3.6</strong> complete.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Horizon</th>
+<th>Commitment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tomorrow</strong></td>
+<td><em>e.g. Use Work Assistant on 1 real email before lunch</em></td>
+</tr>
+<tr>
+<td><strong>This week</strong></td>
+<td><em>e.g. Attach 3 SOPs/files; run my workflow once</em></td>
+</tr>
+<tr>
+<td><strong>Next 30 days</strong></td>
+<td><em>e.g. Friday ritual: trigger → draft → approve</em></td>
+</tr>
+<tr>
+<td><strong>I will stop doing…</strong></td>
+<td><em>e.g. Pasting customer/employee PII into public chat</em></td>
+</tr>
+<tr>
+<td><strong>I will measure success by…</strong></td>
+<td><em>e.g. Time to first usable draft under 10 minutes</em></td>
+</tr>
+<tr>
+<td><strong>Accountability buddy</strong></td>
+<td><em>e.g. Desk neighbour / team lead</em></td>
+</tr>
+</tbody>
+</table>
+<h2>Section 3 — Reflection</h2>
+<ol>
+<li>As a manager of AI, my most important skill is:</li>
+</ol>
+<hr />
+<ol start="2">
+<li>One process I will <strong>not</strong> automate yet:</li>
+</ol>
+<hr />
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 25</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 26</strong> · Reference · R1 Prompt Cheat Sheet · R3 Workflow Checklist</p>
+<h1>END OF BOOKLET — Reference Cards</h1>
+<p><em>Tear-out style pages. Keep using after the workshop.</em></p>
+<h2>R1 — Prompt Cheat Sheet</h2>
+<p><strong>CTAO</strong></p>
+<pre><code>Context: I am [role] at [org type] working on [topic].
+Task: [verb] [object].
+Audience / constraints: [tone, language, length, never invent X].
+Output: [format, number of options, sections].
+</code></pre>
+<p><strong>Power add-ons</strong></p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Add this line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Less invention</td>
+<td>“If unknown, say unknown. Do not invent numbers or policy.”</td>
+</tr>
+<tr>
+<td>Better structure</td>
+<td>“Use headings + bullets. Max one page.”</td>
+</tr>
+<tr>
+<td>Bangla quality</td>
+<td>“Natural Bangla, not literal translation. Avoid awkward formalisms.”</td>
+</tr>
+<tr>
+<td>Critique mode</td>
+<td>“List weaknesses first. Then rewrite once.”</td>
+</tr>
+<tr>
+<td>Use prior context</td>
+<td>“Use my process from earlier in this chat. Don’t ask me to re-paste unless critical.”</td>
+</tr>
+<tr>
+<td>Manager gate</td>
+<td>“End with: Risks / What a human must check.”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Stop → Read → Decide</strong> before you paste into email, CRM, or WhatsApp.</p>
+<h2>R3 — AI Workflow Checklist</h2>
+<ul>
+<li>[ ] One locked process named</li>
+<li>[ ] Trigger defined</li>
+<li>[ ] Steps mapped (🟢/🔵/🔴)</li>
+<li>[ ] ETCSLV drafted — L &amp; V specific</li>
+<li>[ ] Pattern / Type chosen (simplest that works)</li>
+<li>[ ] Workflow brain in Settings (once)</li>
+<li>[ ] Happy path tested · Messy path tested</li>
+<li>[ ] Output location correct</li>
+<li>[ ] Human approval visible</li>
+<li>[ ] Owner named for exceptions</li>
+</ul>
+<p><em>Key: 🟢 </em><em>Green</em><em> = AI thinking · 🔵 </em><em>Blue</em><em> = rules / automation · 🔴 </em><em>Red</em><em> = human only</em></p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 26</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 27</strong> · Reference · R2 Tool Matrix · R4 ETCSLV Summary · R5 Decision Tree</p>
+<h2>R2 — AI Tool Selection Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>If your job needs…</th>
+<th>Start with</th>
+<th>Also consider</th>
+<th>Avoid for this job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fast draft / rewrite</td>
+<td>ChatGPT or Claude</td>
+<td>Gemini</td>
+<td>Over-tooling</td>
+</tr>
+<tr>
+<td>Long policy reading</td>
+<td>Claude or ChatGPT (+ file)</td>
+<td>NotebookLM</td>
+<td>Blind trust without cite</td>
+</tr>
+<tr>
+<td>Answers from <em>your</em> SOP pack</td>
+<td>NotebookLM / Project files</td>
+<td>Claude/ChatGPT Projects</td>
+<td>Pure web chat with no upload</td>
+</tr>
+<tr>
+<td>Web research + links</td>
+<td>Perplexity</td>
+<td>Gemini</td>
+<td>Treating snippets as audited fact</td>
+</tr>
+<tr>
+<td>Slides / visuals</td>
+<td>Gemini / Gamma / ChatGPT images</td>
+<td>—</td>
+<td>Brand compliance without review</td>
+</tr>
+<tr>
+<td>Recurring trigger</td>
+<td>Zapier / Make / n8n + Doc/Sheet</td>
+<td>—</td>
+<td>Multi-agent complexity on day 1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Max 2–3 tools for one workflow.</strong></p>
+<h2>R4 — ETCSLV One-Page Summary</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Question</th>
+<th>Onboarding analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E</strong> Execution</td>
+<td>Multi-step reasoning?</td>
+<td>How hard is the desk job?</td>
+</tr>
+<tr>
+<td><strong>T</strong> Tools</td>
+<td>Which systems?</td>
+<td>Email, Sheet, CRM…</td>
+</tr>
+<tr>
+<td><strong>C</strong> Context</td>
+<td>Always know what?</td>
+<td>Product + tone + taboos</td>
+</tr>
+<tr>
+<td><strong>S</strong> State</td>
+<td>What persists?</td>
+<td>Last file, ticket ID, prefs</td>
+</tr>
+<tr>
+<td><strong>L</strong> Limits</td>
+<td>Never alone?</td>
+<td>No send / no money / no legal</td>
+</tr>
+<tr>
+<td><strong>V</strong> Validation</td>
+<td>Correct how?</td>
+<td>Checklist + human sign-off</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Harness</strong> = ETCSLV with a shipping name for the live process.</p>
+<h2>R5 — AI Decision Tree (pocket)</h2>
+<pre><code>Finished output = ONE thing?
+  ├─ Needs company files? ─ No  → Type 1 Quick helper
+  │                        └ Yes → Type 2 Company brain
+  └─ MANY steps?
+        ├─ I approve each step     → Type 3 Work buddy
+        ├─ Overnight many items    → Type 6 Batch
+        └─ Two specialist roles    → Type 5 Handoff
+
+Special cases: coding → Type 4 · rubric QA → Type 7
+</code></pre>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 27</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 28</strong> · Reference · R6 Ethics &amp; Privacy · R9 Glossary</p>
+<h2>R6 — AI Ethics &amp; Privacy Checklist</h2>
+<p><strong>Before you paste</strong></p>
+<ul>
+<li>[ ] No full NID / passport / card / salary / medical details unless approved channel</li>
+<li>[ ] No passwords, OTPs, or system credentials</li>
+<li>[ ] No confidential contracts, credit files, or unreleased board packs in personal tool accounts</li>
+<li>[ ] Minimize personal data — mask where possible</li>
+<li>[ ] Respect employer AI / data policy</li>
+</ul>
+<p><strong>Before you publish or send</strong></p>
+<ul>
+<li>[ ] No invented policy, legal, or regulatory claims</li>
+<li>[ ] Marketing / employer-brand claims checked</li>
+<li>[ ] Respectful language for staff, candidates, customers, vendors</li>
+<li>[ ] Human accountable name on external messages</li>
+<li>[ ] Sources retained for audit if needed</li>
+</ul>
+<p><strong>If unsure:</strong> ask compliance / IT / your manager — do not “just try it” with live employee or customer data.</p>
+<h2>R9 — Glossary (one line each)</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generative AI</td>
+<td>AI that creates new text/media from prompts</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Your work brief to the AI</td>
+</tr>
+<tr>
+<td>Hallucination</td>
+<td>Confident false detail</td>
+</tr>
+<tr>
+<td>Human-in-the-loop</td>
+<td>Person must approve risky steps</td>
+</tr>
+<tr>
+<td>Project / Settings</td>
+<td>Standing job brief + files</td>
+</tr>
+<tr>
+<td>Knowledge assistant</td>
+<td>Answers from your documents</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Find relevant file passages, then answer</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td>Trigger → steps → output</td>
+</tr>
+<tr>
+<td>Automation</td>
+<td>Path starts without you remembering</td>
+</tr>
+<tr>
+<td>ETCSLV</td>
+<td>Execution, Tools, Context, State, Limits, Validation</td>
+</tr>
+<tr>
+<td>Harness</td>
+<td>ETCSLV structure to manage agents</td>
+</tr>
+<tr>
+<td>Agent (workshop sense)</td>
+<td>AI following a routed process with rules</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 28</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 29</strong> · Reference · R7 — 30-Day Personal AI Adoption Plan</p>
+<h2>R7 — 30-Day Personal AI Adoption Plan</h2>
+<p><strong>Theme for 30 days:</strong> <em>e.g. “One Friday workflow I can re-run without thinking”</em> <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___</p>
+<table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Focus</th>
+<th>Concrete actions</th>
+<th>Done</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Week 1</strong></td>
+<td>WITH — daily helper</td>
+<td>Use Work Assistant on 3 real tasks; CTAO prompts; Stop→Read→Decide</td>
+<td>☐</td>
+</tr>
+<tr>
+<td><strong>Week 2</strong></td>
+<td>Memory &amp; tools</td>
+<td>Attach 3 key files; cut tool stack to ≤3; one NotebookLM or Project brain</td>
+<td>☐</td>
+</tr>
+<tr>
+<td><strong>Week 3</strong></td>
+<td>THROUGH — one workflow</td>
+<td>Map steps; ETCSLV; run trigger→AI→output once per week</td>
+<td>☐</td>
+</tr>
+<tr>
+<td><strong>Week 4</strong></td>
+<td>BY — manage</td>
+<td>Failure drill; peer review; decide keep / kill / improve</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cadence</strong></p>
+<table>
+<thead>
+<tr>
+<th>Ritual</th>
+<th>When</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15-min AI practice</td>
+<td>☐ Daily ☐ 3× week</td>
+<td></td>
+</tr>
+<tr>
+<td>Weekly workflow run</td>
+<td>Day: <strong><em>_</em></strong>_</td>
+<td></td>
+</tr>
+<tr>
+<td>Review L &amp; V</td>
+<td>Every Friday</td>
+<td></td>
+</tr>
+<tr>
+<td>Share one win</td>
+<td>With: <strong><em>_</em></strong>_</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Metrics (pick 2)</strong></p>
+<ul>
+<li>[ ] Hours saved on <strong><em>_</em></strong><strong><em>_</em></strong>____</li>
+<li>[ ] Cycle time for <strong><em>_</em></strong><strong><em>_</em></strong>____</li>
+<li>[ ] Error / rewrite rate down</li>
+<li>[ ] Team adoption (people using the assistant): ____</li>
+</ul>
+<p><strong>Month-end decision</strong></p>
+<table>
+<thead>
+<tr>
+<th>Keep</th>
+<th>Improve</th>
+<th>Stop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Signature (optional commitment)</strong><br />
+I will treat AI as staff I manage — briefed, limited, and reviewed.</p>
+<p>Name: <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em> Date: </em></strong><strong><em>_</em></strong>__</p>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 29</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 30</strong> · Reference · R8 — Corporate Scenario Bank</p>
+<h2>R8 — Corporate office scenario bank (inspiration only)</h2>
+<p>Pick a row close to your job. Banking/finance people can still use the Finance / Credit row.</p>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>WITH AI (help at your desk)</th>
+<th>THROUGH AI (path that runs)</th>
+<th>Human approval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HR / Admin</strong></td>
+<td>Offer / joining letter from template + sheet row</td>
+<td>Form → onboarding checklist Doc → HR queue</td>
+<td>HR verifies compensation &amp; dates</td>
+</tr>
+<tr>
+<td><strong>Team lead / Manager</strong></td>
+<td>Weekly update from Slack/WhatsApp notes</td>
+<td>Friday Sheet bullets → manager email draft</td>
+<td>You send after number check</td>
+</tr>
+<tr>
+<td><strong>Operations</strong></td>
+<td>Meeting notes → owners + deadlines</td>
+<td>Shared inbox / Form → tagged queue + draft reply</td>
+<td>Ops owner sends / assigns</td>
+</tr>
+<tr>
+<td><strong>Customer / vendor support</strong></td>
+<td>Rewrite angry email calmly</td>
+<td>Ticket → SOP draft reply</td>
+<td>Agent sends</td>
+</tr>
+<tr>
+<td><strong>Marketing / Comms</strong></td>
+<td>3 caption options; slide outline from brief</td>
+<td>Brief → draft pack → brand review folder</td>
+<td>Brand / compliance approves</td>
+</tr>
+<tr>
+<td><strong>Sales / BD</strong></td>
+<td>Visit notes → polite follow-up</td>
+<td>Lead Form → welcome pack draft → CRM note</td>
+<td>RM / AE personalizes &amp; sends</td>
+</tr>
+<tr>
+<td><strong>Analyst / Strategy</strong></td>
+<td>“What changed vs last month?” from export</td>
+<td>Dirty CSV → cleaned table → insight bullets</td>
+<td>Analyst owns the numbers</td>
+</tr>
+<tr>
+<td><strong>Finance / Accounts</strong></td>
+<td>Narrative for P&amp;L bullets; vendor chase email</td>
+<td>Receipt photos / Sheet → exception list</td>
+<td>Finance lead confirms totals</td>
+</tr>
+<tr>
+<td><strong>Learning / L&amp;D · IT</strong></td>
+<td>Lesson plan from PDF; access FAQ from SOP</td>
+<td>Ticket form → category + first reply draft</td>
+<td>Facilitator / IT agent owns edge cases</td>
+</tr>
+<tr>
+<td><strong>Finance institutions</strong></td>
+<td>Document chase; product FAQ draft</td>
+<td>Inquiry Form → checklist Doc → RM queue</td>
+<td>RM sends; credit decision stays human</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Everyday Bangladesh workplace patterns (any industry)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Familiar pattern</th>
+<th>How AI helps</th>
+<th>Still human</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Office WhatsApp chaos → Monday plan</td>
+<td>Clean action list by owner</td>
+<td>You assign &amp; chase</td>
+</tr>
+<tr>
+<td>Vendor / procurement follow-ups</td>
+<td>Polite reminder drafts</td>
+<td>Commercial terms stay yours</td>
+</tr>
+<tr>
+<td>New employee first-week confusion</td>
+<td>Handbook Q&amp;A with citations</td>
+<td>HR owns exceptions</td>
+</tr>
+<tr>
+<td>Leadership Friday review</td>
+<td>Slide outline + speaker notes</td>
+<td>Leaders own the story</td>
+</tr>
+<tr>
+<td>Shared mailbox overload</td>
+<td>Tag + draft; batch overnight</td>
+<td>Spot-check sample before trust</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 30</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 31</strong> · Big picture · Day Roadmap — How every piece connects</p>
+<h1>Day Roadmap — How every piece connects</h1>
+<p><em>One page. Same job all day. Escalate — don’t restart.</em></p>
+<pre><code>  OPEN          WITH AI              THROUGH AI                 BY AI
+  0.0–0.4       1.1–1.6              2.0–2.6                    3.0–3.6
+     │             │                    │                          │
+  Hire coach   Hire helper         Make the JOB run          Manage the team
+  + name roles + lock ONE job      on a clear path           + ship + demo
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>You learn</th>
+<th>You build</th>
+<th>Why the next step exists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0 Open</strong></td>
+<td>What AI is · chat vs assistant vs agent</td>
+<td>Teacher Project (Settings once) + kickoff chat</td>
+<td>You need a coach before you hire a worker</td>
+</tr>
+<tr>
+<td><strong>1 WITH</strong></td>
+<td>Brief · feedback once · <strong>lock one job</strong> · tools ≤3 · memory</td>
+<td>Work Assistant + <strong>locked process (1.4)</strong></td>
+<td>You must feel AI at your elbow <em>and</em> commit one job before automating</td>
+</tr>
+<tr>
+<td><strong>2 THROUGH</strong></td>
+<td>Map 🟢🔵🔴 · ETCSLV · pattern · brain · run</td>
+<td>Trigger → AI → output → human approval</td>
+<td>The locked job becomes a <strong>path that runs</strong>, not a blank chat every time</td>
+</tr>
+<tr>
+<td><strong>3 BY</strong></td>
+<td>Roles · harness (= ETCSLV for shipping) · failure · demo</td>
+<td>Minimum AI roster + re-runnable capstone</td>
+<td>Managers don’t do every draft — they set roles, limits, and quality</td>
+</tr>
+</tbody>
+</table>
+<h3>Task chain at a glance</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Tasks</th>
+<th>Connection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠🖥️📘🤝💬</td>
+<td><strong>0.0→0.4</strong></td>
+<td>Orient → open desk → hire Teacher → contract → name chat/assistant/agent</td>
+</tr>
+<tr>
+<td>📝🧑‍💼🔁🔒🧰📁</td>
+<td><strong>1.1→1.6</strong></td>
+<td>Brief → hire Work Assistant → feedback once → <strong>lock job</strong> → tools → memory <em>for that job</em></td>
+</tr>
+<tr>
+<td>🪜🗺️✍️🔍🌳🧬⚡</td>
+<td><strong>2.0→2.6</strong></td>
+<td>How tall? → map → draft E–V → critique → pick pattern → brain → <strong>run once</strong></td>
+</tr>
+<tr>
+<td>👔👥🛡️💥🚀🎤📅</td>
+<td><strong>3.0→3.6</strong></td>
+<td>Manager mindset → roster → harness → break it → ship → demo → 30-day plan</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Remember:</strong> Product of the day = one <strong>running</strong> workflow for the process you locked at <strong>1.4</strong>. Notes alone are not enough.</p>
+</blockquote>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 31</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 32</strong> · Notes · Notes page</p>
+<h2>Notes</h2>
+<pre><code>_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+
+_______________________________________________________________________________
+</code></pre>
+<hr />
+<p><em>Become a Manager of AI Agents · Participant Workbook · Sec 32</em></p>
+<div class="page-break" style="page-break-before: always; break-before: page;"></div>
+
+<p><strong>Sec 33</strong> · Notes · Parking Lot, Wins &amp; Closing</p>
+<h2>Parking lot (questions for instructor / IT / compliance)</h2>
+<hr />
+<hr />
+<hr />
+<hr />
+<hr />
+<hr />
+<h2>Wins to tell my team on Monday</h2>
+<ol>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+</ol>
+<h2>Closing reminder</h2>
+<pre><code>Work WITH AI    →  brief clearly, review always
+Work THROUGH AI →  one path that runs
+Work BY AI      →  roles + limits + evaluation
+
+You are the manager.
+AI is the workforce.
+Final approval is still yours.
+</code></pre>
+<p><strong>Thank you for investing a day in building your personal AI workforce.</strong></p>
+<hr />
+<p><em>Participant Workbook · Become a Manager of AI Agents · Build Your Personal AI Workforce</em></p>
+</body>
+</html>

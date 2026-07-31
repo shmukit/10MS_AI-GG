@@ -29,14 +29,14 @@ export const MentorsSection: React.FC<MentorsSectionProps> = ({ mentors = [] }) 
                             : 'Mentor';
 
                         return (
-                            <div key={mentor.id} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center border border-border text-sm font-medium text-muted-foreground">
+                            <div key={mentor.id} className="flex items-center justify-between gap-2 min-w-0">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="w-10 h-10 shrink-0 bg-muted rounded-full flex items-center justify-center border border-border text-sm font-medium text-muted-foreground">
                                         {name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
                                     </div>
-                                    <div>
-                                        <div className="font-medium transition-colors duration-200 text-foreground">{name}</div>
-                                        <div className="text-xs transition-colors duration-200 text-muted-foreground">{subtitle}</div>
+                                    <div className="min-w-0">
+                                        <div className="font-medium transition-colors duration-200 text-foreground truncate" title={name}>{name}</div>
+                                        <div className="text-xs transition-colors duration-200 text-muted-foreground truncate" title={subtitle}>{subtitle}</div>
                                     </div>
                                 </div>
                                 {profile?.expertise_areas && profile.expertise_areas.length > 0 && (

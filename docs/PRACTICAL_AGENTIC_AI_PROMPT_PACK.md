@@ -446,22 +446,53 @@ Keep it maintainable by a non-engineer.
 
 ## Task 2.6 — Automation path that runs (30 min)
 
-Build with the facilitator’s clone template (or Track B semi-auto): trigger → AI → output → human approval. **Live-run once.**
+**Default:** Clone the facilitator’s template → make it about your locked process → **Run once**.
 
-**Optional if time — one short Teacher review:**
+**If tools are blocked:** Semi-auto — sample data → AI in chat → you paste into Sheet or email draft.
 
-```
+**Exception (only if facilitator agrees):** A tiny custom flow — Manual Trigger, under 5 nodes, no webhooks, no auto-send. If stuck >10 minutes, go back to the template.
+
+**Steps**
+1. Open the clone link the facilitator shares.
+2. Copy **BOX A** into Teacher (optional but useful) — map your process onto the template shape.
+3. In the template: put sample or real-safe data → **Execute / Run once** → confirm output on screen.
+4. Write one line: what **you** approve before anything goes out.
+5. Optional: **BOX B** for a 1-minute Teacher review.
+6. Mark complete.
+
+——— COPY BELOW ———
+I will run a prepared automation TEMPLATE in the workshop (not build my full production system).
+
+My locked process: [one sentence — Teacher already knows it; keep short]
+Pattern I locked: [one short phrase from the decision tree]
+
+Help me map my process onto this template shape:
+Start → AI does one clear step → result lands somewhere real → I approve before anything external.
+
+Answer in this exact structure:
+1) Which template family fits me best today: Classify→log / Draft→approve / Extract→checklist / Other (one line)
+2) In MY words: what “Start” means for me
+3) What the AI step should do in one sentence (classify, clean, or draft only — not counting, ratios, or multi-person routing)
+4) Where the result should land (Sheet row / Doc / email draft)
+5) What I personally must approve before anything is sent
+6) One sentence I can say at Demo Day that connects THIS template run to MY real job
+7) If my real Monday system needs more (Meta, CRM, webhooks, many files), say so in one line — and still keep today’s slice simple
+——— END ———
+
+——— COPY BELOW ———
 My path runs:
-Trigger = […]
-AI step = […]
-Output = […]
-Approval = […]
+Start (how it begins) = […]
+AI step (what AI does) = […]
+Output (where the result lands) = […]
+My approval (what I check before it goes out) = […]
+
+I used: [template / tiny custom / semi-auto by hand]
 
 List top 3 Monday failure modes and one fix each.
-Confirm T / L / V in one line each.
-```
+Confirm Limits and Validation in one line each.
+——— END ———
 
-**Review:** Can you trigger it again without help? Mark **2.6**.
+**Review:** Can you run it again without help? Mark **2.6**.
 
 ---
 

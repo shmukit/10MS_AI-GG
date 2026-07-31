@@ -505,16 +505,16 @@ Done: Mark 2.5
 
 ```
 TASK 2.6 · Path that runs · ~30 min
-Do: Trigger → AI → output → approval · live once
+Do: Clone template → run once → name your approval
 Done: Mark 2.6
 ```
 
-- Running = you can show it on screen
-- Teacher review = **optional if time**
-- Track A: n8n/Make/Zapier · Track B: semi-auto checklist
-- Keys: secrets only
+- Default = facilitator template (not build from scratch)
+- Exception = tiny custom only (Manual Trigger · ≤5 nodes · no webhook / auto-send)
+- Blocked = semi-auto by hand still counts
+- Keys: secrets only · never in chat
 
-**Instructor cue:** No paper-only builds. Demo first.  
+**Instructor cue:** Demo template first. Custom is exception; 10 min stuck → back to template.  
 **Show when:** 2.6
 
 ---

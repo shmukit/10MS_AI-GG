@@ -73,16 +73,18 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           aria-expanded={isOpen}
           aria-haspopup="menu"
           aria-label="Account menu"
-          className="flex items-center gap-2 rounded-full border border-border py-1.5 pl-2 pr-2 transition-colors hover:bg-muted sm:gap-3 sm:pl-3 sm:pr-4"
+          className="flex max-w-[min(100%,16rem)] items-center gap-2 rounded-full border border-border py-1.5 pl-2 pr-2 transition-colors hover:bg-muted sm:gap-3 sm:pl-3 sm:pr-4"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-sm font-bold text-foreground">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-sm font-bold text-foreground">
             {displayName.charAt(0)}
           </div>
-          <div className="hidden flex-col items-start sm:flex">
-            <span className="mb-1 text-sm font-medium leading-none text-foreground">{displayName}</span>
+          <div className="hidden min-w-0 flex-col items-start sm:flex">
+            <span className="mb-1 max-w-[9rem] truncate text-sm font-medium leading-none text-foreground lg:max-w-[11rem]" title={displayName}>
+              {displayName}
+            </span>
             <span className="text-xs leading-none text-muted-foreground">{displayRoleLabel}</span>
           </div>
-          <ChevronDown className={cn('hidden h-4 w-4 text-muted-foreground sm:block', isOpen && 'rotate-180')} />
+          <ChevronDown className={cn('hidden h-4 w-4 shrink-0 text-muted-foreground sm:block', isOpen && 'rotate-180')} />
         </button>
       ) : (
         <button
@@ -91,21 +93,23 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           aria-expanded={isOpen}
           aria-haspopup="menu"
           aria-label="Account menu"
-          className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
+          className="flex max-w-[min(100%,16rem)] items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
         >
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border border-border">
+          <div className="w-8 h-8 shrink-0 bg-muted rounded-full flex items-center justify-center border border-border">
             <User className="w-4 h-4" />
           </div>
-          <span className="text-sm font-medium text-foreground">{displayName}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <span className="text-sm font-medium text-foreground truncate max-w-[7rem] sm:max-w-[9rem] lg:max-w-[11rem]" title={displayName}>
+            {displayName}
+          </span>
+          <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       )}
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-modal border border-border bg-card z-50">
+        <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] rounded-xl shadow-modal border border-border bg-card z-[100]">
           <div className="py-2">
-            <div className="px-4 py-3 border-b border-border">
-              <div className="font-medium text-foreground">{userName}</div>
+            <div className="px-4 py-3 border-b border-border min-w-0">
+              <div className="font-medium text-foreground break-words" title={userName}>{userName}</div>
               <div className="text-sm capitalize text-muted-foreground">{displayRoleLabel}</div>
               {user?.email && (
                 <div className="text-xs text-muted-foreground mt-1 truncate" title={user.email}>
