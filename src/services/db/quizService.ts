@@ -258,44 +258,99 @@ export async function getTaskQuizScoreSummary(
   return pickDisplayScore(attempts, preferBest);
 }
 
+/**
+ * Mentor quiz analytics for a roadmap, optionally scoped to one batch/cohort.
+ * Attempts are attributed by enrollment when batch_id on the attempt is null
+ * (common for early submissions), so results still show.
+ */
 export async function getBatchQuizStats(
-  batchId: string,
-  roadmapId: string
+  roadmapId: string,
+  batchId?: string | null
 ): Promise<BatchQuizStats[]> {
   const quizzes = await getQuizzesForRoadmap(roadmapId);
   if (quizzes.length === 0) return [];
 
-  const { data: enrollments } = await supabase
-    .from('student_batch_assignments')
-    .select('student_id, users!inner(id, first_name, last_name)')
-    .eq('batch_id', batchId)
-    .eq('status', 'active');
-
-  const students = (enrollments || []) as {
+  let students: {
     student_id: string;
     users: { id: string; first_name: string; last_name: string };
-  }[];
+  }[] = [];
 
+  if (batchId) {
+    const { data: enrollments } = await supabase
+      .from('student_batch_assignments')
+      .select('student_id, users!inner(id, first_name, last_name)')
+      .eq('batch_id', batchId)
+      .eq('status', 'active');
+    students = (enrollments || []) as typeof students;
+  } else {
+    // All active students on any batch linked to this roadmap
+    const { data: roadmapBatches } = await supabase
+      .from('batches')
+      .select('id')
+      .eq('roadmap_id', roadmapId);
+    const batchIds = ((roadmapBatches || []) as { id: string }[]).map((b) => b.id);
+    if (batchIds.length > 0) {
+      const { data: enrollments } = await supabase
+        .from('student_batch_assignments')
+        .select('student_id, users!inner(id, first_name, last_name)')
+        .in('batch_id', batchIds)
+        .eq('status', 'active');
+      const seen = new Set<string>();
+      for (const row of (enrollments || []) as typeof students) {
+        if (seen.has(row.student_id)) continue;
+        seen.add(row.student_id);
+        students.push(row);
+      }
+    }
+  }
+
+  const enrolledIds = new Set(students.map((s) => s.student_id));
   const results: BatchQuizStats[] = [];
 
   for (const quiz of quizzes) {
     const cards = await getQuizCardsForDeck(quiz.practice_deck_id);
     const preferBest = deckHasScoredItems(cards);
 
+    // Load all completed attempts for this quiz; filter by cohort in JS so
+    // null batch_id attempts still count for enrolled students.
     const { data: attempts } = await db('quiz_attempts')
       .select('*')
       .eq('roadmap_quiz_id', quiz.id)
-      .eq('batch_id', batchId)
       .not('completed_at', 'is', null);
 
-    const attemptList = (attempts || []) as QuizAttempt[];
-    const studentStats = students.map((s) => {
-      const mine = attemptList.filter((a) => a.student_id === s.student_id);
+    const allAttempts = (attempts || []) as QuizAttempt[];
+    const attemptList = allAttempts.filter((a) => {
+      if (enrolledIds.size === 0) return true;
+      if (!enrolledIds.has(a.student_id)) return false;
+      if (!batchId) return true;
+      // Match explicit batch, or null batch_id (attribute via enrollment)
+      return a.batch_id == null || a.batch_id === batchId;
+    });
+
+    // Include attempt students who may not be in the enrollment join (name fallback)
+    const studentById = new Map(
+      students.map((s) => [
+        s.student_id,
+        `${s.users.first_name} ${s.users.last_name}`.trim() || 'Student',
+      ])
+    );
+    for (const a of attemptList) {
+      if (!studentById.has(a.student_id)) {
+        studentById.set(a.student_id, 'Student');
+      }
+    }
+
+    const studentIdsForTable = batchId
+      ? [...new Set([...students.map((s) => s.student_id), ...attemptList.map((a) => a.student_id)])]
+      : [...studentById.keys()];
+
+    const studentStats = studentIdsForTable.map((studentId) => {
+      const mine = attemptList.filter((a) => a.student_id === studentId);
       const best = pickDisplayScore(mine, preferBest);
       const latest = pickDisplayScore(mine, false);
       return {
-        studentId: s.student_id,
-        name: `${s.users.first_name} ${s.users.last_name}`.trim(),
+        studentId,
+        name: studentById.get(studentId) || 'Student',
         bestScore: best?.score ?? null,
         latestScore: latest?.score ?? null,
         maxScore: best?.maxScore ?? latest?.maxScore ?? null,
@@ -311,23 +366,46 @@ export async function getBatchQuizStats(
       bestScores.length > 0
         ? bestScores.reduce((a, b) => a + b, 0) / bestScores.length
         : 0;
-    const maxScore = studentStats[0]?.maxScore ?? cards.reduce((s, c) => s + (c.content.scaleMax ?? 5), 0);
+    const maxFromAttempt = attemptList.find((a) => Number(a.max_score) > 0)?.max_score;
+    const maxScore =
+      maxFromAttempt != null
+        ? Number(maxFromAttempt)
+        : cards.reduce((s, c) => {
+            const kind = c.content.questionKind;
+            if (kind === 'likert' || !kind) return s + (c.content.scaleMax ?? 5);
+            if (
+              kind === 'mcq_single' ||
+              kind === 'mcq_multi' ||
+              ((kind === 'binary' || kind === 'categorical') && c.content.hasCorrectAnswer)
+            ) {
+              return s + 1;
+            }
+            return s;
+          }, 0);
 
+    const attemptIds = new Set(attemptList.map((a) => a.id));
     const { data: allAnswers } = await db('quiz_attempt_answers')
-      .select('*, quiz_attempts!inner(roadmap_quiz_id, batch_id, completed_at)')
+      .select('*, quiz_attempts!inner(id, roadmap_quiz_id, batch_id, completed_at, student_id)')
       .eq('quiz_attempts.roadmap_quiz_id', quiz.id);
+
+    const scopedAnswers = ((allAnswers || []) as { card_id: string; points: number; is_correct: boolean | null; attempt_id: string }[])
+      .filter((a) => attemptIds.has(a.attempt_id));
 
     const itemMeans: BatchQuizStats['itemMeans'] = [];
     const itemCorrectRates: BatchQuizStats['itemCorrectRates'] = [];
 
     for (const card of cards) {
-      const cardAnswers = (allAnswers || []).filter(
-        (a: { card_id: string }) => a.card_id === card.id
-      );
+      const cardAnswers = scopedAnswers.filter((a) => a.card_id === card.id);
       if (cardAnswers.length === 0) continue;
 
-      if (card.content.questionKind === 'likert' || !card.content.correctAnswer) {
-        const pts = cardAnswers.map((a: { points: number }) => Number(a.points));
+      const isSurvey =
+        card.content.questionKind === 'likert' ||
+        ((card.content.questionKind === 'binary' || card.content.questionKind === 'categorical') &&
+          !card.content.hasCorrectAnswer) ||
+        (card.content.questionKind == null && typeof card.content.correctAnswer !== 'number');
+
+      if (isSurvey) {
+        const pts = cardAnswers.map((a) => Number(a.points));
         itemMeans.push({
           cardId: card.id,
           question: card.content.question,
@@ -335,7 +413,7 @@ export async function getBatchQuizStats(
           responseCount: pts.length,
         });
       } else {
-        const correct = cardAnswers.filter((a: { is_correct: boolean | null }) => a.is_correct === true).length;
+        const correct = cardAnswers.filter((a) => a.is_correct === true).length;
         itemCorrectRates.push({
           cardId: card.id,
           question: card.content.question,
@@ -348,13 +426,13 @@ export async function getBatchQuizStats(
     results.push({
       quizId: quiz.id,
       quizTitle: quiz.title,
-      enrolledCount: students.length,
+      enrolledCount: students.length || studentIdsForTable.length,
       attemptedCount: attemptedIds.size,
       avgBestScore: avgBest,
       avgBestPercent: maxScore > 0 ? (avgBest / maxScore) * 100 : 0,
       itemMeans,
       itemCorrectRates,
-      students: studentStats,
+      students: studentStats.sort((a, b) => a.name.localeCompare(b.name)),
     });
   }
 

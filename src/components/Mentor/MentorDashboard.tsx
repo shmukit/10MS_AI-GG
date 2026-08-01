@@ -479,8 +479,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = () => {
           </div>
           <div className={activeTab !== 'quizzes' ? 'hidden' : undefined} aria-hidden={activeTab !== 'quizzes'}>
             <QuizStatsTab
-              selectedBatchId={selectedBatch || null}
-              roadmapId={quizRoadmapId}
+              batches={batches}
+              roadmaps={roadmaps.map((r) => ({ id: r.id, title: r.title }))}
+              initialBatchId={selectedBatch || null}
+              initialRoadmapId={quizRoadmapId}
+              onBatchChange={setSelectedBatch}
+              onRoadmapChange={setSelectedRoadmap}
             />
           </div>
           <div className={activeTab !== 'notice' ? 'hidden' : undefined} aria-hidden={activeTab !== 'notice'}>
