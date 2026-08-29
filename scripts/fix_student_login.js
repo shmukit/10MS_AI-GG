@@ -13,7 +13,7 @@
  *   2. SMOKE_TEST_EMAIL + TEST_USER_PASSWORD (mentor/admin) — upsert_student_user RPC
  *
  * Env:
- *   VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD (default: NeverStopLearning!)
+ *   VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD (required)
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -32,8 +32,12 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const sharedPassword =
   process.env.VITE_DEFAULT_STUDENT_PASSWORD ||
-  process.env.STUDENT_PASSWORD ||
-  'NeverStopLearning!';
+  process.env.STUDENT_PASSWORD;
+
+if (!sharedPassword) {
+  console.error('Set VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD in .env.local');
+  process.exit(1);
+}
 
 if (!supabaseUrl || !anonKey) {
   console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');

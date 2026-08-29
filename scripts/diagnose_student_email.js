@@ -127,7 +127,11 @@ async function main() {
   console.log('  ', category);
 
   const defaultPassword =
-    process.env.VITE_DEFAULT_STUDENT_PASSWORD || process.env.STUDENT_PASSWORD || 'NeverStopLearning!';
+    process.env.VITE_DEFAULT_STUDENT_PASSWORD || process.env.STUDENT_PASSWORD;
+  if (!defaultPassword) {
+    console.error('Set VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD in .env.local');
+    process.exit(1);
+  }
 
   if (authUser) {
     console.log('\n--- login test (anon key) ---');

@@ -8,9 +8,11 @@ At minimum, rotate and purge:
 
 - PostHog project key (`phc_...`) — was hardcoded in `src/lib/posthog.ts`
 - Any Supabase project URLs that were committed (`*.supabase.co` project refs)
-- Default passwords (`NeverStopLearning!`) in application source
+- Default student passwords in application source, scripts, and SQL
 
 After purging history, **rotate all affected credentials** in PostHog and Supabase dashboards.
+
+Do **not** paste real keys or passwords into this file. Use placeholders only.
 
 ## Option A: BFG Repo-Cleaner (recommended)
 
@@ -22,11 +24,11 @@ brew install bfg
 git clone --mirror git@github.com:tenminschool/10MS_AI-GG.git
 cd 10MS_AI-GG.git
 
-# 3. Create a secrets file listing strings to remove
+# 3. Create a secrets file listing strings to remove (fill from your password manager)
 cat > /tmp/secrets-to-purge.txt << 'EOF'
-phc_cfUCdGAUd0Y5AxxIRnvEeKQ7EEyfRI2UcursFuYpZQ3
-jlcckizicpyvjvnzllrk.supabase.co
-hayhwvddwhgdvlxrxqun.supabase.co
+<POSTHOG_PROJECT_API_KEY>
+<SUPABASE_PROJECT_REF>.supabase.co
+<SHARED_STUDENT_PASSWORD>
 EOF
 
 # 4. Run BFG
@@ -43,7 +45,7 @@ git push --force
 ```bash
 pip install git-filter-repo
 
-git filter-repo --replace-text <(echo 'phc_cfUCdGAUd0Y5AxxIRnvEeKQ7EEyfRI2UcursFuYpZQ3==>REDACTED')
+git filter-repo --replace-text <(echo '<POSTHOG_PROJECT_API_KEY>==>REDACTED')
 ```
 
 ## After purging
@@ -59,8 +61,8 @@ git filter-repo --replace-text <(echo 'phc_cfUCdGAUd0Y5AxxIRnvEeKQ7EEyfRI2UcursF
 # Run gitleaks against full history
 gitleaks detect --source . --verbose
 
-# Search for known leaked strings
-git log --all -S 'phc_cfUCdGAUd0Y5AxxIRnvEeKQ7EEyfRI2UcursFuYpZQ3' --oneline
+# Search for known leaked strings (replace with the real value from your password manager)
+git log --all -S '<POSTHOG_PROJECT_API_KEY>' --oneline
 ```
 
 If the last command returns no results, the key has been purged from history.

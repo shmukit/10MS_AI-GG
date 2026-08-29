@@ -9,7 +9,7 @@
  *
  * Env (preferred):
  *   VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VITE_SUPABASE_ANON_KEY
- *   VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD (default: NeverStopLearning!)
+ *   VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD (required)
  *
  * Fallback (no service role): SMOKE_TEST_EMAIL + TEST_USER_PASSWORD (mentor/admin)
  *   — can audit login_fail/login_ok and public.users; auth schema checks need service role.
@@ -31,8 +31,12 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const sharedPassword =
   process.env.VITE_DEFAULT_STUDENT_PASSWORD ||
-  process.env.STUDENT_PASSWORD ||
-  'NeverStopLearning!';
+  process.env.STUDENT_PASSWORD;
+
+if (!sharedPassword) {
+  console.error('Set VITE_DEFAULT_STUDENT_PASSWORD or STUDENT_PASSWORD in .env.local');
+  process.exit(1);
+}
 
 if (!supabaseUrl || !anonKey) {
   console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');
@@ -155,7 +159,10 @@ function categorizeStudent(publicUser, authByEmail) {
 
 async function main() {
   console.log('Student login fleet audit');
-  console.log('Shared password source:', process.env.VITE_DEFAULT_STUDENT_PASSWORD ? 'VITE_DEFAULT_STUDENT_PASSWORD' : 'default NeverStopLearning!');
+  console.log(
+    'Shared password source:',
+    process.env.VITE_DEFAULT_STUDENT_PASSWORD ? 'VITE_DEFAULT_STUDENT_PASSWORD' : 'STUDENT_PASSWORD'
+  );
   console.log('Service role:', serviceKey ? 'yes' : 'no (limited auth schema checks)');
   if (singleEmail) console.log('Filter:', singleEmail);
   console.log('');

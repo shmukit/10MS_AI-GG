@@ -1,7 +1,8 @@
 -- Forward-fix: students who cannot log in with the shared default password.
 -- Root cause: public.users rows without matching auth.users, or auth password never set via upsert_student_user.
 --
--- Run in Supabase SQL Editor. Replace the password literal below if your production default differs.
+-- Run in Supabase SQL Editor. Set v_password in each DO block immediately before running.
+-- Do not commit a real password.
 -- Prior scripts: secure_rpc_upsert_student_user.sql, sync_existing_users.sql
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -43,8 +44,11 @@ DO $$
 DECLARE
   r RECORD;
   v_identity_id uuid;
-  v_password text := 'NeverStopLearning!';
+  v_password text := NULL; -- set in SQL Editor before running; never commit a real value
 BEGIN
+  IF v_password IS NULL OR length(v_password) = 0 THEN
+    RAISE EXCEPTION 'Set v_password in this DO block before running. Do not commit a real password.';
+  END IF;
   FOR r IN
     SELECT pu.id, pu.email, pu.first_name, pu.last_name, pu.phone
     FROM public.users pu
@@ -104,8 +108,12 @@ END $$;
 DO $$
 DECLARE
   r RECORD;
-  v_password text := 'NeverStopLearning!';
+  v_password text := NULL; -- set in SQL Editor before running; never commit a real value
 BEGIN
+  IF v_password IS NULL OR length(v_password) = 0 THEN
+    RAISE EXCEPTION 'Set v_password in this DO block before running. Do not commit a real password.';
+  END IF;
+
   FOR r IN
     SELECT au.id, au.email
     FROM auth.users au

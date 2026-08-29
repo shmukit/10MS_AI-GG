@@ -2,7 +2,7 @@
 -- Same login path as Mentor → Add Student (auth.users + identity + public.users + batch).
 --
 -- Run in Supabase SQL Editor as postgres (service role). Idempotent.
--- Default shared password: NeverStopLearning! (change v_password in the DO block if needed).
+-- Set v_password in the DO block immediately before running. Do not commit a real password.
 --
 -- Safe / not safe:
 --   SAFE if this script completes: email already confirmed; password set in auth.users;
@@ -20,9 +20,9 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 DO $body$
 DECLARE
-  -- Shared login password for all workshop participants (same default as other student cohorts).
-  -- Change this if you want a workshop-only password instead.
-  v_password text := 'NeverStopLearning!';
+  -- Shared login password for all workshop participants.
+  -- Set this in the SQL Editor immediately before running. Do not commit a real value.
+  v_password text := NULL;
 
   v_roadmap_id uuid;
   v_batch_id uuid;
@@ -37,8 +37,8 @@ DECLARE
   v_enrolled int := 0;
   v_skipped int := 0;
 BEGIN
-  IF length(trim(v_password)) < 8 THEN
-    RAISE EXCEPTION 'v_password must be at least 8 characters.';
+  IF v_password IS NULL OR length(trim(v_password)) < 8 THEN
+    RAISE EXCEPTION 'Set v_password in this DO block before running (min 8 characters). Do not commit a real password.';
   END IF;
 
   SELECT id INTO v_roadmap_id
